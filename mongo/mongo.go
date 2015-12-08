@@ -42,7 +42,7 @@ func buildSession() (*mgo.Session, error) {
 		return nil, errors.New("not a valid MONGO_URL")
 	}
 	log.Println("init mongo on", u.Host)
-	s, err := mgo.DialWithTimeout(rawURL, 1*time.Second)
+	s, err := mgo.Dial(rawURL)
 	if err != nil {
 		return nil, err
 	}
