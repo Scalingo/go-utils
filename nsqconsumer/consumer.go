@@ -16,6 +16,8 @@ type NsqMessageDeserialize struct {
 }
 
 type nsqConsumer struct {
+	NsqConfig      *nsq.Config
+	NsqLookupdURLs []string
 	Topic          string
 	Channel        string
 	MessageHandler func(*NsqMessageDeserialize) error
@@ -23,6 +25,8 @@ type nsqConsumer struct {
 }
 
 type ConsumerOpts struct {
+	NsqConfig      *nsq.Config
+	NsqLookupdURLs []string
 	Topic          string
 	Channel        string
 	MessageHandler func(*NsqMessageDeserialize) error
@@ -34,6 +38,8 @@ type Consumer interface {
 
 func New(opts ConsumerOpts) (Consumer, error) {
 	consumer := &nsqConsumer{
+		NsqConfig:      opts.NsqConfig,
+		NsqLookupdURLs: opts.NsqLookupdURLs,
 		Topic:          opts.Topic,
 		Channel:        opts.Channel,
 		MessageHandler: opts.MessageHandler,
@@ -50,11 +56,11 @@ func New(opts ConsumerOpts) (Consumer, error) {
 	return consumer, nil
 }
 
-func (c *nsqConsumer) Start(config *nsq.Config) func() {
+func (c *nsqConsumer) Start() func() {
 	logger := log.New(os.Stdout, "[nsq-consumer] ", log.Flags())
 	logger.Println("Start the worker")
 
-	consumer, err := nsq.NewConsumer(c.Topic, c.Channel, config)
+	consumer, err := nsq.NewConsumer(c.Topic, c.Channel, c.NsqConfig)
 	if err != nil {
 		rollbar.Error(rollbar.ERR, err, &rollbar.Field{Name: "worker", Data: "nsq-consumer"})
 		logger.Fatalf("fail to create new NSQ consumer: %+v\n", err)
@@ -90,9 +96,9 @@ func (c *nsqConsumer) Start(config *nsq.Config) func() {
 			return errgo.Mask(err, errgo.Any)
 		}
 		return nil
-	}), config.MaxInFlight)
+	}), c.NsqConfig.MaxInFlight)
 
-	if err = consumer.ConnectToNSQLookupds(config.NsqLookupdURLs); err != nil {
+	if err = consumer.ConnectToNSQLookupds(c.NsqLookupdURLs); err != nil {
 		rollbar.Error(rollbar.ERR, err, &rollbar.Field{Name: "worker", Data: "authenticator"})
 		logger.Fatalf("Fail to connect to NSQ lookupd: %+v\n", err)
 	}
