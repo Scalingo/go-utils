@@ -21,6 +21,7 @@ type nsqConsumer struct {
 	Topic          string
 	Channel        string
 	MessageHandler func(*NsqMessageDeserialize) error
+	MaxInFlight    int
 	count          uint64
 }
 
@@ -29,6 +30,7 @@ type ConsumerOpts struct {
 	NsqLookupdURLs []string
 	Topic          string
 	Channel        string
+	MaxInFlight    int
 	MessageHandler func(*NsqMessageDeserialize) error
 }
 
@@ -43,6 +45,10 @@ func New(opts ConsumerOpts) (Consumer, error) {
 		Topic:          opts.Topic,
 		Channel:        opts.Channel,
 		MessageHandler: opts.MessageHandler,
+		MaxInFlight:    opts.MaxInFlight,
+	}
+	if consumer.MaxInFlight == 0 {
+		consumer.MaxInFlight = opts.NsqConfig.MaxInFlight
 	}
 	if opts.Topic == "" {
 		return nil, errgo.New("topic can't be blank")
@@ -96,7 +102,7 @@ func (c *nsqConsumer) Start() func() {
 			return errgo.Mask(err, errgo.Any)
 		}
 		return nil
-	}), c.NsqConfig.MaxInFlight)
+	}), c.MaxInFlight)
 
 	if err = consumer.ConnectToNSQLookupds(c.NsqLookupdURLs); err != nil {
 		rollbar.Error(rollbar.ERR, err, &rollbar.Field{Name: "worker", Data: "authenticator"})
