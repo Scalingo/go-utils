@@ -83,8 +83,10 @@ func (c *nsqConsumer) Start() func() {
 
 	consumer.AddConcurrentHandlers(nsq.HandlerFunc(func(message *nsq.Message) (err error) {
 		defer func() {
-			if errRecovered := recover(); err != nil {
+			if errRecovered := recover(); errRecovered != nil {
 				err = errgo.Newf("recover panic from nsq consumer: %+v", errRecovered)
+				logger.Printf("[PANIC] %v: %v", err, errgo.Details(errRecovered.(error)))
+				rollbar.Error(rollbar.ERR, errRecovered.(error), &rollbar.Field{Name: "worker", Data: "nsq-consumer"})
 			}
 		}()
 		if len(message.Body) == 0 {
