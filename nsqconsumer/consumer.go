@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"time"
 
 	"github.com/nsqio/go-nsq"
 	"github.com/stvp/rollbar"
@@ -31,6 +32,8 @@ type ConsumerOpts struct {
 	Topic          string
 	Channel        string
 	MaxInFlight    int
+	// How long can the consumer keep the message before the message is considered as 'Timed Out'
+	MsgTimeout     time.Duration
 	MessageHandler func(*NsqMessageDeserialize) error
 }
 
@@ -39,6 +42,10 @@ type Consumer interface {
 }
 
 func New(opts ConsumerOpts) (Consumer, error) {
+	if opts.MsgTimeout != 0 {
+		opts.NsqConfig.MsgTimeout = opts.MsgTimeout
+	}
+
 	consumer := &nsqConsumer{
 		NsqConfig:      opts.NsqConfig,
 		NsqLookupdURLs: opts.NsqLookupdURLs,
