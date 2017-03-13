@@ -14,6 +14,7 @@ import (
 type NsqMessageDeserialize struct {
 	Type    string          `json:"type"`
 	Payload json.RawMessage `json:"payload"`
+	NsqMsg  *nsq.Message
 }
 
 type nsqConsumer struct {
@@ -102,6 +103,7 @@ func (c *nsqConsumer) Start() func() {
 		}
 
 		logger.Printf("New message: '%s'", msg.Type)
+		msg.NsqMsg = message
 		err = c.MessageHandler(&msg)
 		if err != nil {
 			rollbar.Error(rollbar.ERR, err, &rollbar.Field{Name: "worker", Data: "nsq-consumer"})
