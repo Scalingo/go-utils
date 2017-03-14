@@ -89,6 +89,7 @@ func (c *nsqConsumer) Start() func() {
 				rollbar.Error(rollbar.ERR, errRecovered.(error), &rollbar.Field{Name: "worker", Data: "nsq-consumer"})
 			}
 		}()
+
 		if len(message.Body) == 0 {
 			errMsg := "body is blank, re-enqueued message"
 			logger.Printf("%s\n", errMsg)
@@ -104,14 +105,15 @@ func (c *nsqConsumer) Start() func() {
 			return errgo.Mask(err, errgo.Any)
 		}
 
-		logger.Printf("New message: '%s'", msg.Type)
+		logger.Printf("[%s] BEGIN Message: '%s'", message.ID, msg.Type)
 		msg.NsqMsg = message
 		err = c.MessageHandler(&msg)
 		if err != nil {
 			rollbar.Error(rollbar.ERR, err, &rollbar.Field{Name: "worker", Data: "nsq-consumer"})
-			logger.Printf("Failed to handle the message: %+v\n", err)
+			logger.Printf("[%s] fail to handle the message: %+v\n", message.ID, err)
 			return errgo.Mask(err, errgo.Any)
 		}
+		logger.Printf("[%s] END Message: '%s'", message.ID, msg.Type)
 		return nil
 	}), c.MaxInFlight)
 
