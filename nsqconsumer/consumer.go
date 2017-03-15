@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/Soulou/errgo-rollbar"
 	"github.com/nsqio/go-nsq"
 	"github.com/stvp/rollbar"
 	"gopkg.in/errgo.v1"
@@ -109,8 +110,8 @@ func (c *nsqConsumer) Start() func() {
 		msg.NsqMsg = message
 		err = c.MessageHandler(&msg)
 		if err != nil {
-			rollbar.Error(rollbar.ERR, err, &rollbar.Field{Name: "worker", Data: "nsq-consumer"})
-			logger.Printf("[%s] fail to handle the message: %+v\n", message.ID, err)
+			rollbar.ErrorWithStack(rollbar.ERR, err, errgorollbar.BuildStack(err), &rollbar.Field{Name: "worker", Data: "nsq-consumer"})
+			logger.Printf("[%s] ERROR: %+v\n", message.ID, errgo.Details(err))
 			return errgo.Mask(err, errgo.Any)
 		}
 		logger.Printf("[%s] END Message: '%s'", message.ID, msg.Type)
