@@ -68,8 +68,8 @@ func (producer *ProducerMock) Publish(topic string, message nsqproducer.NsqMessa
 	return nil
 }
 
-func (producer *ProducerMock) DeferredPublish(topic string, delay time.Duration, message nsqproducer.NsqMessageSerialize) error {
-	message.At = time.Now().Add(delay).Unix()
+func (producer *ProducerMock) DeferredPublish(topic string, delay int64, message nsqproducer.NsqMessageSerialize) error {
+	message.At = time.Now().Add(time.Duration(delay) * time.Second).Unix()
 	producer.Lock()
 	producer.messages[topic] = append(producer.messages[topic], message)
 	producer.Unlock()
