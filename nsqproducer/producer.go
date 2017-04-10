@@ -15,6 +15,11 @@ type Producer interface {
 	DeferredPublish(topic string, delay int64, message NsqMessageSerialize) error
 }
 
+type NsqProducer struct {
+	producer *nsq.Producer
+	config   *nsq.Config
+}
+
 type ProducerOpts struct {
 	Host      string
 	Port      string
@@ -27,39 +32,50 @@ type NsqMessageSerialize struct {
 	Payload interface{} `json:"payload"`
 }
 
-var client *nsq.Producer
+var (
+	DefaultProducer Producer
+)
 
 func Init(opts ProducerOpts) func() {
-	var err error
-	client, err = nsq.NewProducer(opts.Host+":"+opts.Port, opts.NsqConfig)
+	client, err := nsq.NewProducer(opts.Host+":"+opts.Port, opts.NsqConfig)
 	if err != nil {
 		log.Fatalf("init-nsq: cannot initialize nsq producer: %v:%v", opts.Host, opts.Port)
 	}
+	DefaultProducer = &NsqProducer{producer: client, config: opts.NsqConfig}
+
 	return func() {
 		client.Stop()
 	}
 }
 
 func Publish(topic string, message NsqMessageSerialize) error {
+	return DefaultProducer.Publish(topic, message)
+}
+
+func DeferredPublish(topic string, delay int64, message NsqMessageSerialize) error {
+	return DefaultProducer.DeferredPublish(topic, delay, message)
+}
+
+func (p *NsqProducer) Publish(topic string, message NsqMessageSerialize) error {
 	body, err := json.Marshal(message)
 	if err != nil {
 		return errgo.Mask(err, errgo.Any)
 	}
 
-	err = client.Publish(topic, body)
+	err = p.producer.Publish(topic, body)
 	if err != nil {
 		return errgo.Mask(err, errgo.Any)
 	}
 	return nil
 }
 
-func DeferredPublish(topic string, delay int64, message NsqMessageSerialize) error {
+func (p *NsqProducer) DeferredPublish(topic string, delay int64, message NsqMessageSerialize) error {
 	body, err := json.Marshal(message)
 	if err != nil {
 		return errgo.Mask(err, errgo.Any)
 	}
 
-	err = client.DeferredPublish(topic, time.Duration(delay)*time.Second, body)
+	err = p.producer.DeferredPublish(topic, time.Duration(delay)*time.Second, body)
 	if err != nil {
 		return errgo.Mask(err, errgo.Any)
 	}
