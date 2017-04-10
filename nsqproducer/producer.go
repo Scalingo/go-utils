@@ -2,12 +2,18 @@ package nsqproducer
 
 import (
 	"encoding/json"
+	"time"
 
 	"log"
 
 	"github.com/nsqio/go-nsq"
 	"gopkg.in/errgo.v1"
 )
+
+type Producer interface {
+	Publish(topic string, message NsqMessageSerialize) error
+	DeferredPublish(topic string, delay int64, message NsqMessageSerialize) error
+}
 
 type ProducerOpts struct {
 	Host      string
@@ -16,6 +22,7 @@ type ProducerOpts struct {
 }
 
 type NsqMessageSerialize struct {
+	At      int64       `json:"at"`
 	Type    string      `json:"type"`
 	Payload interface{} `json:"payload"`
 }
@@ -44,4 +51,19 @@ func Publish(topic string, message NsqMessageSerialize) error {
 		return errgo.Mask(err, errgo.Any)
 	}
 	return nil
+}
+
+func DeferredPublish(topic string, delay int64, message NsqMessageSerialize) error {
+	body, err := json.Marshal(message)
+	if err != nil {
+		return errgo.Mask(err, errgo.Any)
+	}
+
+	err = client.DeferredPublish(topic, time.Duration(delay)*time.Second, body)
+	if err != nil {
+		return errgo.Mask(err, errgo.Any)
+	}
+
+	return nil
+
 }
