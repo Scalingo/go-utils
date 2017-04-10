@@ -15,7 +15,7 @@ type ProducerMock struct {
 	messages map[string][]nsqproducer.NsqMessageSerialize
 }
 
-func NewProducerMock() *ProducerMock {
+func New() *ProducerMock {
 	return &ProducerMock{
 		messages: make(map[string][]nsqproducer.NsqMessageSerialize),
 	}
