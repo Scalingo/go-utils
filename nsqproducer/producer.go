@@ -2,6 +2,7 @@ package nsqproducer
 
 import (
 	"encoding/json"
+	"sync"
 	"time"
 
 	"log"
@@ -33,7 +34,8 @@ type NsqMessageSerialize struct {
 }
 
 var (
-	DefaultProducer Producer
+	defaultProducer  Producer
+	defaultProducerM = &sync.Mutex{}
 )
 
 func Init(opts ProducerOpts) func() {
@@ -41,19 +43,25 @@ func Init(opts ProducerOpts) func() {
 	if err != nil {
 		log.Fatalf("init-nsq: cannot initialize nsq producer: %v:%v", opts.Host, opts.Port)
 	}
-	DefaultProducer = &NsqProducer{producer: client, config: opts.NsqConfig}
+	defaultProducer = &NsqProducer{producer: client, config: opts.NsqConfig}
 
 	return func() {
 		client.Stop()
 	}
 }
 
+func SetDefaultProducer(producer Producer) {
+	defaultProducerM.Lock()
+	defer defaultProducerM.Unlock()
+	defaultProducer = producer
+}
+
 func Publish(topic string, message NsqMessageSerialize) error {
-	return DefaultProducer.Publish(topic, message)
+	return defaultProducer.Publish(topic, message)
 }
 
 func DeferredPublish(topic string, delay int64, message NsqMessageSerialize) error {
-	return DefaultProducer.DeferredPublish(topic, delay, message)
+	return defaultProducer.DeferredPublish(topic, delay, message)
 }
 
 func (p *NsqProducer) Publish(topic string, message NsqMessageSerialize) error {
