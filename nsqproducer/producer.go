@@ -2,7 +2,6 @@ package nsqproducer
 
 import (
 	"encoding/json"
-	"sync"
 	"time"
 
 	"log"
@@ -33,35 +32,16 @@ type NsqMessageSerialize struct {
 	Payload interface{} `json:"payload"`
 }
 
-var (
-	defaultProducer  Producer
-	defaultProducerM = &sync.Mutex{}
-)
-
-func Init(opts ProducerOpts) func() {
+func New(opts ProducerOpts) *NsqProducer {
 	client, err := nsq.NewProducer(opts.Host+":"+opts.Port, opts.NsqConfig)
 	if err != nil {
 		log.Fatalf("init-nsq: cannot initialize nsq producer: %v:%v", opts.Host, opts.Port)
 	}
-	defaultProducer = &NsqProducer{producer: client, config: opts.NsqConfig}
-
-	return func() {
-		client.Stop()
-	}
+	return &NsqProducer{producer: client, config: opts.NsqConfig}
 }
 
-func SetDefaultProducer(producer Producer) {
-	defaultProducerM.Lock()
-	defer defaultProducerM.Unlock()
-	defaultProducer = producer
-}
-
-func Publish(topic string, message NsqMessageSerialize) error {
-	return defaultProducer.Publish(topic, message)
-}
-
-func DeferredPublish(topic string, delay int64, message NsqMessageSerialize) error {
-	return defaultProducer.DeferredPublish(topic, delay, message)
+func (p *NsqProducer) Stop() {
+	p.producer.Stop()
 }
 
 func (p *NsqProducer) Publish(topic string, message NsqMessageSerialize) error {
