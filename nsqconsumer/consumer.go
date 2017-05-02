@@ -2,6 +2,7 @@ package nsqconsumer
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"os"
 	"time"
@@ -31,14 +32,15 @@ type NsqMessageDeserialize struct {
 }
 
 type nsqConsumer struct {
-	NsqConfig      *nsq.Config
-	NsqLookupdURLs []string
-	Topic          string
-	Channel        string
-	MessageHandler func(*NsqMessageDeserialize) error
-	MaxInFlight    int
-	count          uint64
-	logger         *log.Logger
+	NsqConfig        *nsq.Config
+	NsqLookupdURLs   []string
+	Topic            string
+	Channel          string
+	MessageHandler   func(*NsqMessageDeserialize) error
+	MaxInFlight      int
+	PostponeProducer nsqproducer.Producer
+	count            uint64
+	logger           *log.Logger
 }
 
 type ConsumerOpts struct {
@@ -47,6 +49,8 @@ type ConsumerOpts struct {
 	Topic          string
 	Channel        string
 	MaxInFlight    int
+	// PostponeProducer is an NSQ producer user to send postponed messages
+	PostponeProducer nsqproducer.Producer
 	// How long can the consumer keep the message before the message is considered as 'Timed Out'
 	MsgTimeout     time.Duration
 	MessageHandler func(*NsqMessageDeserialize) error
@@ -164,5 +168,9 @@ func (c *nsqConsumer) postponeMessage(msg NsqMessageDeserialize, delay int64) er
 
 	c.logger.Printf("[%s] POSTPONE Messaage: '%s'", msg.NsqMsg.ID, msg.Type)
 
-	return nsqproducer.DeferredPublish(c.Topic, delay, publishedMsg)
+	if c.PostponeProducer == nil {
+		return errors.New("no postpone producer configured in this consumer")
+	}
+
+	return c.PostponeProducer.DeferredPublish(c.Topic, delay, publishedMsg)
 }
