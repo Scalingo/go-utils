@@ -3,11 +3,13 @@ package nsqconsumer
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"time"
 
 	"github.com/Scalingo/go-internal-tools/nsqproducer"
+	"github.com/Sirupsen/logrus"
 	"github.com/Soulou/errgo-rollbar"
 	"github.com/nsqio/go-nsq"
 	"github.com/stvp/rollbar"
@@ -29,6 +31,7 @@ type NsqMessageDeserialize struct {
 	At      int64           `json:"at"`
 	Payload json.RawMessage `json:"payload"`
 	NsqMsg  *nsq.Message
+	Logger  logrus.FieldLogger
 }
 
 type nsqConsumer struct {
@@ -40,7 +43,7 @@ type nsqConsumer struct {
 	MaxInFlight      int
 	PostponeProducer nsqproducer.Producer
 	count            uint64
-	logger           *log.Logger
+	logger           logrus.FieldLogger
 }
 
 type ConsumerOpts struct {
@@ -89,29 +92,33 @@ func New(opts ConsumerOpts) (Consumer, error) {
 }
 
 func (c *nsqConsumer) Start() func() {
-	c.logger = log.New(os.Stdout, "[nsq-consumer] ", log.Flags())
-	c.logger.Println("Start the worker")
+	c.logger = logrus.New().WithFields(logrus.Fields{
+		"source":  "nsq-consumer",
+		"topic":   c.Topic,
+		"channel": c.Channel,
+	})
+	c.logger.Println("starting consumer")
 
 	consumer, err := nsq.NewConsumer(c.Topic, c.Channel, c.NsqConfig)
 	if err != nil {
 		rollbar.Error(rollbar.ERR, err, &rollbar.Field{Name: "worker", Data: "nsq-consumer"})
-		c.logger.Fatalf("fail to create new NSQ consumer: %+v\n", err)
+		c.logger.WithField("error", err).Fatalf("fail to create new NSQ consumer")
 	}
-	consumer.SetLogger(c.logger, nsq.LogLevelWarning)
+
+	consumer.SetLogger(log.New(os.Stderr, fmt.Sprintf("[nsq-consumer(%s)]", c.Topic), log.Flags()), nsq.LogLevelWarning)
 
 	consumer.AddConcurrentHandlers(nsq.HandlerFunc(func(message *nsq.Message) (err error) {
 		defer func() {
 			if errRecovered := recover(); errRecovered != nil {
 				err = errgo.Newf("recover panic from nsq consumer: %+v", errRecovered)
-				c.logger.Printf("[PANIC] %v: %v", err, errgo.Details(errRecovered.(error)))
+				c.logger.WithFields(logrus.Fields{"error": errRecovered.(error), "stacktrace": errgo.Details(errRecovered.(error))}).Error("recover panic")
 				rollbar.Error(rollbar.ERR, errRecovered.(error), &rollbar.Field{Name: "worker", Data: "nsq-consumer"})
 			}
 		}()
 
 		if len(message.Body) == 0 {
-			errMsg := "body is blank, re-enqueued message"
-			c.logger.Printf("%s\n", errMsg)
-			err := errgo.New(errMsg)
+			err := errgo.New("body is blank, re-enqueued message")
+			c.logger.Error(err)
 			rollbar.Error(rollbar.ERR, err, &rollbar.Field{Name: "worker", Data: "nsq-consumer"})
 			return err
 		}
@@ -119,9 +126,11 @@ func (c *nsqConsumer) Start() func() {
 		err = json.Unmarshal(message.Body, &msg)
 		if err != nil {
 			rollbar.Error(rollbar.ERR, err, &rollbar.Field{Name: "worker", Data: "nsq-consumer"})
-			c.logger.Printf("Failed to unmarshal message: %+v\n", err)
+			c.logger.WithField("error", err).Error("failed to unmarshal message")
 			return errgo.Mask(err, errgo.Any)
 		}
+
+		msg.Logger = c.logger.WithFields(logrus.Fields{"message-id": fmt.Sprintf("%s", message.ID), "message-type": msg.Type})
 
 		if msg.At != 0 {
 			now := time.Now().Unix()
@@ -131,21 +140,22 @@ func (c *nsqConsumer) Start() func() {
 			}
 		}
 
-		c.logger.Printf("[%s] BEGIN Message: '%s'", message.ID, msg.Type)
+		before := time.Now()
+		msg.Logger.Printf("BEGIN Message")
 		msg.NsqMsg = message
 		err = c.MessageHandler(&msg)
 		if err != nil {
 			rollbar.ErrorWithStack(rollbar.ERR, err, errgorollbar.BuildStack(err), &rollbar.Field{Name: "worker", Data: "nsq-consumer"})
-			c.logger.Printf("[%s] ERROR: %+v\n", message.ID, errgo.Details(err))
+			msg.Logger.WithField("stacktrace", errgo.Details(err)).Error(err)
 			return errgo.Mask(err, errgo.Any)
 		}
-		c.logger.Printf("[%s] END Message: '%s'", message.ID, msg.Type)
+		c.logger.WithField("duration", time.Since(before)).Printf("END Message")
 		return nil
 	}), c.MaxInFlight)
 
 	if err = consumer.ConnectToNSQLookupds(c.NsqLookupdURLs); err != nil {
 		rollbar.Error(rollbar.ERR, err, &rollbar.Field{Name: "worker", Data: "authenticator"})
-		c.logger.Fatalf("Fail to connect to NSQ lookupd: %+v\n", err)
+		c.logger.WithField("error", err).Fatalf("Fail to connect to NSQ lookupd")
 	}
 
 	return func() {
@@ -166,7 +176,7 @@ func (c *nsqConsumer) postponeMessage(msg NsqMessageDeserialize, delay int64) er
 		Payload: msg.Payload,
 	}
 
-	c.logger.Printf("[%s] POSTPONE Messaage: '%s'", msg.NsqMsg.ID, msg.Type)
+	msg.Logger.Printf("POSTPONE Messaage")
 
 	if c.PostponeProducer == nil {
 		return errors.New("no postpone producer configured in this consumer")
