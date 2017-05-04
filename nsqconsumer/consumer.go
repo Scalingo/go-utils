@@ -48,6 +48,7 @@ type nsqConsumer struct {
 	Channel          string
 	MessageHandler   func(*NsqMessageDeserialize) error
 	MaxInFlight      int
+	SkipLogSet       map[string]bool
 	PostponeProducer nsqproducer.Producer
 	count            uint64
 	logger           logrus.FieldLogger
@@ -59,6 +60,7 @@ type ConsumerOpts struct {
 	Topic          string
 	Channel        string
 	MaxInFlight    int
+	SkipLogSet     map[string]bool
 	// PostponeProducer is an NSQ producer user to send postponed messages
 	PostponeProducer nsqproducer.Producer
 	// How long can the consumer keep the message before the message is considered as 'Timed Out'
@@ -75,6 +77,10 @@ func New(opts ConsumerOpts) (Consumer, error) {
 		opts.NsqConfig.MsgTimeout = opts.MsgTimeout
 	}
 
+	if opts.SkipLogSet == nil {
+		opts.SkipLogSet = map[string]bool{}
+	}
+
 	consumer := &nsqConsumer{
 		NsqConfig:      opts.NsqConfig,
 		NsqLookupdURLs: opts.NsqLookupdURLs,
@@ -82,6 +88,7 @@ func New(opts ConsumerOpts) (Consumer, error) {
 		Channel:        opts.Channel,
 		MessageHandler: opts.MessageHandler,
 		MaxInFlight:    opts.MaxInFlight,
+		SkipLogSet:     opts.SkipLogSet,
 	}
 	if consumer.MaxInFlight == 0 {
 		consumer.MaxInFlight = opts.NsqConfig.MaxInFlight
@@ -149,14 +156,20 @@ func (c *nsqConsumer) Start() func() {
 		}
 
 		before := time.Now()
-		msg.Logger().Printf("BEGIN Message")
+		if _, ok := c.SkipLogSet[msg.Type]; !ok {
+			msg.Logger().Printf("BEGIN Message")
+		}
+
 		err = c.MessageHandler(&msg)
 		if err != nil {
 			rollbar.ErrorWithStack(rollbar.ERR, err, errgorollbar.BuildStack(err), &rollbar.Field{Name: "worker", Data: "nsq-consumer"})
 			msg.Logger().WithField("stacktrace", errgo.Details(err)).Error(err)
 			return errgo.Mask(err, errgo.Any)
 		}
-		c.logger.WithField("duration", time.Since(before)).Printf("END Message")
+
+		if _, ok := c.SkipLogSet[msg.Type]; !ok {
+			msg.Logger().WithField("duration", time.Since(before)).Printf("END Message")
+		}
 		return nil
 	}), c.MaxInFlight)
 
