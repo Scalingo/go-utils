@@ -31,7 +31,14 @@ type NsqMessageDeserialize struct {
 	At      int64           `json:"at"`
 	Payload json.RawMessage `json:"payload"`
 	NsqMsg  *nsq.Message
-	Logger  logrus.FieldLogger
+	logger  logrus.FieldLogger
+}
+
+func (msg *NsqMessageDeserialize) Logger() logrus.FieldLogger {
+	if msg.logger == nil {
+		msg.logger = logrus.New().WithFields(logrus.Fields{"message-type": msg.Type})
+	}
+	return msg.logger
 }
 
 type nsqConsumer struct {
@@ -129,8 +136,9 @@ func (c *nsqConsumer) Start() func() {
 			c.logger.WithField("error", err).Error("failed to unmarshal message")
 			return errgo.Mask(err, errgo.Any)
 		}
+		msg.NsqMsg = message
 
-		msg.Logger = c.logger.WithFields(logrus.Fields{"message-id": fmt.Sprintf("%s", message.ID), "message-type": msg.Type})
+		msg.logger = c.logger.WithFields(logrus.Fields{"message-id": fmt.Sprintf("%s", message.ID), "message-type": msg.Type})
 
 		if msg.At != 0 {
 			now := time.Now().Unix()
@@ -141,12 +149,11 @@ func (c *nsqConsumer) Start() func() {
 		}
 
 		before := time.Now()
-		msg.Logger.Printf("BEGIN Message")
-		msg.NsqMsg = message
+		msg.Logger().Printf("BEGIN Message")
 		err = c.MessageHandler(&msg)
 		if err != nil {
 			rollbar.ErrorWithStack(rollbar.ERR, err, errgorollbar.BuildStack(err), &rollbar.Field{Name: "worker", Data: "nsq-consumer"})
-			msg.Logger.WithField("stacktrace", errgo.Details(err)).Error(err)
+			msg.Logger().WithField("stacktrace", errgo.Details(err)).Error(err)
 			return errgo.Mask(err, errgo.Any)
 		}
 		c.logger.WithField("duration", time.Since(before)).Printf("END Message")
@@ -176,7 +183,7 @@ func (c *nsqConsumer) postponeMessage(msg NsqMessageDeserialize, delay int64) er
 		Payload: msg.Payload,
 	}
 
-	msg.Logger.Printf("POSTPONE Messaage")
+	msg.Logger().Printf("POSTPONE Messaage")
 
 	if c.PostponeProducer == nil {
 		return errors.New("no postpone producer configured in this consumer")
