@@ -92,6 +92,8 @@ func New(opts ConsumerOpts) (Consumer, error) {
 	}
 	if consumer.MaxInFlight == 0 {
 		consumer.MaxInFlight = opts.NsqConfig.MaxInFlight
+	} else {
+		opts.NsqConfig.MaxInFlight = consumer.MaxInFlight
 	}
 	if opts.Topic == "" {
 		return nil, errgo.New("topic can't be blank")
