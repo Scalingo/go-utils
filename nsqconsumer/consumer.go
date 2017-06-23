@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime/debug"
 	"time"
 
 	"github.com/Scalingo/go-internal-tools/nsqproducer"
@@ -127,7 +128,7 @@ func (c *nsqConsumer) Start() func() {
 		defer func() {
 			if errRecovered := recover(); errRecovered != nil {
 				err = errgo.Newf("recover panic from nsq consumer: %+v", errRecovered)
-				c.logger.WithFields(logrus.Fields{"error": errRecovered.(error), "stacktrace": errgo.Details(errRecovered.(error))}).Error("recover panic")
+				c.logger.WithFields(logrus.Fields{"error": errRecovered.(error), "stacktrace": debug.Stack(), "error-stacktrace": errgo.Details(errRecovered.(error))}).Error("recover panic")
 				rollbar.Error(rollbar.ERR, errRecovered.(error), &rollbar.Field{Name: "worker", Data: "nsq-consumer"})
 			}
 		}()
