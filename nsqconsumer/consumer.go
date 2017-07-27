@@ -126,10 +126,17 @@ func (c *nsqConsumer) Start() func() {
 
 	consumer.AddConcurrentHandlers(nsq.HandlerFunc(func(message *nsq.Message) (err error) {
 		defer func() {
-			if errRecovered := recover(); errRecovered != nil {
+			if r := recover(); r != nil {
+				var errRecovered error
+				switch value := errRecovered.(type) {
+				case error:
+					errRecovered = value
+				default:
+					errRecovered = errgo.Newf("%v", value)
+				}
 				err = errgo.Newf("recover panic from nsq consumer: %+v", errRecovered)
-				c.logger.WithFields(logrus.Fields{"error": errRecovered.(error), "stacktrace": string(debug.Stack()), "error-stacktrace": errgo.Details(errRecovered.(error))}).Error("recover panic")
-				rollbar.Error(rollbar.ERR, errRecovered.(error), &rollbar.Field{Name: "worker", Data: "nsq-consumer"})
+				c.logger.WithFields(logrus.Fields{"error": errRecovered, "stacktrace": string(debug.Stack()), "error-stacktrace": errgo.Details(errRecovered)}).Error("recover panic")
+				rollbar.Error(rollbar.ERR, errRecovered, &rollbar.Field{Name: "worker", Data: "nsq-consumer"})
 			}
 		}()
 
