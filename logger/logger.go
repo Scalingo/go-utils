@@ -7,7 +7,10 @@ import (
 )
 
 var logLevel logrus.Level = logrus.DebugLevel
-var formatter logrus.Formatter = new(logrus.TextFormatter)
+var formatter logrus.Formatter = &logrus.TextFormatter{
+	TimestampFormat: "2006-01-02T15:04:05.000",
+	FullTimestamp:   true,
+}
 var hooks []logrus.Hook
 
 // SetConfig set the configuration at the level package.
