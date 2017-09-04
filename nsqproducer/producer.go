@@ -1,18 +1,21 @@
 package nsqproducer
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
-	"log"
-
+	"github.com/Scalingo/go-internal-tools/logger"
+	"github.com/Sirupsen/logrus"
 	"github.com/nsqio/go-nsq"
+	"github.com/satori/go.uuid"
 	"gopkg.in/errgo.v1"
 )
 
 type Producer interface {
-	Publish(topic string, message NsqMessageSerialize) error
-	DeferredPublish(topic string, delay int64, message NsqMessageSerialize) error
+	Publish(ctx context.Context, topic string, message NsqMessageSerialize) error
+	DeferredPublish(ctx context.Context, topic string, delay int64, message NsqMessageSerialize) error
 }
 
 type NsqProducer struct {
@@ -26,25 +29,34 @@ type ProducerOpts struct {
 	NsqConfig *nsq.Config
 }
 
+type WithLoggableFields interface {
+	LoggableFields() logrus.Fields
+}
+
 type NsqMessageSerialize struct {
 	At      int64       `json:"at"`
 	Type    string      `json:"type"`
 	Payload interface{} `json:"payload"`
+
+	// Automatically set by context if existing, generated otherwise
+	RequestID string `json:"request_id"`
 }
 
-func New(opts ProducerOpts) *NsqProducer {
+func New(opts ProducerOpts) (*NsqProducer, error) {
 	client, err := nsq.NewProducer(opts.Host+":"+opts.Port, opts.NsqConfig)
 	if err != nil {
-		log.Fatalf("init-nsq: cannot initialize nsq producer: %v:%v", opts.Host, opts.Port)
+		return nil, fmt.Errorf("init-nsq: cannot initialize nsq producer: %v:%v", opts.Host, opts.Port)
 	}
-	return &NsqProducer{producer: client, config: opts.NsqConfig}
+	return &NsqProducer{producer: client, config: opts.NsqConfig}, nil
 }
 
 func (p *NsqProducer) Stop() {
 	p.producer.Stop()
 }
 
-func (p *NsqProducer) Publish(topic string, message NsqMessageSerialize) error {
+func (p *NsqProducer) Publish(ctx context.Context, topic string, message NsqMessageSerialize) error {
+	message.RequestID = p.requestID(ctx)
+
 	body, err := json.Marshal(message)
 	if err != nil {
 		return errgo.Mask(err, errgo.Any)
@@ -54,10 +66,15 @@ func (p *NsqProducer) Publish(topic string, message NsqMessageSerialize) error {
 	if err != nil {
 		return errgo.Mask(err, errgo.Any)
 	}
+
+	p.log(ctx, message, logrus.Fields{})
+
 	return nil
 }
 
-func (p *NsqProducer) DeferredPublish(topic string, delay int64, message NsqMessageSerialize) error {
+func (p *NsqProducer) DeferredPublish(ctx context.Context, topic string, delay int64, message NsqMessageSerialize) error {
+	message.RequestID = p.requestID(ctx)
+
 	body, err := json.Marshal(message)
 	if err != nil {
 		return errgo.Mask(err, errgo.Any)
@@ -68,6 +85,34 @@ func (p *NsqProducer) DeferredPublish(topic string, delay int64, message NsqMess
 		return errgo.Mask(err, errgo.Any)
 	}
 
-	return nil
+	p.log(ctx, message, logrus.Fields{"message_delay": delay})
 
+	return nil
+}
+
+func (p *NsqProducer) requestID(ctx context.Context) string {
+	reqid, ok := ctx.Value("request_id").(string)
+	if !ok {
+		return uuid.NewV4().String()
+	}
+	return reqid
+}
+
+func (p *NsqProducer) logger(ctx context.Context) logrus.FieldLogger {
+	return logger.Get(ctx)
+}
+
+func (p *NsqProducer) log(ctx context.Context, message NsqMessageSerialize, fields logrus.Fields) {
+	logger := p.logger(ctx).WithFields(fields)
+
+	if logger.Level == logrus.DebugLevel {
+		logger.WithFields(logrus.Fields{"message_type": message.Type, "message_payload": message.Payload}).Debug()
+	} else {
+		// We don't want the complete payload to be dump in the logs With this
+		// interface we can, for each type of payload, add fields in the logs.
+		if payload, ok := message.Payload.(WithLoggableFields); ok {
+			logger = logger.WithFields(payload.LoggableFields())
+		}
+		logger.WithFields(logrus.Fields{"message_type": message.Type}).Info()
+	}
 }

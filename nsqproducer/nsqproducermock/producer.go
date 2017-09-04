@@ -1,6 +1,7 @@
 package nsqproducermock
 
 import (
+	"context"
 	"reflect"
 	"sync"
 	"time"
@@ -61,14 +62,14 @@ func (producer *ProducerMock) UnmarshalAllMessages(topic string, data interface{
 	return nil
 }
 
-func (producer *ProducerMock) Publish(topic string, message nsqproducer.NsqMessageSerialize) error {
+func (producer *ProducerMock) Publish(ctx context.Context, topic string, message nsqproducer.NsqMessageSerialize) error {
 	producer.Lock()
 	producer.messages[topic] = append(producer.messages[topic], message)
 	producer.Unlock()
 	return nil
 }
 
-func (producer *ProducerMock) DeferredPublish(topic string, delay int64, message nsqproducer.NsqMessageSerialize) error {
+func (producer *ProducerMock) DeferredPublish(ctx context.Context, topic string, delay int64, message nsqproducer.NsqMessageSerialize) error {
 	message.At = time.Now().Add(time.Duration(delay) * time.Second).Unix()
 	producer.Lock()
 	producer.messages[topic] = append(producer.messages[topic], message)

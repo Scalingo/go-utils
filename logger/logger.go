@@ -52,8 +52,8 @@ func AddLoggerToContext(ctx context.Context) context.Context {
 }
 
 // Get return the logger stored in the context or create a new one if the logger is not set
-func Get(ctx context.Context) *logrus.Entry {
-	if logger, ok := ctx.Value("logger").(*logrus.Entry); ok {
+func Get(ctx context.Context) logrus.FieldLogger {
+	if logger, ok := ctx.Value("logger").(logrus.FieldLogger); ok {
 		return logger
 	}
 
@@ -61,6 +61,6 @@ func Get(ctx context.Context) *logrus.Entry {
 }
 
 // ToCtx add a logger to a context
-func ToCtx(ctx context.Context, logger *logrus.Entry) context.Context {
+func ToCtx(ctx context.Context, logger logrus.FieldLogger) context.Context {
 	return context.WithValue(ctx, "logger", logger)
 }
