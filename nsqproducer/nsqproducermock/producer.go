@@ -36,7 +36,7 @@ func (producer *ProducerMock) Messages(topic string) []nsqproducer.NsqMessageSer
 	producer.Lock()
 	defer producer.Unlock()
 	if messages, ok := producer.messages[topic]; !ok {
-		return []nsqproduce.NsqMessageSerialize{}
+		return []nsqproducer.NsqMessageSerialize{}
 	} else {
 		return messages
 	}
