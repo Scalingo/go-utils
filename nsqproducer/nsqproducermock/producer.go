@@ -32,6 +32,16 @@ func (producer *ProducerMock) CountTopic(topic string) int {
 	}
 }
 
+func (producer *ProducerMock) Messages(topic string) []nsqproducer.NsqMessageSerialize {
+	producer.Lock()
+	defer producer.Unlock()
+	if messages, ok := producer.messages[topic]; !ok {
+		return []nsqproduce.NsqMessageSerialize{}
+	} else {
+		return messages
+	}
+}
+
 func (producer *ProducerMock) UnmarshallLastMessage(topic string, data interface{}) error {
 	producer.Lock()
 	defer producer.Unlock()
