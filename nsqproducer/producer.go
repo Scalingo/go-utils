@@ -19,14 +19,16 @@ type Producer interface {
 }
 
 type NsqProducer struct {
-	producer *nsq.Producer
-	config   *nsq.Config
+	producer   *nsq.Producer
+	config     *nsq.Config
+	skipLogSet map[string]bool
 }
 
 type ProducerOpts struct {
-	Host      string
-	Port      string
-	NsqConfig *nsq.Config
+	Host       string
+	Port       string
+	NsqConfig  *nsq.Config
+	SkipLogSet map[string]bool
 }
 
 type WithLoggableFields interface {
@@ -47,7 +49,10 @@ func New(opts ProducerOpts) (*NsqProducer, error) {
 	if err != nil {
 		return nil, fmt.Errorf("init-nsq: cannot initialize nsq producer: %v:%v", opts.Host, opts.Port)
 	}
-	return &NsqProducer{producer: client, config: opts.NsqConfig}, nil
+	if opts.SkipLogSet == nil {
+		opts.SkipLogSet = map[string]bool{}
+	}
+	return &NsqProducer{producer: client, config: opts.NsqConfig, skipLogSet: opts.SkipLogSet}, nil
 }
 
 func (p *NsqProducer) Stop() {
@@ -103,16 +108,20 @@ func (p *NsqProducer) logger(ctx context.Context) logrus.FieldLogger {
 }
 
 func (p *NsqProducer) log(ctx context.Context, message NsqMessageSerialize, fields logrus.Fields) {
+	if p.skipLogSet[message.Type] {
+		return
+	}
+
 	logger := p.logger(ctx).WithFields(fields)
 
 	if logger.Level == logrus.DebugLevel {
-		logger.WithFields(logrus.Fields{"message_type": message.Type, "message_payload": message.Payload}).Debug()
+		logger.WithFields(logrus.Fields{"message_type": message.Type, "message_payload": message.Payload}).Debug("publish message")
 	} else {
 		// We don't want the complete payload to be dump in the logs With this
 		// interface we can, for each type of payload, add fields in the logs.
 		if payload, ok := message.Payload.(WithLoggableFields); ok {
 			logger = logger.WithFields(payload.LoggableFields())
 		}
-		logger.WithFields(logrus.Fields{"message_type": message.Type}).Info()
+		logger.WithFields(logrus.Fields{"message_type": message.Type}).Info("publish message")
 	}
 }
