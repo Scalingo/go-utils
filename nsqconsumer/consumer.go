@@ -39,11 +39,10 @@ type NsqMessageDeserialize struct {
 // FromMessageSerialize let you transform a Serialized message to a DeserializeMessage for a consumer
 // Its use is mostly for testing as writing manual `json.RawMessage` is boring
 func FromMessageSerialize(msg *nsqproducer.NsqMessageSerialize) *NsqMessageDeserialize {
-	res := &nsqproducer.NsqMessageSerialize{
+	res := &NsqMessageDeserialize{
 		At:   msg.At,
 		Type: msg.Type,
 	}
-	var payload json.RawMessage
 	buffer, _ := json.Marshal(msg.Payload)
 	res.Payload = json.RawMessage(buffer)
 	return res
