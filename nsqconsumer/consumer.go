@@ -51,7 +51,7 @@ func FromMessageSerialize(msg *nsqproducer.NsqMessageSerialize) *NsqMessageDeser
 // TouchUntilClosed returns a channel which has to be closed by the called
 // Until the channel is closed, the NSQ message will be touched every 40 secs
 // to ensure NSQ does not consider the message as failed because of time out.
-func (msg *NsqMessageDeserialize) TouchUntilClosed() <-chan struct{} {
+func (msg *NsqMessageDeserialize) TouchUntilClosed() chan<- struct{} {
 	done := make(chan struct{})
 	go func() {
 		ticker := time.NewTicker(40 * time.Second)
