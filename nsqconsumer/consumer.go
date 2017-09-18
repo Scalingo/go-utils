@@ -36,6 +36,19 @@ type NsqMessageDeserialize struct {
 	NsqMsg    *nsq.Message
 }
 
+// FromMessageSerialize let you transform a Serialized message to a DeserializeMessage for a consumer
+// Its use is mostly for testing as writing manual `json.RawMessage` is boring
+func FromMessageSerialize(msg *nsqproducer.NsqMessageSerialize) *NsqMessageDeserialize {
+	res := &nsqproducer.NsqMessageSerialize{
+		At:   msg.At,
+		Type: msg.Type,
+	}
+	var payload json.RawMessage
+	buffer, _ := json.Marshal(msg.Payload)
+	res.Payload = json.RawMessage(buffer)
+	return res
+}
+
 // TouchUntilClosed returns a channel which has to be closed by the called
 // Until the channel is closed, the NSQ message will be touched every 40 secs
 // to ensure NSQ does not consider the message as failed because of time out.
