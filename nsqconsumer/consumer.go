@@ -204,7 +204,7 @@ func (c *nsqConsumer) Start() func() {
 
 		err = c.MessageHandler(ctx, &msg)
 		if err != nil {
-			msgLogger.WithError(err).Info("message handling error")
+			msgLogger.WithError(err).Error("message handling error")
 			return err
 		}
 
