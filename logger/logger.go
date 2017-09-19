@@ -3,7 +3,7 @@ package logger
 import (
 	"context"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 var logLevel logrus.Level = logrus.DebugLevel

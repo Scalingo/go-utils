@@ -12,8 +12,8 @@ import (
 
 	"github.com/Scalingo/go-internal-tools/logger"
 	"github.com/Scalingo/go-internal-tools/nsqproducer"
-	"github.com/Sirupsen/logrus"
 	"github.com/nsqio/go-nsq"
+	"github.com/sirupsen/logrus"
 	"github.com/stvp/rollbar"
 	"gopkg.in/errgo.v1"
 )
