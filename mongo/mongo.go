@@ -1,8 +1,10 @@
 package mongo
 
 import (
+	"crypto/tls"
 	"errors"
 	"log"
+	"net"
 	"net/url"
 	"os"
 	"sync"
@@ -41,8 +43,23 @@ func buildSession() (*mgo.Session, error) {
 	if err != nil {
 		return nil, errors.New("not a valid MONGO_URL")
 	}
+	withTLS := false
+	if u.Query().Get("ssl") == "true" {
+		withTLS = true
+		u.Query().Del("ssl")
+	}
+	info, err := mgo.ParseURL(u.String())
+	if withTLS {
+		tlsConfig := &tls.Config{}
+		tlsConfig.InsecureSkipVerify = true
+		info.DialServer = func(addr *mgo.ServerAddr) (net.Conn, error) {
+			conn, err := tls.Dial("tcp", addr.String(), tlsConfig)
+			return conn, err
+		}
+	}
+
 	log.Println("init mongo on", u.Host)
-	s, err := mgo.Dial(rawURL)
+	s, err := mgo.DialWithInfo(info)
 	if err != nil {
 		return nil, err
 	}
