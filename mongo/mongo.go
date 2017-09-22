@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/url"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -46,9 +47,10 @@ func buildSession() (*mgo.Session, error) {
 	withTLS := false
 	if u.Query().Get("ssl") == "true" {
 		withTLS = true
-		u.Query().Del("ssl")
+		rawURL = strings.Replace(rawURL, "?ssl=true", "", 1)
+		rawURL = strings.Replace(rawURL, "&ssl=true", "", 1)
 	}
-	info, err := mgo.ParseURL(u.String())
+	info, err := mgo.ParseURL(rawURL)
 	if err != nil {
 		return nil, err
 	}
