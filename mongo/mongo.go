@@ -49,6 +49,9 @@ func buildSession() (*mgo.Session, error) {
 		u.Query().Del("ssl")
 	}
 	info, err := mgo.ParseURL(u.String())
+	if err != nil {
+		return nil, err
+	}
 	if withTLS {
 		tlsConfig := &tls.Config{}
 		tlsConfig.InsecureSkipVerify = true
