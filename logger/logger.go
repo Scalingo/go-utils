@@ -11,7 +11,6 @@ var formatter logrus.Formatter = &logrus.TextFormatter{
 	TimestampFormat: "2006-01-02T15:04:05.000",
 	FullTimestamp:   true,
 }
-var hooks []logrus.Hook
 
 // SetConfig set the configuration at the level package.
 // level: The minimum log level to log.
@@ -23,13 +22,8 @@ func SetConfig(level logrus.Level, f logrus.Formatter) {
 	formatter = f
 }
 
-// AddHook add a hook to the default logger stack
-func AddHook(hook logrus.Hook) {
-	hooks = append(hooks, hook)
-}
-
 // Default generate a logrus logger with the configuration set by the SetConfig and AddHook methods
-func Default() *logrus.Logger {
+func Default(hooks ...logrus.Hook) *logrus.Logger {
 	logger := logrus.StandardLogger()
 	logger.SetLevel(logLevel)
 	logger.Formatter = formatter
