@@ -16,12 +16,12 @@ func Add() {
 }
 
 func (p RollbarPlugin) AddHook() (bool, logrus.Hook) {
-	token := os.Getenv("ROLLBAR_TOKEN")
+	token := os.Getenv("ROLLBAR_API_KEY")
 	if token == "" {
 		return false, nil
 	}
 
-	rollbar.Token = os.Getenv("ROLLBAR_API_KEY")
+	rollbar.Token = token
 	rollbar.Environment = os.Getenv("GO_ENV")
 
 	return true, logrus_rollbar.New(8)
