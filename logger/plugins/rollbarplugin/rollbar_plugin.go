@@ -22,10 +22,7 @@ func (p RollbarPlugin) Name() string {
 
 // Generate the hook
 func (p RollbarPlugin) Hook() (bool, logrus.Hook) {
-	token := os.Getenv("ROLLBAR_API_KEY")
-	if token == "" {
-		token = os.Getenv("ROLLBAR_TOKEN")
-	}
+	token := os.Getenv("ROLLBAR_TOKEN")
 
 	if token == "" {
 		return false, nil

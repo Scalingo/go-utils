@@ -4,7 +4,7 @@ This package will provide you a generic way to handle logging.
 
 ## Configuration
 
-This plugin will configure himself automaticly using the following environment variables:
+This plugin will configure himself automatically using the following environment variables:
 
  * `LOGGER_TYPE`: define the logger output type (values: `json`, `text`) (default: `text`)
  * `LOGGER_LEVEL`: define the minimum output level of the logger (values: `panic`, `fatal`, `warn`, `info`, `debug`) (default: `info`)
