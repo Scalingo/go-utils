@@ -8,11 +8,11 @@ import (
 
 // Default generate a logrus logger with the configuration defined in the environment and the hooks used in the plugins
 func Default() *logrus.Logger {
-	logger := logrus.StandardLogger()
+	logger := logrus.New()
 	logger.SetLevel(logLevel())
 	logger.Formatter = formatter()
 
-	for _, hook := range Plugins.Hooks() {
+	for _, hook := range Plugins().Hooks() {
 		logger.AddHook(hook)
 	}
 

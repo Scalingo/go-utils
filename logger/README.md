@@ -4,11 +4,14 @@ This package will provide you a generic way to handle logging.
 
 ## Configuration
 
-This step is optional, by default the library uses Debug log level and a text formatter.
+This plugin will configure himself automaticly using the following environment variables:
+
+ * `LOGGER_TYPE`: define the logger output type (values: `json`, `text`) (default: `text`)
+ * `LOGGER_LEVEL`: define the minimum output level of the logger (values: `panic`, `fatal`, `warn`, `info`, `debug`) (default: `info`)
+
+## Usage
 
 ```go
-logger.SetConfig(logrus.DebugLevel, new(logrus.TextFormatter)) // This will set the logger level and type.
-
 log := logger.Default() // Return a default logger
 ```
 
@@ -42,3 +45,11 @@ def do(ctx context.Context, a,b int, op fun(int, int)int) {
 2017-08-27 11:10:10 [INFO] Starting add operation caller=main
 2017-08-27 11:10:10 [INFO] Do operation caller=main operation=add
 ```
+
+## Plugins
+
+This logger accept plugins which can register hooks on the logger.
+
+### Known plugins
+
+* [rollbar](https://github.com/Scalingo/go-internal-tools/tree/master/logger/plugins/rollbarplugin)

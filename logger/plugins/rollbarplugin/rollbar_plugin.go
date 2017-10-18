@@ -11,15 +11,17 @@ import (
 
 type RollbarPlugin struct{}
 
-func EnsurePresent() {
-	logger.Plugins().EnsurePlugin(RollbarPlugin{})
+// Register the plugin to the logger library
+func Register() {
+	logger.Plugins().RegisterPlugin(RollbarPlugin{})
 }
 
 func (p RollbarPlugin) Name() string {
 	return "rollbar"
 }
 
-func (p RollbarPlugin) AddHook() (bool, logrus.Hook) {
+// Generate the hook
+func (p RollbarPlugin) Hook() (bool, logrus.Hook) {
 	token := os.Getenv("ROLLBAR_API_KEY")
 	if token == "" {
 		token = os.Getenv("ROLLBAR_TOKEN")

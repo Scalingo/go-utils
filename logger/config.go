@@ -6,8 +6,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var defaultLogLevel logrus.Level = logrus.DebugLevel
-var defaultFormatter logrus.Formatter = &logrus.TextFormatter{
+var defaultLogLevel logrus.Level = logrus.InfoLevel
+var defaultTextFormatter logrus.Formatter = &logrus.TextFormatter{
 	TimestampFormat: "2006-01-02T15:04:05.000",
 	FullTimestamp:   true,
 }
@@ -17,9 +17,9 @@ func formatter() logrus.Formatter {
 	case "json":
 		return new(logrus.JSONFormatter)
 	case "text":
-		return new(logrus.TextFormatter)
+		return defaultTextFormatter
 	default:
-		return defaultFormatter
+		return defaultTextFormatter
 	}
 }
 
