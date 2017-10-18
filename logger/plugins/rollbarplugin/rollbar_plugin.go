@@ -18,6 +18,10 @@ func Add() {
 func (p RollbarPlugin) AddHook() (bool, logrus.Hook) {
 	token := os.Getenv("ROLLBAR_API_KEY")
 	if token == "" {
+		token = os.Getenv("ROLLBAR_TOKEN")
+	}
+
+	if token == "" {
 		return false, nil
 	}
 
