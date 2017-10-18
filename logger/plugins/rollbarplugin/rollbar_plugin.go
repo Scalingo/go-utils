@@ -12,7 +12,7 @@ import (
 type RollbarPlugin struct{}
 
 func EnsurePresent() {
-	logger.Plugins.EnsurePlugin(RollbarPlugin{})
+	logger.Plugins().EnsurePlugin(RollbarPlugin{})
 }
 
 func (p RollbarPlugin) Name() string {

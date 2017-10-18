@@ -6,7 +6,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var Plugins = PluginManager{}
+var plugins = PluginManager{}
+
+func Plugins() PluginManager {
+	return plugins
+}
 
 type Plugin interface {
 	Name() string
