@@ -9,6 +9,7 @@ import (
 var Plugins = PluginManager{}
 
 type Plugin interface {
+	Name() string
 	AddHook() (bool, logrus.Hook)
 }
 
@@ -17,9 +18,16 @@ type PluginManager struct {
 	lock    sync.Mutex
 }
 
-func (m PluginManager) AddPlugin(plugin Plugin) {
+func (m PluginManager) EnsurePlugin(plugin Plugin) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
+
+	for _, p := range m.plugins {
+		if p.Name() == plugin.Name() {
+			return
+		}
+	}
+
 	m.plugins = append(m.plugins, plugin)
 }
 

@@ -11,8 +11,12 @@ import (
 
 type RollbarPlugin struct{}
 
-func Add() {
-	logger.Plugins.AddPlugin(RollbarPlugin{})
+func EnsurePresent() {
+	logger.Plugins.EnsurePlugin(RollbarPlugin{})
+}
+
+func (p RollbarPlugin) Name() string {
+	return "rollbar"
 }
 
 func (p RollbarPlugin) AddHook() (bool, logrus.Hook) {
