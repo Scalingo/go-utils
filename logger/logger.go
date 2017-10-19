@@ -6,30 +6,14 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var logLevel logrus.Level = logrus.DebugLevel
-var formatter logrus.Formatter = &logrus.TextFormatter{
-	TimestampFormat: "2006-01-02T15:04:05.000",
-	FullTimestamp:   true,
-}
+// Default generate a logrus logger with the configuration defined in the environment and the hooks used in the plugins
+func Default() *logrus.Logger {
+	logger := logrus.New()
+	logger.SetLevel(logLevel())
+	logger.Formatter = formatter()
 
-// SetConfig set the configuration at the level package.
-// level: The minimum log level to log.
-// formatter: The formatter used to format logs (see logrus formatter)
-//
-// By default the configuration use the debug level and a text formatter
-func SetConfig(level logrus.Level, f logrus.Formatter) {
-	logLevel = level
-	formatter = f
-}
-
-// Default generate a logrus logger with the configuration set by the SetConfig and AddHook methods
-func Default(hooks ...logrus.Hook) *logrus.Logger {
-	logger := logrus.StandardLogger()
-	logger.SetLevel(logLevel)
-	logger.Formatter = formatter
-
-	for _, h := range hooks {
-		logger.AddHook(h)
+	for _, hook := range Plugins().Hooks() {
+		logger.AddHook(hook)
 	}
 
 	return logger
