@@ -1,6 +1,6 @@
 # Rollbar Plugin
 
-This plugin will send every log with a level > Error to rollbar.
+This plugin will send every log with a level >= Error to rollbar.
 
 ## Configuration
 
