@@ -134,8 +134,8 @@ func New(opts ConsumerOpts) (Consumer, error) {
 	return consumer, nil
 }
 
-func (c *nsqConsumer) Start() func() {
-	c.logger = logger.Default().WithFields(logrus.Fields{
+func (c *nsqConsumer) Start(ctx context.Context) func() {
+	c.logger = logger.Get(ctx).WithFields(logrus.Fields{
 		"topic":   c.Topic,
 		"channel": c.Channel,
 	})
