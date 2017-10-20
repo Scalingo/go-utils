@@ -96,7 +96,7 @@ type ConsumerOpts struct {
 }
 
 type Consumer interface {
-	Start() func()
+	Start(ctx context.Context) func()
 }
 
 func New(opts ConsumerOpts) (Consumer, error) {
