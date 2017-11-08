@@ -23,8 +23,8 @@ var (
 )
 
 func Session(logger *logrus.Logger) *mgo.Session {
-	log := logger.WithField("process", "mongo-init")
 	sessionOnce.Do(func() {
+		log := logger.WithField("process", "mongo-init")
 		err := errors.New("")
 		for err != nil {
 			_session, err = buildSession(logs.ToCtx(context.Background(), log))
@@ -67,7 +67,7 @@ func buildSession(ctx context.Context) (*mgo.Session, error) {
 		}
 	}
 
-	log.WithField("host", u.Host).Info("init mongo")
+	log.WithField("mongodb_host", u.Host).Info("init mongo")
 	s, err := mgo.DialWithInfo(info)
 	if err != nil {
 		return nil, err
