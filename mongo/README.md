@@ -2,7 +2,7 @@
 
 ```go
 mongo.DefaultDatabaseName = "default-database"
-mongo.Session()
+mongo.Session(logger.Default())
 ```
 
 Create a new session based on `MONGO_URL`, connection will be initialized only

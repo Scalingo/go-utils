@@ -1,9 +1,9 @@
 package mongo
 
 import (
+	"context"
 	"crypto/tls"
 	"errors"
-	"log"
 	"net"
 	"net/url"
 	"os"
@@ -11,6 +11,8 @@ import (
 	"sync"
 	"time"
 
+	logs "github.com/Scalingo/go-internal-tools/logger"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/mgo.v2"
 )
 
@@ -20,13 +22,14 @@ var (
 	_session            *mgo.Session
 )
 
-func Session() *mgo.Session {
+func Session(logger *logrus.Logger) *mgo.Session {
+	log := logger.WithField("process", "mongo-init")
 	sessionOnce.Do(func() {
 		err := errors.New("")
 		for err != nil {
-			_session, err = buildSession()
+			_session, err = buildSession(logs.ToCtx(context.Background(), log))
 			if err != nil {
-				log.Println("init mongo: fail to create session", err, "wait 10sec")
+				log.WithField("err", err).WithField("action", "wait 10sec").Info("init mongo: fail to create session")
 				time.Sleep(10 * time.Second)
 			}
 		}
@@ -34,7 +37,8 @@ func Session() *mgo.Session {
 	return _session
 }
 
-func buildSession() (*mgo.Session, error) {
+func buildSession(ctx context.Context) (*mgo.Session, error) {
+	log := logs.Get(ctx)
 	rawURL := os.Getenv("MONGO_URL")
 	if rawURL == "" {
 		rawURL = "mongodb://localhost:27017/" + DefaultDatabaseName
@@ -63,7 +67,7 @@ func buildSession() (*mgo.Session, error) {
 		}
 	}
 
-	log.Println("init mongo on", u.Host)
+	log.WithField("host", u.Host).Info("init mongo")
 	s, err := mgo.DialWithInfo(info)
 	if err != nil {
 		return nil, err
