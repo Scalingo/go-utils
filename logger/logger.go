@@ -13,7 +13,7 @@ func Default() *logrus.Logger {
 	logger.Formatter = formatter()
 
 	for _, hook := range Plugins().Hooks() {
-		logger.AddHook(hook)
+		logger.Hooks.Add(hook)
 	}
 
 	return logger
