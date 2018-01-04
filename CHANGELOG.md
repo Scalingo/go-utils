@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.1.0
+
+### errors
+
+* New errors.Notef and errors.Wrapf with context to let the error handling system
+  read the context and its logger
+
 ## v1.0.2
 
 ### logger
