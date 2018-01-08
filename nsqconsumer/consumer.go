@@ -28,6 +28,23 @@ var (
 	maxPostponeDelay int64 = 3600
 )
 
+type Error struct {
+	error   error
+	noRetry bool
+}
+
+func (nsqerr Error) Error() string {
+	return nsqerr.error.Error()
+}
+
+type ErrorOpts struct {
+	NoRetry bool
+}
+
+func NewError(err error, opts ErrorOpts) error {
+	return Error{error: err, noRetry: opts.NoRetry}
+}
+
 type NsqMessageDeserialize struct {
 	RequestID string          `json:"request_id"`
 	Type      string          `json:"type"`
@@ -204,6 +221,10 @@ func (c *nsqConsumer) Start(ctx context.Context) func() {
 
 		err = c.MessageHandler(ctx, &msg)
 		if err != nil {
+			if nsqerr, ok := err.(Error); ok && nsqerr.NoRetry {
+				msgLogger.WithError(err).Error("message handling error - noretry")
+				return nil
+			}
 			msgLogger.WithError(err).Error("message handling error")
 			return err
 		}
