@@ -60,7 +60,11 @@ func (p *NsqProducer) Stop() {
 }
 
 func (p *NsqProducer) Publish(ctx context.Context, topic string, message NsqMessageSerialize) error {
-	message.RequestID = p.requestID(ctx)
+	var err error
+	message.RequestID, err = p.requestID(ctx)
+	if err != nil {
+		return errgo.Notef(err, "fail to get requestID")
+	}
 
 	body, err := json.Marshal(message)
 	if err != nil {
@@ -78,7 +82,11 @@ func (p *NsqProducer) Publish(ctx context.Context, topic string, message NsqMess
 }
 
 func (p *NsqProducer) DeferredPublish(ctx context.Context, topic string, delay int64, message NsqMessageSerialize) error {
-	message.RequestID = p.requestID(ctx)
+	var err error
+	message.RequestID, err = p.requestID(ctx)
+	if err != nil {
+		return errgo.Notef(err, "fail to get requestID")
+	}
 
 	body, err := json.Marshal(message)
 	if err != nil {
@@ -95,12 +103,16 @@ func (p *NsqProducer) DeferredPublish(ctx context.Context, topic string, delay i
 	return nil
 }
 
-func (p *NsqProducer) requestID(ctx context.Context) string {
+func (p *NsqProducer) requestID(ctx context.Context) (string, error) {
 	reqid, ok := ctx.Value("request_id").(string)
 	if !ok {
-		return uuid.NewV4().String()
+		uuid, err := uuid.NewV4()
+		if err != nil {
+			return "", err
+		}
+		return uuid.String(), nil
 	}
-	return reqid
+	return reqid, nil
 }
 
 func (p *NsqProducer) logger(ctx context.Context) logrus.FieldLogger {
