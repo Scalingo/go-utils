@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.1.1
+
+### nsqconsumer
+
+* Create nsqconsumer.Error to handle when no retry should be done
+
 ## v1.1.0
 
 ### errors
