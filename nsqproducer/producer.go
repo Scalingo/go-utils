@@ -108,7 +108,7 @@ func (p *NsqProducer) requestID(ctx context.Context) (string, error) {
 	if !ok {
 		uuid, err := uuid.NewV4()
 		if err != nil {
-			return "", err
+			return "", errgo.Notef(err, "fail to generate UUID v4")
 		}
 		return uuid.String(), nil
 	}
