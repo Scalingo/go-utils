@@ -221,7 +221,7 @@ func (c *nsqConsumer) Start(ctx context.Context) func() {
 
 		err = c.MessageHandler(ctx, &msg)
 		if err != nil {
-			if nsqerr, ok := err.(Error); ok && nsqerr.NoRetry {
+			if nsqerr, ok := err.(Error); ok && nsqerr.noRetry {
 				msgLogger.WithError(err).Error("message handling error - noretry")
 				return nil
 			}
