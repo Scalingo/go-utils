@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Scalingo/go-internal-tools/logger"
+	"github.com/Scalingo/go-utils/logger"
 	"github.com/nsqio/go-nsq"
 	"github.com/satori/go.uuid"
 	"github.com/sirupsen/logrus"

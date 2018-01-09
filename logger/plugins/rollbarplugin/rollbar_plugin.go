@@ -3,7 +3,7 @@ package rollbarplugin
 import (
 	"os"
 
-	"github.com/Scalingo/go-internal-tools/logger"
+	"github.com/Scalingo/go-utils/logger"
 	logrus_rollbar "github.com/Scalingo/logrus-rollbar"
 	"github.com/sirupsen/logrus"
 	"github.com/stvp/rollbar"
