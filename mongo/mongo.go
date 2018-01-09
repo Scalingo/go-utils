@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Scalingo/go-internal-tools/logger"
+	"github.com/Scalingo/go-utils/logger"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/mgo.v2"
 )

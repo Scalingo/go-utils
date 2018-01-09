@@ -52,4 +52,4 @@ This logger accept plugins which can register hooks on the logger.
 
 ### Known plugins
 
-* [rollbar](https://github.com/Scalingo/go-internal-tools/tree/master/logger/plugins/rollbarplugin)
+* [rollbar](https://github.com/Scalingo/go-utils/tree/master/logger/plugins/rollbarplugin)

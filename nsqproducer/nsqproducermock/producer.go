@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Scalingo/go-internal-tools/nsqproducer"
+	"github.com/Scalingo/go-utils/nsqproducer"
 
 	"gopkg.in/errgo.v1"
 )
