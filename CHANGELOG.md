@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.1.2
+
+### global
+
+* No more reference to go-internal-tools
+
 ## v1.1.1
 
 ### nsqconsumer
