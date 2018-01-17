@@ -6,7 +6,7 @@ mongo.Session(logger.Default())
 ```
 
 Create a new session based on `MONGO_URL`, connection will be initialized only
-once, so you can call it everytime your need a session. 
+once, so you can call it every time your need a session.
 
 Will wait until database is available.
 
