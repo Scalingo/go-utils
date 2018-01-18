@@ -15,7 +15,7 @@ import (
 
 type Producer interface {
 	Publish(ctx context.Context, topic string, message NsqMessageSerialize) error
-	DeferredPublish(ctx context.Context, topic string, delay int64, message NsqMessageSerialize) error
+	DeferredPublish(ctx context.Context, topic string, delay time.Duration, message NsqMessageSerialize) error
 }
 
 type NsqProducer struct {
@@ -81,7 +81,7 @@ func (p *NsqProducer) Publish(ctx context.Context, topic string, message NsqMess
 	return nil
 }
 
-func (p *NsqProducer) DeferredPublish(ctx context.Context, topic string, delay int64, message NsqMessageSerialize) error {
+func (p *NsqProducer) DeferredPublish(ctx context.Context, topic string, delay time.Duration, message NsqMessageSerialize) error {
 	var err error
 	message.RequestID, err = p.requestID(ctx)
 	if err != nil {
@@ -93,7 +93,7 @@ func (p *NsqProducer) DeferredPublish(ctx context.Context, topic string, delay i
 		return errgo.Mask(err, errgo.Any)
 	}
 
-	err = p.producer.DeferredPublish(topic, time.Duration(delay)*time.Second, body)
+	err = p.producer.DeferredPublish(topic, delay*time.Second, body)
 	if err != nil {
 		return errgo.Mask(err, errgo.Any)
 	}
