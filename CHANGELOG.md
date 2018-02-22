@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.0.1
+
+* Update rollbar plugin configuration, only skip 4 levels of stack
+
+## v2.0.0
+
+* Change interface of nsqproducer.Producer, add Stop method
+
 ## v1.1.2
 
 ### global
