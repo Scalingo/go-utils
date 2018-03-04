@@ -2,9 +2,10 @@ package document
 
 import (
 	"context"
+	"fmt"
 	"time"
 
-	"gopkg.in/errgo.v1"
+	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/Scalingo/go-utils/logger"
@@ -49,7 +50,7 @@ func ParanoiaDelete(ctx context.Context, collectionName string, d ParanoiaDeleta
 	d.SetDeletedAt(now)
 	err := Update(ctx, collectionName, bson.M{"$set": bson.M{"deleted_at": now}}, d)
 	if err != nil {
-		return errgo.Notef(err, "fail to run mongo update")
+		return fmt.Errorf("fail to run mongo update: %v", err)
 	}
 	return nil
 }
@@ -91,7 +92,39 @@ func WhereSort(ctx context.Context, collectionName string, query bson.M, data in
 
 	err := c.Find(query).Sort(sortFields...).All(data)
 	if err != nil {
-		return errgo.Notef(err, "fail to query mongo %v", query)
+		return fmt.Errorf("fail to query mongo %v: %v", query, err)
+	}
+	return nil
+}
+
+func WhereParanoiaIter(ctx context.Context, collectionName string, query bson.M, fun func(*mgo.Iter) error, sortFields ...string) error {
+	if query == nil {
+		query = bson.M{}
+	}
+	if _, ok := query["deleted_at"]; !ok {
+		query["deleted_at"] = nil
+	}
+	return WhereIter(ctx, collectionName, query, fun, sortFields...)
+}
+
+func WhereIter(ctx context.Context, collectionName string, query bson.M, fun func(*mgo.Iter) error, sortFields ...string) error {
+	log := logger.Get(ctx)
+	c := mongo.Session(log).DB("").C(collectionName)
+	defer c.Database.Session.Close()
+
+	if query == nil {
+		query = bson.M{}
+	}
+
+	iter := c.Find(query).Sort(sortFields...).Iter()
+	defer iter.Close()
+
+	err := fun(iter)
+	if err != nil {
+		return fmt.Errorf("error occured during iteration over collection %v with query %v: %v", collectionName, query, err)
+	}
+	if iter.Err() != nil {
+		return fmt.Errorf("fail to iterate over collection %v with query %v: %v", collectionName, query, err)
 	}
 	return nil
 }
