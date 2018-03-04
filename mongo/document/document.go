@@ -7,8 +7,8 @@ import (
 	"gopkg.in/errgo.v1"
 	"gopkg.in/mgo.v2/bson"
 
-	"github.com/Scalingo/appsdeck-database/controller/mongo"
 	"github.com/Scalingo/go-utils/logger"
+	"github.com/Scalingo/go-utils/mongo"
 )
 
 type Document interface {
@@ -27,7 +27,7 @@ type Updatable interface {
 
 func Save(ctx context.Context, collectionName string, doc Document) error {
 	log := logger.Get(ctx)
-	c := mongo.Collection(collectionName)
+	c := mongo.Session(log).DB("").C(collectionName)
 	defer c.Database.Session.Close()
 	log.WithField(collectionName, doc).Debugf("save '%v'", collectionName)
 	_, err := c.UpsertId(doc.GetID(), &doc)
@@ -38,7 +38,7 @@ func Save(ctx context.Context, collectionName string, doc Document) error {
 // Handle with care...
 func Destroy(ctx context.Context, collectionName string, doc Document) error {
 	log := logger.Get(ctx)
-	c := mongo.Collection(collectionName)
+	c := mongo.Session(log).DB("").C(collectionName)
 	defer c.Database.Session.Close()
 	log.WithField(collectionName, doc).Debugf("remove '%v'", collectionName)
 	return c.RemoveId(doc.GetID())
@@ -60,7 +60,8 @@ func Find(ctx context.Context, collectionName string, id bson.ObjectId, doc Docu
 }
 
 func FindOne(ctx context.Context, collectionName string, query bson.M, doc Document) error {
-	c := mongo.Collection(collectionName)
+	log := logger.Get(ctx)
+	c := mongo.Session(log).DB("").C(collectionName)
 	defer c.Database.Session.Close()
 	return c.Find(query).One(doc)
 }
@@ -80,7 +81,8 @@ func Where(ctx context.Context, collectionName string, query bson.M, data interf
 }
 
 func WhereSort(ctx context.Context, collectionName string, query bson.M, data interface{}, sortFields ...string) error {
-	c := mongo.Collection(collectionName)
+	log := logger.Get(ctx)
+	c := mongo.Session(log).DB("").C(collectionName)
 	defer c.Database.Session.Close()
 
 	if query == nil {
@@ -96,7 +98,7 @@ func WhereSort(ctx context.Context, collectionName string, query bson.M, data in
 
 func Update(ctx context.Context, collectionName string, update bson.M, doc Updatable) error {
 	log := logger.Get(ctx)
-	c := mongo.Collection(collectionName)
+	c := mongo.Session(log).DB("").C(collectionName)
 	defer c.Database.Session.Close()
 
 	now := time.Now()
