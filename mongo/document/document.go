@@ -28,7 +28,7 @@ type Updatable interface {
 
 func Save(ctx context.Context, collectionName string, doc Document) error {
 	log := logger.Get(ctx)
-	c := mongo.Session(log).DB("").C(collectionName)
+	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
 	log.WithField(collectionName, doc).Debugf("save '%v'", collectionName)
 	_, err := c.UpsertId(doc.GetID(), &doc)
@@ -39,7 +39,7 @@ func Save(ctx context.Context, collectionName string, doc Document) error {
 // Handle with care...
 func Destroy(ctx context.Context, collectionName string, doc Document) error {
 	log := logger.Get(ctx)
-	c := mongo.Session(log).DB("").C(collectionName)
+	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
 	log.WithField(collectionName, doc).Debugf("remove '%v'", collectionName)
 	return c.RemoveId(doc.GetID())
@@ -62,7 +62,7 @@ func Find(ctx context.Context, collectionName string, id bson.ObjectId, doc Docu
 
 func FindOne(ctx context.Context, collectionName string, query bson.M, doc Document) error {
 	log := logger.Get(ctx)
-	c := mongo.Session(log).DB("").C(collectionName)
+	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
 	return c.Find(query).One(doc)
 }
@@ -83,7 +83,7 @@ func Where(ctx context.Context, collectionName string, query bson.M, data interf
 
 func WhereSort(ctx context.Context, collectionName string, query bson.M, data interface{}, sortFields ...string) error {
 	log := logger.Get(ctx)
-	c := mongo.Session(log).DB("").C(collectionName)
+	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
 
 	if query == nil {
@@ -109,7 +109,7 @@ func WhereParanoiaIter(ctx context.Context, collectionName string, query bson.M,
 
 func WhereIter(ctx context.Context, collectionName string, query bson.M, fun func(*mgo.Iter) error, sortFields ...string) error {
 	log := logger.Get(ctx)
-	c := mongo.Session(log).DB("").C(collectionName)
+	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
 
 	if query == nil {
@@ -131,7 +131,7 @@ func WhereIter(ctx context.Context, collectionName string, query bson.M, fun fun
 
 func Update(ctx context.Context, collectionName string, update bson.M, doc Updatable) error {
 	log := logger.Get(ctx)
-	c := mongo.Session(log).DB("").C(collectionName)
+	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
 
 	now := time.Now()
