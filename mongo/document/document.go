@@ -55,9 +55,13 @@ func ParanoiaDelete(ctx context.Context, collectionName string, d ParanoiaDeleta
 }
 
 func Find(ctx context.Context, collectionName string, id bson.ObjectId, doc Document) error {
+	query := bson.M{"_id": id, "deleted_at": nil}
+	return FindOne(ctx, collectionName, query, doc)
+}
+
+func FindOne(ctx context.Context, collectionName string, query bson.M, doc Document) error {
 	c := mongo.Collection(collectionName)
 	defer c.Database.Session.Close()
-	query := bson.M{"_id": id, "deleted_at": nil}
 	return c.Find(query).One(doc)
 }
 
