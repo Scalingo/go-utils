@@ -16,6 +16,11 @@ type Document interface {
 	GetID() bson.ObjectId
 }
 
+type Creatable interface {
+	Document
+	SetCreatedAt(time.Time)
+}
+
 type ParanoiaDeletable interface {
 	Updatable
 	SetDeletedAt(time.Time)
@@ -24,6 +29,25 @@ type ParanoiaDeletable interface {
 type Updatable interface {
 	Document
 	SetUpdatedAt(time.Time)
+}
+
+type scopable interface {
+	scope(bson.M) bson.M
+}
+
+type destroyable interface {
+	destroy(ctx context.Context, collection string) error
+}
+
+// Create inser the document in the database, returns an error if document already exists and set CreatedAt timestamp
+func Create(ctx context.Context, collectionName string, doc Creatable) error {
+	log := logger.Get(ctx)
+	c := mongo.Session(log).Clone().DB("").C(collectionName)
+	defer c.Database.Session.Close()
+	doc.SetCreatedAt(time.Now())
+	log.WithField(collectionName, doc).Debugf("save '%v'", collectionName)
+	return c.Insert(&doc)
+
 }
 
 func Save(ctx context.Context, collectionName string, doc Document) error {
@@ -35,9 +59,12 @@ func Save(ctx context.Context, collectionName string, doc Document) error {
 	return err
 }
 
-// Remove the document from the database.
-// Handle with care...
-func Destroy(ctx context.Context, collectionName string, doc Document) error {
+// Destroy really deletes
+func Destroy(ctx context.Context, collectionName string, doc destroyable) error {
+	return doc.destroy(ctx, collectionName)
+}
+
+func ReallyDestroy(ctx context.Context, collectionName string, doc Document) error {
 	log := logger.Get(ctx)
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
@@ -45,22 +72,22 @@ func Destroy(ctx context.Context, collectionName string, doc Document) error {
 	return c.RemoveId(doc.GetID())
 }
 
-func ParanoiaDelete(ctx context.Context, collectionName string, d ParanoiaDeletable) error {
-	now := time.Now()
-	d.SetDeletedAt(now)
-	err := Update(ctx, collectionName, bson.M{"$set": bson.M{"deleted_at": now}}, d)
-	if err != nil {
-		return fmt.Errorf("fail to run mongo update: %v", err)
-	}
-	return nil
-}
-
-func Find(ctx context.Context, collectionName string, id bson.ObjectId, doc Document) error {
-	query := bson.M{"_id": id, "deleted_at": nil}
+// Find is finding the model with objectid id in the collection name, with its
+// default scope for paranoid documents, it won't look at documents tagged as
+// deleted
+func Find(ctx context.Context, collectionName string, id bson.ObjectId, doc scopable) error {
+	query := doc.scope(bson.M{"_id": id})
 	return FindOne(ctx, collectionName, query, doc)
 }
 
-func FindOne(ctx context.Context, collectionName string, query bson.M, doc Document) error {
+// FindUnscoped is similar as Find but does not care of the default scope of
+// the document default scope.
+func FindUnscoped(ctx context.Context, collectionName string, id bson.ObjectId, doc interface{}) error {
+	query := bson.M{"_id": id}
+	return FindOne(ctx, collectionName, query, doc)
+}
+
+func FindOne(ctx context.Context, collectionName string, query bson.M, doc interface{}) error {
 	log := logger.Get(ctx)
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
