@@ -1,5 +1,20 @@
 # Changelog
 
+## v2.1.0 (Mar 5 2018)
+
+* Add `mongo/document` package for CRUD operations against the database and
+  base structure to embed in models
+
+  ```
+  type Model struct {
+    document.Base `bson:",inline"`
+  }
+
+  type ParanoidModel struct {
+    document.Paranoid `bson:",inline"`
+  }
+  ```
+
 ## v2.0.1
 
 * Update rollbar plugin configuration, only skip 4 levels of stack
