@@ -14,13 +14,9 @@ import (
 
 type document interface {
 	getID() bson.ObjectId
+	ensureID()
+	ensureCreatedAt()
 }
-
-type creatable interface {
-	document
-	setCreatedAt(time.Time)
-}
-
 type updatable interface {
 	document
 	setUpdatedAt(time.Time)
@@ -35,11 +31,12 @@ type destroyable interface {
 }
 
 // Create inser the document in the database, returns an error if document already exists and set CreatedAt timestamp
-func Create(ctx context.Context, collectionName string, doc creatable) error {
+func Create(ctx context.Context, collectionName string, doc document) error {
 	log := logger.Get(ctx)
+	doc.ensureID()
+	doc.ensureCreatedAt()
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
-	doc.setCreatedAt(time.Now())
 	log.WithField(collectionName, doc).Debugf("save '%v'", collectionName)
 	return c.Insert(&doc)
 
@@ -47,6 +44,8 @@ func Create(ctx context.Context, collectionName string, doc creatable) error {
 
 func Save(ctx context.Context, collectionName string, doc document) error {
 	log := logger.Get(ctx)
+	doc.ensureID()
+	doc.ensureCreatedAt()
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
 	log.WithField(collectionName, doc).Debugf("save '%v'", collectionName)

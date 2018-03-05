@@ -12,6 +12,10 @@ type Paranoid struct {
 	DeletedAt time.Time `bson:"deleted_at,omitempty" json:"deleted_at,omitempty"`
 }
 
+func (p Paranoid) IsDeleted() bool {
+	return !p.DeletedAt.IsZero()
+}
+
 func (d *Paranoid) setDeletedAt(t time.Time) {
 	d.DeletedAt = t
 }
