@@ -24,7 +24,7 @@ func NewTestParanoidDoc(t *testing.T) (*ParanoidDoc, func()) {
 	}
 }
 
-func TestParanoidFind(t *testing.T) {
+func TestParanoid_Find(t *testing.T) {
 	examples := []struct {
 		Name        string
 		ParanoidDoc func(t *testing.T) (*ParanoidDoc, func())

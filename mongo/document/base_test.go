@@ -24,7 +24,63 @@ func NewTestDoc(t *testing.T) (*Doc, func()) {
 	}
 }
 
-func TestBaseFind(t *testing.T) {
+func TestBase_Save(t *testing.T) {
+	examples := []struct {
+		Name   string
+		Doc    func(t *testing.T) (*Doc, func())
+		Expect func(t *testing.T, d *Doc)
+		Error  string
+	}{
+		{
+			Name: "it should define an ID",
+			Doc: func(t *testing.T) (*Doc, func()) {
+				return NewTestDoc(t)
+			},
+			Expect: func(t *testing.T, d *Doc) {
+				require.NotEmpty(t, d.ID)
+			},
+		}, {
+			Name: "it should not replace an ID",
+			Doc: func(t *testing.T) (*Doc, func()) {
+				return NewTestDoc(t)
+			},
+			Expect: func(t *testing.T, d *Doc) {
+				id := d.ID
+				err := Save(context.Background(), DocsCollection, d)
+				require.NoError(t, err)
+				require.Equal(t, id, d.ID)
+			},
+		}, {
+			Name: "it should define created_at",
+			Doc: func(t *testing.T) (*Doc, func()) {
+				return NewTestDoc(t)
+			},
+			Expect: func(t *testing.T, d *Doc) {
+				require.NotZero(t, d.CreatedAt)
+			},
+		}, {
+			Name: "it should not replace created_at",
+			Doc: func(t *testing.T) (*Doc, func()) {
+				return NewTestDoc(t)
+			},
+			Expect: func(t *testing.T, d *Doc) {
+				ts := d.CreatedAt
+				err := Save(context.Background(), DocsCollection, d)
+				require.NoError(t, err)
+				require.Equal(t, ts, d.CreatedAt)
+			},
+		},
+	}
+	for _, example := range examples {
+		t.Run(example.Name, func(t *testing.T) {
+			fixtureDoc, clean := example.Doc(t)
+			defer clean()
+			example.Expect(t, fixtureDoc)
+		})
+	}
+}
+
+func TestBase_Find(t *testing.T) {
 	examples := []struct {
 		Name  string
 		Doc   func(t *testing.T) (*Doc, func())
@@ -33,8 +89,7 @@ func TestBaseFind(t *testing.T) {
 		{
 			Name: "it should find existing doc",
 			Doc: func(t *testing.T) (*Doc, func()) {
-				d, clean := NewTestDoc(t)
-				return d, clean
+				return NewTestDoc(t)
 			},
 		}, {
 			Name: "it should not find unsaved doc",
@@ -84,8 +139,7 @@ func TestBase_FindUnscoped(t *testing.T) {
 		{
 			Name: "it should find existing doc",
 			Doc: func(t *testing.T) (*Doc, func()) {
-				d, clean := NewTestDoc(t)
-				return d, clean
+				return NewTestDoc(t)
 			},
 		}, {
 			Name: "it should not find unsaved doc",
