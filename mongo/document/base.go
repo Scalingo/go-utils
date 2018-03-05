@@ -13,15 +13,15 @@ type Base struct {
 	UpdatedAt time.Time     `bson:"updated_at" json:"updated_at"`
 }
 
-func (d Base) GetID() bson.ObjectId {
+func (d Base) getID() bson.ObjectId {
 	return d.ID
 }
 
-func (d *Base) SetCreatedAt(t time.Time) {
+func (d *Base) setCreatedAt(t time.Time) {
 	d.CreatedAt = t
 }
 
-func (d *Base) SetUpdatedAt(t time.Time) {
+func (d *Base) setUpdatedAt(t time.Time) {
 	d.UpdatedAt = t
 }
 

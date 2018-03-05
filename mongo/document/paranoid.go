@@ -12,7 +12,7 @@ type Paranoid struct {
 	DeletedAt time.Time `bson:"deleted_at,omitempty" json:"deleted_at,omitempty"`
 }
 
-func (d *Paranoid) SetDeletedAt(t time.Time) {
+func (d *Paranoid) setDeletedAt(t time.Time) {
 	d.DeletedAt = t
 }
 
@@ -25,6 +25,6 @@ func (d Paranoid) scope(query bson.M) bson.M {
 
 func (d *Paranoid) destroy(ctx context.Context, collectionName string) error {
 	now := time.Now()
-	d.SetDeletedAt(now)
+	d.setDeletedAt(now)
 	return Update(ctx, collectionName, bson.M{"$set": bson.M{"deleted_at": now}}, d)
 }

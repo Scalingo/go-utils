@@ -12,23 +12,18 @@ import (
 	"github.com/Scalingo/go-utils/mongo"
 )
 
-type Document interface {
-	GetID() bson.ObjectId
+type document interface {
+	getID() bson.ObjectId
 }
 
-type Creatable interface {
-	Document
-	SetCreatedAt(time.Time)
+type creatable interface {
+	document
+	setCreatedAt(time.Time)
 }
 
-type ParanoiaDeletable interface {
-	Updatable
-	SetDeletedAt(time.Time)
-}
-
-type Updatable interface {
-	Document
-	SetUpdatedAt(time.Time)
+type updatable interface {
+	document
+	setUpdatedAt(time.Time)
 }
 
 type scopable interface {
@@ -40,22 +35,22 @@ type destroyable interface {
 }
 
 // Create inser the document in the database, returns an error if document already exists and set CreatedAt timestamp
-func Create(ctx context.Context, collectionName string, doc Creatable) error {
+func Create(ctx context.Context, collectionName string, doc creatable) error {
 	log := logger.Get(ctx)
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
-	doc.SetCreatedAt(time.Now())
+	doc.setCreatedAt(time.Now())
 	log.WithField(collectionName, doc).Debugf("save '%v'", collectionName)
 	return c.Insert(&doc)
 
 }
 
-func Save(ctx context.Context, collectionName string, doc Document) error {
+func Save(ctx context.Context, collectionName string, doc document) error {
 	log := logger.Get(ctx)
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
 	log.WithField(collectionName, doc).Debugf("save '%v'", collectionName)
-	_, err := c.UpsertId(doc.GetID(), &doc)
+	_, err := c.UpsertId(doc.getID(), &doc)
 	return err
 }
 
@@ -64,12 +59,12 @@ func Destroy(ctx context.Context, collectionName string, doc destroyable) error 
 	return doc.destroy(ctx, collectionName)
 }
 
-func ReallyDestroy(ctx context.Context, collectionName string, doc Document) error {
+func ReallyDestroy(ctx context.Context, collectionName string, doc document) error {
 	log := logger.Get(ctx)
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
 	log.WithField(collectionName, doc).Debugf("remove '%v'", collectionName)
-	return c.RemoveId(doc.GetID())
+	return c.RemoveId(doc.getID())
 }
 
 // Find is finding the model with objectid id in the collection name, with its
@@ -156,16 +151,16 @@ func WhereIter(ctx context.Context, collectionName string, query bson.M, fun fun
 	return nil
 }
 
-func Update(ctx context.Context, collectionName string, update bson.M, doc Updatable) error {
+func Update(ctx context.Context, collectionName string, update bson.M, doc updatable) error {
 	log := logger.Get(ctx)
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
 
 	now := time.Now()
-	doc.SetUpdatedAt(now)
+	doc.setUpdatedAt(now)
 	if _, ok := update["$set"]; ok {
 		update["$set"].(bson.M)["updated_at"] = now
 	}
 	log.WithField("query", update).Debugf("update %v", collectionName)
-	return c.UpdateId(doc.GetID(), update)
+	return c.UpdateId(doc.getID(), update)
 }
