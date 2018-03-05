@@ -17,6 +17,7 @@ type document interface {
 	ensureID()
 	ensureCreatedAt()
 	setUpdatedAt(time.Time)
+	Validable
 }
 
 type scopable interface {
@@ -27,12 +28,21 @@ type destroyable interface {
 	destroy(ctx context.Context, collection string) error
 }
 
+type Validable interface {
+	Validate(ctx context.Context) *ValidationError
+}
+
 // Create inser the document in the database, returns an error if document already exists and set CreatedAt timestamp
 func Create(ctx context.Context, collectionName string, doc document) error {
 	log := logger.Get(ctx)
 	doc.ensureID()
 	doc.ensureCreatedAt()
 	doc.setUpdatedAt(time.Now())
+
+	if err := doc.Validate(ctx); err != nil {
+		return err
+	}
+
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
 	log.WithField(collectionName, doc).Debugf("save '%v'", collectionName)
@@ -45,6 +55,11 @@ func Save(ctx context.Context, collectionName string, doc document) error {
 	doc.ensureID()
 	doc.ensureCreatedAt()
 	doc.setUpdatedAt(time.Now())
+
+	if err := doc.Validate(ctx); err != nil {
+		return err
+	}
+
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
 	log.WithField(collectionName, doc).Debugf("save '%v'", collectionName)
@@ -159,6 +174,11 @@ func Update(ctx context.Context, collectionName string, update bson.M, doc docum
 	if _, ok := update["$set"]; ok {
 		update["$set"].(bson.M)["updated_at"] = now
 	}
+
+	if err := doc.Validate(ctx); err != nil {
+		return err
+	}
+
 	log.WithField("query", update).Debugf("update %v", collectionName)
 	return c.UpdateId(doc.getID(), update)
 }
