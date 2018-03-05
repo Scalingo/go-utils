@@ -4,25 +4,49 @@
 [[projects]]
   name = "github.com/Scalingo/go-etcd-cron"
   packages = ["."]
-  revision = "468ca828234bd257d1372ebd28654f7ed531d286"
-  version = "v1.0.0"
+  revision = "09f2d0456ecee6e20e0b9608dd29e9193503532f"
+  version = "v1.0.1"
 
 [[projects]]
-  name = "github.com/Scalingo/go-utils"
-  packages = ["logger"]
-  revision = "312dd878008fd8f3afcafc308aace5e53277a540"
-  version = "v2.0.1"
+  name = "github.com/Scalingo/logrus-rollbar"
+  packages = ["."]
+  revision = "b82bcdb17d040be3abd945a63464a9601e73a6d6"
+  version = "v1.2.1"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/Soulou/errgo-rollbar"
+  packages = ["."]
+  revision = "2f7de2c8755a840bfcf34b2b6508e86eba0fbccc"
 
 [[projects]]
   name = "github.com/coreos/etcd"
-  packages = ["auth/authpb","clientv3","clientv3/concurrency","etcdserver/api/v3rpc/rpctypes","etcdserver/etcdserverpb","mvcc/mvccpb","pkg/types"]
+  packages = ["auth/authpb","clientv3","clientv3/concurrency","etcdserver/api/v3rpc/rpctypes","etcdserver/etcdserverpb","mvcc/mvccpb","pkg/tlsutil","pkg/transport","pkg/types"]
   revision = "28f3f26c0e303392556035b694f75768d449d33d"
   version = "v3.3.1"
+
+[[projects]]
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  revision = "346938d642f2ec3594ed81d874461961cd0faa76"
+  version = "v1.1.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/dustin/go-humanize"
+  packages = ["."]
+  revision = "bb3d318650d48840a39aa21a027c6630e198e626"
 
 [[projects]]
   name = "github.com/gogo/protobuf"
   packages = ["gogoproto","proto","protoc-gen-gogo/descriptor"]
   revision = "1adfc126b41513cc696b209667c8656ea7aac67c"
+  version = "v1.0.0"
+
+[[projects]]
+  name = "github.com/golang/mock"
+  packages = ["gomock"]
+  revision = "13f360950a79f5864a972c786a10a50e44b69541"
   version = "v1.0.0"
 
 [[projects]]
@@ -33,9 +57,21 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/golang/snappy"
+  packages = ["."]
+  revision = "553a641470496b2327abcac10b36396bd98e45c9"
+
+[[projects]]
+  branch = "master"
   name = "github.com/iancoleman/strcase"
   packages = ["."]
   revision = "3de563c3dc08a7504131e9d63f678b7d1c3e85d7"
+
+[[projects]]
+  name = "github.com/nsqio/go-nsq"
+  packages = ["."]
+  revision = "eee57a3ac4174c55924125bb15eeeda8cffb6e6f"
+  version = "v1.0.7"
 
 [[projects]]
   name = "github.com/pkg/errors"
@@ -44,10 +80,34 @@
   version = "v0.8.0"
 
 [[projects]]
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
+  name = "github.com/satori/go.uuid"
+  packages = ["."]
+  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
+  version = "v1.2.0"
+
+[[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   revision = "d682213848ed68c0a260ca37d6dd5ace8423f5ba"
   version = "v1.0.4"
+
+[[projects]]
+  name = "github.com/stretchr/testify"
+  packages = ["assert","require"]
+  revision = "12b6f73e6084dad08a7c6e575284b177ecafbc71"
+  version = "v1.2.1"
+
+[[projects]]
+  name = "github.com/stvp/rollbar"
+  packages = ["."]
+  revision = "b20261800d8cda3be14dcef0d1a8320779bba61a"
+  version = "v0.5.1"
 
 [[projects]]
   branch = "master"
@@ -85,9 +145,21 @@
   revision = "8e4536a86ab602859c20df5ebfd0bd4228d08655"
   version = "v1.10.0"
 
+[[projects]]
+  branch = "v1"
+  name = "gopkg.in/errgo.v1"
+  packages = ["."]
+  revision = "442357a80af5c6bf9b6d51ae791a39c3421004f3"
+
+[[projects]]
+  branch = "v2"
+  name = "gopkg.in/mgo.v2"
+  packages = [".","bson","internal/json","internal/sasl","internal/scram"]
+  revision = "3f83fa5005286a7fe593b055f0d7771a7dce4655"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9fa3f0db5ca05cea2c00c3f945db7c70eeca787499d7a817f392ae8000ee3053"
+  inputs-digest = "fdd4fdb151aa1f5f070602acac82bd1123dceaeb2a9cfac3694f5f93b1dedfa1"
   solver-name = "gps-cdcl"
   solver-version = 1
