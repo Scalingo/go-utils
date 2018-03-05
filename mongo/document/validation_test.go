@@ -15,10 +15,6 @@ type DummyDocument struct {
 }
 
 func (d *DummyDocument) Validate(ctx context.Context) *ValidationError {
-	if d.FieldAErrors == 0 && d.FieldBErrors == 0 {
-		return nil
-	}
-
 	err := NewValidationError()
 
 	for i := 0; i < d.FieldAErrors; i++ {
@@ -29,7 +25,8 @@ func (d *DummyDocument) Validate(ctx context.Context) *ValidationError {
 		err.Set("b", "test")
 	}
 
-	return err
+	return err.Build()
+
 }
 
 func TestValidation(t *testing.T) {

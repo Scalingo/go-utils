@@ -33,3 +33,11 @@ func (v *ValidationError) Set(field, err string) {
 func (v *ValidationError) Get(field string) []string {
 	return v.Errors[field]
 }
+
+func (v *ValidationError) Build() *ValidationError {
+	if len(v.Errors) == 0 {
+		return nil
+	}
+
+	return v
+}
