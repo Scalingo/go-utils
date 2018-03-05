@@ -16,9 +16,6 @@ type document interface {
 	getID() bson.ObjectId
 	ensureID()
 	ensureCreatedAt()
-}
-type updatable interface {
-	document
 	setUpdatedAt(time.Time)
 }
 
@@ -35,6 +32,7 @@ func Create(ctx context.Context, collectionName string, doc document) error {
 	log := logger.Get(ctx)
 	doc.ensureID()
 	doc.ensureCreatedAt()
+	doc.setUpdatedAt(time.Now())
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
 	log.WithField(collectionName, doc).Debugf("save '%v'", collectionName)
@@ -46,6 +44,7 @@ func Save(ctx context.Context, collectionName string, doc document) error {
 	log := logger.Get(ctx)
 	doc.ensureID()
 	doc.ensureCreatedAt()
+	doc.setUpdatedAt(time.Now())
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
 	log.WithField(collectionName, doc).Debugf("save '%v'", collectionName)
@@ -150,7 +149,7 @@ func WhereIter(ctx context.Context, collectionName string, query bson.M, fun fun
 	return nil
 }
 
-func Update(ctx context.Context, collectionName string, update bson.M, doc updatable) error {
+func Update(ctx context.Context, collectionName string, update bson.M, doc document) error {
 	log := logger.Get(ctx)
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()

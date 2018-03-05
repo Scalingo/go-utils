@@ -69,6 +69,25 @@ func TestBase_Save(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, ts, d.CreatedAt)
 			},
+		}, {
+			Name: "it should define updated_at",
+			Doc: func(t *testing.T) (*Doc, func()) {
+				return NewTestDoc(t)
+			},
+			Expect: func(t *testing.T, d *Doc) {
+				require.NotZero(t, d.UpdatedAt)
+			},
+		}, {
+			Name: "it should update updated_at",
+			Doc: func(t *testing.T) (*Doc, func()) {
+				return NewTestDoc(t)
+			},
+			Expect: func(t *testing.T, d *Doc) {
+				ts := d.UpdatedAt
+				err := Save(context.Background(), DocsCollection, d)
+				require.NoError(t, err)
+				require.NotEqual(t, ts, d.UpdatedAt)
+			},
 		},
 	}
 	for _, example := range examples {
