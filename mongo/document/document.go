@@ -35,7 +35,7 @@ func Save(ctx context.Context, collectionName string, doc Document) error {
 	return err
 }
 
-// Remove the volume from the database.
+// Remove the document from the database.
 // Handle with care...
 func Destroy(ctx context.Context, collectionName string, doc Document) error {
 	log := logger.Get(ctx)
