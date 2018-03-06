@@ -33,10 +33,6 @@ func (d *Base) ensureCreatedAt() {
 	}
 }
 
-func (d *Base) setCreatedAt(t time.Time) {
-	d.CreatedAt = t
-}
-
 func (d *Base) setUpdatedAt(t time.Time) {
 	d.UpdatedAt = t
 }
@@ -47,4 +43,8 @@ func (d Base) scope(query bson.M) bson.M {
 
 func (d *Base) destroy(ctx context.Context, collection string) error {
 	return ReallyDestroy(ctx, collection, d)
+}
+
+func (d *Base) Validate(ctx context.Context) *ValidationErrors {
+	return nil
 }
