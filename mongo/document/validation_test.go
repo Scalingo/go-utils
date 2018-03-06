@@ -15,7 +15,7 @@ type DummyDocument struct {
 }
 
 func (d *DummyDocument) Validate(ctx context.Context) *ValidationErrors {
-	err := NewValidationErrors()
+	err := NewValidationErrorsBuilder()
 
 	for i := 0; i < d.FieldAErrors; i++ {
 		err.Set("a", "test")

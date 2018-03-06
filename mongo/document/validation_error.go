@@ -2,29 +2,9 @@ package document
 
 import "bytes"
 
-// ValidationErrors is used to store all errors related to the model validation. The typical usecase is:
-//	func (m *MyModel) Validate(ctx context.Context) *ValidationErrors {
-//		validations := document.NewValidationErrors()
-//
-//		if m.Name == "" {
-//			validations.Set("name", "should not be empty")
-//		}
-//
-//		if m.Email == "" {
-//			validations.Set("email", "should not be empty")
-//		}
-//
-//		return validations.Build()
-//	}
+// ValidationErrors store each errors associated to every fields of a model
 type ValidationErrors struct {
 	Errors map[string][]string `json:"errors"`
-}
-
-// NewValidationErrors return an empty ValidationErrors struct
-func NewValidationErrors() *ValidationErrors {
-	return &ValidationErrors{
-		Errors: make(map[string][]string),
-	}
 }
 
 func (v *ValidationErrors) Error() string {
@@ -41,21 +21,49 @@ func (v *ValidationErrors) Error() string {
 	return buffer.String()
 }
 
+// ValidationErrorsBuilder is used to provide a simple way to create a ValidationErrors struct. The typical usecase is:
+//	func (m *MyModel) Validate(ctx context.Context) *ValidationErrors {
+//		validations := document.NewValidationErrorsBuilder()
+//
+//		if m.Name == "" {
+//			validations.Set("name", "should not be empty")
+//		}
+//
+//		if m.Email == "" {
+//			validations.Set("email", "should not be empty")
+//		}
+//
+//		return validations.Build()
+//	}
+
+type ValidationErrorsBuilder struct {
+	errors map[string][]string
+}
+
+// NewValidationErrors return an empty ValidationErrors struct
+func NewValidationErrorsBuilder() *ValidationErrorsBuilder {
+	return &ValidationErrorsBuilder{
+		errors: make(map[string][]string),
+	}
+}
+
 // Set will add an error on a specific field, if the field already contains an error, it will just add it to the current errors list
-func (v *ValidationErrors) Set(field, err string) {
-	v.Errors[field] = append(v.Errors[field], err)
+func (v *ValidationErrorsBuilder) Set(field, err string) {
+	v.errors[field] = append(v.errors[field], err)
 }
 
 // Get will return all errors set for a specific field
-func (v *ValidationErrors) Get(field string) []string {
-	return v.Errors[field]
+func (v *ValidationErrorsBuilder) Get(field string) []string {
+	return v.errors[field]
 }
 
 // Build will send a ValidationErrors struct if there is some errors or nil if no errors has been defined
-func (v *ValidationErrors) Build() *ValidationErrors {
-	if len(v.Errors) == 0 {
+func (v *ValidationErrorsBuilder) Build() *ValidationErrors {
+	if len(v.errors) == 0 {
 		return nil
 	}
 
-	return v
+	return &ValidationErrors{
+		Errors: v.errors,
+	}
 }
