@@ -14,8 +14,8 @@ type DummyDocument struct {
 	FieldBErrors int
 }
 
-func (d *DummyDocument) Validate(ctx context.Context) *ValidationError {
-	err := NewValidationError()
+func (d *DummyDocument) Validate(ctx context.Context) *ValidationErrors {
+	err := NewValidationErrors()
 
 	for i := 0; i < d.FieldAErrors; i++ {
 		err.Set("a", "test")
@@ -43,7 +43,7 @@ func TestValidation(t *testing.T) {
 				FieldAErrors: 1,
 				FieldBErrors: 2,
 			},
-			ExpectedError: &ValidationError{
+			ExpectedError: &ValidationErrors{
 				Errors: map[string][]string{
 					"a": []string{"test"},
 					"b": []string{"test", "test"},

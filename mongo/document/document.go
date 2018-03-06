@@ -29,7 +29,7 @@ type destroyable interface {
 }
 
 type Validable interface {
-	Validate(ctx context.Context) *ValidationError
+	Validate(ctx context.Context) *ValidationErrors
 }
 
 // Create inser the document in the database, returns an error if document already exists and set CreatedAt timestamp
