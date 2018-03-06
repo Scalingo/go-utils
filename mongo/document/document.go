@@ -95,6 +95,14 @@ func FindUnscoped(ctx context.Context, collectionName string, id bson.ObjectId, 
 	return FindOne(ctx, collectionName, query, doc)
 }
 
+func FindSort(ctx context.Context, collectionName string, query bson.M, doc interface{}, sortFields ...string) error {
+	log := logger.Get(ctx)
+	c := mongo.Session(log).Clone().DB("").C(collectionName)
+	defer c.Database.Session.Close()
+
+	return c.Find(query).Sort(sortFields...).One(doc)
+}
+
 func FindOne(ctx context.Context, collectionName string, query bson.M, doc interface{}) error {
 	log := logger.Get(ctx)
 	c := mongo.Session(log).Clone().DB("").C(collectionName)

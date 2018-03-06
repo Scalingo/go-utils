@@ -14,10 +14,17 @@ const DocsCollection = "docs"
 
 type Doc struct {
 	Base `bson:",inline"`
+	Data int `bson:"data,omitempty"`
 }
 
 func NewTestDoc(t *testing.T) (*Doc, func()) {
-	d := Doc{}
+	return NewTestDocWithData(t, 0)
+}
+
+func NewTestDocWithData(t *testing.T, data int) (*Doc, func()) {
+	d := Doc{
+		Data: data,
+	}
 	require.NoError(t, Save(context.Background(), DocsCollection, &d))
 	return &d, func() {
 		require.NoError(t, ReallyDestroy(context.Background(), DocsCollection, &d))
@@ -145,6 +152,74 @@ func TestBase_Find(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, fixtureDoc.ID, d.ID)
 			}
+		})
+	}
+}
+
+func TestBase_FindSort(t *testing.T) {
+	examples := map[string]struct {
+		Docs     func(t *testing.T) ([]*Doc, func())
+		Expected int
+		Sort     string
+	}{
+		"with only one document": {
+			Docs: func(t *testing.T) ([]*Doc, func()) {
+				var docs []*Doc
+				doc, clean := NewTestDocWithData(t, 10)
+				return append(docs, doc), clean
+			},
+			Expected: 10,
+			Sort:     "data",
+		},
+		"with three document sort positive": {
+			Docs: func(t *testing.T) ([]*Doc, func()) {
+				var docs []*Doc
+				var cleans []func()
+				for i := 1; i < 4; i++ {
+					doc, clean := NewTestDocWithData(t, i)
+					cleans = append(cleans, clean)
+					docs = append(docs, doc)
+				}
+
+				return docs, func() {
+					for _, clean := range cleans {
+						clean()
+					}
+				}
+			},
+			Expected: 1,
+			Sort:     "data",
+		},
+		"with three document sort negative": {
+			Docs: func(t *testing.T) ([]*Doc, func()) {
+				var docs []*Doc
+				var cleans []func()
+				for i := 1; i < 4; i++ {
+					doc, clean := NewTestDocWithData(t, i)
+					cleans = append(cleans, clean)
+					docs = append(docs, doc)
+				}
+
+				return docs, func() {
+					for _, clean := range cleans {
+						clean()
+					}
+				}
+			},
+			Expected: 3,
+			Sort:     "-data",
+		},
+	}
+
+	for name, example := range examples {
+		t.Run(name, func(t *testing.T) {
+			_, clean := example.Docs(t)
+			defer clean()
+
+			var doc Doc
+			FindSort(context.Background(), DocsCollection, bson.M{}, &doc, example.Sort)
+			assert.Equal(t, example.Expected, doc.Data)
+
 		})
 	}
 }
