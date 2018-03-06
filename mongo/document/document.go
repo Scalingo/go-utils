@@ -104,10 +104,7 @@ func FindSort(ctx context.Context, collectionName string, query bson.M, doc inte
 }
 
 func FindOne(ctx context.Context, collectionName string, query bson.M, doc interface{}) error {
-	log := logger.Get(ctx)
-	c := mongo.Session(log).Clone().DB("").C(collectionName)
-	defer c.Database.Session.Close()
-	return c.Find(query).One(doc)
+	return FindSort(ctx, collectionName, query, doc)
 }
 
 func WhereParanoia(ctx context.Context, collectionName string, query bson.M, data interface{}) error {
