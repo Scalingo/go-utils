@@ -35,7 +35,6 @@ func (v *ValidationErrors) Error() string {
 //
 //		return validations.Build()
 //	}
-
 type ValidationErrorsBuilder struct {
 	errors map[string][]string
 }
