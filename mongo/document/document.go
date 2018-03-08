@@ -89,7 +89,7 @@ func Find(ctx context.Context, collectionName string, id bson.ObjectId, doc scop
 }
 
 // FindUnscoped is similar as Find but does not care of the default scope of
-// the document default scope.
+// the document.
 func FindUnscoped(ctx context.Context, collectionName string, id bson.ObjectId, doc interface{}) error {
 	query := bson.M{"_id": id}
 	return find(ctx, collectionName, query, doc)
