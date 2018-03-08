@@ -204,3 +204,22 @@ func TestParanoid_Where(t *testing.T) {
 		})
 	}
 }
+
+func TestParanoid_Restore(t *testing.T) {
+	ctx := context.Background()
+	doc, clean := NewTestParanoidDoc(t)
+	defer clean()
+	err := Destroy(ctx, ParanoidDocsCollection, doc)
+	assert.NoError(t, err)
+
+	err = FindUnscoped(ctx, ParanoidDocsCollection, doc.ID, doc)
+	assert.NoError(t, err)
+	assert.True(t, doc.IsDeleted())
+
+	err = Restore(ctx, ParanoidDocsCollection, doc)
+	assert.NoError(t, err)
+
+	err = Find(ctx, ParanoidDocsCollection, doc.ID, doc)
+	assert.NoError(t, err)
+	assert.False(t, doc.IsDeleted())
+}
