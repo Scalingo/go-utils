@@ -85,17 +85,33 @@ func ReallyDestroy(ctx context.Context, collectionName string, doc document) err
 // deleted
 func Find(ctx context.Context, collectionName string, id bson.ObjectId, doc scopable) error {
 	query := doc.scope(bson.M{"_id": id})
-	return FindOne(ctx, collectionName, query, doc)
+	return find(ctx, collectionName, query, doc)
 }
 
 // FindUnscoped is similar as Find but does not care of the default scope of
-// the document default scope.
+// the document.
 func FindUnscoped(ctx context.Context, collectionName string, id bson.ObjectId, doc interface{}) error {
 	query := bson.M{"_id": id}
-	return FindOne(ctx, collectionName, query, doc)
+	return find(ctx, collectionName, query, doc)
 }
 
-func FindSort(ctx context.Context, collectionName string, query bson.M, doc interface{}, sortFields ...string) error {
+func FindSort(ctx context.Context, collectionName string, query bson.M, doc scopable, sortFields ...string) error {
+	return find(ctx, collectionName, doc.scope(query), doc, sortFields...)
+}
+
+func FindSortUnscoped(ctx context.Context, collectionName string, query bson.M, doc interface{}, sortFields ...string) error {
+	return find(ctx, collectionName, query, doc, sortFields...)
+}
+
+func FindOne(ctx context.Context, collectionName string, query bson.M, doc scopable) error {
+	return find(ctx, collectionName, doc.scope(query), doc)
+}
+
+func FindOneUnscoped(ctx context.Context, collectionName string, query bson.M, doc interface{}) error {
+	return find(ctx, collectionName, query, doc)
+}
+
+func find(ctx context.Context, collectionName string, query bson.M, doc interface{}, sortFields ...string) error {
 	log := logger.Get(ctx)
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
@@ -103,25 +119,21 @@ func FindSort(ctx context.Context, collectionName string, query bson.M, doc inte
 	return c.Find(query).Sort(sortFields...).One(doc)
 }
 
-func FindOne(ctx context.Context, collectionName string, query bson.M, doc interface{}) error {
-	return FindSort(ctx, collectionName, query, doc)
-}
-
-func WhereParanoia(ctx context.Context, collectionName string, query bson.M, data interface{}) error {
+func Where(ctx context.Context, collectionName string, query bson.M, data interface{}) error {
 	if query == nil {
 		query = bson.M{}
 	}
 	if _, ok := query["deleted_at"]; !ok {
 		query["deleted_at"] = nil
 	}
-	return Where(ctx, collectionName, query, data)
+	return WhereSortUnscoped(ctx, collectionName, query, data)
 }
 
-func Where(ctx context.Context, collectionName string, query bson.M, data interface{}) error {
-	return WhereSort(ctx, collectionName, query, data)
+func WhereUnscoped(ctx context.Context, collectionName string, query bson.M, data interface{}) error {
+	return WhereSortUnscoped(ctx, collectionName, query, data)
 }
 
-func WhereSort(ctx context.Context, collectionName string, query bson.M, data interface{}, sortFields ...string) error {
+func WhereSortUnscoped(ctx context.Context, collectionName string, query bson.M, data interface{}, sortFields ...string) error {
 	log := logger.Get(ctx)
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
@@ -137,17 +149,28 @@ func WhereSort(ctx context.Context, collectionName string, query bson.M, data in
 	return nil
 }
 
-func WhereParanoiaIter(ctx context.Context, collectionName string, query bson.M, fun func(*mgo.Iter) error, sortFields ...string) error {
+func WhereSort(ctx context.Context, collectionName string, query bson.M, data interface{}, sortFields ...string) error {
+	if query == nil {
+		query = bson.M{}
+	}
+
+	if _, ok := query["deleted_at"]; !ok {
+		query["deleted_at"] = nil
+	}
+	return WhereSortUnscoped(ctx, collectionName, query, data, sortFields...)
+}
+
+func WhereIter(ctx context.Context, collectionName string, query bson.M, fun func(*mgo.Iter) error, sortFields ...string) error {
 	if query == nil {
 		query = bson.M{}
 	}
 	if _, ok := query["deleted_at"]; !ok {
 		query["deleted_at"] = nil
 	}
-	return WhereIter(ctx, collectionName, query, fun, sortFields...)
+	return WhereIterUnscoped(ctx, collectionName, query, fun, sortFields...)
 }
 
-func WhereIter(ctx context.Context, collectionName string, query bson.M, fun func(*mgo.Iter) error, sortFields ...string) error {
+func WhereIterUnscoped(ctx context.Context, collectionName string, query bson.M, fun func(*mgo.Iter) error, sortFields ...string) error {
 	log := logger.Get(ctx)
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()

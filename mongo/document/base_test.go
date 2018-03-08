@@ -289,7 +289,7 @@ func TestBase_FindUnscoped(t *testing.T) {
 	}
 }
 
-func TestBase_WhereParanoia(t *testing.T) {
+func TestBase_Where(t *testing.T) {
 	examples := []struct {
 		Name  string
 		Query bson.M
@@ -332,7 +332,7 @@ func TestBase_WhereParanoia(t *testing.T) {
 				query = example.Query
 			}
 			var docs []*Doc
-			err := WhereParanoia(context.Background(), DocsCollection, query, &docs)
+			err := Where(context.Background(), DocsCollection, query, &docs)
 			require.NoError(t, err)
 			require.Len(t, docs, example.Count)
 		})
