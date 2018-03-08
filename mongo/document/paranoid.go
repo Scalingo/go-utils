@@ -32,3 +32,7 @@ func (d *Paranoid) destroy(ctx context.Context, collectionName string) error {
 	d.setDeletedAt(now)
 	return Update(ctx, collectionName, bson.M{"$set": bson.M{"deleted_at": now}}, d)
 }
+
+func Restore(ctx context.Context, collectionName string, doc document) error {
+	return Update(ctx, collectionName, bson.M{"$unset": bson.M{"deleted_at": ""}}, doc)
+}
