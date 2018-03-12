@@ -147,17 +147,6 @@ func WhereUnscoped(ctx context.Context, collectionName string, query bson.M, dat
 	return nil
 }
 
-func WhereSort(ctx context.Context, collectionName string, query bson.M, data interface{}, sortFields ...SortField) error {
-	if query == nil {
-		query = bson.M{}
-	}
-
-	if _, ok := query["deleted_at"]; !ok {
-		query["deleted_at"] = nil
-	}
-	return WhereUnscoped(ctx, collectionName, query, data, sortFields...)
-}
-
 func WhereIter(ctx context.Context, collectionName string, query bson.M, fun func(*mgo.Iter) error, sortFields ...SortField) error {
 	if query == nil {
 		query = bson.M{}
