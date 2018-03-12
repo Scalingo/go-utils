@@ -16,6 +16,7 @@ type field struct {
 	JSONTag string
 	PkgPath string
 	Pointer bool
+	Slice   bool
 }
 
 func newField(field field) *ast.Field {
@@ -36,14 +37,23 @@ func newField(field field) *ast.Field {
 		},
 	}
 
+	fieldAst.Type = ident
+
 	if field.Pointer {
 		fieldAst.Type = &ast.StarExpr{
 			Star: 1,
 			X:    ident,
 		}
-	} else {
-		fieldAst.Type = ident
 	}
+
+	if field.Slice {
+		oldType := fieldAst.Type
+		fieldAst.Type = &ast.ArrayType{
+			Elt:    oldType,
+			Lbrack: 1,
+		}
+	}
+
 	if field.JSONTag != "" {
 		fieldAst.Tag = &ast.BasicLit{
 			Kind:  token.STRING,
@@ -120,15 +130,18 @@ func newAST(packageName string, structs map[string][]field) *ast.File {
 		imports = append(imports, imps...)
 	}
 
-	impAst := newImports(imports)
-
-	return &ast.File{
+	file := &ast.File{
 		Package: 1,
 		Name: &ast.Ident{
 			Name: packageName,
 		},
-		Decls: append([]ast.Decl{impAst}, declsList...),
+		Decls: declsList,
 	}
+
+	if len(imports) > 0 {
+		file.Decls = append([]ast.Decl{newImports(imports)}, file.Decls...)
+	}
+	return file
 }
 
 func writeAst(ast *ast.File, filename string) error {
@@ -146,6 +159,7 @@ func writeAst(ast *ast.File, filename string) error {
 		return err
 	}
 
+	fmt.Println(string(out))
 	err = ioutil.WriteFile(filename, out, 0644)
 	return err
 }
