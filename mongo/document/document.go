@@ -83,28 +83,20 @@ func ReallyDestroy(ctx context.Context, collectionName string, doc document) err
 // Find is finding the model with objectid id in the collection name, with its
 // default scope for paranoid documents, it won't look at documents tagged as
 // deleted
-func Find(ctx context.Context, collectionName string, id bson.ObjectId, doc scopable) error {
+func Find(ctx context.Context, collectionName string, id bson.ObjectId, doc scopable, sortFields ...string) error {
 	query := doc.scope(bson.M{"_id": id})
-	return find(ctx, collectionName, query, doc)
+	return find(ctx, collectionName, query, doc, sortFields...)
 }
 
 // FindUnscoped is similar as Find but does not care of the default scope of
 // the document.
-func FindUnscoped(ctx context.Context, collectionName string, id bson.ObjectId, doc interface{}) error {
+func FindUnscoped(ctx context.Context, collectionName string, id bson.ObjectId, doc interface{}, sortFields ...string) error {
 	query := bson.M{"_id": id}
-	return find(ctx, collectionName, query, doc)
-}
-
-func FindSort(ctx context.Context, collectionName string, query bson.M, doc scopable, sortFields ...string) error {
-	return find(ctx, collectionName, doc.scope(query), doc, sortFields...)
-}
-
-func FindSortUnscoped(ctx context.Context, collectionName string, query bson.M, doc interface{}, sortFields ...string) error {
 	return find(ctx, collectionName, query, doc, sortFields...)
 }
 
-func FindOne(ctx context.Context, collectionName string, query bson.M, doc scopable) error {
-	return find(ctx, collectionName, doc.scope(query), doc)
+func FindOne(ctx context.Context, collectionName string, query bson.M, doc scopable, sortFields ...string) error {
+	return find(ctx, collectionName, doc.scope(query), doc, sortFields...)
 }
 
 func FindOneUnscoped(ctx context.Context, collectionName string, query bson.M, doc interface{}) error {
