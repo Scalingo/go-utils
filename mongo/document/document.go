@@ -117,14 +117,14 @@ func find(ctx context.Context, collectionName string, query bson.M, doc interfac
 	return c.Find(query).Sort(fields...).One(doc)
 }
 
-func Where(ctx context.Context, collectionName string, query bson.M, data interface{}) error {
+func Where(ctx context.Context, collectionName string, query bson.M, data interface{}, sortFields ...SortField) error {
 	if query == nil {
 		query = bson.M{}
 	}
 	if _, ok := query["deleted_at"]; !ok {
 		query["deleted_at"] = nil
 	}
-	return WhereUnscoped(ctx, collectionName, query, data)
+	return WhereUnscoped(ctx, collectionName, query, data, sortFields...)
 }
 
 func WhereUnscoped(ctx context.Context, collectionName string, query bson.M, data interface{}, sortFields ...SortField) error {
