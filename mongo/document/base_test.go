@@ -156,11 +156,11 @@ func TestBase_Find(t *testing.T) {
 	}
 }
 
-func TestBase_FindSort(t *testing.T) {
+func TestBase_FindOne_WithSort(t *testing.T) {
 	examples := map[string]struct {
 		Docs     func(t *testing.T) ([]*Doc, func())
 		Expected int
-		Sort     string
+		Sort     SortField
 	}{
 		"with only one document": {
 			Docs: func(t *testing.T) ([]*Doc, func()) {
@@ -169,7 +169,7 @@ func TestBase_FindSort(t *testing.T) {
 				return append(docs, doc), clean
 			},
 			Expected: 10,
-			Sort:     "data",
+			Sort:     SortField("data"),
 		},
 		"with three document sort positive": {
 			Docs: func(t *testing.T) ([]*Doc, func()) {
@@ -188,7 +188,7 @@ func TestBase_FindSort(t *testing.T) {
 				}
 			},
 			Expected: 1,
-			Sort:     "data",
+			Sort:     SortField("data"),
 		},
 		"with three document sort negative": {
 			Docs: func(t *testing.T) ([]*Doc, func()) {
@@ -207,7 +207,7 @@ func TestBase_FindSort(t *testing.T) {
 				}
 			},
 			Expected: 3,
-			Sort:     "-data",
+			Sort:     SortField("-data"),
 		},
 	}
 
@@ -217,7 +217,7 @@ func TestBase_FindSort(t *testing.T) {
 			defer clean()
 
 			var doc Doc
-			FindSort(context.Background(), DocsCollection, bson.M{}, &doc, example.Sort)
+			FindOne(context.Background(), DocsCollection, bson.M{}, &doc, example.Sort)
 			assert.Equal(t, example.Expected, doc.Data)
 
 		})
