@@ -50,7 +50,7 @@ func TestConditionBuilder(t *testing.T) {
 func TestQueryBuilder(t *testing.T) {
 	examples := []struct {
 		Name     string
-		Query    Query
+		Query    *Query
 		Expected string
 	}{
 		{
