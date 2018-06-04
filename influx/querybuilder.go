@@ -55,8 +55,8 @@ type conditionOperator struct {
 
 // NewQuery makes a new Query object. You MUST use this method to instantiate a new Query
 // structure.
-func NewQuery() Query {
-	return Query{
+func NewQuery() *Query {
+	return &Query{
 		conditions: nil,
 		limit:      -1,
 	}
@@ -64,14 +64,14 @@ func NewQuery() Query {
 
 // On sets the measurement of the current query. Calling it twice will take the latest measurement
 // provided.
-func (q Query) On(measurement string) Query {
+func (q *Query) On(measurement string) *Query {
 	q.measurement = measurement
 	return q
 }
 
 // Field adds the given field to the list of fields with the given aggregation method applied. It
 // is possible to add multiple fields with the same name but is highly discouraged.
-func (q Query) Field(fieldname, aggregationMethod string) Query {
+func (q *Query) Field(fieldname, aggregationMethod string) *Query {
 	q.fields = append(q.fields, field{
 		name:              fieldname,
 		aggregationMethod: aggregationMethod,
@@ -83,7 +83,7 @@ func (q Query) Field(fieldname, aggregationMethod string) Query {
 // time order; the first point returned has the oldest timestamp and the last point returned has the
 // most recent timestamp. Calling this method with "DESC" reverses that order such that InfluxDB
 // returns the points with the most recent timestamps first.
-func (q Query) OrderByTime(direction string) Query {
+func (q *Query) OrderByTime(direction string) *Query {
 	q.orderDirection = direction
 	return q
 }
@@ -91,7 +91,7 @@ func (q Query) OrderByTime(direction string) Query {
 // Where adds a condition on tag to the query. The comparison argument must be one of the
 // constants defined in this package. Where must be called for the first condition. Calling it
 // twice would remove all the previously registered conditions with And and Or.
-func (q Query) Where(tag, comparison, value string) Query {
+func (q *Query) Where(tag, comparison, value string) *Query {
 	q.conditions = &condition{
 		tag:        tag,
 		comparison: comparison,
@@ -101,7 +101,7 @@ func (q Query) Where(tag, comparison, value string) Query {
 	return q
 }
 
-func (q Query) addCondition(operator string, condition *condition) Query {
+func (q *Query) addCondition(operator string, condition *condition) *Query {
 	if q.conditions == nil {
 		q.conditions = condition
 	} else {
@@ -118,7 +118,7 @@ func (q Query) addCondition(operator string, condition *condition) Query {
 }
 
 // And add a condition to the query separated from the previous with AND.
-func (q Query) And(tag, comparison, value string) Query {
+func (q *Query) And(tag, comparison, value string) *Query {
 	return q.addCondition("AND", &condition{
 		tag:        tag,
 		comparison: comparison,
@@ -128,7 +128,7 @@ func (q Query) And(tag, comparison, value string) Query {
 }
 
 // Or add a condition to the query separated from the previous with OR.
-func (q Query) Or(tag, comparison, value string) Query {
+func (q *Query) Or(tag, comparison, value string) *Query {
 	return q.addCondition("OR", &condition{
 		tag:        tag,
 		comparison: comparison,
@@ -140,21 +140,21 @@ func (q Query) Or(tag, comparison, value string) Query {
 // Limit sets the limit of the current query. Calling it twice will take the latest limit
 // provided.
 // It limits the number of points returned by the query.
-func (q Query) Limit(limit int) Query {
+func (q *Query) Limit(limit int) *Query {
 	q.limit = limit
 	return q
 }
 
 // GroupByTime groups query results by a time interval. Calling it twice will take the latest
 // duration provided.
-func (q Query) GroupByTime(duration time.Duration) Query {
+func (q *Query) GroupByTime(duration time.Duration) *Query {
 	q.groupByTime = duration.String()
 	return q
 }
 
 // GroupByTag groups query results by a user-specified set of tags. Every call to this method adds
 // the given slice of tags to the existing set of tags.
-func (q Query) GroupByTag(tag ...string) Query {
+func (q *Query) GroupByTag(tag ...string) *Query {
 	q.groupByTag = append(q.groupByTag, tag...)
 	return q
 }
@@ -162,13 +162,13 @@ func (q Query) GroupByTag(tag ...string) Query {
 // Fill sets the fill behaviour of the current query. Calling it twice will take the latest fill
 // provided.
 // It changes the value reported for time intervals that have no data.
-func (q Query) Fill(value string) Query {
+func (q *Query) Fill(value string) *Query {
 	q.groupByFill = value
 	return q
 }
 
 // Build constructs the InfluxQL query in a string form.
-func (q Query) Build() string {
+func (q *Query) Build() string {
 	query := "SELECT"
 
 	for i, f := range q.fields {
