@@ -13,16 +13,16 @@
 //    	query := influx.NewQuery()
 //
 //    	query = query.Where("time", influx.LessThan, "now() - 1m").And("time", influx.MoreThan, "now() - 5m")
-//    	query = query.And("application_id", influx.Equal, fmt.Sprintf("'%s'", a.AppID))
+//    	query = query.And("application_id", influx.Equal, influx.String(a.AppID))
 //    	query = query.GroupByTime(5*time.Minute).Fill(influx.None).OrderBy("time", "DESC").Limit(1)
 //
 //    	if a.IsRouterMetric() {
 //    		query = query.On("router").Field("value", "mean")
 //    		if a.Metric == metric.MetricRouterP95ResponseTime {
-//    			query = query.And("type", influx.Equal, "'p95'")
+//    			query = query.And("type", influx.Equal, influx.String("p95"))
 //    		}
 //    	} else {
-//    		query.And("container_type", influx.Equal, fmt.Sprintf("'%s'", a.ContainerType))
+//    		query.And("container_type", influx.Equal, influx.String(a.ContainerType))
 //    		query = query.On(a.Metric).Field("value", "mean").Field("limit", "last")
 //    		query = query.GroupByTag("container_type").GroupByTag("container_index")
 //    	}

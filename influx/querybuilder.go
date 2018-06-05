@@ -62,6 +62,12 @@ func NewQuery() Query {
 	}
 }
 
+// String returns the parameter surround with single quote. You should use this method when
+// dealing with values of conditions (third parameter of Where, And and Or methods).
+func String(param string) string {
+	return fmt.Sprintf("'%s'", param)
+}
+
 // On sets the measurement of the current query. Calling it twice will take the latest measurement
 // provided.
 func (q Query) On(measurement string) Query {
@@ -91,6 +97,9 @@ func (q Query) OrderByTime(direction string) Query {
 // Where adds a condition on tag to the query. The comparison argument must be one of the
 // constants defined in this package. Where must be called for the first condition. Calling it
 // twice would remove all the previously registered conditions with And and Or.
+//
+// The value parameter must be surrounded with single quote if it does not represent a number. You
+// can use the influx.String method to add these.
 func (q Query) Where(tag, comparison, value string) Query {
 	q.conditions = &condition{
 		tag:        tag,
@@ -118,6 +127,9 @@ func (q Query) addCondition(operator string, condition *condition) Query {
 }
 
 // And add a condition to the query separated from the previous with AND.
+//
+// The value parameter must be surrounded with single quote if it does not represent a number. You
+// can use the influx.String method to add these.
 func (q Query) And(tag, comparison, value string) Query {
 	return q.addCondition("AND", &condition{
 		tag:        tag,
@@ -128,6 +140,9 @@ func (q Query) And(tag, comparison, value string) Query {
 }
 
 // Or add a condition to the query separated from the previous with OR.
+//
+// The value parameter must be surrounded with single quote if it does not represent a number. You
+// can use the influx.String method to add these.
 func (q Query) Or(tag, comparison, value string) Query {
 	return q.addCondition("OR", &condition{
 		tag:        tag,
