@@ -97,3 +97,9 @@ func TestQueryBuilder(t *testing.T) {
 		})
 	}
 }
+
+func TestString(t *testing.T) {
+	t.Run("it should add surrounding single quotes around the parameter", func(t *testing.T) {
+		assert.Equal(t, "'biniou'", String("biniou"))
+	})
+}
