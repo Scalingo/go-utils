@@ -27,7 +27,7 @@ const (
 // Query is the main structure for the query builder. All methods apply to it.
 type Query struct {
 	measurement    string
-	conditions     *condition
+	conditions     condition
 	fields         []field
 	groupByTime    string
 	groupByTag     []string
@@ -50,15 +50,14 @@ type field struct {
 
 type conditionOperator struct {
 	operator  string
-	condition *condition
+	condition condition
 }
 
 // NewQuery makes a new Query object. You MUST use this method to instantiate a new Query
 // structure.
 func NewQuery() Query {
 	return Query{
-		conditions: nil,
-		limit:      -1,
+		limit: -1,
 	}
 }
 
@@ -101,7 +100,7 @@ func (q Query) OrderByTime(direction string) Query {
 // The value parameter must be surrounded with single quote if it does not represent a number. You
 // can use the influx.String method to add these.
 func (q Query) Where(tag, comparison, value string) Query {
-	q.conditions = &condition{
+	q.conditions = condition{
 		tag:        tag,
 		comparison: comparison,
 		value:      value,
@@ -110,17 +109,17 @@ func (q Query) Where(tag, comparison, value string) Query {
 	return q
 }
 
-func (q Query) addCondition(operator string, condition *condition) Query {
-	if q.conditions == nil {
-		q.conditions = condition
+func (q Query) addCondition(operator string, c condition) Query {
+	if q.conditions == (condition{}) {
+		q.conditions = c
 	} else {
-		c := q.conditions
-		for c.next != nil {
-			c = c.next.condition
+		lastCondition := &q.conditions
+		for lastCondition.next != nil {
+			lastCondition = &c.next.condition
 		}
-		c.next = &conditionOperator{
+		lastCondition.next = &conditionOperator{
 			operator:  operator,
-			condition: condition,
+			condition: c,
 		}
 	}
 	return q
@@ -131,7 +130,7 @@ func (q Query) addCondition(operator string, condition *condition) Query {
 // The value parameter must be surrounded with single quote if it does not represent a number. You
 // can use the influx.String method to add these.
 func (q Query) And(tag, comparison, value string) Query {
-	return q.addCondition("AND", &condition{
+	return q.addCondition("AND", condition{
 		tag:        tag,
 		comparison: comparison,
 		value:      value,
@@ -144,7 +143,7 @@ func (q Query) And(tag, comparison, value string) Query {
 // The value parameter must be surrounded with single quote if it does not represent a number. You
 // can use the influx.String method to add these.
 func (q Query) Or(tag, comparison, value string) Query {
-	return q.addCondition("OR", &condition{
+	return q.addCondition("OR", condition{
 		tag:        tag,
 		comparison: comparison,
 		value:      value,
@@ -194,7 +193,7 @@ func (q Query) Build() string {
 	}
 
 	query += fmt.Sprintf(" FROM %s", q.measurement)
-	if q.conditions != nil {
+	if q.conditions != (condition{}) {
 		query += fmt.Sprintf(" WHERE %s", q.conditions.build())
 	}
 
@@ -227,7 +226,7 @@ func (q Query) Build() string {
 	return query
 }
 
-func (c *condition) build() string {
+func (c condition) build() string {
 	query := fmt.Sprintf("%s %s %s", c.tag, c.comparison, c.value)
 	if c.next != nil {
 		query += fmt.Sprintf(" %s %s", c.next.operator, c.next.condition.build())
