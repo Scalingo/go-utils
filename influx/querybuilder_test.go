@@ -29,7 +29,7 @@ func TestConditionBuilder(t *testing.T) {
 				value:      `"hi"`,
 				next: &conditionOperator{
 					operator: "AND",
-					condition: &condition{
+					condition: condition{
 						tag:        "time",
 						comparison: LessThan,
 						value:      "now() - 3m",
@@ -96,6 +96,16 @@ func TestQueryBuilder(t *testing.T) {
 			assert.Equal(t, example.Expected, example.Query.Build())
 		})
 	}
+
+	t.Run("query builder should be stateless", func(t *testing.T) {
+		query := NewQuery()
+		// Calling all the methods should not modify the receiving object.
+		query.On("serie").Field("f1", "mean").
+			Where("cond1F", Equal, `"value"`).And("cond2F", MoreOrEqual, "time() - 3m").
+			GroupByTag("tag1").GroupByTime(1 * time.Second).Fill(Previous).
+			OrderByTime("DESC").Limit(1)
+		assert.Equal(t, NewQuery().Build(), query.Build())
+	})
 }
 
 func TestString(t *testing.T) {
