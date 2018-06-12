@@ -4,13 +4,16 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"time"
 
+	"github.com/Scalingo/go-utils/nsqproducer"
 	nsq "github.com/nsqio/go-nsq"
 	errgo "gopkg.in/errgo.v1"
 )
 
 type NsqLBProducer struct {
-	producers []Producer
+	producers []nsqproducer.Producer
+	randSrc   randSource
 }
 
 type Host struct {
@@ -24,16 +27,20 @@ type LBProducerOpts struct {
 	SkipLogSet map[string]bool
 }
 
-func NewLB(opts LBProducerOpts) (*NsqLBProducer, error) {
+type randSource interface {
+	Int() int
+}
+
+func New(opts LBProducerOpts) (*NsqLBProducer, error) {
 	if len(opts.Hosts) == 0 {
 		return nil, fmt.Errorf("A producer must have at least one host")
 	}
 	producer := &NsqLBProducer{
-		producers: make([]Producer, len(opts.Hosts)),
+		producers: make([]nsqproducer.Producer, len(opts.Hosts)),
 	}
 
 	for i, h := range opts.Hosts {
-		p, err := New(ProducerOpts{
+		p, err := nsqproducer.New(nsqproducer.ProducerOpts{
 			Host:       h.Host,
 			Port:       h.Port,
 			NsqConfig:  opts.NsqConfig,
@@ -47,11 +54,13 @@ func NewLB(opts LBProducerOpts) (*NsqLBProducer, error) {
 		producer.producers[i] = p
 	}
 
+	producer.randSrc = rand.New(rand.NewSource(time.Now().Unix()))
+
 	return producer, nil
 }
 
-func (p *NsqLBProducer) Publish(ctx context.Context, topic string, message NsqMessageSerialize) error {
-	firstProducer := rand.Int() % len(p.producers)
+func (p *NsqLBProducer) Publish(ctx context.Context, topic string, message nsqproducer.NsqMessageSerialize) error {
+	firstProducer := p.randSrc.Int() % len(p.producers)
 
 	var err error
 	for i := 0; i < len(p.producers); i++ {
@@ -64,8 +73,8 @@ func (p *NsqLBProducer) Publish(ctx context.Context, topic string, message NsqMe
 	return errgo.Notef(err, "fail to send message on %v hosts", len(p.producers))
 }
 
-func (p *NsqLBProducer) DeferredPublish(ctx context.Context, topic string, delay int64, message NsqMessageSerialize) error {
-	firstProducer := rand.Int() % len(p.producers)
+func (p *NsqLBProducer) DeferredPublish(ctx context.Context, topic string, delay int64, message nsqproducer.NsqMessageSerialize) error {
+	firstProducer := p.randSrc.Int() % len(p.producers)
 
 	var err error
 
