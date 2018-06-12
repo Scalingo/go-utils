@@ -1,4 +1,4 @@
-package nsqproducer
+package nsqlbproducer
 
 import (
 	"context"
