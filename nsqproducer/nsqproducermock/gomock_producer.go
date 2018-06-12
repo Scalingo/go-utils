@@ -57,3 +57,13 @@ func (m *MockProducer) Publish(arg0 context.Context, arg1 string, arg2 nsqproduc
 func (mr *MockProducerMockRecorder) Publish(arg0, arg1, arg2 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Publish", reflect.TypeOf((*MockProducer)(nil).Publish), arg0, arg1, arg2)
 }
+
+// Stop mocks base method
+func (m *MockProducer) Stop() {
+	m.ctrl.Call(m, "Stop")
+}
+
+// Stop indicates an expected call of Stop
+func (mr *MockProducerMockRecorder) Stop() *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Stop", reflect.TypeOf((*MockProducer)(nil).Stop))
+}
