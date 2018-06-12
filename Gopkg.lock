@@ -68,6 +68,12 @@
   revision = "3de563c3dc08a7504131e9d63f678b7d1c3e85d7"
 
 [[projects]]
+  name = "github.com/influxdata/influxdb"
+  packages = ["client/v2","models","pkg/escape"]
+  revision = "89e084a80fb1e0bf5e7d38038e3367f821fdf3d7"
+  version = "v1.5.3"
+
+[[projects]]
   name = "github.com/nsqio/go-nsq"
   packages = ["."]
   revision = "eee57a3ac4174c55924125bb15eeeda8cffb6e6f"
@@ -160,6 +166,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6dbc3bf3a5af008ad292f46129958f80a7eaa47c45c1928899791a9cd7b4dda8"
+  inputs-digest = "78111ce4fdb65067536d93899f7d994ee53073ae359874bd1ea96215bcae4610"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -16,6 +16,7 @@ import (
 type Producer interface {
 	Publish(ctx context.Context, topic string, message NsqMessageSerialize) error
 	DeferredPublish(ctx context.Context, topic string, delay int64, message NsqMessageSerialize) error
+	Stop()
 }
 
 type NsqProducer struct {
