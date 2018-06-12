@@ -101,7 +101,7 @@ func runPublishExample(t *testing.T, example example, deferred bool) {
 	}
 
 	producer := &NsqLBProducer{
-		producers: []nsqproducer.Producer{p1, p2},
+		producers: []producer{{producer: p1, host: Host{}}, {producer: p2, host: Host{}}},
 		randSrc:   &mockedRandSource{current: 0, values: example.RandOrder},
 	}
 
