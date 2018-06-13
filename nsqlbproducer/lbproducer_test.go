@@ -23,7 +23,7 @@ func (m *mockedRandSource) Int() int {
 }
 
 type example struct {
-	LBProducer   func([]nsqproducer.Producer) *NsqLBProducer
+	LBProducer   func([]producer) *NsqLBProducer
 	ExpectP1Call bool
 	ExpectP2Call bool
 	P1Error      error
@@ -32,7 +32,7 @@ type example struct {
 	RandInt      func() int
 }
 
-func randLBProducer(order []int) func(producers []nsqproducer.Producer) *NsqLBProducer {
+func randLBProducer(order []int) func(producers []producer) *NsqLBProducer {
 	return func(producers []nsqproducer.Producer) *NsqLBProducer {
 		return &NsqLBProducer{
 			producers: producers,
@@ -68,7 +68,7 @@ func TestLBPublish(t *testing.T) {
 			ExpectError:  true,
 		},
 		"when using the fallback mode, the first node ": {
-			LBProducer: func(producers []nsqproducer.Producer) *NsqLBProducer {
+			LBProducer: func(producers []producer) *NsqLBProducer {
 				return &NsqLBProducer{
 					producers: producers,
 					randInt:   alwaysZero,
@@ -79,7 +79,7 @@ func TestLBPublish(t *testing.T) {
 			P1Error:      nil,
 		},
 		"when using the fallback mode and the firs node is failing, it should call the second one": {
-			LBProducer: func(producers []nsqproducer.Producer) *NsqLBProducer {
+			LBProducer: func(producers []producer) *NsqLBProducer {
 				return &NsqLBProducer{
 					producers: producers,
 					randInt:   alwaysZero,
@@ -132,7 +132,7 @@ func runPublishExample(t *testing.T, example example, deferred bool) {
 		}
 	}
 
-	producer := example.LBProducer([]nsqproducer.Producer{p1, p2})
+	producer := example.LBProducer([]producer{{producer: p1, host: Host{}}, {producer: p2, host: Host{}}})
 
 	var err error
 	if deferred {
