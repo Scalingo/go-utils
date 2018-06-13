@@ -87,10 +87,11 @@ func (p *NsqLBProducer) Publish(ctx context.Context, topic string, message nsqpr
 	for i := 0; i < len(p.producers); i++ {
 		producer := p.producers[(i+firstProducer)%len(p.producers)]
 		err = producer.producer.Publish(ctx, topic, message)
-		if err == nil {
+		if err != nil {
 			if p.logger != nil {
 				p.logger.WithError(err).WithField("host", producer.host.String()).Error("fail to send nsq message to one nsq node")
 			}
+		} else {
 			return nil
 		}
 	}
@@ -105,10 +106,11 @@ func (p *NsqLBProducer) DeferredPublish(ctx context.Context, topic string, delay
 	for i := 0; i < len(p.producers); i++ {
 		producer := p.producers[(i+firstProducer)%len(p.producers)]
 		err = producer.producer.DeferredPublish(ctx, topic, delay, message)
-		if err == nil {
+		if err != nil {
 			if p.logger != nil {
 				p.logger.WithError(err).WithField("host", producer.host.String()).Error("fail to send nsq message to one nsq node")
 			}
+		} else {
 			return nil
 		}
 	}
