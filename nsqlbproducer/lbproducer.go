@@ -11,9 +11,17 @@ import (
 	errgo "gopkg.in/errgo.v1"
 )
 
+type LBStrategy int
+
+const (
+	RandomStrategy LBStrategy = iota
+	FallbackStrategy
+)
+
 type NsqLBProducer struct {
 	producers []nsqproducer.Producer
-	randSrc   randSource
+	randInt   func() int
+	strategy  LBStrategy
 }
 
 type Host struct {
@@ -25,10 +33,7 @@ type LBProducerOpts struct {
 	Hosts      []Host
 	NsqConfig  *nsq.Config
 	SkipLogSet map[string]bool
-}
-
-type randSource interface {
-	Int() int
+	Strategy   LBStrategy
 }
 
 func New(opts LBProducerOpts) (*NsqLBProducer, error) {
@@ -37,6 +42,7 @@ func New(opts LBProducerOpts) (*NsqLBProducer, error) {
 	}
 	producer := &NsqLBProducer{
 		producers: make([]nsqproducer.Producer, len(opts.Hosts)),
+		strategy:  opts.Strategy,
 	}
 
 	for i, h := range opts.Hosts {
@@ -54,13 +60,24 @@ func New(opts LBProducerOpts) (*NsqLBProducer, error) {
 		producer.producers[i] = p
 	}
 
-	producer.randSrc = rand.New(rand.NewSource(time.Now().Unix()))
+	switch producer.strategy {
+	case FallbackStrategy:
+		producer.randInt = alwaysZero
+	case RandomStrategy:
+		fallthrough
+	default:
+		producer.randInt = rand.New(rand.NewSource(time.Now().Unix())).Int
+	}
 
 	return producer, nil
 }
 
+func alwaysZero() int {
+	return 0
+}
+
 func (p *NsqLBProducer) Publish(ctx context.Context, topic string, message nsqproducer.NsqMessageSerialize) error {
-	firstProducer := p.randSrc.Int() % len(p.producers)
+	firstProducer := p.randInt() % len(p.producers)
 
 	var err error
 	for i := 0; i < len(p.producers); i++ {
@@ -74,7 +91,7 @@ func (p *NsqLBProducer) Publish(ctx context.Context, topic string, message nsqpr
 }
 
 func (p *NsqLBProducer) DeferredPublish(ctx context.Context, topic string, delay int64, message nsqproducer.NsqMessageSerialize) error {
-	firstProducer := p.randSrc.Int() % len(p.producers)
+	firstProducer := p.randInt() % len(p.producers)
 
 	var err error
 

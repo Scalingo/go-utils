@@ -23,18 +23,28 @@ func (m *mockedRandSource) Int() int {
 }
 
 type example struct {
-	RandOrder    []int
+	LBProducer   func([]nsqproducer.Producer) *NsqLBProducer
 	ExpectP1Call bool
 	ExpectP2Call bool
 	P1Error      error
 	P2Error      error
 	ExpectError  bool
+	RandInt      func() int
+}
+
+func randLBProducer(order []int) func(producers []nsqproducer.Producer) *NsqLBProducer {
+	return func(producers []nsqproducer.Producer) *NsqLBProducer {
+		return &NsqLBProducer{
+			producers: producers,
+			randInt:   (&mockedRandSource{current: 0, values: order}).Int,
+		}
+	}
 }
 
 func TestLBPublish(t *testing.T) {
 	examples := map[string]example{
 		"when all host works": {
-			RandOrder:    []int{1},
+			LBProducer:   randLBProducer([]int{1}),
 			ExpectP1Call: false,
 			ExpectP2Call: true,
 			P1Error:      nil,
@@ -42,7 +52,7 @@ func TestLBPublish(t *testing.T) {
 			ExpectError:  false,
 		},
 		"when a	single host is down": {
-			RandOrder:    []int{1, 0},
+			LBProducer:   randLBProducer([]int{1, 0}),
 			ExpectP1Call: true,
 			ExpectP2Call: true,
 			P1Error:      nil,
@@ -50,12 +60,34 @@ func TestLBPublish(t *testing.T) {
 			ExpectError:  false,
 		},
 		"when all hosts are down": {
-			RandOrder:    []int{1, 0},
+			LBProducer:   randLBProducer([]int{1, 0}),
 			ExpectP1Call: true,
 			ExpectP2Call: true,
 			P1Error:      errors.New("NOP"),
 			P2Error:      errors.New("NOP"),
 			ExpectError:  true,
+		},
+		"when using the fallback mode, the first node ": {
+			LBProducer: func(producers []nsqproducer.Producer) *NsqLBProducer {
+				return &NsqLBProducer{
+					producers: producers,
+					randInt:   alwaysZero,
+				}
+			},
+			ExpectP1Call: true,
+			ExpectP2Call: false,
+			P1Error:      nil,
+		},
+		"when using the fallback mode and the firs node is failing, it should call the second one": {
+			LBProducer: func(producers []nsqproducer.Producer) *NsqLBProducer {
+				return &NsqLBProducer{
+					producers: producers,
+					randInt:   alwaysZero,
+				}
+			},
+			ExpectP1Call: true,
+			ExpectP2Call: true,
+			P1Error:      errors.New("FAIL"),
 		},
 	}
 
@@ -100,17 +132,13 @@ func runPublishExample(t *testing.T, example example, deferred bool) {
 		}
 	}
 
-	producer := &NsqLBProducer{
-		producers: []nsqproducer.Producer{p1, p2},
-		randSrc:   &mockedRandSource{current: 0, values: example.RandOrder},
-	}
+	producer := example.LBProducer([]nsqproducer.Producer{p1, p2})
 
 	var err error
 	if deferred {
 		err = producer.DeferredPublish(ctx, topic, delay, message)
 	} else {
 		err = producer.Publish(ctx, topic, message)
-
 	}
 
 	if example.ExpectError {
@@ -118,5 +146,4 @@ func runPublishExample(t *testing.T, example example, deferred bool) {
 	} else {
 		assert.NoError(t, err)
 	}
-
 }
