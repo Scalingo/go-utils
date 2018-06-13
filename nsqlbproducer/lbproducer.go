@@ -13,11 +13,19 @@ import (
 	errgo "gopkg.in/errgo.v1"
 )
 
+type LBStrategy int
+
+const (
+	RandomStrategy LBStrategy = iota
+	FallbackStrategy
+)
+
 // NsqLBProducer a producer that distribute nsq messages across a set of node
 // if a node send an error when receiving the message it will try with another node of the set
 type NsqLBProducer struct {
 	producers []producer
-	randSrc   randSource
+	randInt   func() int
+	strategy  LBStrategy
 	logger    logrus.FieldLogger
 }
 
@@ -40,10 +48,7 @@ type LBProducerOpts struct {
 	NsqConfig  *nsq.Config
 	Logger     logrus.FieldLogger
 	SkipLogSet map[string]bool
-}
-
-type randSource interface {
-	Int() int
+	Strategy   LBStrategy
 }
 
 var _ nsqproducer.Producer = &NsqLBProducer{} // Ensure that NsqLBProducer implements the Producer interface
@@ -54,6 +59,7 @@ func New(opts LBProducerOpts) (*NsqLBProducer, error) {
 	}
 	lbproducer := &NsqLBProducer{
 		producers: make([]producer, len(opts.Hosts)),
+		strategy:  opts.Strategy,
 	}
 
 	for i, h := range opts.Hosts {
@@ -74,14 +80,25 @@ func New(opts LBProducerOpts) (*NsqLBProducer, error) {
 		}
 	}
 
-	lbproducer.randSrc = rand.New(rand.NewSource(time.Now().Unix()))
+	switch lbproducer.strategy {
+	case FallbackStrategy:
+		lbproducer.randInt = alwaysZero
+	case RandomStrategy:
+		fallthrough
+	default:
+		lbproducer.randInt = rand.New(rand.NewSource(time.Now().Unix())).Int
+	}
 	lbproducer.logger = opts.Logger
 
 	return lbproducer, nil
 }
 
+func alwaysZero() int {
+	return 0
+}
+
 func (p *NsqLBProducer) Publish(ctx context.Context, topic string, message nsqproducer.NsqMessageSerialize) error {
-	firstProducer := p.randSrc.Int() % len(p.producers)
+	firstProducer := p.randInt() % len(p.producers)
 
 	var err error
 	for i := 0; i < len(p.producers); i++ {
@@ -100,7 +117,7 @@ func (p *NsqLBProducer) Publish(ctx context.Context, topic string, message nsqpr
 }
 
 func (p *NsqLBProducer) DeferredPublish(ctx context.Context, topic string, delay int64, message nsqproducer.NsqMessageSerialize) error {
-	firstProducer := p.randSrc.Int() % len(p.producers)
+	firstProducer := p.randInt() % len(p.producers)
 
 	var err error
 	for i := 0; i < len(p.producers); i++ {
