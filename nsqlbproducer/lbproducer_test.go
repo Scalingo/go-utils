@@ -33,7 +33,7 @@ type example struct {
 }
 
 func randLBProducer(order []int) func(producers []producer) *NsqLBProducer {
-	return func(producers []nsqproducer.Producer) *NsqLBProducer {
+	return func(producers []producer) *NsqLBProducer {
 		return &NsqLBProducer{
 			producers: producers,
 			randInt:   (&mockedRandSource{current: 0, values: order}).Int,
