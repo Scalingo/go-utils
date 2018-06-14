@@ -1,5 +1,12 @@
 # Changelog
 
+## v4.2.0 (Jun 14 2018)
+
+* New package `nsqlbproducer` to produce among multiple nsqd instances
+  Several strategies:
+  * Random (default)
+  * Fallback: always produce on the first host of the list, and fallback on other if it fails
+
 ## v4.0.0 (Mar 13 2018)
 
 * `mongo/document` Add SortFields on all Find/Where methods
