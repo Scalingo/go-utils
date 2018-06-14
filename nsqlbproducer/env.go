@@ -9,16 +9,14 @@ import (
 
 func FromEnv() (*NsqLBProducer, error) {
 	E := env.InitMapFromEnv(map[string]string{
-		"NSQD_TLS":        "false",
-		"NSQD_TLS_CACERT": "",
-		"NSQD_TLS_CERT":   "",
-		"NSQD_TLS_KEY":    "",
-
-		"NSQLOOKUPD_URLS": "localhost:4161",
-
-		"NSQD_HOSTS": "localhost:4150",
-
-		"NSQ_MAX_IN_FLIGHT": "20",
+		"NSQD_TLS":              "false",
+		"NSQD_TLS_CACERT":       "",
+		"NSQD_TLS_CERT":         "",
+		"NSQD_TLS_KEY":          "",
+		"NSQLOOKUPD_URLS":       "localhost:4161",
+		"NSQD_HOSTS":            "localhost:4150",
+		"NSQ_MAX_IN_FLIGHT":     "20",
+		"NSQ_PRODUCER_STRATEGY": "fallback",
 	})
 
 	var hosts []Host
@@ -38,5 +36,6 @@ func FromEnv() (*NsqLBProducer, error) {
 	return New(LBProducerOpts{
 		Hosts:     hosts,
 		NsqConfig: nsqConfig,
+		Strategy:  StrategiesFromName[E["NSQ_PRODUCER_STRATEGY"]],
 	})
 }

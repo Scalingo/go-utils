@@ -1,5 +1,9 @@
 # Changelog
 
+## v4.2.3 (Jun 14 2018)
+
+* Add ability to choose nsq producing strategy from env NSQ_PRODUCER_STRATEGY 'fallback' or 'random', default is 'fallback'
+
 ## v4.2.2 (Jun 14 2018)
 
 * New package `nsqlbproducer` to produce among multiple nsqd instances

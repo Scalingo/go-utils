@@ -16,8 +16,16 @@ import (
 type LBStrategy int
 
 const (
-	RandomStrategy LBStrategy = iota
-	FallbackStrategy
+	FallbackStrategy LBStrategy = iota
+	RandomStrategy
+)
+
+var (
+	StrategiesFromName = map[string]LBStrategy{
+		"":         FallbackStrategy,
+		"fallback": FallbackStrategy,
+		"random":   RandomStrategy,
+	}
 )
 
 // NsqLBProducer a producer that distribute nsq messages across a set of node
