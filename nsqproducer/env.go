@@ -4,8 +4,8 @@ import (
 	"strconv"
 
 	"github.com/Scalingo/go-utils/env"
-	"github.com/juju/errgo/errors"
 	nsq "github.com/nsqio/go-nsq"
+	"github.com/pkg/errors"
 )
 
 func FromEnv() (*NsqProducer, error) {
@@ -47,7 +47,7 @@ func NsqConfigFromEnv(E map[string]string) (*nsq.Config, error) {
 
 	max_in_flight, err := strconv.Atoi(E["NSQ_MAX_IN_FLIGHT"])
 	if err != nil {
-		return nil, errors.Notef(err, "invalid max in flight: %s", E["NSQ_MAX_IN_FLIGHT"])
+		return nil, errors.Wrapf(err, "invalid max in flight: %s", E["NSQ_MAX_IN_FLIGHT"])
 	}
 
 	nsqConfig.Set("max_in_flight", max_in_flight)
