@@ -1,6 +1,6 @@
 # Changelog
 
-## v4.2.0 (Jun 14 2018)
+## v4.2.1 (Jun 14 2018)
 
 * New package `nsqlbproducer` to produce among multiple nsqd instances
   Several strategies:
