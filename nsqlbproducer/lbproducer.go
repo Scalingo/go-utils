@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/Scalingo/go-utils/nsqproducer"
-	"github.com/juju/errgo/errors"
 	nsq "github.com/nsqio/go-nsq"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	errgo "gopkg.in/errgo.v1"
 )
@@ -71,7 +71,7 @@ func New(opts LBProducerOpts) (*NsqLBProducer, error) {
 		})
 
 		if err != nil {
-			return nil, errors.Notef(err, "fail to create producer for host: %s:%s", h.Host, h.Port)
+			return nil, errors.Wrapf(err, "fail to create producer for host: %s:%s", h.Host, h.Port)
 		}
 
 		lbproducer.producers[i] = producer{
