@@ -45,12 +45,12 @@ func NsqConfigFromEnv(E map[string]string) (*nsq.Config, error) {
 		nsqConfig.Set("tls_key", E["NSQD_TLS_KEY"])
 	}
 
-	max_in_flight, err := strconv.Atoi(E["NSQ_MAX_IN_FLIGHT"])
+	maxInFlight, err := strconv.Atoi(E["NSQ_MAX_IN_FLIGHT"])
 	if err != nil {
 		return nil, errors.Wrapf(err, "invalid max in flight: %s", E["NSQ_MAX_IN_FLIGHT"])
 	}
 
-	nsqConfig.Set("max_in_flight", max_in_flight)
+	nsqConfig.Set("max_in_flight", maxInFlight)
 
 	return nsqConfig, nil
 }
