@@ -115,7 +115,7 @@ func (q Query) addCondition(operator string, c condition) Query {
 	} else {
 		lastCondition := &q.conditions
 		for lastCondition.next != nil {
-			lastCondition = &c.next.condition
+			lastCondition = &lastCondition.next.condition
 		}
 		lastCondition.next = &conditionOperator{
 			operator:  operator,

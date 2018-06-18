@@ -66,6 +66,10 @@ func TestQueryBuilder(t *testing.T) {
 			Query:    NewQuery().On("serie").Field("test", "mean").Where("cond1F", Equal, `"value"`).And("cond2F", MoreOrEqual, "time() - 3m"),
 			Expected: `SELECT mean("test") AS "test" FROM serie WHERE cond1F = "value" AND cond2F >= time() - 3m`,
 		}, {
+			Name:     "with an even more complex condition",
+			Query:    NewQuery().On("serie").Field("test", "mean").Where("cond1F", Equal, `"value"`).And("cond2F", MoreOrEqual, "time() - 3m").And("cond3F", Equal, "'app_id'"),
+			Expected: `SELECT mean("test") AS "test" FROM serie WHERE cond1F = "value" AND cond2F >= time() - 3m AND cond3F = 'app_id'`,
+		}, {
 			Name:     "with a group by tag",
 			Query:    NewQuery().On("serie").Field("f1", "last").GroupByTag("tag1"),
 			Expected: `SELECT last("f1") AS "f1" FROM serie GROUP BY tag1`,
