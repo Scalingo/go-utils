@@ -5,9 +5,14 @@ import (
 
 	"github.com/Scalingo/go-utils/env"
 	"github.com/Scalingo/go-utils/nsqproducer"
+	"github.com/sirupsen/logrus"
 )
 
-func FromEnv() (*NsqLBProducer, error) {
+type FromEnvOpts struct {
+	Logger logrus.FieldLogger
+}
+
+func FromEnv(opts FromEnvOpts) (*NsqLBProducer, error) {
 	E := env.InitMapFromEnv(map[string]string{
 		"NSQD_TLS":              "false",
 		"NSQD_TLS_CACERT":       "",
@@ -37,5 +42,6 @@ func FromEnv() (*NsqLBProducer, error) {
 		Hosts:     hosts,
 		NsqConfig: nsqConfig,
 		Strategy:  StrategiesFromName[E["NSQ_PRODUCER_STRATEGY"]],
+		Logger:    opts.Logger,
 	})
 }
