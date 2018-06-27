@@ -9,15 +9,15 @@ import (
 
 type Paranoid struct {
 	Base      `bson:",inline"`
-	DeletedAt time.Time `bson:"deleted_at,omitempty" json:"deleted_at,omitempty"`
+	DeletedAt *time.Time `bson:"deleted_at,omitempty" json:"deleted_at,omitempty"`
 }
 
 func (p Paranoid) IsDeleted() bool {
-	return !p.DeletedAt.IsZero()
+	return p.DeletedAt != nil
 }
 
 func (d *Paranoid) setDeletedAt(t time.Time) {
-	d.DeletedAt = t
+	d.DeletedAt = &t
 }
 
 func (d Paranoid) scope(query bson.M) bson.M {
