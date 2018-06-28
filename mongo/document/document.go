@@ -117,17 +117,18 @@ func find(ctx context.Context, collectionName string, query bson.M, doc interfac
 	return c.Find(query).Sort(fields...).One(doc)
 }
 
-func Where(ctx context.Context, collectionName string, query bson.M, data interface{}, sortFields ...SortField) error {
+func WhereQuery(ctx context.Context, collectionName string, query bson.M, sortFields ...SortField) *mgo.Query {
 	if query == nil {
 		query = bson.M{}
 	}
 	if _, ok := query["deleted_at"]; !ok {
 		query["deleted_at"] = nil
 	}
-	return WhereUnscoped(ctx, collectionName, query, data, sortFields...)
+
+	return WhereUnscopedQuery(ctx, collectionName, query, sortFields...)
 }
 
-func WhereUnscoped(ctx context.Context, collectionName string, query bson.M, data interface{}, sortFields ...SortField) error {
+func WhereUnscopedQuery(ctx context.Context, collectionName string, query bson.M, sortFields ...SortField) *mgo.Query {
 	log := logger.Get(ctx)
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
@@ -140,7 +141,21 @@ func WhereUnscoped(ctx context.Context, collectionName string, query bson.M, dat
 	for i, f := range sortFields {
 		fields[i] = string(f)
 	}
-	err := c.Find(query).Sort(fields...).All(data)
+	return c.Find(query).Sort(fields...)
+}
+
+func Where(ctx context.Context, collectionName string, query bson.M, data interface{}, sortFields ...SortField) error {
+	mongoQuery := WhereQuery(ctx, collectionName, query, sortFields...)
+	err := mongoQuery.All(data)
+	if err != nil {
+		return fmt.Errorf("fail to query mongo %v: %v", query, err)
+	}
+	return nil
+}
+
+func WhereUnscoped(ctx context.Context, collectionName string, query bson.M, data interface{}, sortFields ...SortField) error {
+	mongoQuery := WhereUnscopedQuery(ctx, collectionName, query, sortFields...)
+	err := mongoQuery.All(data)
 	if err != nil {
 		return fmt.Errorf("fail to query mongo %v: %v", query, err)
 	}
