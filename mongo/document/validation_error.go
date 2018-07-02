@@ -8,6 +8,9 @@ type ValidationErrors struct {
 }
 
 func (v *ValidationErrors) Error() string {
+	if v == nil {
+		return "empty validation error"
+	}
 	var buffer bytes.Buffer
 
 	for field, errors := range v.Errors {

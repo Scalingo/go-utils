@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -84,5 +85,11 @@ func TestValidation(t *testing.T) {
 			})
 		}
 	})
+}
 
+func TestValidationErrors_Error(t *testing.T) {
+	t.Run("it should return a specific error message if nil", func(t *testing.T) {
+		var err *ValidationErrors
+		require.Equal(t, "empty validation error", err.Error())
+	})
 }
