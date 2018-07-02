@@ -9,7 +9,7 @@ type ValidationErrors struct {
 
 func (v *ValidationErrors) Error() string {
 	if v == nil {
-		return ""
+		return "empty validation error"
 	}
 	var buffer bytes.Buffer
 
