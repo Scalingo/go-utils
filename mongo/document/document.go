@@ -30,6 +30,10 @@ type destroyable interface {
 	destroy(ctx context.Context, collectionName string) error
 }
 
+type Closer interface {
+	Close()
+}
+
 type Validable interface {
 	Validate(ctx context.Context) *ValidationErrors
 }
@@ -117,20 +121,20 @@ func find(ctx context.Context, collectionName string, query bson.M, doc interfac
 	return c.Find(query).Sort(fields...).One(doc)
 }
 
-func Where(ctx context.Context, collectionName string, query bson.M, data interface{}, sortFields ...SortField) error {
+func WhereQuery(ctx context.Context, collectionName string, query bson.M, sortFields ...SortField) (*mgo.Query, Closer) {
 	if query == nil {
 		query = bson.M{}
 	}
 	if _, ok := query["deleted_at"]; !ok {
 		query["deleted_at"] = nil
 	}
-	return WhereUnscoped(ctx, collectionName, query, data, sortFields...)
+
+	return WhereUnscopedQuery(ctx, collectionName, query, sortFields...)
 }
 
-func WhereUnscoped(ctx context.Context, collectionName string, query bson.M, data interface{}, sortFields ...SortField) error {
+func WhereUnscopedQuery(ctx context.Context, collectionName string, query bson.M, sortFields ...SortField) (*mgo.Query, Closer) {
 	log := logger.Get(ctx)
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
-	defer c.Database.Session.Close()
 
 	if query == nil {
 		query = bson.M{}
@@ -140,7 +144,23 @@ func WhereUnscoped(ctx context.Context, collectionName string, query bson.M, dat
 	for i, f := range sortFields {
 		fields[i] = string(f)
 	}
-	err := c.Find(query).Sort(fields...).All(data)
+	return c.Find(query).Sort(fields...), c.Database.Session
+}
+
+func Where(ctx context.Context, collectionName string, query bson.M, data interface{}, sortFields ...SortField) error {
+	mongoQuery, session := WhereQuery(ctx, collectionName, query, sortFields...)
+	defer session.Close()
+	err := mongoQuery.All(data)
+	if err != nil {
+		return fmt.Errorf("fail to query mongo %v: %v", query, err)
+	}
+	return nil
+}
+
+func WhereUnscoped(ctx context.Context, collectionName string, query bson.M, data interface{}, sortFields ...SortField) error {
+	mongoQuery, session := WhereUnscopedQuery(ctx, collectionName, query, sortFields...)
+	defer session.Close()
+	err := mongoQuery.All(data)
 	if err != nil {
 		return fmt.Errorf("fail to query mongo %v: %v", query, err)
 	}
