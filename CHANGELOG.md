@@ -1,5 +1,9 @@
 # Changelog
 
+## v5.2.0 (Jul 20 2018)
+
+* Add `WhereQuery` in `mongo/document`
+
 ## v4.2.3 (Jun 14 2018)
 
 * Add ability to choose nsq producing strategy from env NSQ_PRODUCER_STRATEGY 'fallback' or 'random', default is 'fallback'
