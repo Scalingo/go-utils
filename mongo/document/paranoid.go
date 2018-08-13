@@ -12,7 +12,7 @@ type Paranoid struct {
 	DeletedAt *time.Time `bson:"deleted_at,omitempty" json:"deleted_at,omitempty"`
 }
 
-func (p Paranoid) IsDeleted() bool {
+func (p *Paranoid) IsDeleted() bool {
 	return p.DeletedAt != nil && !p.DeletedAt.IsZero()
 }
 
@@ -20,7 +20,7 @@ func (d *Paranoid) setDeletedAt(t time.Time) {
 	d.DeletedAt = &t
 }
 
-func (d Paranoid) scope(query bson.M) bson.M {
+func (d *Paranoid) scope(query bson.M) bson.M {
 	if _, ok := query["deleted_at"]; !ok {
 		query["deleted_at"] = nil
 	}
