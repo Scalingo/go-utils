@@ -20,7 +20,7 @@ func (d *Paranoid) setDeletedAt(t time.Time) {
 	d.DeletedAt = &t
 }
 
-func (d *Paranoid) scope(query bson.M) bson.M {
+func (d Paranoid) scope(query bson.M) bson.M {
 	if _, ok := query["deleted_at"]; !ok {
 		query["deleted_at"] = nil
 	}

@@ -31,8 +31,8 @@ type scopable interface {
 	scope(bson.M) bson.M
 }
 
-var _ scopable = &Base{}
-var _ scopable = &Paranoid{}
+var _ scopable = Base{}
+var _ scopable = Paranoid{}
 
 type destroyable interface {
 	destroy(ctx context.Context, collectionName string) error
@@ -49,7 +49,7 @@ type Validable interface {
 	Validate(ctx context.Context) *ValidationErrors
 }
 
-var _ Validable = &Base{}
+var _ Validable = Base{}
 
 // Create inser the document in the database, returns an error if document already exists and set CreatedAt timestamp
 func Create(ctx context.Context, collectionName string, doc document) error {
@@ -236,24 +236,22 @@ func Update(ctx context.Context, collectionName string, update bson.M, doc docum
 }
 
 func EnsureParanoidIndices(ctx context.Context, collectionNames ...string) {
-	go func() {
-		log := logger.Get(ctx)
+	log := logger.Get(ctx)
 
-		for _, collectionName := range collectionNames {
-			log := logger.Get(ctx).WithFields(logrus.Fields{
-				"init":       "setup-indices",
-				"collection": collectionName,
-			})
-			ctx := logger.ToCtx(ctx, log)
-			log.Info("Setup the MongoDB index")
+	for _, collectionName := range collectionNames {
+		log = logger.Get(ctx).WithFields(logrus.Fields{
+			"init":       "setup-indices",
+			"collection": collectionName,
+		})
+		ctx = logger.ToCtx(ctx, log)
+		log.Info("Setup the MongoDB index")
 
-			c := mongo.Session(log).Clone().DB("").C(collectionName)
-			defer c.Database.Session.Close()
-			err := c.EnsureIndexKey("deleted_at")
-			if err != nil {
-				log.WithError(err).Error("fail to setup the deleted_at index")
-				return
-			}
+		c := mongo.Session(log).Clone().DB("").C(collectionName)
+		defer c.Database.Session.Close()
+		err := c.EnsureIndexKey("deleted_at")
+		if err != nil {
+			log.WithError(err).Error("fail to setup the deleted_at index")
+			continue
 		}
-	}()
+	}
 }

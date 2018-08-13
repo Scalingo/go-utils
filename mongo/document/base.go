@@ -13,7 +13,7 @@ type Base struct {
 	UpdatedAt time.Time     `bson:"updated_at" json:"updated_at"`
 }
 
-func (d *Base) IsPersisted() bool {
+func (d Base) IsPersisted() bool {
 	return !d.CreatedAt.IsZero()
 }
 
@@ -45,6 +45,6 @@ func (d *Base) destroy(ctx context.Context, collection string) error {
 	return ReallyDestroy(ctx, collection, d)
 }
 
-func (d *Base) Validate(ctx context.Context) *ValidationErrors {
+func (d Base) Validate(ctx context.Context) *ValidationErrors {
 	return nil
 }
