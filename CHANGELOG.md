@@ -1,5 +1,9 @@
 # Changelog
 
+## v5.2.1 (Sep 25 2018)
+
+* Add `SkipLogSet` options to NSQ LB producer env init
+
 ## v5.2.0 (Jul 20 2018)
 
 * Add `WhereQuery` in `mongo/document`
