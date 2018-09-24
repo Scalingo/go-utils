@@ -9,7 +9,8 @@ import (
 )
 
 type FromEnvOpts struct {
-	Logger logrus.FieldLogger
+	Logger     logrus.FieldLogger
+	SkipLogSet map[string]bool
 }
 
 func FromEnv(opts FromEnvOpts) (*NsqLBProducer, error) {
@@ -39,9 +40,10 @@ func FromEnv(opts FromEnvOpts) (*NsqLBProducer, error) {
 	}
 
 	return New(LBProducerOpts{
-		Hosts:     hosts,
-		NsqConfig: nsqConfig,
-		Strategy:  StrategiesFromName[E["NSQ_PRODUCER_STRATEGY"]],
-		Logger:    opts.Logger,
+		Hosts:      hosts,
+		NsqConfig:  nsqConfig,
+		Strategy:   StrategiesFromName[E["NSQ_PRODUCER_STRATEGY"]],
+		SkipLogSet: opts.SkipLogSet,
+		Logger:     opts.Logger,
 	})
 }
