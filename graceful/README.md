@@ -29,6 +29,7 @@ graceful.NewService()
 s := graceful.NewService(
 	graceful.WithWaitDuration(30 * time.Second),
 	graceful.WithReloadWaitDuration(time.Hour),
+	graceful.WithPIDFile("/var/run/service.pid"),
 )
 
 err := s.ListenAndServe(ctx, "tcp", ":9000", handler)

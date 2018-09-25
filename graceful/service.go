@@ -3,7 +3,10 @@ package graceful
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
@@ -26,6 +29,9 @@ type service struct {
 	// connection to close when a graceful restart has been ordered. The new
 	// process is already woking as expecting.
 	reloadWaitDuration time.Duration
+	// pidFile tracks the pid of the last child among the chain of graceful restart
+	// Required for daemon manager to track the service
+	pidFile string
 }
 
 type Option func(*service)
@@ -56,6 +62,12 @@ func WithReloadWaitDuration(d time.Duration) Option {
 	})
 }
 
+func WithPIDFile(path string) Option {
+	return Option(func(s *service) {
+		s.pidFile = path
+	})
+}
+
 func (s *service) ListenAndServeTLS(ctx context.Context, proto string, addr string, handler http.Handler, tlsConfig *tls.Config) error {
 	httpServer := &http.Server{
 		Addr:      addr,
@@ -74,6 +86,14 @@ func (s *service) ListenAndServe(ctx context.Context, proto string, addr string,
 }
 
 func (s *service) listenAndServe(ctx context.Context, proto string, addr string, server *http.Server) error {
+	if s.pidFile != "" {
+		pid := os.Getpid()
+		err := ioutil.WriteFile(s.pidFile, []byte(fmt.Sprintf("%d\n", pid)), 0600)
+		if err != nil {
+			return errgo.Notef(err, "fail to write PID file")
+		}
+	}
+
 	ld, err := s.graceful.Listen(proto, addr)
 	if err != nil {
 		return errgo.Notef(err, "fail to get listener")

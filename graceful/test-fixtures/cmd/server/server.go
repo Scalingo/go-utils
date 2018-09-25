@@ -18,7 +18,10 @@ func main() {
 		timeout = time.Duration(timeoutI) * time.Millisecond
 	}
 	ctx := context.Background()
-	s := graceful.NewService(graceful.WithWaitDuration(timeout))
+	s := graceful.NewService(
+		graceful.WithWaitDuration(timeout),
+		graceful.WithPIDFile("./test-fixtures/server.pid"),
+	)
 	router := http.NewServeMux()
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		sleepStr := r.URL.Query().Get("sleep")
