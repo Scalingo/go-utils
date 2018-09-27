@@ -99,6 +99,10 @@ func (s *service) listenAndServe(ctx context.Context, proto string, addr string,
 		return errgo.Notef(err, "fail to get listener")
 	}
 
+	if server.TLSConfig != nil {
+		ld = tls.NewListener(ld, server.TLSConfig)
+	}
+
 	s.httpServer = server
 
 	go s.setupSignals(ctx)
