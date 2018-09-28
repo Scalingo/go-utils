@@ -5,8 +5,8 @@ import (
 
 	"github.com/Scalingo/go-utils/logger"
 	logrus_rollbar "github.com/Scalingo/logrus-rollbar"
+	"github.com/rollbar/rollbar-go"
 	"github.com/sirupsen/logrus"
-	"github.com/stvp/rollbar"
 )
 
 type RollbarPlugin struct{}
@@ -28,8 +28,8 @@ func (p RollbarPlugin) Hook() (bool, logrus.Hook) {
 		return false, nil
 	}
 
-	rollbar.Token = token
-	rollbar.Environment = os.Getenv("GO_ENV")
+	rollbar.SetToken(token)
+	rollbar.SetEnvironment(os.Getenv("GO_ENV"))
 
 	return true, logrus_rollbar.New(4)
 }
