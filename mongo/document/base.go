@@ -45,6 +45,6 @@ func (d *Base) destroy(ctx context.Context, collection string) error {
 	return ReallyDestroy(ctx, collection, d)
 }
 
-func (d Base) Validate(ctx context.Context) *ValidationErrors {
+func (d *Base) Validate(ctx context.Context) *ValidationErrors {
 	return nil
 }

@@ -49,9 +49,10 @@ type Validable interface {
 	Validate(ctx context.Context) *ValidationErrors
 }
 
-var _ Validable = Base{}
+var _ Validable = &Base{}
 
-// Create inser the document in the database, returns an error if document already exists and set CreatedAt timestamp
+// Create inserts the document in the database, returns an error if document already exists and set
+// CreatedAt timestamp
 func Create(ctx context.Context, collectionName string, doc document) error {
 	log := logger.Get(ctx)
 	doc.ensureID()
