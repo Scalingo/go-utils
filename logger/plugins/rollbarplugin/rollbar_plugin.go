@@ -31,5 +31,5 @@ func (p RollbarPlugin) Hook() (bool, logrus.Hook) {
 	rollbar.SetToken(token)
 	rollbar.SetEnvironment(os.Getenv("GO_ENV"))
 
-	return true, logrus_rollbar.New(4)
+	return true, logrus_rollbar.New()
 }
