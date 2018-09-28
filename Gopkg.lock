@@ -10,20 +10,20 @@
   version = "v1.0.1"
 
 [[projects]]
-  digest = "1:f42aedcffbf7a490ef5b412f7de21026b4a7f7d48cc19f9bf49948147876f204"
+  branch = "deps/new-rollbar"
+  digest = "1:db6993352a5a50d2169021056041119b39657ac2902c715f4177100a935b4085"
   name = "github.com/Scalingo/logrus-rollbar"
   packages = ["."]
   pruneopts = ""
-  revision = "b82bcdb17d040be3abd945a63464a9601e73a6d6"
-  version = "v1.2.1"
+  revision = "5759bf5d60bcdd6dde8e97291df8d1d0a4dd6402"
 
 [[projects]]
-  branch = "master"
-  digest = "1:68dc91a180bead3fc27c5f4deca1d8fb4a61a8300b3d65a38011aee4b32ba1cc"
+  branch = "deps/new-rollbar"
+  digest = "1:ead73659dd01c92f51ad0bfe759e96820102f375b3161e797f39c9beaebffef8"
   name = "github.com/Soulou/errgo-rollbar"
   packages = ["."]
   pruneopts = ""
-  revision = "2f7de2c8755a840bfcf34b2b6508e86eba0fbccc"
+  revision = "233adcd05fe2aa08c6f7449c26a5530726f05207"
 
 [[projects]]
   digest = "1:e2d8cad4cf0c1b724c97f4cb1f01cbb9531bcc07b73c5ff3fe575cf6f8a2f75f"
@@ -130,6 +130,14 @@
   version = "v1.5.3"
 
 [[projects]]
+  branch = "master"
+  digest = "1:448b4a6e39e46d8740b00dc871f26d58dc39341b160e01267b7917132831a136"
+  name = "github.com/konsorten/go-windows-terminal-sequences"
+  packages = ["."]
+  pruneopts = ""
+  revision = "b729f2633dfe35f4d1d8a32385f6685610ce1cb5"
+
+[[projects]]
   digest = "1:7a69f6a3a33929f8b66aa39c93868ad1698f06417fe627ae067559beb94504bd"
   name = "github.com/nsqio/go-nsq"
   packages = ["."]
@@ -170,12 +178,12 @@
   revision = "36e9d2ebbde5e3f13ab2e25625fd453271d6522e"
 
 [[projects]]
-  digest = "1:42a42c4bc67bed17f40fddf0f24d4403e25e7b96488456cf4248e6d16659d370"
+  digest = "1:01d968ff6535945510c944983eee024e81f1c949043e9bbfe5ab206ebc3588a4"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   pruneopts = ""
-  revision = "d682213848ed68c0a260ca37d6dd5ace8423f5ba"
-  version = "v1.0.4"
+  revision = "a67f783a3814b8729bd2dac5780b5f78f8dbd64d"
+  version = "v1.1.0"
 
 [[projects]]
   digest = "1:a30066593578732a356dc7e5d7f78d69184ca65aeeff5939241a3ab10559bb06"
