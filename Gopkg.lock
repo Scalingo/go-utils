@@ -10,12 +10,12 @@
   version = "v1.0.1"
 
 [[projects]]
-  branch = "deps/new-rollbar"
-  digest = "1:db6993352a5a50d2169021056041119b39657ac2902c715f4177100a935b4085"
+  digest = "1:81a6eea8b6e1654174ae4dbf3aed14ad2a67549b15e2a524b665d39c574b5c1d"
   name = "github.com/Scalingo/logrus-rollbar"
   packages = ["."]
   pruneopts = ""
-  revision = "5759bf5d60bcdd6dde8e97291df8d1d0a4dd6402"
+  revision = "e205c8087ba6b9ee8297af49c7c37ad8ee17637c"
+  version = "v1.3.0"
 
 [[projects]]
   branch = "deps/new-rollbar"
