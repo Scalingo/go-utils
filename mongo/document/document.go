@@ -198,7 +198,7 @@ func WhereIterUnscoped(ctx context.Context, collectionName string, query bson.M,
 		return fmt.Errorf("error occured during iteration over collection %v with query %v: %v", collectionName, query, err)
 	}
 	if iter.Err() != nil {
-		return fmt.Errorf("fail to iterate over collection %v with query %v: %v", collectionName, query, err)
+		return fmt.Errorf("fail to iterate over collection %v with query %v: %v", collectionName, query, iter.Err())
 	}
 	return nil
 }
