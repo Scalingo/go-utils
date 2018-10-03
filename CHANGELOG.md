@@ -1,5 +1,9 @@
 # Changelog
 
+## v5.3.2 (Oct 3 2018)
+
+* [mongo] Fix Iter error, return iterator error no callback one, #56
+
 ## v5.3.1 (Sep 27 2018)
 
 * [graceful] Fix ListenAndServeTLS to correctly use a tls.Listener
