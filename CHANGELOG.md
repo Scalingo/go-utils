@@ -1,8 +1,13 @@
 # Changelog
 
+## v5.4.0 (Oct 10 2018)
+
+* [httpclient] New library to forward request_id + a few helpers (TLS and authentication)
+
 ## v5.3.2 (Oct 3 2018)
 
 * [mongo] Fix Iter error, return iterator error no callback one, #56
+* [logger-rollbar] Switch rollbar library to use official lib
 
 ## v5.3.1 (Sep 27 2018)
 
