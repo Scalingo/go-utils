@@ -29,7 +29,7 @@ func WithTLSConfig(config *tls.Config) ClientOpt {
 func WithAuthentication(username, password string) ClientOpt {
 	return func(c *http.Client) {
 		c.Transport = authTransport{
-			parent:   reqidTransport{http.DefaultTransport},
+			parent:   reqidTransport{c.Transport},
 			username: username, password: password,
 		}
 	}
