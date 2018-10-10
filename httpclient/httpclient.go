@@ -56,7 +56,7 @@ func NewClient(opts ...ClientOpt) *http.Client {
 	}
 	if c.user != "" || c.password != "" {
 		httpClient.Transport = authTransport{
-			parent:   reqidTransport{httpClient.Transport},
+			parent:   httpClient.Transport,
 			username: c.user, password: c.password,
 		}
 	}
