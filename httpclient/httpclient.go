@@ -12,18 +12,18 @@ import (
 type ClientOpt func(c *http.Client)
 
 func WithTimeout(d time.Duration) ClientOpt {
-	return ClientOpt(func(c *http.Client) {
+	return func(c *http.Client) {
 		c.Timeout = d
-	})
+	}
 }
 
 func WithTLSConfig(config *tls.Config) ClientOpt {
-	return ClientOpt(func(c *http.Client) {
+	return func(c *http.Client) {
 		parent := &http.Transport{
 			TLSClientConfig: config,
 		}
 		c.Transport = transport{parentTransport: parent}
-	})
+	}
 }
 
 func NewClient(opts ...ClientOpt) *http.Client {
