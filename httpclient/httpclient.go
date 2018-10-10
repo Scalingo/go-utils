@@ -9,40 +9,58 @@ import (
 	"github.com/satori/go.uuid"
 )
 
-type ClientOpt func(c *http.Client)
+type ClientOpt func(c *client)
+
+type client struct {
+	config   *tls.Config
+	user     string
+	password string
+	timeout  time.Duration
+}
 
 func WithTimeout(d time.Duration) ClientOpt {
-	return func(c *http.Client) {
-		c.Timeout = d
+	return func(c *client) {
+		c.timeout = d
 	}
 }
 
 func WithTLSConfig(config *tls.Config) ClientOpt {
-	return func(c *http.Client) {
-		parent := &http.Transport{
-			TLSClientConfig: config,
-		}
-		c.Transport = reqidTransport{parent: parent}
+	return func(c *client) {
+		c.config = config
 	}
 }
 
 func WithAuthentication(username, password string) ClientOpt {
-	return func(c *http.Client) {
-		c.Transport = authTransport{
-			parent:   reqidTransport{c.Transport},
-			username: username, password: password,
-		}
+	return func(c *client) {
+		c.user = username
+		c.password = password
 	}
 }
 
 func NewClient(opts ...ClientOpt) *http.Client {
-	client := &http.Client{
+	httpClient := &http.Client{
 		Transport: reqidTransport{parent: http.DefaultTransport},
 	}
+	c := client{}
 	for _, o := range opts {
-		o(client)
+		o(&c)
 	}
-	return client
+	if c.timeout > 0 {
+		httpClient.Timeout = c.timeout
+	}
+	if c.config != nil {
+		parent := &http.Transport{
+			TLSClientConfig: c.config,
+		}
+		httpClient.Transport = reqidTransport{parent: parent}
+	}
+	if c.user != "" || c.password != "" {
+		httpClient.Transport = authTransport{
+			parent:   reqidTransport{httpClient.Transport},
+			username: c.user, password: c.password,
+		}
+	}
+	return httpClient
 }
 
 type reqidTransport struct {
