@@ -22,13 +22,22 @@ func WithTLSConfig(config *tls.Config) ClientOpt {
 		parent := &http.Transport{
 			TLSClientConfig: config,
 		}
-		c.Transport = transport{parentTransport: parent}
+		c.Transport = reqidTransport{parent: parent}
+	}
+}
+
+func WithAuthentication(username, password string) ClientOpt {
+	return func(c *http.Client) {
+		c.Transport = authTransport{
+			parent:   reqidTransport{http.DefaultTransport},
+			username: username, password: password,
+		}
 	}
 }
 
 func NewClient(opts ...ClientOpt) *http.Client {
 	client := &http.Client{
-		Transport: transport{parentTransport: http.DefaultTransport},
+		Transport: reqidTransport{parent: http.DefaultTransport},
 	}
 	for _, o := range opts {
 		o(client)
@@ -36,13 +45,13 @@ func NewClient(opts ...ClientOpt) *http.Client {
 	return client
 }
 
-type transport struct {
-	parentTransport http.RoundTripper
+type reqidTransport struct {
+	parent http.RoundTripper
 }
 
-func (t transport) RoundTrip(req *http.Request) (*http.Response, error) {
+func (t reqidTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	if req.Header.Get("X-Request-ID") != "" {
-		return t.parentTransport.RoundTrip(req)
+		return t.parent.RoundTrip(req)
 	}
 
 	reqID, ok := req.Context().Value("request_id").(string)
@@ -54,5 +63,18 @@ func (t transport) RoundTrip(req *http.Request) (*http.Response, error) {
 		reqID = uuid.String()
 	}
 	req.Header.Set("X-Request-ID", reqID)
-	return t.parentTransport.RoundTrip(req)
+	return t.parent.RoundTrip(req)
+}
+
+type authTransport struct {
+	parent   http.RoundTripper
+	username string
+	password string
+}
+
+func (t authTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	if _, _, ok := req.BasicAuth(); !ok {
+		req.SetBasicAuth(t.username, t.password)
+	}
+	return t.parent.RoundTrip(req)
 }
