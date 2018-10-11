@@ -1,5 +1,9 @@
 # Changelog
 
+## v5.4.1 (Oct 11 2018)
+
+* [mongo] Make BuildSession public and usable with custom URLs
+
 ## v5.4.0 (Oct 10 2018)
 
 * [httpclient] New library to forward request_id + a few helpers (TLS and authentication)
