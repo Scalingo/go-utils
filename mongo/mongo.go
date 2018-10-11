@@ -27,7 +27,7 @@ func Session(log logrus.FieldLogger) *mgo.Session {
 		log = log.WithField("process", "mongo-init")
 		err := errors.New("")
 		for err != nil {
-			_session, err = buildSession(logger.ToCtx(context.Background(), log))
+			_session, err = BuildSession(logger.ToCtx(context.Background(), log), os.Getenv("MONGO_URL"))
 			if err != nil {
 				log.WithField("err", err).WithField("action", "wait 10sec").Info("init mongo: fail to create session")
 				time.Sleep(10 * time.Second)
@@ -37,9 +37,8 @@ func Session(log logrus.FieldLogger) *mgo.Session {
 	return _session
 }
 
-func buildSession(ctx context.Context) (*mgo.Session, error) {
+func BuildSession(ctx context.Context, rawURL string) (*mgo.Session, error) {
 	log := logger.Get(ctx)
-	rawURL := os.Getenv("MONGO_URL")
 	if rawURL == "" {
 		rawURL = "mongodb://localhost:27017/" + DefaultDatabaseName
 	}
