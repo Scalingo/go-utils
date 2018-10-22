@@ -13,7 +13,7 @@ NAME:
    GoMock generator - Highly parallelized generator of gomock mocks
 
 USAGE:
-   gomock_generator [global options] command [command options] [arguments...]
+   gomock_generator [global options]
 
 VERSION:
    0.1.0
