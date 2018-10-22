@@ -44,6 +44,26 @@ Reads the mymocks.json file from the current directory and generates the mocks, 
 		cli.IntFlag{Name: "concurrent-goroutines", Value: 4, Usage: "Concurrent amount of goroutines to generate mock.", EnvVar: "CONCURRENT_GOROUTINES"},
 		cli.BoolFlag{Name: "debug", Usage: "Activate debug logs"},
 	}
+	cli.AppHelpTemplate = `NAME:
+   {{.Name}} - {{.Usage}}
+USAGE:
+   {{.HelpName}} {{if .VisibleFlags}}[global options]{{end}}
+   {{if len .Authors}}
+AUTHOR:
+   {{range .Authors}}{{ . }}{{end}}
+   {{end}}{{if .Commands}}
+COMMANDS:
+{{range .Commands}}{{if not .HideHelp}}   {{join .Names ", "}}{{ "\t"}}{{.Usage}}{{ "\n" }}{{end}}{{end}}{{end}}{{if .VisibleFlags}}
+GLOBAL OPTIONS:
+   {{range .VisibleFlags}}{{.}}
+   {{end}}{{end}}{{if .Copyright }}
+COPYRIGHT:
+   {{.Copyright}}
+   {{end}}{{if .Version}}
+VERSION:
+   {{.Version}}
+   {{end}}
+`
 	app.cli.Before = func(c *cli.Context) error {
 		app.config.MocksFilename = c.GlobalString("mocks-filename")
 		app.config.SignaturesFilename = c.GlobalString("signatures-filename")
