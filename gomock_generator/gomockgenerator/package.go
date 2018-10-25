@@ -95,6 +95,10 @@ func fieldToString(field ast.Expr) string {
 		return fmt.Sprintf("[]%v", fieldToString(arrayExpr.Elt))
 	}
 
+	if ellipsisExpr, ok := field.(*ast.Ellipsis); ok {
+		return fmt.Sprintf("...%v", fieldToString(ellipsisExpr.Elt))
+	}
+
 	if _, ok := field.(*ast.InterfaceType); ok {
 		// TODO: It's the only case I can think of, but they might be others.
 		return "interface{}"
