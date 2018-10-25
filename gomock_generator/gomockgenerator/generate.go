@@ -20,8 +20,8 @@ import (
 
 // GenerationConfiguration lets you configure the generation of mocks for your project
 type GenerationConfiguration struct {
-	// MocksFilename is the filename of the JSON file containing the mock configuration.  Location of this file is the base package.
-	MocksFilename string
+	// MocksFilePath is the path to the JSON file containing the mock configuration.  Location of this file is the base package.
+	MocksFilePath string
 	// SignaturesFilename is the filename of the signatures cache. Location of this file is the base package.
 	SignaturesFilename string
 	// ConcurrentGoroutines specifies the concurrent amount of goroutines which can execute
@@ -57,6 +57,15 @@ func GenerateMocks(ctx context.Context, gcfg GenerationConfiguration, mocksCfg M
 	if mocksCfg.BasePackage == "" {
 		panic(errors.New("BasePackage is mandatory"))
 	}
+	cwd, err := os.Getwd()
+	if err != nil {
+		return errors.Wrap(err, "fail to get current directory")
+	}
+	err = os.Chdir(path.Join(os.Getenv("GOPATH"), "src", mocksCfg.BasePackage))
+	if err != nil {
+		return errors.Wrap(err, "fail to move to base package directory")
+	}
+	defer os.Chdir(cwd)
 	log := logger.Get(ctx).WithField("nb_mocks", len(mocksCfg.Mocks))
 	ctx = logger.ToCtx(ctx, log)
 	log.WithFields(logrus.Fields{
