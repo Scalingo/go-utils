@@ -20,8 +20,8 @@ import (
 
 // GenerationConfiguration lets you configure the generation of mocks for your project
 type GenerationConfiguration struct {
-	// MocksFilename is the filename of the JSON file containing the mock configuration.  Location of this file is the base package.
-	MocksFilename string
+	// MocksFilePath is the path to the JSON file containing the mock configuration.  Location of this file is the base package.
+	MocksFilePath string
 	// SignaturesFilename is the filename of the signatures cache. Location of this file is the base package.
 	SignaturesFilename string
 	// ConcurrentGoroutines specifies the concurrent amount of goroutines which can execute
