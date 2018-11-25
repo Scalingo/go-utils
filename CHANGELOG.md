@@ -1,5 +1,9 @@
 # Changelog
 
+## v5.5.0 (Nov 25 2018)
+
+* [nsqproducer] Producers have a Ping() method for monitoring
+
 ## v5.4.1 (Oct 11 2018)
 
 * [mongo] Make BuildSession public and usable with custom URLs

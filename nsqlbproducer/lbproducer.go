@@ -105,6 +105,25 @@ func alwaysZero() int {
 	return 0
 }
 
+// Ping return an error if all the nodes are unreachable
+func (p *NsqLBProducer) Ping() error {
+	err := errors.New("fail to ping NSQ LB producer")
+
+	hasError := true
+	for _, producer := range p.producers {
+		pingErr := p.Ping()
+		if pingErr == nil {
+			hasError = false
+			break
+		}
+		err = errors.Wrapf(err, "%s: %v", producer.host, pingErr)
+	}
+	if hasError {
+		return err
+	}
+	return nil
+}
+
 func (p *NsqLBProducer) Publish(ctx context.Context, topic string, message nsqproducer.NsqMessageSerialize) error {
 	firstProducer := p.randInt() % len(p.producers)
 
