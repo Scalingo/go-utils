@@ -37,8 +37,15 @@ type NsqLBProducer struct {
 	logger    logrus.FieldLogger
 }
 
+type PublishPinger interface {
+	Publish(context.Context, string, nsqproducer.NsqMessageSerialize) error
+	DeferredPublish(context.Context, string, int64, nsqproducer.NsqMessageSerialize) error
+	Ping() error
+	Stop()
+}
+
 type producer struct {
-	producer *nsqproducer.NsqProducer
+	producer PublishPinger
 	host     Host
 }
 

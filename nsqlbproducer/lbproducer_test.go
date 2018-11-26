@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/Scalingo/go-utils/nsqlbproducer/nsqlbproducermock"
 	"github.com/Scalingo/go-utils/nsqproducer"
-	"github.com/Scalingo/go-utils/nsqproducer/nsqproducermock"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
@@ -113,8 +113,8 @@ func runPublishExample(t *testing.T, example example, deferred bool) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	p1 := nsqproducermock.NewMockProducer(ctrl)
-	p2 := nsqproducermock.NewMockProducer(ctrl)
+	p1 := nsqlbproducermock.NewMockPublishPinger(ctrl)
+	p2 := nsqlbproducermock.NewMockPublishPinger(ctrl)
 
 	if example.ExpectP1Call {
 		if deferred {
