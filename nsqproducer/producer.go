@@ -64,6 +64,10 @@ func (p *NsqProducer) Stop() {
 	p.producer.Stop()
 }
 
+func (p *NsqProducer) Ping() error {
+	return p.producer.Ping()
+}
+
 func (p *NsqProducer) Publish(ctx context.Context, topic string, message NsqMessageSerialize) error {
 	var err error
 	message.RequestID, err = p.requestID(ctx)
