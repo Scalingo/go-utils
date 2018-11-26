@@ -1,5 +1,9 @@
 # Changelog
 
+## v5.5.1 (Nov 26 2018)
+
+* [nsqproducer] Fix Ping() method recursivity issue
+
 ## v5.5.0 (Nov 25 2018)
 
 * [nsqproducer] Producers have a Ping() method for monitoring

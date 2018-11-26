@@ -38,7 +38,7 @@ type NsqLBProducer struct {
 }
 
 type producer struct {
-	producer nsqproducer.Producer
+	producer *nsqproducer.NsqProducer
 	host     Host
 }
 
@@ -111,7 +111,7 @@ func (p *NsqLBProducer) Ping() error {
 
 	hasError := true
 	for _, producer := range p.producers {
-		pingErr := p.Ping()
+		pingErr := producer.producer.Ping()
 		if pingErr == nil {
 			hasError = false
 			break
