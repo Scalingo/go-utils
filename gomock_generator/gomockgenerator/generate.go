@@ -94,18 +94,19 @@ func GenerateMocks(ctx context.Context, gcfg GenerationConfiguration, mocksCfg M
 	for _, mock := range mocksCfg.Mocks {
 		wg.Add(1)
 		go func(mock MockConfiguration) {
+			defer func() {
+				wg.Done()
+				<-sem
+			}()
 			sem <- true
 			path, sig, err := generateMock(ctx, mocksCfg.BasePackage, mock, mockSigs)
 			if err != nil {
 				log.Error(err)
-				wg.Done()
 				return
 			}
 			lock.Lock()
 			newMockSigs[path] = sig
 			lock.Unlock()
-			<-sem
-			wg.Done()
 		}(mock)
 	}
 	wg.Wait()
