@@ -51,24 +51,31 @@ func interfaceSignature(pkg, iName string) (string, error) {
 									if typeSpec.Name.String() == iName {
 										var interfaceSig string
 										for _, m := range interfaceType.Methods.List {
-											methodName := m.Names[0].String()
-											funcType := m.Type.(*ast.FuncType)
-											var methodType string
-
-											if funcType.Results != nil {
-												for _, res := range funcType.Results.List {
-													methodType = fmt.Sprintf("%s,%s", methodType, fieldToString(res.Type))
+											switch v := m.Type.(type) {
+											case *ast.Ident:
+												interfaceSig = fmt.Sprintf("%s\nInterface{%s}\n", interfaceSig, v.Name)
+											case *ast.FuncType:
+												methodName := m.Names[0].String()
+												var methodType string
+												if v.Results != nil {
+													for _, res := range v.Results.List {
+														methodType = fmt.Sprintf("%s,%s", methodType, fieldToString(res.Type))
+													}
 												}
-											}
 
-											var methodParams string
-											if funcType.Params != nil {
-												for _, param := range funcType.Params.List {
-													methodParams = fmt.Sprintf("%s,%s", methodParams, fieldToString(param.Type))
+												var methodParams string
+												if v.Params != nil {
+													for _, param := range v.Params.List {
+														methodParams = fmt.Sprintf("%s,%s", methodParams, fieldToString(param.Type))
+													}
 												}
+												interfaceSig = fmt.Sprintf("%s\n%s(%s)(%s)\n", interfaceSig, methodName, methodParams, methodType)
+
+											default:
+												panic("Unexpected AST type")
 											}
-											interfaceSig = fmt.Sprintf("%s\n%s(%s)(%s)\n", interfaceSig, methodName, methodParams, methodType)
 										}
+										fmt.Println(interfaceSig)
 										return interfaceSig, nil
 									}
 								}

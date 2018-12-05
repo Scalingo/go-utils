@@ -98,6 +98,7 @@ func GenerateMocks(ctx context.Context, gcfg GenerationConfiguration, mocksCfg M
 			path, sig, err := generateMock(ctx, mocksCfg.BasePackage, mock, mockSigs)
 			if err != nil {
 				log.Error(err)
+				wg.Done()
 				return
 			}
 			lock.Lock()
