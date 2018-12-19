@@ -75,7 +75,6 @@ func interfaceSignature(pkg, iName string) (string, error) {
 												panic("Unexpected AST type")
 											}
 										}
-										fmt.Println(interfaceSig)
 										return interfaceSig, nil
 									}
 								}
