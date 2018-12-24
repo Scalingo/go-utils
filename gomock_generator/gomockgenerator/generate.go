@@ -152,7 +152,7 @@ func generateMock(ctx context.Context, basePackage string, mock MockConfiguratio
 		"dst_package": mock.DstPackage,
 	})
 	ctx = logger.ToCtx(ctx, log)
-	log.Info("Generating a mock")
+	log.Debug("Generating a mock")
 	log.WithFields(logrus.Fields{
 		"mock_path":   mockPath,
 		"src_package": mock.SrcPackage,
@@ -165,10 +165,11 @@ func generateMock(ctx context.Context, basePackage string, mock MockConfiguratio
 	}
 
 	selfPackage := ""
-	if filepath.Dir(mock.MockFile) == mock.SrcPackage {
+	if filepath.Dir(filepath.Join(basePackage, mock.MockFile)) == mock.SrcPackage {
 		log = log.WithField("self_package", true)
 		ctx = logger.ToCtx(ctx, log)
-		selfPackage = "-self_package " + path.Join(basePackage, mock.SrcPackage)
+		selfPackage = "-self_package " + mock.SrcPackage
+		mock.DstPackage = filepath.Base(mock.SrcPackage)
 	}
 
 	hashKey := fmt.Sprintf("%s.%s", mock.SrcPackage, mock.Interface)
@@ -181,7 +182,7 @@ func generateMock(ctx context.Context, basePackage string, mock MockConfiguratio
 	}
 
 	if sigs[hashKey] == hash {
-		log.Info("Skipping!")
+		log.Debug("Skipping!")
 		return hashKey, hash, nil
 	}
 
