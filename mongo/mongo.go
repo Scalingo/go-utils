@@ -50,7 +50,7 @@ func BuildSession(ctx context.Context, rawURL string) (*mgo.Session, error) {
 	withTLS := false
 	if u.Query().Get("ssl") == "true" {
 		withTLS = true
-		rawURL = strings.Replace(rawURL, "?ssl=true", "", 1)
+		rawURL = strings.Replace(rawURL, "?ssl=true", "?", 1)
 		rawURL = strings.Replace(rawURL, "&ssl=true", "", 1)
 	}
 
@@ -61,7 +61,7 @@ func BuildSession(ctx context.Context, rawURL string) (*mgo.Session, error) {
 		if err != nil {
 			return nil, errors.New("invalid duration in timeout parameter")
 		}
-		rawURL = strings.Replace(rawURL, "?timeout="+queryTimeout, "", 1)
+		rawURL = strings.Replace(rawURL, "?timeout="+queryTimeout, "?", 1)
 		rawURL = strings.Replace(rawURL, "&timeout="+queryTimeout, "", 1)
 	}
 
