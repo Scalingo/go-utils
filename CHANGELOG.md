@@ -1,5 +1,10 @@
 # Changelog
 
+## v5.5.2 (Mar 05 2019)
+
+* [mongo] Handle `timeout` parameter in the URL, default at 10s
+* [mongo] Do not destroy URL when `ssl` or `timeout` parameter is first in the list
+
 ## v5.5.1 (Nov 26 2018)
 
 * [nsqproducer] Fix Ping() method recursivity issue
