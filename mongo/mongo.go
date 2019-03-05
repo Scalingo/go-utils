@@ -57,6 +57,7 @@ func BuildSession(ctx context.Context, rawURL string) (*mgo.Session, error) {
 	if err != nil {
 		return nil, err
 	}
+	info.Timeout = 10 * time.Second
 	if withTLS {
 		tlsConfig := &tls.Config{}
 		tlsConfig.InsecureSkipVerify = true
