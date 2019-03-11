@@ -1,5 +1,9 @@
 # Changelog
 
+## v5.5.3 (Mar 11 2019)
+
+* [logger] Rollbar plugin is reading ROLLBAR_ENV first, then GO_ENV
+
 ## v5.5.2 (Mar 05 2019)
 
 * [mongo] Handle `timeout` parameter in the URL, default at 10s
