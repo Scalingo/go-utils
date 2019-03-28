@@ -70,7 +70,7 @@ func String(param string) string {
 // On sets the measurement of the current query. Calling it twice will take the latest measurement
 // provided.
 func (q Query) On(measurement string) Query {
-	q.measurement = measurement
+	q.measurement = fmt.Sprintf("\"%s\"", measurement)
 	return q
 }
 
