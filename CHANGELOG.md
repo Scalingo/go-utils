@@ -1,5 +1,9 @@
 # Changelog
 
+## v5.5.4 (Mar 28 2019)
+
+* [influx] Always write measurement between double quotes for InfluxDB query builder
+
 ## v5.5.3 (Mar 11 2019)
 
 * [logger] Rollbar plugin is reading ROLLBAR_ENV first, then GO_ENV
