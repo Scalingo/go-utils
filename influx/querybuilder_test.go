@@ -50,7 +50,7 @@ func TestConditionBuilder(t *testing.T) {
 func TestQueryBuilder(t *testing.T) {
 	examples := []struct {
 		Name     string
-		Query    *Query
+		Query    Query
 		Expected string
 	}{
 		{
@@ -95,7 +95,7 @@ func TestQueryBuilder(t *testing.T) {
 			Expected: `SELECT mean("f1") AS "f1" FROM "serie" LIMIT 1`,
 		}, {
 			Name: "a query with a subquery",
-			Query: NewQuery().OnSubqueries(
+			Query: NewQuery().OnSubquery(
 				NewQuery().On("serie").Field("biniou", "mean"),
 			).Field("biniou", "min"),
 			Expected: `SELECT min("biniou") AS "biniou" FROM (SELECT mean("biniou") AS "biniou" FROM "serie")`,
@@ -106,6 +106,16 @@ func TestQueryBuilder(t *testing.T) {
 			assert.Equal(t, example.Expected, example.Query.Build())
 		})
 	}
+
+	t.Run("query builder must be stateless", func(t *testing.T) {
+		query := NewQuery()
+		// Calling all the methods should not modify the receiving object.
+		query.On("serie").Field("f1", "mean").
+			Where("cond1F", Equal, `"value"`).And("cond2F", MoreOrEqual, "time() - 3m").
+			GroupByTag("tag1").GroupByTime(1 * time.Second).Fill(Previous).
+			OrderByTime("DESC").Limit(1)
+		assert.Equal(t, NewQuery().Build(), query.Build())
+	})
 }
 
 func TestString(t *testing.T) {
