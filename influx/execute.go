@@ -8,7 +8,7 @@ import (
 )
 
 // Do actually executes the query to the specified InfluxDB instance hosted at the url argument.
-func (q Query) Do(url string) (*influx.Response, error) {
+func (q *Query) Do(url string) (*influx.Response, error) {
 	query := q.Build()
 	response, err := executeQuery(url, query)
 	if err != nil {
