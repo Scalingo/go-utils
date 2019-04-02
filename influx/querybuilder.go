@@ -27,6 +27,7 @@ const (
 // Query is the main structure for the query builder. All methods apply to it.
 type Query struct {
 	measurement    string
+	subquery       *Query
 	conditions     condition
 	fields         []field
 	groupByTime    string
@@ -67,10 +68,26 @@ func String(param string) string {
 	return fmt.Sprintf("'%s'", param)
 }
 
-// On sets the measurement of the current query. Calling it twice will take the latest measurement
-// provided.
+// On sets the measurement of the current query.
+// Calling it twice will take the latest measurement provided.
+// Calling it after a call to OnSubqueries will take this measurement over the
+// subquery.
 func (q Query) On(measurement string) Query {
+	if q.subquery != nil {
+		q.subquery = nil
+	}
 	q.measurement = fmt.Sprintf("\"%s\"", measurement)
+	return q
+}
+
+// OnSubqueries sets a subquery instead of a measurement.
+// Calling it twice will take the latest subquery provided.
+// Calling it after a call to On will take this subquery over the measurement.
+func (q Query) OnSubqueries(subquery *Query) Query {
+	if q.measurement != "" {
+		q.measurement = ""
+	}
+	q.subquery = subquery
 	return q
 }
 
@@ -192,7 +209,11 @@ func (q Query) Build() string {
 		query += fmt.Sprintf(" %s(\"%s\") AS \"%s\"", f.aggregationMethod, f.name, f.name)
 	}
 
-	query += fmt.Sprintf(" FROM %s", q.measurement)
+	if q.subquery != nil {
+		query += fmt.Sprintf(" FROM (%s)", q.subquery.Build())
+	} else {
+		query += fmt.Sprintf(" FROM %s", q.measurement)
+	}
 	if q.conditions != (condition{}) {
 		query += fmt.Sprintf(" WHERE %s", q.conditions.build())
 	}
