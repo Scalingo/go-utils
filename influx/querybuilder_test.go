@@ -93,6 +93,12 @@ func TestQueryBuilder(t *testing.T) {
 			Name:     "with a limit",
 			Query:    NewQuery().On("serie").Field("f1", "mean").Limit(1),
 			Expected: `SELECT mean("f1") AS "f1" FROM "serie" LIMIT 1`,
+		}, {
+			Name: "a query with a subquery",
+			Query: NewQuery().OnSubquery(
+				NewQuery().On("serie").Field("biniou", "mean"),
+			).Field("biniou", "min"),
+			Expected: `SELECT min("biniou") AS "biniou" FROM (SELECT mean("biniou") AS "biniou" FROM "serie")`,
 		},
 	}
 	for _, example := range examples {
@@ -101,7 +107,7 @@ func TestQueryBuilder(t *testing.T) {
 		})
 	}
 
-	t.Run("query builder should be stateless", func(t *testing.T) {
+	t.Run("query builder must be stateless", func(t *testing.T) {
 		query := NewQuery()
 		// Calling all the methods should not modify the receiving object.
 		query.On("serie").Field("f1", "mean").
