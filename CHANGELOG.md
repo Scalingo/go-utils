@@ -1,5 +1,9 @@
 # Changelog
 
+## v5.5.5 (Apr 3 2019)
+
+* [influx] Add support for subqueries
+
 ## v5.5.4 (Mar 28 2019)
 
 * [influx] Always write measurement between double quotes for InfluxDB query builder
