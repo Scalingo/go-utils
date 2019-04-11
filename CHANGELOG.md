@@ -1,5 +1,9 @@
 # Changelog
 
+## v5.5.6 (Apr 11 2019)
+
+* [mongo] Remove trailing comma in validation errors
+
 ## v5.5.5 (Apr 3 2019)
 
 * [influx] Add support for subqueries
