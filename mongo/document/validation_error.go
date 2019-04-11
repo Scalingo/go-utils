@@ -1,6 +1,9 @@
 package document
 
-import "bytes"
+import (
+	"bytes"
+	"strings"
+)
 
 // ValidationErrors store each errors associated to every fields of a model
 type ValidationErrors struct {
@@ -13,10 +16,7 @@ func (v *ValidationErrors) Error() string {
 	for field, errors := range v.Errors {
 		buffer.WriteString(field)
 		buffer.WriteString("=")
-		for _, err := range errors {
-			buffer.WriteString(err)
-			buffer.WriteString(", ")
-		}
+		buffer.WriteString(strings.Join(errors, ","))
 	}
 	return buffer.String()
 }
