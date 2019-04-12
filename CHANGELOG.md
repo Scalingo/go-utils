@@ -1,5 +1,9 @@
 # Changelog
 
+## v5.5.7 (Apr 12 2019)
+
+* [errors] Better handling of ValidationErrors
+
 ## v5.5.6 (Apr 11 2019)
 
 * [mongo] Remove trailing comma in validation errors
