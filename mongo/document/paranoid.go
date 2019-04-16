@@ -13,7 +13,7 @@ type Paranoid struct {
 }
 
 func (p Paranoid) IsDeleted() bool {
-	return p.DeletedAt != nil
+	return p.DeletedAt != nil && !p.DeletedAt.IsZero()
 }
 
 func (d *Paranoid) setDeletedAt(t time.Time) {

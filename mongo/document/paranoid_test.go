@@ -3,6 +3,7 @@ package document
 import (
 	"context"
 	"testing"
+	"time"
 
 	"gopkg.in/mgo.v2/bson"
 
@@ -222,4 +223,49 @@ func TestParanoid_Restore(t *testing.T) {
 	err = Find(ctx, ParanoidDocsCollection, doc.ID, doc)
 	assert.NoError(t, err)
 	assert.False(t, doc.IsDeleted())
+}
+
+func TestParanoid_IsDeleted(t *testing.T) {
+	examples := []struct {
+		name        string
+		paranoidDoc func(t *testing.T) (*ParanoidDoc, func())
+		expectedRes bool
+	}{
+		{
+			name: "It should return true if DeletedAt is set",
+			paranoidDoc: func(t *testing.T) (*ParanoidDoc, func()) {
+				d, clean := NewTestParanoidDoc(t)
+				now := time.Now()
+				d.DeletedAt = &now
+				return d, clean
+			},
+			expectedRes: true,
+		}, {
+			name: "It should return false if DeletedAt is nil",
+			paranoidDoc: func(t *testing.T) (*ParanoidDoc, func()) {
+				d, clean := NewTestParanoidDoc(t)
+				d.DeletedAt = nil
+				return d, clean
+			},
+			expectedRes: false,
+		}, {
+			name: "It should return false if DeletedAt is zero",
+			paranoidDoc: func(t *testing.T) (*ParanoidDoc, func()) {
+				d, clean := NewTestParanoidDoc(t)
+				zero := time.Time{}
+				d.DeletedAt = &zero
+				return d, clean
+			},
+			expectedRes: false,
+		},
+	}
+
+	for _, example := range examples {
+		t.Run(example.name, func(t *testing.T) {
+			fixtureParanoidDoc, clean := example.paranoidDoc(t)
+			defer clean()
+
+			require.Equal(t, example.expectedRes, fixtureParanoidDoc.IsDeleted())
+		})
+	}
 }
