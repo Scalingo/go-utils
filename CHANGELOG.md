@@ -1,5 +1,9 @@
 # Changelog
 
+## v5.5.8 (Apr 16 2019)
+
+* [paranoid] IsDeleted returns true if DeletedAt is not zero
+
 ## v5.5.7 (Apr 12 2019)
 
 * [errors] Better handling of ValidationErrors
