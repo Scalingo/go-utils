@@ -1,0 +1,25 @@
+{
+  "base_package": "github.com/Scalingo/my-package",
+  "mocks": [
+    {
+       "interface" : "MyInterface",
+       "src_package" : "awesomepackage"
+    },
+    {
+       "src_package" : "my/awesome/package/2",
+       "interface" : "MyInterface2",
+       "mock_file" : "my/awesome/package/2/my_interface2_mock.go"
+    },
+    {
+       "interface" : "MyInterface3",
+       "mock_file" : "package3/my_interface3_mock.go"
+    },
+    {
+       "external" : true,
+       "src_package" : "github.com/Scalingo/sand/client/sand",
+       "interface" : "Client",
+       "mock_file" : "test/sandmock/sand_client_mock.go"
+    }
+  ]
+}
+
