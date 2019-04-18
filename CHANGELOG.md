@@ -1,5 +1,28 @@
 # Changelog
 
+## v5.5.9 (Apr 18 2019)
+
+* [errors] Ability to merge one ValidationErrors in another
+
+```
+b := NewValidationErrorsBuilder()
+
+if doc.Field == "" {
+  b.Set("field", "is blank")
+}
+
+// { errors: { field: ["is blank"] } }
+b.Merge(doc.SubDocument.Validate())
+
+// or
+
+// { errors: { subdoc_field: ["is blank"] } }
+b.MergeWithPrefix("subdoc", doc.SubDocument.Validate())
+
+
+return b.Build()
+```
+
 ## v5.5.8 (Apr 16 2019)
 
 * [paranoid] IsDeleted returns true if DeletedAt is not zero
