@@ -56,6 +56,15 @@ func (v *ValidationErrorsBuilder) Get(field string) []string {
 	return v.errors[field]
 }
 
+// Merge ValidationErrors with another ValidationErrors
+func (v *ValidationErrorsBuilder) Merge(verr ValidationErrors) {
+	for key, values := range verr.Errors {
+		for _, value := range values {
+			v.Set(key, value)
+		}
+	}
+}
+
 // Build will send a ValidationErrors struct if there is some errors or nil if no errors has been defined
 func (v *ValidationErrorsBuilder) Build() *ValidationErrors {
 	if len(v.errors) == 0 {
