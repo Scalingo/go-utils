@@ -68,6 +68,14 @@
   revision = "75cf19382434e82df4dd84953f566b8ad23d6e9e"
 
 [[projects]]
+  digest = "1:141cc9fc6279592458b304038bd16a05ef477d125c6dad281216345a11746fd7"
+  name = "github.com/gofrs/uuid"
+  packages = ["."]
+  pruneopts = ""
+  revision = "6b08a5c5172ba18946672b49749cde22873dd7c2"
+  version = "v3.2.0"
+
+[[projects]]
   digest = "1:0a3f6a0c68ab8f3d455f8892295503b179e571b7fefe47cc6c556405d1f83411"
   name = "github.com/gogo/protobuf"
   packages = [
@@ -170,14 +178,6 @@
   version = "v1.0.1"
 
 [[projects]]
-  branch = "master"
-  digest = "1:d4fec58ef1540ef89350bf22c25e013a9f9f57de12180d9067a1e25a5925d99b"
-  name = "github.com/satori/go.uuid"
-  packages = ["."]
-  pruneopts = ""
-  revision = "36e9d2ebbde5e3f13ab2e25625fd453271d6522e"
-
-[[projects]]
   digest = "1:01d968ff6535945510c944983eee024e81f1c949043e9bbfe5ab206ebc3588a4"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
@@ -203,6 +203,14 @@
   pruneopts = ""
   revision = "b20261800d8cda3be14dcef0d1a8320779bba61a"
   version = "v0.5.1"
+
+[[projects]]
+  digest = "1:e85837cb04b78f61688c6eba93ea9d14f60d611e2aaf8319999b1a60d2dafbfa"
+  name = "github.com/urfave/cli"
+  packages = ["."]
+  pruneopts = ""
+  revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
+  version = "v1.20.0"
 
 [[projects]]
   branch = "master"
@@ -334,16 +342,17 @@
     "github.com/coreos/etcd/clientv3",
     "github.com/coreos/etcd/pkg/transport",
     "github.com/facebookgo/grace/gracenet",
+    "github.com/gofrs/uuid",
     "github.com/golang/mock/gomock",
     "github.com/influxdata/influxdb/client/v2",
     "github.com/nsqio/go-nsq",
     "github.com/pkg/errors",
     "github.com/rollbar/rollbar-go",
-    "github.com/satori/go.uuid",
     "github.com/sirupsen/logrus",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/require",
     "github.com/stvp/rollbar",
+    "github.com/urfave/cli",
     "gopkg.in/errgo.v1",
     "gopkg.in/mgo.v2",
     "gopkg.in/mgo.v2/bson",

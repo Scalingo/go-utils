@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 )
 
 type ClientOpt func(c *client)

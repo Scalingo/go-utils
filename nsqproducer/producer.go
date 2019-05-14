@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/Scalingo/go-utils/logger"
+	"github.com/gofrs/uuid"
 	"github.com/nsqio/go-nsq"
-	"github.com/satori/go.uuid"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/errgo.v1"
 )
