@@ -1,5 +1,14 @@
 # Changelog
 
+## v5.5.10 (May 14 2019)
+
+* Migration from `github.com/satori/go.uuid` to its fork `github.com/gofrs/uuid`, Reason:
+
+> This project was originally forked from the github.com/satori/go.uuid
+> repository after it appeared to be no longer maintained, while exhibiting
+> critical flaws. We have decided to take over this project to ensure it receives
+> regular maintenance for the benefit of the larger Go community.
+
 ## v5.5.9 (Apr 18 2019)
 
 * [errors] Ability to merge one ValidationErrors in another
