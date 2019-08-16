@@ -6,9 +6,10 @@ package nsqproducermock
 
 import (
 	context "context"
+	reflect "reflect"
+
 	nsqproducer "github.com/Scalingo/go-utils/nsqproducer"
 	gomock "github.com/golang/mock/gomock"
-	reflect "reflect"
 )
 
 // MockProducer is a mock of Producer interface
@@ -36,6 +37,7 @@ func (m *MockProducer) EXPECT() *MockProducerMockRecorder {
 
 // DeferredPublish mocks base method
 func (m *MockProducer) DeferredPublish(arg0 context.Context, arg1 string, arg2 int64, arg3 nsqproducer.NsqMessageSerialize) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeferredPublish", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -43,11 +45,13 @@ func (m *MockProducer) DeferredPublish(arg0 context.Context, arg1 string, arg2 i
 
 // DeferredPublish indicates an expected call of DeferredPublish
 func (mr *MockProducerMockRecorder) DeferredPublish(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeferredPublish", reflect.TypeOf((*MockProducer)(nil).DeferredPublish), arg0, arg1, arg2, arg3)
 }
 
 // Publish mocks base method
 func (m *MockProducer) Publish(arg0 context.Context, arg1 string, arg2 nsqproducer.NsqMessageSerialize) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Publish", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -55,15 +59,18 @@ func (m *MockProducer) Publish(arg0 context.Context, arg1 string, arg2 nsqproduc
 
 // Publish indicates an expected call of Publish
 func (mr *MockProducerMockRecorder) Publish(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Publish", reflect.TypeOf((*MockProducer)(nil).Publish), arg0, arg1, arg2)
 }
 
 // Stop mocks base method
 func (m *MockProducer) Stop() {
+	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "Stop")
 }
 
 // Stop indicates an expected call of Stop
 func (mr *MockProducerMockRecorder) Stop() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Stop", reflect.TypeOf((*MockProducer)(nil).Stop))
 }

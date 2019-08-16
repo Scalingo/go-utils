@@ -26,6 +26,32 @@
   revision = "233adcd05fe2aa08c6f7449c26a5530726f05207"
 
 [[projects]]
+  digest = "1:3f72590f47228b9bbad42ebfca58f61b4920d73b42a0280560645fffa3a454ec"
+  name = "github.com/aws/aws-sdk-go-v2"
+  packages = [
+    "aws",
+    "aws/awserr",
+    "aws/defaults",
+    "aws/endpoints",
+    "aws/signer/v4",
+    "internal/awsutil",
+    "internal/sdk",
+    "private/protocol",
+    "private/protocol/query",
+    "private/protocol/query/queryutil",
+    "private/protocol/rest",
+    "private/protocol/restxml",
+    "private/protocol/xml",
+    "private/protocol/xml/xmlutil",
+    "service/s3",
+    "service/s3/s3iface",
+    "service/s3/s3manager",
+  ]
+  pruneopts = ""
+  revision = "098e15df3044cf1b04a222c1c33c3e6135ac89f3"
+  version = "v0.9.0"
+
+[[projects]]
   digest = "1:e2d8cad4cf0c1b724c97f4cb1f01cbb9531bcc07b73c5ff3fe575cf6f8a2f75f"
   name = "github.com/coreos/etcd"
   packages = [
@@ -88,12 +114,12 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:a1bad350477afbc84e8cbe5c78be4579478c55335377239631ff0adb985fbabc"
+  digest = "1:68c64bb61d55dcd17c82ca0b871ddddb5ae18b30cfe26f6bfd4b6df6287dc2e0"
   name = "github.com/golang/mock"
   packages = ["gomock"]
   pruneopts = ""
-  revision = "13f360950a79f5864a972c786a10a50e44b69541"
-  version = "v1.0.0"
+  revision = "9fa652df1129bef0e734c9cf9bf6dbae9ef3b9fa"
+  version = "1.3.1"
 
 [[projects]]
   digest = "1:bcb38c8fc9b21bb8682ce2d605a7d4aeb618abc7f827e3ac0b27c0371fdb23fb"
@@ -138,12 +164,27 @@
   version = "v1.5.3"
 
 [[projects]]
+  digest = "1:13fe471d0ed891e8544eddfeeb0471fd3c9f2015609a1c000aefdedf52a19d40"
+  name = "github.com/jmespath/go-jmespath"
+  packages = ["."]
+  pruneopts = ""
+  revision = "c2b33e84"
+
+[[projects]]
   branch = "master"
   digest = "1:448b4a6e39e46d8740b00dc871f26d58dc39341b160e01267b7917132831a136"
   name = "github.com/konsorten/go-windows-terminal-sequences"
   packages = ["."]
   pruneopts = ""
   revision = "b729f2633dfe35f4d1d8a32385f6685610ce1cb5"
+
+[[projects]]
+  digest = "1:c8cbf7532bf2beace82ee1a180dc367f74a90f66b8653dc4443517711597a376"
+  name = "github.com/ncw/swift"
+  packages = ["."]
+  pruneopts = ""
+  revision = "24e3012fc8a71f004a6455bce2088031d50bf2b6"
+  version = "v1.0.47"
 
 [[projects]]
   digest = "1:7a69f6a3a33929f8b66aa39c93868ad1698f06417fe627ae067559beb94504bd"
@@ -339,12 +380,19 @@
   input-imports = [
     "github.com/Scalingo/go-etcd-cron",
     "github.com/Scalingo/logrus-rollbar",
+    "github.com/aws/aws-sdk-go-v2/aws",
+    "github.com/aws/aws-sdk-go-v2/aws/awserr",
+    "github.com/aws/aws-sdk-go-v2/aws/defaults",
+    "github.com/aws/aws-sdk-go-v2/aws/endpoints",
+    "github.com/aws/aws-sdk-go-v2/service/s3",
+    "github.com/aws/aws-sdk-go-v2/service/s3/s3manager",
     "github.com/coreos/etcd/clientv3",
     "github.com/coreos/etcd/pkg/transport",
     "github.com/facebookgo/grace/gracenet",
     "github.com/gofrs/uuid",
     "github.com/golang/mock/gomock",
     "github.com/influxdata/influxdb/client/v2",
+    "github.com/ncw/swift",
     "github.com/nsqio/go-nsq",
     "github.com/pkg/errors",
     "github.com/rollbar/rollbar-go",

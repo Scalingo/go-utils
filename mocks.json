@@ -1,0 +1,12 @@
+{
+  "base_package": "github.com/Scalingo/go-utils",
+  "mocks": [
+    {
+      "interface": "Backend",
+      "src_package": "storage"
+    }, {
+      "interface": "Producer",
+      "src_package": "nsqproducer"
+    }
+  ]
+}
