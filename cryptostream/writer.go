@@ -13,11 +13,7 @@ type EncryptedWriter struct {
 	csw cipher.StreamWriter
 }
 
-func NewWriter() *EncryptedWriter {
-	return &EncryptedWriter{}
-}
-
-func NewEncrypterStreamReadCloser(writer io.Writer, key []byte) (*EncryptedWriter, []byte, error) {
+func NewWriter(writer io.Writer, key []byte) (*EncryptedWriter, []byte, error) {
 	iv, err := generateIV()
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "fail to generate IV")
