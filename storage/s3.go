@@ -33,20 +33,45 @@ type S3Config struct {
 	Bucket   string
 }
 
-type S3 struct {
-	cfg               S3Config
-	s3client          S3Client
-	s3uploader        *s3manager.Uploader
-	retryWaitDuration time.Duration
-	retryAttempts     int
+type RetryPolicy struct {
+	WaitDuration   time.Duration
+	Attempts       int
+	MethodHandlers map[BackendMethod][]string
 }
 
-func NewS3(cfg S3Config, bucket string) *S3 {
+type S3 struct {
+	cfg         S3Config
+	s3client    S3Client
+	s3uploader  *s3manager.Uploader
+	retryPolicy RetryPolicy
+}
+
+type s3Opt func(s3 *S3)
+
+// WithRetryPolicy is an option to constructor NewS3 to add a Retry Policy
+// impacting GET operations
+func WithRetryPolicy(policy RetryPolicy) s3Opt {
+	return s3Opt(func(s3 *S3) {
+		s3.retryPolicy = policy
+	})
+}
+
+func NewS3(cfg S3Config, opts ...s3Opt) *S3 {
 	s3config := s3Config(cfg)
-	return &S3{
+	s3 := &S3{
 		cfg: cfg, s3client: s3.New(s3config), s3uploader: s3manager.NewUploader(s3config),
-		retryWaitDuration: time.Second, retryAttempts: 3,
+		retryPolicy: RetryPolicy{
+			WaitDuration: time.Second,
+			Attempts:     3,
+			MethodHandlers: map[BackendMethod][]string{
+				SizeMethod: []string{NotFoundErrCode},
+			},
+		},
 	}
+	for _, opt := range opts {
+		opt(s3)
+	}
+	return s3
 }
 
 func (s *S3) Get(ctx context.Context, path string) (io.ReadCloser, error) {
@@ -82,27 +107,21 @@ func (s *S3) Upload(ctx context.Context, file io.Reader, path string) error {
 // implemented because of the eventual consistency of S3 backends NotFound
 // error are sometimes returned when the object was just uploaded.
 func (s *S3) Size(ctx context.Context, path string) (int64, error) {
-	var (
-		err   error
-		stat  *s3.HeadObjectResponse
-		log   = logger.Get(ctx)
-		input = &s3.HeadObjectInput{Bucket: &s.cfg.Bucket, Key: &path}
-	)
-	for i := 0; i < s.retryAttempts; i++ {
-		stat, err = s.s3client.HeadObjectRequest(input).Send(ctx)
-		if err == nil {
-			return *stat.ContentLength, nil
-		}
+	var res int64
+	err := s.retryWrapper(ctx, SizeMethod, func(ctx context.Context) error {
+		log := logger.Get(ctx).WithField("key", path)
+		log.Infof("[s3] Size()")
 
-		if aerr, ok := err.(awserr.Error); ok && aerr.Code() == NotFoundErrCode {
-			log.WithField("key", path).Info("[s3] retry HEAD")
-			time.Sleep(s.retryWaitDuration)
-			continue
+		input := &s3.HeadObjectInput{Bucket: &s.cfg.Bucket, Key: &path}
+		stat, err := s.s3client.HeadObjectRequest(input).Send(ctx)
+		if err != nil {
+			return err
 		}
-		return -1, errors.Wrapf(err, "fail to HEAD object '%v'", path)
-	}
+		res = *stat.ContentLength
+		return nil
+	})
 
-	return -1, errors.Wrapf(err, "fail to HEAD object '%v' after %v retries", path, s.retryAttempts)
+	return -1, errors.Wrapf(err, "fail to HEAD object '%v'", path)
 }
 
 func (s *S3) Delete(ctx context.Context, path string) error {
@@ -114,6 +133,33 @@ func (s *S3) Delete(ctx context.Context, path string) error {
 	}
 
 	return nil
+}
+
+func (s *S3) retryWrapper(ctx context.Context, method BackendMethod, fun func(ctx context.Context) error) error {
+	var err error
+
+	errorCodes := s.retryPolicy.MethodHandlers[method]
+	// no-op is no retry policy on the method
+	if errorCodes == nil {
+		return fun(ctx)
+	}
+	for i := 0; i < s.retryPolicy.Attempts; i++ {
+		log := logger.Get(ctx).WithField("attempt", i+1)
+		ctx := logger.ToCtx(ctx, log)
+		err = fun(ctx)
+		if err == nil {
+			return nil
+		}
+		if aerr, ok := err.(awserr.Error); ok {
+			for _, code := range errorCodes {
+				if aerr.Code() == code {
+					time.Sleep(s.retryPolicy.WaitDuration)
+					return err
+				}
+			}
+		}
+	}
+	return err
 }
 
 func s3Config(cfg S3Config) aws.Config {
@@ -131,5 +177,6 @@ func s3Config(cfg S3Config) aws.Config {
 	if cfg.Endpoint == "" {
 		config.EndpointResolver = endpoints.NewDefaultResolver()
 	}
+
 	return config
 }

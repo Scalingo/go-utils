@@ -5,6 +5,16 @@ import (
 	"io"
 )
 
+// BackendMethod represents the name of a Method included in the Backend interface
+type BackendMethod string
+
+const (
+	GetMethod    BackendMethod = "Get"
+	UploadMethod BackendMethod = "Upload"
+	SizeMethod   BackendMethod = "Size"
+	DeleteMethod BackendMethod = "Delete"
+)
+
 // Backend represents something which is able to store files on an object
 // storage service
 type Backend interface {
