@@ -86,9 +86,12 @@ func TestS3_Size(t *testing.T) {
 
 			mock := s3mock.NewMockS3Client(ctrl)
 			storage := &S3{
-				cfg:           S3Config{Bucket: "bucket"},
-				s3client:      mock,
-				retryAttempts: 3, retryWaitDuration: 50 * time.Millisecond,
+				cfg:      S3Config{Bucket: "bucket"},
+				s3client: mock,
+				retryPolicy: RetryPolicy{
+					Attempts: 3, WaitDuration: 50 * time.Millisecond,
+					MethodHandlers: map[BackendMethod][]string{SizeMethod: []string{NotFoundErrCode}},
+				},
 			}
 
 			c.expectMock(t, mock)

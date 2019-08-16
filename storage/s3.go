@@ -121,7 +121,10 @@ func (s *S3) Size(ctx context.Context, path string) (int64, error) {
 		return nil
 	})
 
-	return -1, errors.Wrapf(err, "fail to HEAD object '%v'", path)
+	if err != nil {
+		return -1, errors.Wrapf(err, "fail to HEAD object '%v'", path)
+	}
+	return res, nil
 }
 
 func (s *S3) Delete(ctx context.Context, path string) error {
@@ -154,7 +157,6 @@ func (s *S3) retryWrapper(ctx context.Context, method BackendMethod, fun func(ct
 			for _, code := range errorCodes {
 				if aerr.Code() == code {
 					time.Sleep(s.retryPolicy.WaitDuration)
-					return err
 				}
 			}
 		}
