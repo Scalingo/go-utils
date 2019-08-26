@@ -1,5 +1,12 @@
 # Changelog
 
+## To Be Released
+
+## v5.5.11 (August 26 2019)
+
+* Add simple object storage package for S3 and swift
+  [#89](https://github.com/Scalingo/go-utils/pull/89)
+
 ## v5.5.10 (May 14 2019)
 
 * Migration from `github.com/satori/go.uuid` to its fork `github.com/gofrs/uuid`, Reason:
