@@ -41,7 +41,7 @@ func TestS3_Size(t *testing.T) {
 		"it should make a HEAD request on the object": {
 			expectMock: func(t *testing.T, m *s3mock.MockS3Client) {
 				m.EXPECT().HeadObjectRequest(&s3.HeadObjectInput{
-					Bucket: aws.String("bucket"), Key: aws.String("/key"),
+					Bucket: aws.String("bucket"), Key: aws.String("key"),
 				}).Return(s3.HeadObjectRequest{Request: &aws.Request{
 					// Mandatory to create an empty request, otherwise it panics
 					HTTPRequest: new(http.Request),
@@ -52,14 +52,14 @@ func TestS3_Size(t *testing.T) {
 		"it should retry if the first HEAD request return 404": {
 			expectMock: func(t *testing.T, m *s3mock.MockS3Client) {
 				m.EXPECT().HeadObjectRequest(&s3.HeadObjectInput{
-					Bucket: aws.String("bucket"), Key: aws.String("/key"),
+					Bucket: aws.String("bucket"), Key: aws.String("key"),
 				}).Return(s3.HeadObjectRequest{Request: &aws.Request{
 					HTTPRequest: new(http.Request),
 					Error:       KeyNotFoundErr{},
 				}})
 
 				m.EXPECT().HeadObjectRequest(&s3.HeadObjectInput{
-					Bucket: aws.String("bucket"), Key: aws.String("/key"),
+					Bucket: aws.String("bucket"), Key: aws.String("key"),
 				}).Return(s3.HeadObjectRequest{Request: &aws.Request{
 					// Mandatory to create an empty request, otherwise it panics
 					HTTPRequest: new(http.Request),
@@ -70,7 +70,7 @@ func TestS3_Size(t *testing.T) {
 		"it should fail if the max amount of retried is passed": {
 			expectMock: func(t *testing.T, m *s3mock.MockS3Client) {
 				m.EXPECT().HeadObjectRequest(&s3.HeadObjectInput{
-					Bucket: aws.String("bucket"), Key: aws.String("/key"),
+					Bucket: aws.String("bucket"), Key: aws.String("key"),
 				}).Return(s3.HeadObjectRequest{Request: &aws.Request{
 					HTTPRequest: new(http.Request),
 					Error:       KeyNotFoundErr{},

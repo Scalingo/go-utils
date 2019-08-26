@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"io"
+	"strings"
 	"time"
 
 	"github.com/Scalingo/go-utils/logger"
@@ -75,6 +76,7 @@ func NewS3(cfg S3Config, opts ...s3Opt) *S3 {
 }
 
 func (s *S3) Get(ctx context.Context, path string) (io.ReadCloser, error) {
+	path = fullPath(path)
 	log := logger.Get(ctx)
 	log.WithField("path", path).Info("Get object")
 
@@ -90,6 +92,7 @@ func (s *S3) Get(ctx context.Context, path string) (io.ReadCloser, error) {
 }
 
 func (s *S3) Upload(ctx context.Context, file io.Reader, path string) error {
+	path = fullPath(path)
 	input := &s3manager.UploadInput{
 		Body:   file,
 		Bucket: &s.cfg.Bucket,
@@ -107,6 +110,7 @@ func (s *S3) Upload(ctx context.Context, file io.Reader, path string) error {
 // implemented because of the eventual consistency of S3 backends NotFound
 // error are sometimes returned when the object was just uploaded.
 func (s *S3) Size(ctx context.Context, path string) (int64, error) {
+	path = fullPath(path)
 	var res int64
 	err := s.retryWrapper(ctx, SizeMethod, func(ctx context.Context) error {
 		log := logger.Get(ctx).WithField("key", path)
@@ -128,6 +132,7 @@ func (s *S3) Size(ctx context.Context, path string) (int64, error) {
 }
 
 func (s *S3) Delete(ctx context.Context, path string) error {
+	path = fullPath(path)
 	input := &s3.DeleteObjectInput{Bucket: &s.cfg.Bucket, Key: &path}
 	req := s.s3client.DeleteObjectRequest(input)
 	_, err := req.Send(ctx)
@@ -181,4 +186,8 @@ func s3Config(cfg S3Config) aws.Config {
 	}
 
 	return config
+}
+
+func fullPath(path string) string {
+	return strings.TrimLeft("/"+path, "/")
 }
