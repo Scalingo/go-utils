@@ -2,6 +2,10 @@
 
 ## To Be Released
 
+## v5.5.13 (August 27 2019)
+
+* [S3] Trim left slashes [#92](https://github.com/Scalingo/go-utils/pull/92)
+
 ## v5.5.11 (August 26 2019)
 
 * Add simple object storage package for S3 and swift
