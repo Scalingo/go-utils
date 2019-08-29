@@ -17,7 +17,7 @@ func (d Base) IsPersisted() bool {
 	return !d.CreatedAt.IsZero()
 }
 
-func (d *Base) getID() bson.ObjectId {
+func (d Base) getID() bson.ObjectId {
 	return d.ID
 }
 
