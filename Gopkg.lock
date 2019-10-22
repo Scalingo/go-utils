@@ -10,20 +10,20 @@
   version = "v1.0.1"
 
 [[projects]]
-  digest = "1:81a6eea8b6e1654174ae4dbf3aed14ad2a67549b15e2a524b665d39c574b5c1d"
+  digest = "1:a1613b7d93254c887ab09d00829872bf3abb62702af7b47a82c7a3079e299280"
   name = "github.com/Scalingo/logrus-rollbar"
   packages = ["."]
   pruneopts = ""
-  revision = "e205c8087ba6b9ee8297af49c7c37ad8ee17637c"
-  version = "v1.3.0"
+  revision = "20275d9189973abaddb7ff363f529e6a38211bad"
+  version = "v1.3.2"
 
 [[projects]]
-  branch = "deps/new-rollbar"
-  digest = "1:ead73659dd01c92f51ad0bfe759e96820102f375b3161e797f39c9beaebffef8"
+  digest = "1:24367ebab768da60dff74720731fa15494f7cd3b36f626016ff694ad9fd7cfa2"
   name = "github.com/Soulou/errgo-rollbar"
   packages = ["."]
   pruneopts = ""
-  revision = "233adcd05fe2aa08c6f7449c26a5530726f05207"
+  revision = "77469913cd68bc7aa12d62433bbc565e068a74a9"
+  version = "v0.1.0"
 
 [[projects]]
   digest = "1:3f72590f47228b9bbad42ebfca58f61b4920d73b42a0280560645fffa3a454ec"
