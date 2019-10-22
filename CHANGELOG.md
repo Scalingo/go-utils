@@ -2,6 +2,10 @@
 
 ## To Be Released
 
+## v5.5.15 (Oct 22 2019)
+
+* Update deps related to Rollbar/logging/errors
+
 ## v5.5.14 (August 30 2019)
 
 * Add EnsureParanoidIndices method [#49](https://github.com/Scalingo/go-utils/pull/49)
