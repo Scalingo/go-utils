@@ -4,13 +4,28 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"crypto/sha256"
+	"hash"
 	"io"
 
 	"github.com/pkg/errors"
 )
 
 type EncryptedWriter struct {
-	csw cipher.StreamWriter
+	csw             cipher.StreamWriter
+	computeSHA256   bool
+	plainSHA256     hash.Hash
+	encryptedSHA256 hash.Hash
+}
+
+type WriterOpt func(*EncryptedWriter)
+
+func WithSHA256() WriterOpt {
+	return WriterOpt(func(w *EncryptedWriter) {
+		w.computeSHA256 = true
+		w.plainSHA256 = sha256.New()
+		w.encryptedSHA256 = sha256.New()
+	})
 }
 
 func NewWriter(writer io.Writer, key []byte) (*EncryptedWriter, []byte, error) {
@@ -36,6 +51,8 @@ func NewWriter(writer io.Writer, key []byte) (*EncryptedWriter, []byte, error) {
 }
 
 func (w *EncryptedWriter) Write(b []byte) (int, error) {
+	if w.computeSHA256 {
+	}
 	return w.csw.W.Write(b)
 }
 
