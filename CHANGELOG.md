@@ -1,5 +1,20 @@
 # Changelog
 
+## To Be Released
+
+## v5.5.14 (August 30 2019)
+
+* Add EnsureParanoidIndices method [#49](https://github.com/Scalingo/go-utils/pull/49)
+
+## v5.5.13 (August 27 2019)
+
+* [S3] Trim left slashes [#92](https://github.com/Scalingo/go-utils/pull/92)
+
+## v5.5.11 (August 26 2019)
+
+* Add simple object storage package for S3 and swift
+  [#89](https://github.com/Scalingo/go-utils/pull/89)
+
 ## v5.5.10 (May 14 2019)
 
 * Migration from `github.com/satori/go.uuid` to its fork `github.com/gofrs/uuid`, Reason:

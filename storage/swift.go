@@ -118,5 +118,5 @@ func (s *Swift) segmentPath(path string) (string, error) {
 }
 
 func (s *Swift) fullPath(path string) string {
-	return strings.TrimLeft(s.cfg.Prefix+"/"+path, "/")
+	return strings.TrimLeft(s.cfg.Prefix+"/"+fullPath(path), "/")
 }
