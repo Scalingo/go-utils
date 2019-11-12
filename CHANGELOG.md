@@ -2,6 +2,10 @@
 
 ## To Be Released
 
+## v5.6.1 (Nov 12 2019)
+
+* Update go-etcd-cron dependency with new etcd deps
+
 ## v5.6.0 (Nov 12 2019)
 
 * Update deps Related to etcd (new location github.com/coreos/etcd -> go.etcd.io)
