@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Scalingo/go-etcd-cron"
+	etcdcron "github.com/Scalingo/go-etcd-cron"
 	"github.com/Scalingo/go-utils/logger"
-	"github.com/coreos/etcd/clientv3"
+	"go.etcd.io/etcd/clientv3"
 )
 
 type SetupOpts struct {

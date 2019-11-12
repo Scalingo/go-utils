@@ -10,12 +10,12 @@
   version = "v0.3.1"
 
 [[projects]]
-  digest = "1:f12bfd384d627d554b827bff3a5951435034827b703057baa228ddc708ab3f74"
+  digest = "1:04dbdc55ac416862ea05d3a326a01848a545ee93e4de56f8583d7c002313bf3d"
   name = "github.com/Scalingo/go-etcd-cron"
   packages = ["."]
   pruneopts = ""
-  revision = "09f2d0456ecee6e20e0b9608dd29e9193503532f"
-  version = "v1.0.1"
+  revision = "1545ac576e75545085d9fc42033bf247bd7b1f1d"
+  version = "v1.1.0"
 
 [[projects]]
   digest = "1:a1613b7d93254c887ab09d00829872bf3abb62702af7b47a82c7a3079e299280"
@@ -63,15 +63,8 @@
   digest = "1:e2d8cad4cf0c1b724c97f4cb1f01cbb9531bcc07b73c5ff3fe575cf6f8a2f75f"
   name = "github.com/coreos/etcd"
   packages = [
-    "auth/authpb",
-    "clientv3",
-    "clientv3/concurrency",
-    "etcdserver/api/v3rpc/rpctypes",
-    "etcdserver/etcdserverpb",
-    "mvcc/mvccpb",
     "pkg/tlsutil",
     "pkg/transport",
-    "pkg/types",
   ]
   pruneopts = ""
   revision = "28f3f26c0e303392556035b694f75768d449d33d"
@@ -295,6 +288,7 @@
     "clientv3/balancer/connectivity",
     "clientv3/balancer/picker",
     "clientv3/balancer/resolver/endpoint",
+    "clientv3/concurrency",
     "clientv3/credentials",
     "etcdserver/api/v3rpc/rpctypes",
     "etcdserver/etcdserverpb",
@@ -469,7 +463,6 @@
     "encoding",
     "encoding/proto",
     "grpclog",
-    "health/grpc_health_v1",
     "internal",
     "internal/backoff",
     "internal/balancerload",
@@ -567,7 +560,6 @@
     "github.com/aws/aws-sdk-go-v2/aws/endpoints",
     "github.com/aws/aws-sdk-go-v2/service/s3",
     "github.com/aws/aws-sdk-go-v2/service/s3/s3manager",
-    "github.com/coreos/etcd/clientv3",
     "github.com/coreos/etcd/pkg/transport",
     "github.com/facebookgo/grace/gracenet",
     "github.com/gofrs/uuid",
