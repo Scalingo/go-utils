@@ -2,6 +2,10 @@
 
 ## To Be Released
 
+## v5.6.2 (Nov 14 2019)
+
+* Update errgo, pkg/errors, logrus, and unfreeze their version
+
 ## v5.6.1 (Nov 12 2019)
 
 * Update go-etcd-cron dependency with new etcd deps
