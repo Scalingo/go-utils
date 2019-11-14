@@ -220,12 +220,12 @@
   version = "v1.0.7"
 
 [[projects]]
-  digest = "1:7365acd48986e205ccb8652cc746f09c8b7876030d53710ea6ef7d0bd0dcd7ca"
+  digest = "1:1d7e1867c49a6dd9856598ef7c3123604ea3daabf5b83f303ff457bcbc410b1d"
   name = "github.com/pkg/errors"
   packages = ["."]
   pruneopts = ""
-  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
-  version = "v0.8.0"
+  revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
+  version = "v0.8.1"
 
 [[projects]]
   digest = "1:256484dbbcd271f9ecebc6795b2df8cad4c458dd0f5fd82a8c2fa0c29f233411"
@@ -252,15 +252,15 @@
   version = "v1.1.0"
 
 [[projects]]
-  digest = "1:a30066593578732a356dc7e5d7f78d69184ca65aeeff5939241a3ab10559bb06"
+  digest = "1:f7b541897bcde05a04a044c342ddc7425aab7e331f37b47fbb486cd16324b48e"
   name = "github.com/stretchr/testify"
   packages = [
     "assert",
     "require",
   ]
   pruneopts = ""
-  revision = "12b6f73e6084dad08a7c6e575284b177ecafbc71"
-  version = "v1.2.1"
+  revision = "221dbe5ed46703ee255b1da0dec05086f5035f62"
+  version = "v1.4.0"
 
 [[projects]]
   digest = "1:e8b9785327cd3103084ad3a0d7184e028f5ede42a6bdce1afd64dfa192ae3267"
@@ -493,12 +493,12 @@
   version = "v1.25.1"
 
 [[projects]]
-  branch = "v1"
-  digest = "1:77b4e2069b2966911133cb54f2b266bb4bc454483ab1ac5011ed811cdde06314"
+  digest = "1:6e33aad38842c1b02b44ebd73ec2d0a81e30945a1db0d30fefbe7b884171bffd"
   name = "gopkg.in/errgo.v1"
   packages = ["."]
   pruneopts = ""
-  revision = "442357a80af5c6bf9b6d51ae791a39c3421004f3"
+  revision = "08dc5b27f5ced65786776ec936b4298445ec70cf"
+  version = "v1.0.1"
 
 [[projects]]
   branch = "v2"
@@ -513,6 +513,14 @@
   ]
   pruneopts = ""
   revision = "3f83fa5005286a7fe593b055f0d7771a7dce4655"
+
+[[projects]]
+  digest = "1:16c45073e621eb4261d14740daeaf985e53657ebb40b14fc56499c23e876f84a"
+  name = "gopkg.in/yaml.v2"
+  packages = ["."]
+  pruneopts = ""
+  revision = "f90ceb4f409096b60e2e9076b38b304b8246e5fa"
+  version = "v2.2.5"
 
 [[projects]]
   digest = "1:afc5a2804ec9be0562c937b0c684bbaf5a9c4aef7511677b539c3806be3f4783"
