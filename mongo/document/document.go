@@ -66,7 +66,7 @@ func Create(ctx context.Context, collectionName string, doc document) error {
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
 	log.WithField(collectionName, doc).Debugf("save '%v'", collectionName)
-	return c.Insert(&doc)
+	return c.Insert(doc)
 
 }
 
@@ -83,7 +83,7 @@ func Save(ctx context.Context, collectionName string, doc document) error {
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
 	log.WithField(collectionName, doc).Debugf("save '%v'", collectionName)
-	_, err := c.UpsertId(doc.getID(), &doc)
+	_, err := c.UpsertId(doc.getID(), doc)
 	return err
 }
 
