@@ -24,8 +24,9 @@ func TestRetrier(t *testing.T) {
 	})
 
 	t.Run("When the method works fine the second time", func(t *testing.T) {
-		retrier := New(WithWaitDuration(1 * time.Millisecond))
+		retrier := New(WithWaitDuration(100 * time.Millisecond))
 		tries := 0
+		before := time.Now()
 		err := retrier.Do(context.Background(), func(ctx context.Context) error {
 			tries++
 			if tries == 2 {
@@ -33,9 +34,13 @@ func TestRetrier(t *testing.T) {
 			}
 			return fmt.Errorf("Error attempt %v", tries)
 		})
+		duration := time.Now().Sub(before)
 
 		assert.NoError(t, err)
 		assert.Equal(t, tries, 2)
+		if duration < 100*time.Millisecond {
+			t.Fatalf("Test should take at least 100ms, took %v", duration)
+		}
 	})
 
 	t.Run("When the method never returns", func(t *testing.T) {
@@ -62,5 +67,19 @@ func TestRetrier(t *testing.T) {
 
 		assert.Error(t, err)
 		assert.Equal(t, tries, 1)
+	})
+
+	t.Run("With timeout should ignore sleep", func(t *testing.T) {
+		retrier := New(WithWaitDuration(1 * time.Second))
+		ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+		defer cancel()
+
+		before := time.Now()
+		err := retrier.Do(ctx, func(ctx context.Context) error {
+			return errors.New("test")
+		})
+
+		assert.Error(t, err)
+		assert.WithinDuration(t, time.Now(), before, 100*time.Millisecond)
 	})
 }

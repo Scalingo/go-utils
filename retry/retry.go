@@ -51,9 +51,14 @@ func (r Retryer) Do(ctx context.Context, method Retryable) error {
 			return nil
 		}
 
-		deadLineErr := ctx.Err()
-		if deadLineErr != nil {
-			return deadLineErr
+		timer := time.NewTimer(r.waitDuration)
+		select {
+		case <-timer.C:
+		case <-ctx.Done():
+			deadLineErr := ctx.Err()
+			if deadLineErr != nil {
+				return deadLineErr
+			}
 		}
 	}
 	return err
