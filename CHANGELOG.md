@@ -2,6 +2,10 @@
 
 ## To Be Released
 
+## v5.7.0 (Jan 29 2020)
+
+* Add Retry interface
+
 ## v5.6.2 (Nov 14 2019)
 
 * Update errgo, pkg/errors, logrus, and unfreeze their version
