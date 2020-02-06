@@ -72,7 +72,7 @@ func interfaceSignature(pkg, iName string) (string, error) {
 												interfaceSig = fmt.Sprintf("%s\n%s(%s)(%s)\n", interfaceSig, methodName, methodParams, methodType)
 
 											default:
-												panic("Unexpected AST type")
+												panic(fmt.Sprintf("Unexpected AST type: %T", v))
 											}
 										}
 										return interfaceSig, nil
