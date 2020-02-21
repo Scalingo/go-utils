@@ -2,12 +2,13 @@ package logger
 
 import (
 	"context"
+	"os"
 
 	"github.com/sirupsen/logrus"
 )
 
 // Default generate a logrus logger with the configuration defined in the environment and the hooks used in the plugins
-func Default() *logrus.Logger {
+func Default() logrus.FieldLogger {
 	logger := logrus.New()
 	logger.SetLevel(logLevel())
 	logger.Formatter = formatter()
@@ -16,7 +17,12 @@ func Default() *logrus.Logger {
 		logger.Hooks.Add(hook)
 	}
 
-	return logger
+	var fieldLogger logrus.FieldLogger = logger
+	if os.Getenv("REGION_NAME") != "" {
+		fieldLogger = fieldLogger.WithField("region", os.Getenv("REGION_NAME"))
+	}
+
+	return fieldLogger
 }
 
 // NewContextWithLogger generate a new context (based on context.Background()) and add a Default() logger on top of it
@@ -26,7 +32,7 @@ func NewContextWithLogger() context.Context {
 
 // AddLoggerToContext add the Default() logger on top of the current context
 func AddLoggerToContext(ctx context.Context) context.Context {
-	return context.WithValue(ctx, "logger", logrus.NewEntry(Default()))
+	return context.WithValue(ctx, "logger", Default())
 }
 
 // Get return the logger stored in the context or create a new one if the logger is not set
