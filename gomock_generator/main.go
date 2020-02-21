@@ -19,9 +19,6 @@ type app struct {
 }
 
 func main() {
-	log := logger.Default()
-	ctx := logger.ToCtx(context.Background(), log)
-
 	cli.AppHelpTemplate = fmt.Sprintf(`%s
 EXAMPLE:
 
@@ -68,13 +65,15 @@ VERSION:
 		app.config.MocksFilePath = c.GlobalString("mocks-filepath")
 		app.config.SignaturesFilename = c.GlobalString("signatures-filename")
 		app.config.ConcurrentGoroutines = c.GlobalInt("concurrent-goroutines")
-		if c.GlobalBool("debug") {
-			log.SetLevel(logrus.DebugLevel)
-			logger.ToCtx(ctx, log)
-		}
 		return nil
 	}
-	app.cli.Action = func(_ctx *cli.Context) error {
+	app.cli.Action = func(c *cli.Context) error {
+		log := logger.Default()
+		if c.GlobalBool("debug") {
+			log = logger.Default(logger.WithLogLevel(logrus.DebugLevel))
+		}
+		ctx := logger.ToCtx(context.Background(), log)
+
 		log.WithFields(logrus.Fields{
 			"mocks_file_path":       app.config.MocksFilePath,
 			"signatures_filename":   app.config.SignaturesFilename,

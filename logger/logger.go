@@ -7,14 +7,42 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// Opt is a function-option type for the Default() method.
+type Opt func(*logrus.Logger)
+
+// WithLogLevel let us define the level of verbosity of the logger
+func WithLogLevel(lvl logrus.Level) Opt {
+	return func(l *logrus.Logger) {
+		l.SetLevel(lvl)
+	}
+}
+
+func WithLogFormatter(f logrus.Formater) Opt {
+	return func(l *logrus.Logger) {
+		l.SetFormatter(f)
+	}
+}
+
+func WithHooks(hooks []logrus.Hook) Opt {
+	return func(l *logrus.Logger) {
+		for _, h := range hooks {
+			l.Hooks.Add(h)
+		}
+	}
+}
+
 // Default generate a logrus logger with the configuration defined in the environment and the hooks used in the plugins
-func Default() logrus.FieldLogger {
+func Default(opts ...Opt) logrus.FieldLogger {
 	logger := logrus.New()
 	logger.SetLevel(logLevel())
 	logger.Formatter = formatter()
 
 	for _, hook := range Plugins().Hooks() {
 		logger.Hooks.Add(hook)
+	}
+
+	for _, opt := range opts {
+		opt(logger)
 	}
 
 	var fieldLogger logrus.FieldLogger = logger
