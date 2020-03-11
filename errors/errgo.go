@@ -14,3 +14,20 @@ func ErrgoRoot(err error) error {
 		err = e.Underlying()
 	}
 }
+
+type UserFacingError struct {
+	UserMessage    string
+	TechnicalError error
+}
+
+func (err *UserFacingError) Error() string {
+	return err.UserMessage
+}
+
+func WrapUseMessageAroundError(err error, wrappingMessage string) error {
+	userFacingError := &UserFacingError{
+		UserMessage:    wrappingMessage,
+		TechnicalError: err,
+	}
+	return userFacingError
+}
