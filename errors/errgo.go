@@ -15,19 +15,40 @@ func ErrgoRoot(err error) error {
 	}
 }
 
-type UserFacingError struct {
-	UserMessage    string
-	TechnicalError error
+type UserFacingError interface {
+	error
+	UserFacingError() string
+	TechnicalError() error
 }
 
-func (err *UserFacingError) Error() string {
-	return err.UserMessage
+type GenericUserFacingError struct {
+	technicalError  error
+	userFacingError string
 }
 
-func WrapUseMessageAroundError(err error, wrappingMessage string) error {
-	userFacingError := &UserFacingError{
-		UserMessage:    wrappingMessage,
-		TechnicalError: err,
+func (err GenericUserFacingError) Error() string {
+	return err.technicalError.Error()
+}
+
+func (err GenericUserFacingError) TechnicalError() error {
+	return err.technicalError
+}
+
+func (err GenericUserFacingError) UserFacingError() string {
+	return err.userFacingError
+}
+
+func WrapUseMessageAroundError(err error, msg string) UserFacingError {
+	return GenericUserFacingError{
+		technicalError:  err,
+		userFacingError: msg,
 	}
-	return userFacingError
+}
+
+func IsUserFacingError(err error) bool {
+	if err == nil {
+		return false
+	}
+	_, is := err.(UserFacingError)
+	return is
 }
