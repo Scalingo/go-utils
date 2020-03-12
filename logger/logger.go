@@ -17,7 +17,7 @@ func WithLogLevel(lvl logrus.Level) Opt {
 	}
 }
 
-func WithLogFormatter(f logrus.Formater) Opt {
+func WithLogFormatter(f logrus.Formatter) Opt {
 	return func(l *logrus.Logger) {
 		l.SetFormatter(f)
 	}
