@@ -2,6 +2,10 @@
 
 ## To Be Released
 
+## v6.0.0 (Mar 13 2020)
+
+* [logger] Add `region_name` field by default if `REGION_NAME` environment variable
+
 ## v5.7.0 (Jan 29 2020)
 
 * Add Retry interface
