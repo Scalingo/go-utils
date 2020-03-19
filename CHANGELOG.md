@@ -2,6 +2,8 @@
 
 ## To Be Released
 
+* Fix `ValidationErrors` `Error` output [#109](https://github.com/Scalingo/go-utils/pull/109)
+
 ## v5.7.0 (Jan 29 2020)
 
 * Add Retry interface
