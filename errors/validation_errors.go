@@ -17,6 +17,7 @@ func (v *ValidationErrors) Error() string {
 		buffer.WriteString(field)
 		buffer.WriteString("=")
 		buffer.WriteString(strings.Join(errors, ","))
+		buffer.WriteString(" ")
 	}
 	return buffer.String()
 }

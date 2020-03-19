@@ -1,7 +1,10 @@
 package errors
 
-import "github.com/stretchr/testify/require"
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/require"
+)
 
 func TestValidationErrorsBuilder_Merge(t *testing.T) {
 	cases := map[string]struct {
