@@ -63,3 +63,42 @@ func TestValidationErrorsBuilder_MergeWithPrefix(t *testing.T) {
 		})
 	}
 }
+
+func TestValidationErrors_Error(t *testing.T) {
+	cases := map[string]struct {
+		Errors         ValidationErrors
+		ExpectedString string
+	}{
+		"should return a string with one error in it": {
+			Errors: ValidationErrors{
+				Errors: map[string][]string{
+					"name": {"invalid name"},
+				},
+			},
+			ExpectedString: "name=invalid name",
+		},
+		"should return a string with multiple errors in it with the same field name": {
+			Errors: ValidationErrors{
+				Errors: map[string][]string{
+					"name": {"invalid name", "should contains alphanumeric characters"},
+				},
+			},
+			ExpectedString: "name=invalid name, should contains alphanumeric characters",
+		},
+		"should return a string with multiple errors in it with multiple field name": {
+			Errors: ValidationErrors{
+				Errors: map[string][]string{
+					"name": {"invalid name", "should contains alphanumeric characters"},
+					"type": {"invalid type", "type not exist"},
+				},
+			},
+			ExpectedString: "name=invalid name, should contains alphanumeric characters type=invalid type, type not exist",
+		},
+	}
+
+	for title, c := range cases {
+		t.Run(title, func(t *testing.T) {
+			require.Equal(t, c.ExpectedString, c.Errors.Error())
+		})
+	}
+}

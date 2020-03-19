@@ -16,7 +16,7 @@ func (v *ValidationErrors) Error() string {
 
 	for field, errs := range v.Errors {
 		index++
-		builder.WriteString(fmt.Sprintf("%s=%s", field, strings.Join(errs, ",")))
+		builder.WriteString(fmt.Sprintf("%s=%s", field, strings.Join(errs, ", ")))
 		if index < len(v.Errors) {
 			builder.WriteString(" ")
 		}
