@@ -2,6 +2,10 @@
 
 ## To Be Released
 
+## v6.1.0 (Mar 27 2020)
+
+* [retry] Add WithMaxDuration option to set a timeout
+
 ## v6.0.0 (Mar 13 2020)
 
 * [logger] Add `region_name` field by default if `REGION_NAME` environment variable
