@@ -82,4 +82,69 @@ func TestRetrier(t *testing.T) {
 		assert.Error(t, err)
 		assert.WithinDuration(t, time.Now(), before, 100*time.Millisecond)
 	})
+
+	t.Run("With max duration it should ignore sleep", func(t *testing.T) {
+		retrier := New(
+			WithWaitDuration(1*time.Second),
+			WithMaxDuration(50*time.Millisecond),
+		)
+
+		before := time.Now()
+		err := retrier.Do(context.Background(), func(ctx context.Context) error {
+			return errors.New("test")
+		})
+
+		assert.Error(t, err)
+		assert.WithinDuration(t, time.Now(), before, 100*time.Millisecond)
+	})
+	t.Run("With max duration it should ignore sleep", func(t *testing.T) {
+		retrier := New(
+			WithWaitDuration(1*time.Second),
+			WithMaxDuration(50*time.Millisecond),
+		)
+
+		before := time.Now()
+		err := retrier.Do(context.Background(), func(ctx context.Context) error {
+			return errors.New("test")
+		})
+
+		assert.Error(t, err)
+		assert.WithinDuration(t, time.Now(), before, 100*time.Millisecond)
+	})
+
+	t.Run("If both timeout are specified, the first one which is expired should exist the method", func(t *testing.T) {
+		// Timeout from call context first
+		retrier := New(
+			WithWaitDuration(1*time.Second),
+			WithMaxDuration(200*time.Millisecond),
+		)
+
+		ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+		defer cancel()
+
+		before := time.Now()
+		err := retrier.Do(ctx, func(ctx context.Context) error {
+			return errors.New("test")
+		})
+
+		assert.Error(t, err)
+		assert.WithinDuration(t, time.Now(), before, 100*time.Millisecond)
+
+		// Timeout from MaxDuration first
+		retrier = New(
+			WithWaitDuration(1*time.Second),
+			WithMaxDuration(50*time.Millisecond),
+		)
+
+		ctx, cancel = context.WithTimeout(context.Background(), 200*time.Millisecond)
+		defer cancel()
+
+		before = time.Now()
+		err = retrier.Do(ctx, func(ctx context.Context) error {
+			return errors.New("test")
+		})
+
+		assert.Error(t, err)
+		assert.WithinDuration(t, time.Now(), before, 100*time.Millisecond)
+	})
 }
