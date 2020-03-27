@@ -84,7 +84,7 @@ func (r Retryer) Do(ctx context.Context, method Retryable) error {
 	timeoutCtx := context.Background()
 	if r.maxDuration != 0 {
 		var cancel func()
-		timeoutCtx, cancel = context.WithTimeout(ctx, r.maxDuration)
+		timeoutCtx, cancel = context.WithTimeout(timeoutCtx, r.maxDuration)
 		defer cancel()
 	}
 
