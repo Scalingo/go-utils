@@ -2,6 +2,10 @@
 
 ## To Be Released
 
+## v6.2.1 (Mar 27 2020)
+
+* [retry] Add a constructor for RetryCancelError
+
 ## v6.2.0 (Mar 27 2020)
 
 * [retry] Add ability to get the last error (LastErr) in case of timeout
