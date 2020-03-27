@@ -2,6 +2,11 @@
 
 ## To Be Released
 
+## v6.2.0 (Mar 27 2020)
+
+* [retry] Add ability to get the last error (LastErr) in case of timeout
+* [retry] Add a custom error type to cancel a Retry `RetryCancelError`
+
 ## v6.1.0 (Mar 27 2020)
 
 * [retry] Add WithMaxDuration option to set a timeout
