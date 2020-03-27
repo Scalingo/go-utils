@@ -2,9 +2,26 @@ package retry
 
 import (
 	"context"
+	"fmt"
 	"math"
 	"time"
 )
+
+type RetryErrScope string
+
+const (
+	MaxDurationScope RetryErrScope = "max-duration"
+	ContextScope     RetryErrScope = "context"
+)
+
+type RetryErr struct {
+	Scope RetryErrScope
+	Err   error
+}
+
+func (err RetryErr) Error() string {
+	return fmt.Sprintf("retry error (%v): %v", err.Scope, err.Err)
+}
 
 type Retryable func(ctx context.Context) error
 
@@ -82,9 +99,15 @@ func (r Retryer) Do(ctx context.Context, method Retryable) error {
 		select {
 		case <-timer.C:
 		case <-timeoutCtx.Done():
-			return timeoutCtx.Err()
+			return RetryErr{
+				Scope: MaxDurationScope,
+				Err:   timeoutCtx.Err(),
+			}
 		case <-ctx.Done():
-			return ctx.Err()
+			return RetryErr{
+				Scope: ContextScope,
+				Err:   ctx.Err(),
+			}
 		}
 	}
 	return err
