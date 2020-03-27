@@ -53,6 +53,18 @@ func TestRetrier(t *testing.T) {
 		assert.Error(t, err)
 	})
 
+	t.Run("It should cancel the retry if a RetryCancelError is retuned", func(t *testing.T) {
+		retrier := New(WithWaitDuration(1 * time.Millisecond))
+		count := 0
+		err := retrier.Do(context.Background(), func(ctx context.Context) error {
+			count++
+			return RetryCancelError{errors.New("nop")}
+		})
+
+		assert.Error(t, err)
+		assert.Equal(t, count, 1)
+	})
+
 	t.Run("When the context is canceled after the first try", func(t *testing.T) {
 		retrier := New(WithWaitDuration(1 * time.Millisecond))
 		tries := 0
@@ -77,7 +89,7 @@ func TestRetrier(t *testing.T) {
 
 		before := time.Now()
 		err := retrier.Do(ctx, func(ctx context.Context) error {
-			return errors.New("test")
+			return errors.New("retry test error")
 		})
 
 		assert.Error(t, err)
@@ -85,6 +97,7 @@ func TestRetrier(t *testing.T) {
 		require.IsType(t, RetryError{}, err)
 		assert.EqualValues(t, err.(RetryError).Scope, ContextScope)
 		assert.Equal(t, err.(RetryError).Err, context.DeadlineExceeded)
+		assert.Equal(t, err.(RetryError).LastErr.Error(), "retry test error")
 	})
 
 	t.Run("With max duration it should ignore sleep", func(t *testing.T) {
@@ -95,7 +108,7 @@ func TestRetrier(t *testing.T) {
 
 		before := time.Now()
 		err := retrier.Do(context.Background(), func(ctx context.Context) error {
-			return errors.New("test")
+			return errors.New("max duration error")
 		})
 
 		assert.Error(t, err)
@@ -103,6 +116,7 @@ func TestRetrier(t *testing.T) {
 		require.IsType(t, RetryError{}, err)
 		assert.EqualValues(t, err.(RetryError).Scope, MaxDurationScope)
 		assert.Equal(t, err.(RetryError).Err, context.DeadlineExceeded)
+		assert.Equal(t, err.(RetryError).LastErr.Error(), "max duration error")
 	})
 
 	t.Run("If both timeout are specified, the first one which is expired should exist the method", func(t *testing.T) {
