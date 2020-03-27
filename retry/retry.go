@@ -2,8 +2,26 @@ package retry
 
 import (
 	"context"
+	"fmt"
+	"math"
 	"time"
 )
+
+type RetryErrorScope string
+
+const (
+	MaxDurationScope RetryErrorScope = "max-duration"
+	ContextScope     RetryErrorScope = "context"
+)
+
+type RetryError struct {
+	Scope RetryErrorScope
+	Err   error
+}
+
+func (err RetryError) Error() string {
+	return fmt.Sprintf("retry error (%v): %v", err.Scope, err.Err)
+}
 
 type Retryable func(ctx context.Context) error
 
@@ -13,6 +31,7 @@ type Retry interface {
 
 type Retryer struct {
 	waitDuration time.Duration
+	maxDuration  time.Duration
 	maxAttempts  int
 }
 
@@ -30,6 +49,18 @@ func WithMaxAttempts(maxAttempts int) RetryerOptsFunc {
 	}
 }
 
+func WithMaxDuration(duration time.Duration) RetryerOptsFunc {
+	return func(r *Retryer) {
+		r.maxDuration = duration
+	}
+}
+
+func WithoutMaxAttempts() RetryerOptsFunc {
+	return func(r *Retryer) {
+		r.maxAttempts = math.MaxInt32
+	}
+}
+
 func New(opts ...RetryerOptsFunc) Retryer {
 	r := &Retryer{
 		waitDuration: 10 * time.Second,
@@ -43,7 +74,20 @@ func New(opts ...RetryerOptsFunc) Retryer {
 	return *r
 }
 
+// Do execute method following rules of the Retry struct
+// Two timeouts co-exist:
+// * The one given as param of 'method': can be the scope of the current
+// http.Request for instance
+// * The one defined with the option WithMaxDuration, which would cancel the
+// retry loop if it has expired.
 func (r Retryer) Do(ctx context.Context, method Retryable) error {
+	timeoutCtx := context.Background()
+	if r.maxDuration != 0 {
+		var cancel func()
+		timeoutCtx, cancel = context.WithTimeout(timeoutCtx, r.maxDuration)
+		defer cancel()
+	}
+
 	var err error
 	for i := 0; i < r.maxAttempts; i++ {
 		err = method(ctx)
@@ -54,10 +98,15 @@ func (r Retryer) Do(ctx context.Context, method Retryable) error {
 		timer := time.NewTimer(r.waitDuration)
 		select {
 		case <-timer.C:
+		case <-timeoutCtx.Done():
+			return RetryError{
+				Scope: MaxDurationScope,
+				Err:   timeoutCtx.Err(),
+			}
 		case <-ctx.Done():
-			deadLineErr := ctx.Err()
-			if deadLineErr != nil {
-				return deadLineErr
+			return RetryError{
+				Scope: ContextScope,
+				Err:   ctx.Err(),
 			}
 		}
 	}

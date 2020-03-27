@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRetrier(t *testing.T) {
@@ -81,5 +82,68 @@ func TestRetrier(t *testing.T) {
 
 		assert.Error(t, err)
 		assert.WithinDuration(t, time.Now(), before, 100*time.Millisecond)
+		require.IsType(t, RetryError{}, err)
+		assert.EqualValues(t, err.(RetryError).Scope, ContextScope)
+		assert.Equal(t, err.(RetryError).Err, context.DeadlineExceeded)
+	})
+
+	t.Run("With max duration it should ignore sleep", func(t *testing.T) {
+		retrier := New(
+			WithWaitDuration(1*time.Second),
+			WithMaxDuration(50*time.Millisecond),
+		)
+
+		before := time.Now()
+		err := retrier.Do(context.Background(), func(ctx context.Context) error {
+			return errors.New("test")
+		})
+
+		assert.Error(t, err)
+		assert.WithinDuration(t, time.Now(), before, 100*time.Millisecond)
+		require.IsType(t, RetryError{}, err)
+		assert.EqualValues(t, err.(RetryError).Scope, MaxDurationScope)
+		assert.Equal(t, err.(RetryError).Err, context.DeadlineExceeded)
+	})
+
+	t.Run("If both timeout are specified, the first one which is expired should exist the method", func(t *testing.T) {
+		// Timeout from call context first
+		retrier := New(
+			WithWaitDuration(1*time.Second),
+			WithMaxDuration(500*time.Millisecond),
+		)
+
+		ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+		defer cancel()
+
+		before := time.Now()
+		err := retrier.Do(ctx, func(ctx context.Context) error {
+			return errors.New("test")
+		})
+
+		assert.Error(t, err)
+		assert.WithinDuration(t, time.Now(), before, 100*time.Millisecond)
+		require.IsType(t, RetryError{}, err)
+		assert.EqualValues(t, err.(RetryError).Scope, ContextScope)
+		assert.Equal(t, err.(RetryError).Err, context.DeadlineExceeded)
+
+		// Timeout from MaxDuration first
+		retrier = New(
+			WithWaitDuration(1*time.Second),
+			WithMaxDuration(50*time.Millisecond),
+		)
+
+		ctx, cancel = context.WithTimeout(context.Background(), 500*time.Millisecond)
+		defer cancel()
+
+		before = time.Now()
+		err = retrier.Do(ctx, func(ctx context.Context) error {
+			return errors.New("test")
+		})
+
+		assert.Error(t, err)
+		assert.WithinDuration(t, time.Now(), before, 100*time.Millisecond)
+		require.IsType(t, RetryError{}, err)
+		assert.EqualValues(t, err.(RetryError).Scope, MaxDurationScope)
+		assert.Equal(t, err.(RetryError).Err, context.DeadlineExceeded)
 	})
 }
