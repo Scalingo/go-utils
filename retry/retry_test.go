@@ -58,7 +58,7 @@ func TestRetrier(t *testing.T) {
 		count := 0
 		err := retrier.Do(context.Background(), func(ctx context.Context) error {
 			count++
-			return RetryCancelError{errors.New("nop")}
+			return NewRetryCancelError(errors.New("nop"))
 		})
 
 		assert.Error(t, err)

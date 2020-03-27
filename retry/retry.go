@@ -31,6 +31,10 @@ type RetryCancelError struct {
 	error
 }
 
+func NewRetryCancelError(err error) RetryCancelError {
+	return RetryCancelError{error: err}
+}
+
 func (err RetryCancelError) Error() string {
 	return err.error.Error()
 }
