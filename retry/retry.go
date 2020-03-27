@@ -15,12 +15,24 @@ const (
 )
 
 type RetryError struct {
-	Scope RetryErrorScope
-	Err   error
+	Scope   RetryErrorScope
+	Err     error
+	LastErr error
 }
 
 func (err RetryError) Error() string {
-	return fmt.Sprintf("retry error (%v): %v", err.Scope, err.Err)
+	return fmt.Sprintf("retry error (%v): %v, last error %v", err.Scope, err.Err, err.LastErr)
+}
+
+// RetryCancelError is a error wrapping type that the user of a Retry should
+// use to cancel retry operations before the end of maxAttempts/maxDuration
+// conditions
+type RetryCancelError struct {
+	error
+}
+
+func (err RetryCancelError) Error() string {
+	return err.error.Error()
 }
 
 type Retryable func(ctx context.Context) error
@@ -94,19 +106,24 @@ func (r Retryer) Do(ctx context.Context, method Retryable) error {
 		if err == nil {
 			return nil
 		}
+		if rerr, ok := err.(RetryCancelError); ok {
+			return rerr.error
+		}
 
 		timer := time.NewTimer(r.waitDuration)
 		select {
 		case <-timer.C:
 		case <-timeoutCtx.Done():
 			return RetryError{
-				Scope: MaxDurationScope,
-				Err:   timeoutCtx.Err(),
+				Scope:   MaxDurationScope,
+				Err:     timeoutCtx.Err(),
+				LastErr: err,
 			}
 		case <-ctx.Done():
 			return RetryError{
-				Scope: ContextScope,
-				Err:   ctx.Err(),
+				Scope:   ContextScope,
+				Err:     ctx.Err(),
+				LastErr: err,
 			}
 		}
 	}
