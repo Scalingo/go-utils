@@ -5,7 +5,7 @@ regular interval.
 
 ## Usage
 
-Creating a new retryer is done with
+Creating a new retryer is done with:
 
 ```go
 retry.New(retry.WithWaitDuration(10*time.Second), retry.WithMaxAttempts(5))
@@ -13,10 +13,12 @@ retry.New(retry.WithWaitDuration(10*time.Second), retry.WithMaxAttempts(5))
 
 Possible options for the constructor are:
 
-- `WithWaitDuration`: time interval between each execution of the code.
+- `WithWaitDuration`: time interval between each execution of the code
+  (default to 10 seconds).
 - `WithMaxDuration`: the retryer will stop executing after the specified
-  amount of time.
-- `WithMaxAttempts`: the retryer will execute the at most N times. N being this max attempts parameter.
+  amount of time (disabled by default).
+- `WithMaxAttempts`: the retryer will execute the at most N times. N being
+  this max attempts parameter (default to 5).
 - `WithoutMaxAttempts`: disable the max attempts parameter.
 
 Then execute the retryer with:
