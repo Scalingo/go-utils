@@ -33,6 +33,10 @@ func interfaceSignature(pkg, iName string) (string, error) {
 		return "", errors.Wrap(err, "fail to parse package")
 	}
 
+	if len(packages) == 0 {
+		return "", errors.Errorf("no package found in %v for interface %v", fullPath, iName)
+	}
+
 	if len(packages) != 1 {
 		for name := range packages {
 			fmt.Println(name)
