@@ -119,6 +119,27 @@ func TestRetrier(t *testing.T) {
 		assert.Equal(t, err.(RetryError).LastErr.Error(), "max duration error")
 	})
 
+	t.Run("With a callback", func(t *testing.T) {
+		callbackCalls := 0
+		retrier := New(
+			WithMaxAttempts(1),
+			WithWaitDuration(50*time.Millisecond),
+			WithWaitDuration(100*time.Millisecond),
+			WithErrorCallback(func(ctx context.Context, err error, currentAttempt, maxAttempts int) {
+				callbackCalls++
+				assert.Equal(t, err.Error(), "TestError")
+				assert.Equal(t, 0, currentAttempt)
+				assert.Equal(t, 1, maxAttempts)
+			}),
+		)
+
+		err := retrier.Do(context.Background(), func(ctx context.Context) error {
+			return errors.New("TestError")
+		})
+		assert.Error(t, err)
+		assert.Equal(t, callbackCalls, 1)
+	})
+
 	t.Run("If both timeout are specified, the first one which is expired should exist the method", func(t *testing.T) {
 		// Timeout from call context first
 		retrier := New(
