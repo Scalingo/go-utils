@@ -1,4 +1,4 @@
-# Various Go Utils and Helpers v5.7.1
+# Various Go Utils and Helpers v6.3.0
 
 [ ![Codeship Status for
 Scalingo/go-utils](https://app.codeship.com/projects/af479f60-02c1-0136-d485-6637162e76f3/status?branch=master)](https://app.codeship.com/projects/280142)

@@ -2,6 +2,8 @@
 
 ## To Be Released
 
+## v6.3.0 (Apr 21 2020)
+
 * [retry] Add WithErrorCallback option to add callbacks when a try fails
 
 ## v6.2.1 (Mar 27 2020)
