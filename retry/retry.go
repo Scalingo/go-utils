@@ -41,14 +41,17 @@ func (err RetryCancelError) Error() string {
 
 type Retryable func(ctx context.Context) error
 
+type ErrorCallback func(ctx context.Context, err error, currentAttempt, maxAttempts int)
+
 type Retry interface {
 	Do(ctx context.Context, method Retryable) error
 }
 
 type Retryer struct {
-	waitDuration time.Duration
-	maxDuration  time.Duration
-	maxAttempts  int
+	waitDuration   time.Duration
+	maxDuration    time.Duration
+	maxAttempts    int
+	errorCallbacks []ErrorCallback
 }
 
 type RetryerOptsFunc func(r *Retryer)
@@ -77,10 +80,17 @@ func WithoutMaxAttempts() RetryerOptsFunc {
 	}
 }
 
+func WithErrorCallback(c ErrorCallback) RetryerOptsFunc {
+	return func(r *Retryer) {
+		r.errorCallbacks = append(r.errorCallbacks, c)
+	}
+}
+
 func New(opts ...RetryerOptsFunc) Retryer {
 	r := &Retryer{
-		waitDuration: 10 * time.Second,
-		maxAttempts:  5,
+		waitDuration:   10 * time.Second,
+		maxAttempts:    5,
+		errorCallbacks: make([]ErrorCallback, 0),
 	}
 
 	for _, opt := range opts {
@@ -112,6 +122,10 @@ func (r Retryer) Do(ctx context.Context, method Retryable) error {
 		}
 		if rerr, ok := err.(RetryCancelError); ok {
 			return rerr.error
+		}
+
+		for _, c := range r.errorCallbacks {
+			c(ctx, err, i, r.maxAttempts)
 		}
 
 		timer := time.NewTimer(r.waitDuration)
