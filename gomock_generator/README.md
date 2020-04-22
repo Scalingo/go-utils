@@ -36,3 +36,22 @@ GLOBAL OPTIONS:
 The `gomockgenerator` package provides a `GenerateMocks` function. It works along with the
 `GenerationConfiguration` and `MocksConfiguration` structures. Comments in the code explain the
 purpose of every attribute.
+
+## Installation troubleshooting
+
+## Fix code dependencies
+
+Fix urfave/cli to 934abfb to avoid breaking changes during go build
+```
+cd $GOPATH/src/github.com/urfave/cli
+git checkout master
+git pull origin master
+git checkout 934abfb
+```
+
+## Install external dependencies
+
+```
+sudo apt-get install mockgen
+sudo apt-get install golang-go.tools
+```
