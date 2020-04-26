@@ -29,6 +29,13 @@ func Create(ctx context.Context, src string, dst io.Writer, opts CreateOpts) err
 	log := logger.Get(ctx).WithField("src", src)
 	log.Debug("Create archive")
 
+	if src == "" {
+		return errors.New("src is empty")
+	}
+	if dst == nil {
+		return errors.New("dst writer is nil")
+	}
+
 	fs := opts.Fs
 	if fs == nil {
 		fs = fspkg.NewOsFs()
