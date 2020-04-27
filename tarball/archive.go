@@ -17,8 +17,6 @@ import (
 	"github.com/spf13/afero"
 )
 
-var EmptyArchiveError = errors.New("empty archive")
-
 // CreateOpts gathers all possible options to create a tarball archive
 type CreateOpts struct {
 	Fs          fspkg.Fs
