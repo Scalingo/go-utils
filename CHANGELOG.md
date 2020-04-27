@@ -2,6 +2,20 @@
 
 ## To Be Released
 
+## v6.4.0 (Apr 27 2020)
+
+* [fs] New package allow to manipulate the filesystem through a mockable structure
+
+    ```
+    // Mockable interface
+    fs.Fs
+
+    // Real OS filesystem manipulation
+    fs.NewOsFs()
+    // In-memory empty filesystem
+    fs.NewMemFs()
+    ```
+
 ## v6.3.0 (Apr 21 2020)
 
 * [retry] Add WithErrorCallback option to add callbacks when a try fails
