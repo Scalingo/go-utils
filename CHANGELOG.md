@@ -2,9 +2,19 @@
 
 ## To Be Released
 
+## v6.5.0 (Apr 28 2020)
+
+* [tarball] New package to manipulate tar and gzipped tarballs
+
+    ```
+    tarball.Create(context.Context, file string, in io.Reader, opts tarball.CreateOpts) error
+    tarball.Extract(context.Context, file string, out io.Writer, opts tarball.ExtractOpts) error
+    tarball.Tar(io.Writer, map[string]tarball.TarFileHeader) error
+    ```
+
 ## v6.4.0 (Apr 27 2020)
 
-* [fs] New package allow to manipulate the filesystem through a mockable structure
+* [fs] New package to manipulate the filesystem through a mockable interface
 
     ```
     // Mockable interface
