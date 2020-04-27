@@ -13,6 +13,8 @@ type TarFileReader struct {
 	io.Reader
 }
 
+// Tar is a methods to write a tarball out of a map of TarFileReader, data can
+// then come from disk or memory.
 func Tar(writer io.Writer, files map[string]TarFileReader) error {
 	tarWriter := tar.NewWriter(writer)
 	defer tarWriter.Close()
