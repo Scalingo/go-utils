@@ -32,7 +32,7 @@ func WithNoDiskCacheWrite(c *Copier) {
 	c.noDiskCacheWrite = true
 }
 
-func WitNoDiskCacheWrite(c *Copier) {
+func WithNoDiskCache(c *Copier) {
 	WithNoDiskCacheWrite(c)
 	WithNoDiskCacheRead(c)
 }
