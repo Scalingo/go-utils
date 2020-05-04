@@ -2,6 +2,18 @@
 
 ## To Be Released
 
+## v6.6.0 (May 4 2020)
+
+* [io] New package with a configurable io.Copier
+
+    ```
+    io.NewCopier(...opts io.CopierOpt)
+    io.WithBufferSize(int64)
+    io.WithNoDiskCacheRead
+    io.WithNoDiskCacheWrite
+    io.WithNoDiskCache
+    ```
+
 ## v6.5.0 (Apr 28 2020)
 
 * [tarball] New package to manipulate tar and gzipped tarballs
