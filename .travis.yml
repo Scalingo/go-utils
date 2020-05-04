@@ -1,0 +1,15 @@
+language: go
+go:
+- 1.x
+services: mongodb
+before_install:
+- curl -L -s https://github.com/golang/dep/releases/download/v0.5.4/dep-linux-amd64
+  -o $GOPATH/bin/dep
+- chmod +x $GOPATH/bin/dep
+install:
+- dep ensure
+script:
+- go test ./...
+notifications:
+  slack:
+    secure: Y9bS4jIKNXLM+pCt06gXiG0QMK0iqxU5WVxnLYCs1Eq4oLLDsAqQv79IYEDZ3tZ3YSF7IR2JaVrVidA6k+DHhHnv72kojSWEtUZNJ3SD3OYk+I5cpE11poxMAZupnHK8oytlV5e0WRqQH3A5zIk6ylwQpo/hOcsNdODh8K6fErgCikpQMKztwWRDZl0FlD0eaF4xTst2FatldoO67fYuzkK0F4OgHMlpH7RKixCdfZwAgp6L1a5BNmFfcCMDccuCTi9GB2fo3Oigs3t3uliuIg8DUKYJAO21bYs0doff+nhqmg+ClZPfebXSP/lhQ0oMlqNyDSv+4LjySXYQNI5VjPvmz3oFJBiOgLTo2FKSxtbY4kCVh8UaJFPxjteqpoaAMHAvyoYQApUqfoOM8HxdzrKmQ8S1hISoIdem2p6M0V9JZD92w3yOapeZ5DYt4MT+iYINGbzaqRr4n5n0DCcVwqebPVnXS+Gbuiu6LcVVZvoK8UIni1/AZ5aXFvmulEFKkfnDxU2ySvWDNmxMgCWRieRiSIJcsauFwlkEARvfMjHBUt15zgqaKevsn3GUcfUuYVd0Qr1aNGa0w8qDWz2L02YnEkEtmiigaxZ14GLJkOnTVvC/8SnrnbrnOfcQ11U0ShLmwcS4FgwdSt6dISMEzHe8CXYDM4QAbpYyjsX1LjI=
