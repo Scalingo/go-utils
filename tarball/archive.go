@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	fspkg "github.com/Scalingo/go-utils/fs"
+	iopkg "github.com/Scalingo/go-utils/io"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/pkg/errors"
 	"github.com/spf13/afero"
@@ -21,6 +22,10 @@ import (
 type CreateOpts struct {
 	Fs          fspkg.Fs
 	IncludeRoot bool
+
+	// CopyBufferSize is the size of the memory buffer used to perform the copy
+	// from the file to the tarball writer
+	CopyBufferSize int64
 }
 
 func Create(ctx context.Context, src string, dst io.Writer, opts CreateOpts) error {
@@ -33,6 +38,16 @@ func Create(ctx context.Context, src string, dst io.Writer, opts CreateOpts) err
 	if dst == nil {
 		return errors.New("dst writer is nil")
 	}
+	if opts.CopyBufferSize == 0 {
+		// 512kB of read buffer when reading file (instead of 32kB default)
+		opts.CopyBufferSize = 512 * 1024 * 1024
+	}
+
+	copierOpts := []iopkg.CopierOpt{
+		iopkg.WithBufferSize(opts.CopyBufferSize),
+		iopkg.WithNoDiskCacheRead,
+	}
+	copier := iopkg.NewCopier(copierOpts...)
 
 	fs := opts.Fs
 	if fs == nil {
@@ -69,7 +84,7 @@ func Create(ctx context.Context, src string, dst io.Writer, opts CreateOpts) err
 				return err
 			}
 			defer file.Close()
-			_, err = io.Copy(tarWriter, file)
+			_, err = copier.Copy(tarWriter, file)
 			if err != nil {
 				return err
 			}
@@ -84,10 +99,11 @@ func Create(ctx context.Context, src string, dst io.Writer, opts CreateOpts) err
 }
 
 type ExtractOpts struct {
-	Fs   fspkg.Fs
-	User string
-	UID  int
-	GID  int
+	Fs             fspkg.Fs
+	User           string
+	UID            int
+	GID            int
+	CopyBufferSize int64
 }
 
 func Extract(ctx context.Context, dst string, reader io.Reader, opts *ExtractOpts) error {
@@ -98,6 +114,16 @@ func Extract(ctx context.Context, dst string, reader io.Reader, opts *ExtractOpt
 	if fs == nil {
 		fs = fspkg.NewOsFs()
 	}
+
+	if opts.CopyBufferSize == 0 {
+		// 512kB of read buffer when reading file (instead of 32kB default)
+		opts.CopyBufferSize = 512 * 1024 * 1024
+	}
+	copierOpts := []iopkg.CopierOpt{
+		iopkg.WithBufferSize(opts.CopyBufferSize),
+		iopkg.WithNoDiskCacheWrite,
+	}
+	copier := iopkg.NewCopier(copierOpts...)
 
 	var (
 		archiveUserUID int
@@ -149,7 +175,7 @@ func Extract(ctx context.Context, dst string, reader io.Reader, opts *ExtractOpt
 			if err != nil {
 				return errors.Wrapf(err, "invalid err file")
 			}
-			_, err = io.Copy(fd, tarReader)
+			_, err = copier.Copy(fd, tarReader)
 			if err != nil {
 				return errors.Wrapf(err, "invalid err file during copy")
 			}
