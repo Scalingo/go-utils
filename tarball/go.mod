@@ -5,7 +5,7 @@ go 1.13
 require (
 	github.com/Scalingo/go-utils v6.4.0+incompatible
 	github.com/Scalingo/go-utils/fs v0.0.0-20200427101022-73f3c803d841
-	github.com/Scalingo/go-utils/io v0.0.0-20200504141852-e9c1b87bc668 // indirect
+	github.com/Scalingo/go-utils/io v0.0.0-20200504141852-e9c1b87bc668
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.5.0 // indirect

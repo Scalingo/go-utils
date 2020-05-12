@@ -2,6 +2,10 @@
 
 ## To Be Released
 
+## v6.7.0 (May 12 2020)
+
+* [tarbal] Use `io` package and disable disk cache when creating/extracting tarball archives
+
 ## v6.6.0 (May 4 2020)
 
 * [io] New package with a configurable io.Copier
