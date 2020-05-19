@@ -40,7 +40,7 @@ func Create(ctx context.Context, src string, dst io.Writer, opts CreateOpts) err
 	}
 	if opts.CopyBufferSize == 0 {
 		// 512kB of read buffer when reading file (instead of 32kB default)
-		opts.CopyBufferSize = 512 * 1024 * 1024
+		opts.CopyBufferSize = 512 * 1024
 	}
 
 	copierOpts := []iopkg.CopierOpt{
@@ -117,7 +117,7 @@ func Extract(ctx context.Context, dst string, reader io.Reader, opts *ExtractOpt
 
 	if opts.CopyBufferSize == 0 {
 		// 512kB of read buffer when reading file (instead of 32kB default)
-		opts.CopyBufferSize = 512 * 1024 * 1024
+		opts.CopyBufferSize = 512 * 1024
 	}
 	copierOpts := []iopkg.CopierOpt{
 		iopkg.WithBufferSize(opts.CopyBufferSize),
