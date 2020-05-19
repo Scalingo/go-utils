@@ -2,6 +2,10 @@
 
 ## To Be Released
 
+## v6.7.1 (May 19 2020)
+
+* [tarball] Fix unit: use a buffer of 512kb not MB...
+
 ## v6.7.0 (May 12 2020)
 
 * [tarbal] Use `io` package and disable disk cache when creating/extracting tarball archives
