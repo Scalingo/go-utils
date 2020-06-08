@@ -2,6 +2,8 @@
 
 ## To Be Released
 
+* [storage] Get swift configuration from the environment
+
 ## v6.7.1 (May 19 2020)
 
 * [tarball] Fix unit: use a buffer of 512kb not MB...
