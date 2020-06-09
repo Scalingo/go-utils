@@ -21,6 +21,5 @@ git push --tags
 hub release create v7.0.0
 ```
 
-Tag and release a new version on GitHub
-[here](https://github.com/Scalingo/go-utils/releases/new) which includes the
-changelog.
+The title of the release should be the version number and the text of the
+release is the same as the changelog.
