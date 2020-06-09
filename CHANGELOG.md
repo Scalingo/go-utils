@@ -2,6 +2,8 @@
 
 ## To Be Released
 
+## v7.0.0 (June 09 2020)
+
 * [storage] Get swift configuration from the environment
 
 ## v6.7.1 (May 19 2020)
