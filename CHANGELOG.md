@@ -2,6 +2,10 @@
 
 ## To Be Released
 
+## v7.0.1 (June 12 2020)
+
+* [storage] Fix Swift authentication
+
 ## v7.0.0 (June 09 2020)
 
 * [storage] Get swift configuration from the environment
