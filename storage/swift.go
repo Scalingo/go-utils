@@ -37,6 +37,11 @@ func NewSwift(cfg SwiftConfig) (*Swift, error) {
 		return nil, errors.Wrapf(err, "fail to get Swift configuration from the environment")
 	}
 
+	err = conn.Authenticate()
+	if err != nil {
+		return nil, errors.Wrapf(err, "fail to authentication to Swift")
+	}
+
 	return &Swift{cfg: cfg, conn: conn}, nil
 }
 
