@@ -527,14 +527,15 @@ func formatRangeUnified(start, stop int) string {
 
 // Unified diff parameters
 type UnifiedDiff struct {
-	A        []string // First sequence lines
-	FromFile string   // First file name
-	FromDate string   // First file time
-	B        []string // Second sequence lines
-	ToFile   string   // Second file name
-	ToDate   string   // Second file time
-	Eol      string   // Headers end of line, defaults to LF
-	Context  int      // Number of context lines
+	A          []string // First sequence lines
+	FromFile   string   // First file name
+	FromDate   string   // First file time
+	B          []string // Second sequence lines
+	ToFile     string   // Second file name
+	ToDate     string   // Second file time
+	Eol        string   // Headers end of line, defaults to LF
+	Context    int      // Number of context lines
+	WithColors bool     // Active color support or not
 }
 
 // Compare two sequences of lines; generate the delta as a unified diff.
@@ -572,6 +573,19 @@ func WriteUnifiedDiff(writer io.Writer, diff UnifiedDiff) error {
 		diff.Eol = "\n"
 	}
 
+	var addedFormatTitle = "+++ %s%s%s"
+	var deletedFormatTitle = "--- %s%s%s"
+	var diffFormat = "@@ -%s +%s @@%s"
+	var deletedFormat = "-"
+	var addedFormat = "+"
+	if diff.WithColors {
+		addedFormatTitle = "\033[1;32m+++\033[0m %s%s%s"
+		deletedFormatTitle = "\033[1;31m---\033[0m %s%s%s"
+		diffFormat = "\033[1;33m@@ -%s +%s @@%s\033[0m"
+		deletedFormat = "\033[1;31m-\033[0m"
+		addedFormat = "\033[1;32m+\033[0m"
+	}
+
 	started := false
 	m := NewMatcher(diff.A, diff.B)
 	for _, g := range m.GetGroupedOpCodes(diff.Context) {
@@ -586,11 +600,12 @@ func WriteUnifiedDiff(writer io.Writer, diff UnifiedDiff) error {
 				toDate = "\t" + diff.ToDate
 			}
 			if diff.FromFile != "" || diff.ToFile != "" {
-				err := wf("\033[1;31m---\033[0m %s%s%s", diff.FromFile, fromDate, diff.Eol)
+				err := wf(deletedFormatTitle, diff.FromFile, fromDate, diff.Eol)
 				if err != nil {
 					return err
 				}
-				err = wf("\033[1;32m+++\033[0m %s%s%s", diff.ToFile, toDate, diff.Eol)
+
+				err = wf(addedFormatTitle, diff.ToFile, toDate, diff.Eol)
 				if err != nil {
 					return err
 				}
@@ -599,7 +614,7 @@ func WriteUnifiedDiff(writer io.Writer, diff UnifiedDiff) error {
 		first, last := g[0], g[len(g)-1]
 		range1 := formatRangeUnified(first.I1, last.I2)
 		range2 := formatRangeUnified(first.J1, last.J2)
-		if err := wf("\033[1;33m@@ -%s +%s @@%s\033[0m", range1, range2, diff.Eol); err != nil {
+		if err := wf(diffFormat, range1, range2, diff.Eol); err != nil {
 			return err
 		}
 		for _, c := range g {
@@ -614,14 +629,14 @@ func WriteUnifiedDiff(writer io.Writer, diff UnifiedDiff) error {
 			}
 			if c.Tag == 'r' || c.Tag == 'd' {
 				for _, line := range diff.A[i1:i2] {
-					if err := ws("\033[1;31m-\033[0m" + line); err != nil {
+					if err := ws(deletedFormat + line); err != nil {
 						return err
 					}
 				}
 			}
 			if c.Tag == 'r' || c.Tag == 'i' {
 				for _, line := range diff.B[j1:j2] {
-					if err := ws("\033[1;32m+\033[0m" + line); err != nil {
+					if err := ws(addedFormat + line); err != nil {
 						return err
 					}
 				}
