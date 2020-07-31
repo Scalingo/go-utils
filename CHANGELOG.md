@@ -2,6 +2,7 @@
 
 ## To Be Released
 
+* [difflib] Add a way to activate/desactivate the colors formatting
 * [difflib] Add colors to have a better display in the shell
 * [difflib] New package to print diff between two content in the shell (git diff style)
 
