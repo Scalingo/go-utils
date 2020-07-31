@@ -2,6 +2,9 @@
 
 ## To Be Released
 
+* [difflib] Add colors to have a better display in the shell
+* [difflib] New package to print diff between two content in the shell (git diff style)
+
 ## v7.0.1 (June 12 2020)
 
 * [storage] Fix Swift authentication
@@ -16,7 +19,7 @@
 
 ## v6.7.0 (May 12 2020)
 
-* [tarbal] Use `io` package and disable disk cache when creating/extracting tarball archives
+* [tarball] Use `io` package and disable disk cache when creating/extracting tarball archives
 
 ## v6.6.0 (May 4 2020)
 
