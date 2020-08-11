@@ -3,7 +3,7 @@
 ## To Be Released
 
 * [difflib] Add a way to activate/desactivate the colors formatting
-* [difflib] Add colors to have a better display in the shell
+* [difflib] Add colors to have a better display in the shell (only for unified diff)
 * [difflib] New package to print diff between two content in the shell (git diff style)
 
 ## v7.0.1 (June 12 2020)
