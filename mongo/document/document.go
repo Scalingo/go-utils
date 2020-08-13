@@ -65,7 +65,10 @@ func Create(ctx context.Context, collectionName string, doc document) error {
 
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
-	log.WithField(collectionName, doc).Debugf("save '%v'", collectionName)
+	log.WithFields(logrus.Fields{
+		"collection": collectionName,
+		"doc_id":     doc.getID(),
+	}).Debugf("save '%v'", collectionName)
 	return c.Insert(doc)
 
 }
@@ -82,7 +85,10 @@ func Save(ctx context.Context, collectionName string, doc document) error {
 
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
-	log.WithField(collectionName, doc).Debugf("save '%v'", collectionName)
+	log.WithFields(logrus.Fields{
+		"collection": collectionName,
+		"doc_id":     doc.getID(),
+	}).Debugf("save '%v'", collectionName)
 	_, err := c.UpsertId(doc.getID(), doc)
 	return err
 }
@@ -96,7 +102,10 @@ func ReallyDestroy(ctx context.Context, collectionName string, doc document) err
 	log := logger.Get(ctx)
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
-	log.WithField(collectionName, doc).Debugf("remove '%v'", collectionName)
+	log.WithFields(logrus.Fields{
+		"collection": collectionName,
+		"doc_id":     doc.getID(),
+	}).Debugf("remove '%v'", collectionName)
 	return c.RemoveId(doc.getID())
 }
 
@@ -232,7 +241,10 @@ func Update(ctx context.Context, collectionName string, update bson.M, doc docum
 		return err
 	}
 
-	log.WithField("query", update).Debugf("update %v", collectionName)
+	log.WithFields(logrus.Fields{
+		"collection": collectionName,
+		"doc_id":     doc.getID(),
+	}).Debugf("update %v", collectionName)
 	return c.UpdateId(doc.getID(), update)
 }
 

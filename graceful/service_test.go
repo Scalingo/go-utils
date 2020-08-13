@@ -161,7 +161,9 @@ func ensurePidFileProcessKilled(t *testing.T) {
 		process, err := os.FindProcess(pid)
 		require.NoError(t, err)
 		err = process.Kill()
-		require.NoError(t, err)
+		if err != nil && !strings.Contains(err.Error(), "already finished") {
+			require.NoError(t, err)
+		}
 		err = os.Remove("./test-fixtures/server.pid")
 		require.NoError(t, err)
 	}
