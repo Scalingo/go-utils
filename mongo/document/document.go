@@ -232,7 +232,7 @@ func Update(ctx context.Context, collectionName string, update bson.M, doc docum
 		return err
 	}
 
-	log.WithField("query", update).Debugf("update %v", collectionName)
+	log.Debugf("update %v", collectionName)
 	return c.UpdateId(doc.getID(), update)
 }
 
