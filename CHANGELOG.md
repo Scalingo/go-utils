@@ -2,9 +2,12 @@
 
 ## To Be Released
 
+## v7.1.0 (August 13 2020)
+
 * [difflib] Add a way to activate/desactivate the colors formatting
 * [difflib] Add colors to have a better display in the shell (only for unified diff)
 * [difflib] New package to print diff between two content in the shell (git diff style)
+* [document] Do not add sensitive information in the log
 
 ## v7.0.1 (June 12 2020)
 
