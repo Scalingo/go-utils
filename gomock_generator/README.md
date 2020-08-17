@@ -37,21 +37,11 @@ The `gomockgenerator` package provides a `GenerateMocks` function. It works alon
 `GenerationConfiguration` and `MocksConfiguration` structures. Comments in the code explain the
 purpose of every attribute.
 
-## Installation troubleshooting
-
-## Fix code dependencies
-
-Fix urfave/cli to 934abfb to avoid breaking changes during go build
-```
-cd $GOPATH/src/github.com/urfave/cli
-git checkout master
-git pull origin master
-git checkout 934abfb
-```
-
-## Install external dependencies
+## Installation
 
 ```
-sudo apt-get install mockgen
-sudo apt-get install golang-go.tools
+cd $GOPATH/src/github.com/Scalingo/go-utils
+dep ensure
+cd gomock_generator
+go install
 ```
