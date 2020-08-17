@@ -8,6 +8,7 @@ import (
 	"go/token"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -23,7 +24,14 @@ func interfaceHash(pkg, iName string) (string, error) {
 }
 
 func interfaceSignature(pkg, iName string) (string, error) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return "", errors.Wrap(err, "fail to get current working directory")
+	}
 	fullPath := path.Join(os.Getenv("GOPATH"), "src", pkg)
+	if _, err := os.Stat(filepath.Join(cwd, "vendor", pkg)); err == nil {
+		fullPath = filepath.Join(cwd, "vendor", pkg)
+	}
 	fileSet := token.NewFileSet()
 	packages, err := parser.ParseDir(fileSet, fullPath, func(info os.FileInfo) bool {
 		return !strings.HasSuffix(info.Name(), "_test.go")
