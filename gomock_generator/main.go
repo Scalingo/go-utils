@@ -134,7 +134,20 @@ func validateBinaryDeps() error {
 			cmd := exec.Command("go", "get", binary.Package)
 			err = cmd.Run()
 			if err != nil {
-				return errors.Wrapf(err, "Fail to run 'go get %v'", binary.Package)
+				output, outputErr := cmd.CombinedOutput()
+				if outputErr != nil {
+					return errors.Wrapf(
+						err,
+						"Fail to run 'go get %v', fail to get command output, error: \n\n%v\n",
+						binary.Package, outputErr,
+					)
+				} else {
+					return errors.Wrapf(
+						err,
+						"Fail to run 'go get %v', output: \n\n%v\n",
+						binary.Package, string(output),
+					)
+				}
 			}
 			_, err = exec.LookPath(binary.Executable)
 			if err != nil {
