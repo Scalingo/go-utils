@@ -31,7 +31,7 @@ func (w ParallelWorker) CompleteProcessing() {
 	w.endFunction()
 }
 
-// Perform adds a job to handle. It can be called any number of time The
+// Perform adds a job to handle. It can be called any number of times. The
 // concurrency will never get over the number of workers defined at the
 // initialization
 func (w ParallelWorker) Perform(function func()) {
