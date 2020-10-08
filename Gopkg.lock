@@ -170,6 +170,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:99203b48b0117e9531518f4b99fda6b83941e728aa08d9b2f7947546958d2c13"
+  name = "github.com/guillermo/go.procmeminfo"
+  packages = ["."]
+  pruneopts = ""
+  revision = "be4355a9fb0e5340ebee5b05aafe85948eaccd1b"
+
+[[projects]]
+  branch = "master"
   digest = "1:931319bf81b495c90041425adc169ba39f1cc4c43e59ee69678092aca2fa43b9"
   name = "github.com/iancoleman/strcase"
   packages = ["."]
@@ -204,12 +212,12 @@
   revision = "b729f2633dfe35f4d1d8a32385f6685610ce1cb5"
 
 [[projects]]
-  digest = "1:c8cbf7532bf2beace82ee1a180dc367f74a90f66b8653dc4443517711597a376"
+  digest = "1:88312df566687ed74d1977688f3cdba2ee754d633bc0340f39582360f39d2658"
   name = "github.com/ncw/swift"
   packages = ["."]
   pruneopts = ""
-  revision = "24e3012fc8a71f004a6455bce2088031d50bf2b6"
-  version = "v1.0.47"
+  revision = "e4d0540ae5ee8c698a2c2c4eaf0f96adb6190a5b"
+  version = "v1.0.52"
 
 [[projects]]
   digest = "1:7a69f6a3a33929f8b66aa39c93868ad1698f06417fe627ae067559beb94504bd"
@@ -250,6 +258,17 @@
   pruneopts = ""
   revision = "a67f783a3814b8729bd2dac5780b5f78f8dbd64d"
   version = "v1.1.0"
+
+[[projects]]
+  digest = "1:956f655c87b7255c6b1ae6c203ebb0af98cf2a13ef2507e34c9bf1c0332ac0f5"
+  name = "github.com/spf13/afero"
+  packages = [
+    ".",
+    "mem",
+  ]
+  pruneopts = ""
+  revision = "588a75ec4f32903aa5e39a2619ba6a4631e28424"
+  version = "v1.2.2"
 
 [[projects]]
   digest = "1:f7b541897bcde05a04a044c342ddc7425aab7e331f37b47fbb486cd16324b48e"
@@ -572,17 +591,20 @@
     "github.com/facebookgo/grace/gracenet",
     "github.com/gofrs/uuid",
     "github.com/golang/mock/gomock",
+    "github.com/guillermo/go.procmeminfo",
     "github.com/influxdata/influxdb/client/v2",
     "github.com/ncw/swift",
     "github.com/nsqio/go-nsq",
     "github.com/pkg/errors",
     "github.com/rollbar/rollbar-go",
     "github.com/sirupsen/logrus",
+    "github.com/spf13/afero",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/require",
     "github.com/stvp/rollbar",
     "github.com/urfave/cli",
     "go.etcd.io/etcd/clientv3",
+    "golang.org/x/sys/unix",
     "gopkg.in/errgo.v1",
     "gopkg.in/mgo.v2",
     "gopkg.in/mgo.v2/bson",

@@ -36,3 +36,7 @@
 [[constraint]]
   branch = "v2"
   name = "gopkg.in/mgo.v2"
+
+[[constraint]]
+  name = "github.com/ncw/swift"
+  version = "1.x"

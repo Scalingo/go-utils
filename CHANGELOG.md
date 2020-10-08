@@ -2,13 +2,28 @@
 
 ## To Be Released
 
+## v7.1.0 (August 13 2020)
+
+* [difflib] Add a way to activate/desactivate the colors formatting
+* [difflib] Add colors to have a better display in the shell (only for unified diff)
+* [difflib] New package to print diff between two content in the shell (git diff style)
+* [document] Do not add sensitive information in the log
+
+## v7.0.1 (June 12 2020)
+
+* [storage] Fix Swift authentication
+
+## v7.0.0 (June 09 2020)
+
+* [storage] Get swift configuration from the environment
+
 ## v6.7.1 (May 19 2020)
 
 * [tarball] Fix unit: use a buffer of 512kb not MB...
 
 ## v6.7.0 (May 12 2020)
 
-* [tarbal] Use `io` package and disable disk cache when creating/extracting tarball archives
+* [tarball] Use `io` package and disable disk cache when creating/extracting tarball archives
 
 ## v6.6.0 (May 4 2020)
 

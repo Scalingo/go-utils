@@ -10,6 +10,16 @@ Bump new version number in:
 - `CHANGELOG.md`
 - `README.md`
 
-Tag and release a new version on GitHub
-[here](https://github.com/Scalingo/go-utils/releases/new) which includes the
-changelog.
+Commit, tag and create a new release:
+
+```sh
+git add CHANGELOG.md README.md
+git commit -m "Bump v7.1.0"
+git tag v7.1.0
+git push origin master
+git push --tags
+hub release create v7.1.0
+```
+
+The title of the release should be the version number and the text of the
+release is the same as the changelog.
