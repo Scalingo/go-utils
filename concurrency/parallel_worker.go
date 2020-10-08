@@ -12,7 +12,7 @@ type ParallelWorker struct {
 
 // NewParallelWorker constructs a new parallel worker running at maximum
 // <workers> jobs at a time. <endFunc> is a callback called when all the jobs
-// are over and that "Stop" is called.
+// are over and that "CompleteProcessing" is called.
 func NewParallelWorker(workers int, endFunc func()) ParallelWorker {
 	w := ParallelWorker{
 		sem:         make(chan struct{}, workers),
@@ -23,9 +23,9 @@ func NewParallelWorker(workers int, endFunc func()) ParallelWorker {
 	return w
 }
 
-// Stop should be called to release all resources. It waits for all the runnings
+// CompleteProcessing should be called to release all resources. It waits for all the runnings
 // tasks to be over Calling Perform after this would result in a panic
-func (w ParallelWorker) Stop() {
+func (w ParallelWorker) CompleteProcessing() {
 	w.wg.Wait()
 	close(w.sem)
 	w.endFunction()

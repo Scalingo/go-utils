@@ -16,7 +16,7 @@ func ExampleParallelWorker() {
 	worker := NewParallelWorker(10, func() {
 		close(res)
 		// Ensure that our logics has finished reading all the values before
-		// quitting Stop()
+		// quitting CompleteProcessing()
 		<-over
 	})
 
@@ -39,7 +39,7 @@ func ExampleParallelWorker() {
 	}()
 
 	// Wait the end of the length computation
-	worker.Stop()
+	worker.CompleteProcessing()
 
 	fmt.Println("totalLength:", totalLength)
 	// Output:
