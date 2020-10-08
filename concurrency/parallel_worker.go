@@ -32,7 +32,7 @@ func (w ParallelWorker) Stop() {
 }
 
 // Perform adds a job to handle. It can be called any number of time The
-// concurrencry will never get over the number of workers defined at the
+// concurrency will never get over the number of workers defined at the
 // initialization
 func (w ParallelWorker) Perform(function func()) {
 	w.wg.Add(1)
