@@ -6,6 +6,7 @@ require (
 	github.com/Scalingo/go-utils/env v0.0.0-00010101000000-000000000000
 	github.com/Scalingo/go-utils/logger v0.0.0-00010101000000-000000000000
 	github.com/gofrs/uuid v3.3.0+incompatible
+	github.com/golang/mock v1.4.4
 	github.com/nsqio/go-nsq v1.0.8
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.7.0
