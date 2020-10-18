@@ -8,8 +8,7 @@ import (
 	"time"
 
 	"go.etcd.io/etcd/clientv3"
-
-	"github.com/coreos/etcd/pkg/transport"
+	"go.etcd.io/etcd/pkg/transport"
 )
 
 // ConfigFromEnv generates a etcd clientv3 config from the environment using the following variables:

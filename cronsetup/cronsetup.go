@@ -6,7 +6,7 @@ import (
 
 	etcdcron "github.com/Scalingo/go-etcd-cron"
 	"github.com/Scalingo/go-utils/logger"
-	"go.etcd.io/etcd/clientv3"
+	"go.etcd.io/etcd/v3/clientv3"
 )
 
 type SetupOpts struct {
