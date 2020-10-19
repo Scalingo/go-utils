@@ -124,10 +124,17 @@ func GenerateMocks(ctx context.Context, gcfg GenerationConfiguration, mocksCfg M
 
 func generateMock(ctx context.Context, basePackage string, mock MockConfiguration, sigs map[string]string) (string, string, error) {
 	log := logger.Get(ctx)
+
 	if mock.MockFile == "" {
+		basepath := filepath.Base(mock.SrcPackage)
+		// If srcPackage is empty, its Base is "."
+		if basepath == "." {
+			basepath = filepath.Base(basePackage)
+		}
+
 		mock.MockFile = path.Join(
 			mock.SrcPackage,
-			fmt.Sprintf("%smock", filepath.Base(mock.SrcPackage)),
+			fmt.Sprintf("%smock", basepath),
 			fmt.Sprintf("%s_mock.go", strings.ToLower(mock.Interface)),
 		)
 	}
@@ -135,10 +142,6 @@ func generateMock(ctx context.Context, basePackage string, mock MockConfiguratio
 	if mock.DstPackage == "" {
 		dst := filepath.Base(filepath.Dir(mock.MockFile))
 		mock.DstPackage = dst
-	}
-
-	if mock.SrcPackage == "" {
-		mock.SrcPackage = filepath.Dir(mock.MockFile)
 	}
 
 	if !mock.External {
