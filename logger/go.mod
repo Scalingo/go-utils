@@ -1,4 +1,4 @@
-module github.com/Scalingo/go-utils/logger
+module github.com/Scalingo/go-utils/logger/v7
 
 go 1.14
 
