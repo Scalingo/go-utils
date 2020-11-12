@@ -8,6 +8,8 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rollbar/rollbar-go v1.2.0
 	github.com/sirupsen/logrus v1.7.0
-	github.com/stretchr/testify v1.2.2
+	github.com/stretchr/objx v0.3.0 // indirect
+	github.com/stretchr/testify v1.6.1
 	gopkg.in/errgo.v1 v1.0.1 // indirect
+	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
 )

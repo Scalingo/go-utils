@@ -14,8 +14,10 @@ require (
 	github.com/golang/mock v1.4.4
 	github.com/ncw/swift v1.0.52
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.2.2
+	github.com/stretchr/objx v0.3.0 // indirect
+	github.com/stretchr/testify v1.6.1
 	golang.org/x/sys v0.0.0-20201112073958-5cba982894dd // indirect
+	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
 )
 
 // In Dev you can uncomment the following line to use the local 'logger' package
