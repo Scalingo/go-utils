@@ -3,8 +3,8 @@ module github.com/Scalingo/go-utils/nsqproducer
 go 1.14
 
 require (
-	github.com/Scalingo/go-utils/env v1.0.1 // indirect
-	github.com/Scalingo/go-utils/logger v1.0.0 // indirect
+	github.com/Scalingo/go-utils/env v1.0.1
+	github.com/Scalingo/go-utils/logger v1.0.0
 	github.com/gofrs/uuid v3.3.0+incompatible
 	github.com/golang/mock v1.4.4
 	github.com/nsqio/go-nsq v1.0.8
