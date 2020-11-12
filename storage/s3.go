@@ -180,7 +180,7 @@ func s3Config(cfg S3Config) aws.Config {
 		config.EndpointResolver = aws.EndpointResolverFunc(func(service, region string) (aws.Endpoint, error) {
 			return aws.Endpoint{
 				URL:           "https://" + cfg.Endpoint,
-				SigningRegion: cfg.Endpoint,
+				SigningRegion: cfg.Region,
 			}, nil
 		})
 	}
