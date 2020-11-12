@@ -8,7 +8,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v0.1.2
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v0.1.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v0.27.0
-	github.com/awslabs/smithy-go v0.2.0
+	github.com/awslabs/smithy-go v0.3.0
 	github.com/golang/mock v1.4.4
 	github.com/ncw/swift v1.0.52
 	github.com/pkg/errors v0.9.1
