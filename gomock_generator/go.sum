@@ -1,4 +1,7 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
+github.com/Scalingo/go-utils v1.1.2 h1:Nc3gtIB4Gl5wiMs54pxOQ0TNUl1AUNTCfFY3P/M5HdY=
+github.com/Scalingo/go-utils/logger v1.0.0 h1:E0UHcvcxaESKwcMRL6MWHur+EIps3MhhkKk/mHmZqtw=
+github.com/Scalingo/go-utils/logger v1.0.0/go.mod h1:yVs3dRJyj2NvcOfgzcDVc1P8wkwUQP3PgCBDNS8vmB8=
 github.com/Scalingo/logrus-rollbar v1.3.2/go.mod h1:Mo38Fue00mdY/UM5gOMTXAWfiOIJK29/sxL3zxb/68I=
 github.com/Soulou/errgo-rollbar v0.1.1/go.mod h1:7+LUv1ler6IXAzrVgw3RPKL9CQ43oaLiEp2zv9Gr45E=
 github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d h1:U+s90UTSYgptZMwQh2aRr3LuazLJIa+Pg3Kc1ylSYVY=
@@ -27,6 +30,8 @@ github.com/urfave/cli v1.22.4 h1:u7tSpNPPswAFymm8IehJhy4uJMlUuU/GmqSkvJ1InXA=
 github.com/urfave/cli v1.22.4/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtXRu0=
 golang.org/x/sys v0.0.0-20191026070338-33540a1f6037 h1:YyJpGZS1sBuBCzLAR1VEpK193GlqGZbnPFnPV/5Rsb4=
 golang.org/x/sys v0.0.0-20191026070338-33540a1f6037/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/sys v0.0.0-20201112073958-5cba982894dd h1:5CtCZbICpIOFdgO940moixOPjc0178IU44m4EjOO5IY=
+golang.org/x/sys v0.0.0-20201112073958-5cba982894dd/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/errgo.v1 v1.0.1/go.mod h1:3NjfXwocQRYAPTq4/fzX+CwUhPRcR/azYRhj8G+LqMo=
 gopkg.in/yaml.v2 v2.2.2/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
