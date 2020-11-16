@@ -1,0 +1,8 @@
+{
+  "base_package": "github.com/Scalingo/go-utils/nsqproducer",
+  "mocks": [
+    {
+      "interface": "Producer"
+    }
+  ]
+}

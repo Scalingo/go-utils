@@ -2,17 +2,17 @@ package storage
 
 import (
 	"context"
+	stderrors "errors"
 	"io"
 	"strings"
 	"time"
 
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/aws/awserr"
-	"github.com/aws/aws-sdk-go-v2/aws/defaults"
-	"github.com/aws/aws-sdk-go-v2/aws/endpoints"
+	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go-v2/service/s3/s3manager"
+	"github.com/awslabs/smithy-go"
 	"github.com/pkg/errors"
 )
 
@@ -21,9 +21,9 @@ const (
 )
 
 type S3Client interface {
-	GetObjectRequest(input *s3.GetObjectInput) s3.GetObjectRequest
-	HeadObjectRequest(input *s3.HeadObjectInput) s3.HeadObjectRequest
-	DeleteObjectRequest(input *s3.DeleteObjectInput) s3.DeleteObjectRequest
+	GetObject(ctx context.Context, input *s3.GetObjectInput, opts ...func(*s3.Options)) (*s3.GetObjectOutput, error)
+	HeadObject(ctx context.Context, input *s3.HeadObjectInput, opts ...func(*s3.Options)) (*s3.HeadObjectOutput, error)
+	DeleteObject(ctx context.Context, input *s3.DeleteObjectInput, opts ...func(*s3.Options)) (*s3.DeleteObjectOutput, error)
 }
 
 type S3Config struct {
@@ -43,7 +43,7 @@ type RetryPolicy struct {
 type S3 struct {
 	cfg         S3Config
 	s3client    S3Client
-	s3uploader  *s3manager.Uploader
+	s3uploader  *manager.Uploader
 	retryPolicy RetryPolicy
 }
 
@@ -59,8 +59,9 @@ func WithRetryPolicy(policy RetryPolicy) s3Opt {
 
 func NewS3(cfg S3Config, opts ...s3Opt) *S3 {
 	s3config := s3Config(cfg)
+	s3client := s3.NewFromConfig(s3config)
 	s3 := &S3{
-		cfg: cfg, s3client: s3.New(s3config), s3uploader: s3manager.NewUploader(s3config),
+		cfg: cfg, s3client: s3client, s3uploader: manager.NewUploader(s3client),
 		retryPolicy: RetryPolicy{
 			WaitDuration: time.Second,
 			Attempts:     3,
@@ -84,7 +85,7 @@ func (s *S3) Get(ctx context.Context, path string) (io.ReadCloser, error) {
 		Bucket: &s.cfg.Bucket,
 		Key:    &path,
 	}
-	out, err := s.s3client.GetObjectRequest(input).Send(ctx)
+	out, err := s.s3client.GetObject(ctx, input)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to get object %v", path)
 	}
@@ -93,12 +94,12 @@ func (s *S3) Get(ctx context.Context, path string) (io.ReadCloser, error) {
 
 func (s *S3) Upload(ctx context.Context, file io.Reader, path string) error {
 	path = fullPath(path)
-	input := &s3manager.UploadInput{
+	input := &s3.PutObjectInput{
 		Body:   file,
 		Bucket: &s.cfg.Bucket,
 		Key:    &path,
 	}
-	_, err := s.s3uploader.UploadWithContext(ctx, input)
+	_, err := s.s3uploader.Upload(ctx, input)
 	if err != nil {
 		return errors.Wrapf(err, "fail to save file to %v", path)
 	}
@@ -117,7 +118,7 @@ func (s *S3) Size(ctx context.Context, path string) (int64, error) {
 		log.Infof("[s3] Size()")
 
 		input := &s3.HeadObjectInput{Bucket: &s.cfg.Bucket, Key: &path}
-		stat, err := s.s3client.HeadObjectRequest(input).Send(ctx)
+		stat, err := s.s3client.HeadObject(ctx, input)
 		if err != nil {
 			return err
 		}
@@ -134,8 +135,7 @@ func (s *S3) Size(ctx context.Context, path string) (int64, error) {
 func (s *S3) Delete(ctx context.Context, path string) error {
 	path = fullPath(path)
 	input := &s3.DeleteObjectInput{Bucket: &s.cfg.Bucket, Key: &path}
-	req := s.s3client.DeleteObjectRequest(input)
-	_, err := req.Send(ctx)
+	_, err := s.s3client.DeleteObject(ctx, input)
 	if err != nil {
 		return errors.Wrapf(err, "fail to delete object %v", path)
 	}
@@ -158,9 +158,10 @@ func (s *S3) retryWrapper(ctx context.Context, method BackendMethod, fun func(ct
 		if err == nil {
 			return nil
 		}
-		if aerr, ok := err.(awserr.Error); ok {
+		var apiErr smithy.APIError
+		if stderrors.As(err, &apiErr) {
 			for _, code := range errorCodes {
-				if aerr.Code() == code {
+				if apiErr.ErrorCode() == code {
 					time.Sleep(s.retryPolicy.WaitDuration)
 				}
 			}
@@ -170,19 +171,18 @@ func (s *S3) retryWrapper(ctx context.Context, method BackendMethod, fun func(ct
 }
 
 func s3Config(cfg S3Config) aws.Config {
-	credentials := aws.NewStaticCredentialsProvider(cfg.AK, cfg.SK, "")
+	credentials := credentials.NewStaticCredentialsProvider(cfg.AK, cfg.SK, "")
 	config := aws.Config{
 		Region:      cfg.Region,
-		Handlers:    defaults.Handlers(),
-		HTTPClient:  defaults.HTTPClient(),
 		Credentials: credentials,
-		EndpointResolver: aws.ResolveWithEndpoint(aws.Endpoint{
-			URL:           "https://" + cfg.Endpoint,
-			SigningRegion: cfg.Endpoint,
-		}),
 	}
-	if cfg.Endpoint == "" {
-		config.EndpointResolver = endpoints.NewDefaultResolver()
+	if cfg.Endpoint != "" {
+		config.EndpointResolver = aws.EndpointResolverFunc(func(service, region string) (aws.Endpoint, error) {
+			return aws.Endpoint{
+				URL:           "https://" + cfg.Endpoint,
+				SigningRegion: cfg.Region,
+			}, nil
+		})
 	}
 
 	return config

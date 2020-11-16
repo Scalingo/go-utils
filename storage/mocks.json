@@ -1,0 +1,10 @@
+{
+  "base_package": "github.com/Scalingo/go-utils/storage",
+  "mocks": [
+    {
+      "interface": "Backend"
+    }, {
+      "interface": "S3Client"
+    }
+  ]
+}

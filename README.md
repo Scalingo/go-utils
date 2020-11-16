@@ -1,25 +1,42 @@
 # Various Go Utils and Helpers
 
-[ ![Codeship Status for
-Scalingo/go-utils](https://app.codeship.com/projects/af479f60-02c1-0136-d485-6637162e76f3/status?branch=master)](https://app.codeship.com/projects/280142)
+[ ![Travis Status for
+Scalingo/go-utils](https://travis-ci.com/Scalingo/go-utils.svg?branch=master)](https://travis-ci.com/github/Scalingo/go-utils)
 
-## Release a New Version
+## Structure of this repository
+
+This repository is hosting modules, each of these modules are independant, they should all have their own:
+
+* Dependencies (handled with go modules)
+* `README.md`
+* `CHANGELOG.md`
+* Versioning through git tags. (Example for `etcd` → tag will look like `etcd/v1.0.0`)
+
+## Release a New Version of a module
 
 Bump new version number in:
 
-- `CHANGELOG.md`
-- `README.md`
+- `module/CHANGELOG.md`
+- `module/README.md`
 
 Commit, tag and create a new release:
 
 ```sh
-git add CHANGELOG.md README.md
-git commit -m "Bump v7.1.0"
-git tag v7.1.0
+git add module/CHANGELOG.md module/README.md
+git commit -m "Bump v1.1.0"
+git tag module/v1.1.0
 git push origin master
 git push --tags
-hub release create v7.1.0
 ```
 
-The title of the release should be the version number and the text of the
-release is the same as the changelog.
+## Use one module in your project
+
+With go modules, it's as easy as `go get github.com/Scalingo/go-utils/module`
+
+For instance:
+
+```
+go get github.com/Scalingo/go-utils/logger
+go get github.com/Scalingo/go-utils/logger@v1.0.0
+go get github.com/Scalingo/go-utils/logger@<branch name>
+```
