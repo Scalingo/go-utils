@@ -2,6 +2,8 @@
 
 ## To Be Released
 
+> From now, versions are managed by submodules, CHANGELOG also, it's directory has its own changelog
+
 ## v7.1.0 (August 13 2020)
 
 * [difflib] Add a way to activate/desactivate the colors formatting
