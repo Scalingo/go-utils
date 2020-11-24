@@ -1,5 +1,7 @@
 ## To Release
 
+## v1.1.0
+
 * Pretty print JSON for mocks_sig.json
 * Correctly handle go modules to read data at the right location
 * Fix regression: when SrcPackage was not defined, an error was spawn
