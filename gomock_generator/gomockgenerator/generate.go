@@ -200,7 +200,7 @@ func generateMock(ctx context.Context, gcfg GenerationConfiguration, basePackage
 		hash = "NOFILE"
 	}
 
-	if sigs[hashKey] == hash {
+	if sigs[hashKey] == hash && hash != "FORCE_REGENERATE" {
 		log.Debug("Skipping!")
 		return hashKey, hash, nil
 	}

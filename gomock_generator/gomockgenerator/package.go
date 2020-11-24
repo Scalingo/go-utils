@@ -19,6 +19,9 @@ func interfaceHash(pkg, iName string) (string, error) {
 	if err != nil {
 		return "", errors.Wrapf(err, "fail to get interface signature for %s:%s", pkg, iName)
 	}
+	if sig == "FORCE_REGENERATE" {
+		return sig, nil
+	}
 	hash := sha1.Sum([]byte(sig))
 	return fmt.Sprintf("% x", hash), nil
 }
@@ -67,6 +70,10 @@ func interfaceSignature(pkg, iName string) (string, error) {
 											switch v := m.Type.(type) {
 											case *ast.Ident:
 												interfaceSig = fmt.Sprintf("%s\nInterface{%s}\n", interfaceSig, v.Name)
+											case *ast.SelectorExpr:
+												// If there is a selector expr (if the interface calls other interfaces: force a regeneration)
+												// Implementing a real signature seems to be really tricky!
+												return "FORCE_REGENERATE", nil
 											case *ast.FuncType:
 												methodName := m.Names[0].String()
 												var methodType string
@@ -85,7 +92,7 @@ func interfaceSignature(pkg, iName string) (string, error) {
 												interfaceSig = fmt.Sprintf("%s\n%s(%s)(%s)\n", interfaceSig, methodName, methodParams, methodType)
 
 											default:
-												panic(fmt.Sprintf("Unexpected AST type: %T", v))
+												panic(fmt.Sprintf("Unexpected AST type: %T for %s.%s", v, pkg, iName))
 											}
 										}
 										return interfaceSig, nil
