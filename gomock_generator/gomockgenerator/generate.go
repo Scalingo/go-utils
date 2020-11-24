@@ -132,10 +132,8 @@ func generateMock(ctx context.Context, gcfg GenerationConfiguration, basePackage
 			return "", "", errors.New("SrcPackage or MockFile should be defined to know of guess the source page")
 		}
 
-		if mock.SrcPackage != "" {
-			mock.SrcPackage = path.Join(basePackage, mock.SrcPackage)
-		} else {
-			mock.SrcPackage = path.Join(basePackage, filepath.Dir(mock.MockFile))
+		if mock.SrcPackage == "" {
+			mock.SrcPackage = filepath.Dir(mock.MockFile)
 		}
 	}
 
@@ -146,9 +144,13 @@ func generateMock(ctx context.Context, gcfg GenerationConfiguration, basePackage
 			basepath = filepath.Base(basePackage)
 		}
 
+		packagePath := path.Join(mock.SrcPackage, fmt.Sprintf("%smock", basepath))
+		if mock.DstPackage != "" {
+			packagePath = mock.DstPackage
+		}
+
 		mock.MockFile = path.Join(
-			mock.SrcPackage,
-			fmt.Sprintf("%smock", basepath),
+			packagePath,
 			fmt.Sprintf("%s_mock.go", strings.ToLower(mock.Interface)),
 		)
 	}
@@ -156,6 +158,10 @@ func generateMock(ctx context.Context, gcfg GenerationConfiguration, basePackage
 	if mock.DstPackage == "" {
 		dst := filepath.Base(filepath.Dir(mock.MockFile))
 		mock.DstPackage = dst
+	}
+
+	if !mock.External {
+		mock.SrcPackage = path.Join(basePackage, mock.SrcPackage)
 	}
 
 	mockPath := filepath.Join(os.Getenv("GOPATH"), "src", basePackage, mock.MockFile)
@@ -194,7 +200,7 @@ func generateMock(ctx context.Context, gcfg GenerationConfiguration, basePackage
 		hash = "NOFILE"
 	}
 
-	if sigs[hashKey] == hash {
+	if sigs[hashKey] == hash && hash != "FORCE_REGENERATE" {
 		log.Debug("Skipping!")
 		return hashKey, hash, nil
 	}
