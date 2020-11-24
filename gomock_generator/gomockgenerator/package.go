@@ -17,7 +17,7 @@ import (
 func interfaceHash(pkg, iName string) (string, error) {
 	sig, err := interfaceSignature(pkg, iName)
 	if err != nil {
-		return "", errors.Wrapf(err, "fail to get interface signature for %s", iName)
+		return "", errors.Wrapf(err, "fail to get interface signature for %s:%s", pkg, iName)
 	}
 	hash := sha1.Sum([]byte(sig))
 	return fmt.Sprintf("% x", hash), nil
@@ -29,8 +29,9 @@ func interfaceSignature(pkg, iName string) (string, error) {
 		return "", errors.Wrap(err, "fail to get current working directory")
 	}
 	fullPath := path.Join(os.Getenv("GOPATH"), "src", pkg)
-	if _, err := os.Stat(filepath.Join(cwd, "vendor", pkg)); err == nil {
-		fullPath = filepath.Join(cwd, "vendor", pkg)
+	vendoredPkg := filepath.Join(cwd, "vendor", pkg)
+	if _, err := os.Stat(vendoredPkg); err == nil {
+		fullPath = vendoredPkg
 	}
 	fileSet := token.NewFileSet()
 	packages, err := parser.ParseDir(fileSet, fullPath, func(info os.FileInfo) bool {
