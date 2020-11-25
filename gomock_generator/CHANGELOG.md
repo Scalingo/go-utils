@@ -1,5 +1,16 @@
 ## To Release
 
+## v1.2.0
+
+* Add notion of `BaseDirectory` when go modules are used, which is sometimes different from `BasePackage`:
+
+    ```
+    {
+      "BaseDirectory": "github.com/Scalingo/go-scalingo",
+      "BasePackage": "github.com/Scalingo/go-scalingo/v4"
+    }
+    ```
+
 ## v1.1.0
 
 * Pretty print JSON for mocks_sig.json

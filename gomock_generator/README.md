@@ -16,13 +16,12 @@ USAGE:
    gomock_generator [global options]
 
 VERSION:
-   0.1.0
+   1.2.0
 
 COMMANDS:
      help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --base-package value           Project base package. E.g. github.com/Scalingo/go-utils. [$BASE_PACKAGE]
    --mocks-filename value         Filename of the JSON file containing the MockConfiguration. Location of this file is the base package. (default: "mocks.json") [$MOCKS_FILENAME]
    --signatures-filename value    Filename of the signatures cache. Location of this file is the base package. (default: "mocks_sig.json") [$SIGNATURES_FILENAME]
    --concurrent-goroutines value  Concurrent amount of goroutines to generate mock. (default: 4) [$CONCURRENT_GOROUTINES]
