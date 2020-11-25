@@ -1,6 +1,6 @@
 ## To Release
 
-## v1.2.0
+## v1.2.1
 
 * Add notion of `BaseDirectory` when go modules are used, which is sometimes different from `BasePackage`:
 
@@ -10,6 +10,11 @@
       "BasePackage": "github.com/Scalingo/go-scalingo/v4"
     }
     ```
+
+## v1.2.0
+
+* Embedded interfaces are not throwing an error anymore.
+  Known caveat: mocks with embedded interfaces will be regenerate at each execution.
 
 ## v1.1.0
 
