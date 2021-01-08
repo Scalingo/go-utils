@@ -91,8 +91,7 @@ func TestPaginationPaginate(t *testing.T) {
 				PageQueryParams:    "one",
 				PerPageQueryParams: "three",
 			},
-			Error: "* Requested page → fail to parse page parameter, must be greater then 0\n" +
-				"* per_page → fail to parse per_page parameter, must be greater then 0",
+			Error: "* Requested page → fail to parse page parameter",
 		},
 		{
 			Name: "It should return an error with a perPageDefault lower or equal to 0",

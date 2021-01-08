@@ -147,14 +147,6 @@ func (opts ServiceOpts) Paginate(ctx context.Context,
 		return nil, err
 	}
 
-	if meta.perPageNum == 0 {
-		meta.perPageNum = opts.PerPageDefault
-	}
-
-	// We start to count page with 1
-	if meta.CurrentPage == 0 {
-		meta.CurrentPage = 1
-	}
 	if meta.CurrentPage > 1 {
 		meta.PrevPage = new(int)
 		*meta.PrevPage = meta.CurrentPage - 1
