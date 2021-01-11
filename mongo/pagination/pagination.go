@@ -147,15 +147,21 @@ func (opts ServiceOpts) Paginate(ctx context.Context,
 		return nil, err
 	}
 
+	// PrevPage must be null when unavailable
 	if meta.CurrentPage > 1 {
 		meta.PrevPage = new(int)
 		*meta.PrevPage = meta.CurrentPage - 1
 	}
+	// NextPage must be null when unavailable
 	if meta.CurrentPage < meta.TotalPages {
 		meta.NextPage = new(int)
 		*meta.NextPage = meta.CurrentPage + 1
 	}
 
+	// Mongo Skip will become slower as the offset increases. Hence this could be
+	// improved using a range. But we have to use an index field to refer to it.
+	// More information about the range-queries:
+	// https://docs.mongodb.com/manual/reference/method/cursor.skip/#using-range-queries
 	offset := (meta.CurrentPage - 1) * meta.perPageNum
 	err = query.Skip(offset).Sort(sortField).Limit(meta.perPageNum).All(result)
 	if err != nil {
