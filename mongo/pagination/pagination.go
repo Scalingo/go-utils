@@ -63,11 +63,11 @@ func (opts ServiceOpts) paramValidation(meta *Meta, collection string) error {
 	if opts.PerPageDefault > opts.MaxPerPage ||
 		opts.PerPageDefault <= 0 ||
 		opts.MaxPerPage <= 0 {
-		return errors.New("Usage: MaxPerPage > PerPageDefault > 0")
+		return errors.New("invalid pagination service configuration: MaxPerPage > PerPageDefault > 0")
 	}
 	// Parameter validation
 	if collection == "" {
-		return errors.New("collection must be set")
+		return errors.New("invalid pagination service configuration: collection must be set")
 	}
 
 	// Default values assignation
@@ -82,7 +82,7 @@ func (opts ServiceOpts) paramValidation(meta *Meta, collection string) error {
 	meta.CurrentPage, err = strconv.Atoi(opts.PageQueryParams)
 	if err != nil {
 		badRequestErr.Errors[pageErr] =
-			append(badRequestErr.Errors[pageErr], "fail to parse page parameter")
+			append(badRequestErr.Errors[pageErr], fmt.Sprintf("%s is not a valid number", opts.PageQueryParams))
 	}
 	if meta.CurrentPage <= 0 {
 		badRequestErr.Errors[pageErr] =
