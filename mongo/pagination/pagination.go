@@ -43,17 +43,21 @@ type Meta struct {
 }
 
 type Service interface {
-	Paginate(ctx context.Context, DBQuery bson.M, collection string, result interface{}, sortField string) (Meta, error)
+	Paginate(ctx context.Context,
+		pageQueryParams string,
+		perPageQueryParams string,
+		DBQuery bson.M,
+		collection string,
+		result interface{},
+		sortField string) (Meta, error)
 }
 
 type ServiceOpts struct {
-	PerPageDefault     int
-	MaxPerPage         int
-	PageQueryParams    string
-	PerPageQueryParams string
+	PerPageDefault int
+	MaxPerPage     int
 }
 
-func (opts ServiceOpts) paramValidation(meta *Meta, collection string) error {
+func (opts ServiceOpts) paramValidation(meta *Meta, collection, pageQueryParams, perPageQueryParams string) error {
 	badRequestErr := NewBadRequestErrors()
 	pageErr := "Requested page"
 	perPageErr := "per_page"
@@ -71,24 +75,24 @@ func (opts ServiceOpts) paramValidation(meta *Meta, collection string) error {
 	}
 
 	// Default values assignation
-	if opts.PageQueryParams == "" {
-		opts.PageQueryParams = "1"
+	if pageQueryParams == "" {
+		pageQueryParams = "1"
 	}
-	if opts.PerPageQueryParams == "" {
-		opts.PerPageQueryParams = fmt.Sprintf("%d", opts.PerPageDefault)
+	if perPageQueryParams == "" {
+		perPageQueryParams = fmt.Sprintf("%d", opts.PerPageDefault)
 	}
 
 	// Request parameters validation
-	meta.CurrentPage, err = strconv.Atoi(opts.PageQueryParams)
+	meta.CurrentPage, err = strconv.Atoi(pageQueryParams)
 	if err != nil {
 		badRequestErr.Errors[pageErr] =
-			append(badRequestErr.Errors[pageErr], fmt.Sprintf("%s is not a valid number", opts.PageQueryParams))
+			append(badRequestErr.Errors[pageErr], fmt.Sprintf("%s is not a valid number", pageQueryParams))
 	}
 	if meta.CurrentPage <= 0 {
 		badRequestErr.Errors[pageErr] =
 			append(badRequestErr.Errors[pageErr], "must be greater then 0")
 	}
-	meta.perPageNum, err = strconv.Atoi(opts.PerPageQueryParams)
+	meta.perPageNum, err = strconv.Atoi(perPageQueryParams)
 	if err != nil {
 		badRequestErr.Errors[perPageErr] =
 			append(badRequestErr.Errors[perPageErr], "fail to parse per_page parameter")
@@ -122,6 +126,8 @@ func (opts ServiceOpts) paramValidation(meta *Meta, collection string) error {
 }
 
 func (opts ServiceOpts) Paginate(ctx context.Context,
+	pageQueryParams,
+	perPageQueryParams string,
 	DBQuery bson.M,
 	collection string,
 	result interface{},
@@ -142,7 +148,7 @@ func (opts ServiceOpts) Paginate(ctx context.Context,
 		return meta, nil
 	}
 
-	err = opts.paramValidation(&meta, collection)
+	err = opts.paramValidation(&meta, collection, pageQueryParams, perPageQueryParams)
 	if err != nil {
 		return meta, err
 	}
