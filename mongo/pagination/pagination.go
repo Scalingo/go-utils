@@ -43,7 +43,7 @@ type Meta struct {
 }
 
 type Service interface {
-	Paginate(ctx context.Context, DBQuery bson.M, collection string, result interface{}, sortField string) (*Meta, error)
+	Paginate(ctx context.Context, DBQuery bson.M, collection string, result interface{}, sortField string) (Meta, error)
 }
 
 type ServiceOpts struct {
@@ -125,7 +125,7 @@ func (opts ServiceOpts) Paginate(ctx context.Context,
 	DBQuery bson.M,
 	collection string,
 	result interface{},
-	sortField string) (*Meta, error) {
+	sortField string) (Meta, error) {
 
 	var err error
 	meta := Meta{}
@@ -135,16 +135,16 @@ func (opts ServiceOpts) Paginate(ctx context.Context,
 
 	meta.TotalCount, err = query.Count()
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to count items for the collection %s", collection)
+		return meta, errors.Wrapf(err, "fail to count items for the collection %s", collection)
 	}
 
 	if meta.TotalCount == 0 {
-		return &meta, nil
+		return meta, nil
 	}
 
 	err = opts.paramValidation(&meta, collection)
 	if err != nil {
-		return nil, err
+		return meta, err
 	}
 
 	// PrevPage must be null when unavailable
@@ -165,8 +165,8 @@ func (opts ServiceOpts) Paginate(ctx context.Context,
 	offset := (meta.CurrentPage - 1) * meta.perPageNum
 	err = query.Skip(offset).Sort(sortField).Limit(meta.perPageNum).All(result)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to query database for collection %s", collection)
+		return meta, errors.Wrapf(err, "fail to query database for collection %s", collection)
 	}
 
-	return &meta, nil
+	return meta, nil
 }

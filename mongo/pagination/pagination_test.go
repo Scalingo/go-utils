@@ -47,7 +47,7 @@ func TestPaginationPaginate(t *testing.T) {
 		DummyDocument  func(t *testing.T) func()
 		PaginationOpts *ServiceOpts
 		ExpectedQuery  bson.M
-		ExpectedMeta   func() *Meta
+		ExpectedMeta   func() Meta
 		ExpectedResult []dummyDocument
 		Error          string
 	}{
@@ -160,8 +160,8 @@ func TestPaginationPaginate(t *testing.T) {
 				PageQueryParams:    "",
 				PerPageQueryParams: "",
 			},
-			ExpectedMeta: func() *Meta {
-				return &Meta{
+			ExpectedMeta: func() Meta {
+				return Meta{
 					CurrentPage: 0,
 					PrevPage:    nil,
 					NextPage:    nil,
@@ -177,8 +177,8 @@ func TestPaginationPaginate(t *testing.T) {
 				clean := newDummyDocuments(t, "vs_name_1", 1)
 				return clean
 			},
-			ExpectedMeta: func() *Meta {
-				return &Meta{
+			ExpectedMeta: func() Meta {
+				return Meta{
 					CurrentPage: 1,
 					PrevPage:    nil,
 					NextPage:    nil,
@@ -201,8 +201,8 @@ func TestPaginationPaginate(t *testing.T) {
 					clean2()
 				}
 			},
-			ExpectedMeta: func() *Meta {
-				return &Meta{
+			ExpectedMeta: func() Meta {
+				return Meta{
 					CurrentPage: 1,
 					PrevPage:    nil,
 					NextPage:    nil,
@@ -226,9 +226,9 @@ func TestPaginationPaginate(t *testing.T) {
 					clean2()
 				}
 			},
-			ExpectedMeta: func() *Meta {
+			ExpectedMeta: func() Meta {
 				nextPage := 2
-				return &Meta{
+				return Meta{
 					CurrentPage: 1,
 					PrevPage:    nil,
 					NextPage:    &nextPage,
@@ -258,9 +258,9 @@ func TestPaginationPaginate(t *testing.T) {
 				PageQueryParams:    "2",
 				PerPageQueryParams: "",
 			},
-			ExpectedMeta: func() *Meta {
+			ExpectedMeta: func() Meta {
 				prevPage := 1
-				return &Meta{
+				return Meta{
 					CurrentPage: 2,
 					PrevPage:    &prevPage,
 					NextPage:    nil,
