@@ -91,7 +91,7 @@ func TestPaginationPaginate(t *testing.T) {
 				PageQueryParams:    "one",
 				PerPageQueryParams: "three",
 			},
-			Error: "* Requested page → fail to parse page parameter",
+			Error: "* Requested page → one is not a valid number, must be greater then 0",
 		},
 		{
 			Name: "It should return an error with a perPageDefault lower or equal to 0",
@@ -105,7 +105,7 @@ func TestPaginationPaginate(t *testing.T) {
 				PageQueryParams:    "",
 				PerPageQueryParams: "",
 			},
-			Error: "Usage: MaxPerPage > PerPageDefault > 0",
+			Error: "invalid pagination service configuration: MaxPerPage > PerPageDefault > 0",
 		},
 		{
 			Name: "It should return an error with a perPageDefault greater MaxPerPage",
@@ -119,7 +119,7 @@ func TestPaginationPaginate(t *testing.T) {
 				PageQueryParams:    "",
 				PerPageQueryParams: "",
 			},
-			Error: "Usage: MaxPerPage > PerPageDefault > 0",
+			Error: "invalid pagination service configuration: MaxPerPage > PerPageDefault > 0",
 		},
 		{
 			Name: "It should return an error with a MaxPerPage lower or equal to 0",
@@ -133,7 +133,7 @@ func TestPaginationPaginate(t *testing.T) {
 				PageQueryParams:    "",
 				PerPageQueryParams: "",
 			},
-			Error: "Usage: MaxPerPage > PerPageDefault > 0",
+			Error: "invalid pagination service configuration: MaxPerPage > PerPageDefault > 0",
 		},
 		{
 			Name: "It should return an error with a requested page lower or equal to 0",
