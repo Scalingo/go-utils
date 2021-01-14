@@ -3,7 +3,6 @@ package pagination
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/Scalingo/go-utils/mongo/document"
@@ -42,14 +41,15 @@ type Meta struct {
 	perPageNum  int
 }
 
+type PaginateOpts struct {
+	PageNumber  int
+	AmountItems int
+	Query       bson.M
+	SortOrder   string
+}
+
 type Service interface {
-	Paginate(ctx context.Context,
-		pageQueryParams string,
-		perPageQueryParams string,
-		DBQuery bson.M,
-		collection string,
-		result interface{},
-		sortField string) (Meta, error)
+	Paginate(ctx context.Context, collection string, result interface{}, opts PaginateOpts) (Meta, error)
 }
 
 type ServiceOpts struct {
@@ -57,16 +57,15 @@ type ServiceOpts struct {
 	MaxPerPage     int
 }
 
-func (opts ServiceOpts) paramValidation(meta *Meta, collection, pageQueryParams, perPageQueryParams string) error {
+func (s ServiceOpts) paramValidation(meta *Meta, collection string, opts *PaginateOpts) error {
 	badRequestErr := NewBadRequestErrors()
 	pageErr := "Requested page"
 	perPageErr := "per_page"
-	var err error
 
 	// Options validation
-	if opts.PerPageDefault > opts.MaxPerPage ||
-		opts.PerPageDefault <= 0 ||
-		opts.MaxPerPage <= 0 {
+	if s.PerPageDefault > s.MaxPerPage ||
+		s.PerPageDefault <= 0 ||
+		s.MaxPerPage <= 0 {
 		return errors.New("invalid pagination service configuration: MaxPerPage > PerPageDefault > 0")
 	}
 	// Parameter validation
@@ -75,35 +74,30 @@ func (opts ServiceOpts) paramValidation(meta *Meta, collection, pageQueryParams,
 	}
 
 	// Default values assignation
-	if pageQueryParams == "" {
-		pageQueryParams = "1"
+	if opts.PageNumber == 0 {
+		opts.PageNumber = 1
 	}
-	if perPageQueryParams == "" {
-		perPageQueryParams = fmt.Sprintf("%d", opts.PerPageDefault)
+	if opts.AmountItems == 0 {
+		opts.AmountItems = s.PerPageDefault
+	}
+	if opts.SortOrder == "" {
+		opts.SortOrder = "_id"
 	}
 
 	// Request parameters validation
-	meta.CurrentPage, err = strconv.Atoi(pageQueryParams)
-	if err != nil {
-		badRequestErr.Errors[pageErr] =
-			append(badRequestErr.Errors[pageErr], fmt.Sprintf("%s is not a valid number", pageQueryParams))
-	}
+	meta.CurrentPage = opts.PageNumber
 	if meta.CurrentPage <= 0 {
 		badRequestErr.Errors[pageErr] =
 			append(badRequestErr.Errors[pageErr], "must be greater then 0")
 	}
-	meta.perPageNum, err = strconv.Atoi(perPageQueryParams)
-	if err != nil {
-		badRequestErr.Errors[perPageErr] =
-			append(badRequestErr.Errors[perPageErr], "fail to parse per_page parameter")
-	}
+	meta.perPageNum = opts.AmountItems
 	if meta.perPageNum <= 0 {
 		badRequestErr.Errors[perPageErr] =
 			append(badRequestErr.Errors[perPageErr], "must be greater then 0")
 	}
-	if meta.perPageNum < 0 || meta.perPageNum > opts.MaxPerPage {
+	if meta.perPageNum < 0 || meta.perPageNum > s.MaxPerPage {
 		badRequestErr.Errors[perPageErr] =
-			append(badRequestErr.Errors[perPageErr], fmt.Sprintf("must be between 0 and %d", opts.MaxPerPage))
+			append(badRequestErr.Errors[perPageErr], fmt.Sprintf("must be between 0 and %d", s.MaxPerPage))
 	}
 
 	if badRequestErr.Errors != nil && len(badRequestErr.Errors) > 0 {
@@ -125,18 +119,15 @@ func (opts ServiceOpts) paramValidation(meta *Meta, collection, pageQueryParams,
 	return nil
 }
 
-func (opts ServiceOpts) Paginate(ctx context.Context,
-	pageQueryParams,
-	perPageQueryParams string,
-	DBQuery bson.M,
+func (s ServiceOpts) Paginate(ctx context.Context,
 	collection string,
 	result interface{},
-	sortField string) (Meta, error) {
+	opts PaginateOpts) (Meta, error) {
 
 	var err error
 	meta := Meta{}
 
-	query, session := document.WhereQuery(ctx, collection, DBQuery)
+	query, session := document.WhereQuery(ctx, collection, opts.Query)
 	defer session.Close()
 
 	meta.TotalCount, err = query.Count()
@@ -148,7 +139,7 @@ func (opts ServiceOpts) Paginate(ctx context.Context,
 		return meta, nil
 	}
 
-	err = opts.paramValidation(&meta, collection, pageQueryParams, perPageQueryParams)
+	err = s.paramValidation(&meta, collection, &opts)
 	if err != nil {
 		return meta, err
 	}
@@ -169,7 +160,7 @@ func (opts ServiceOpts) Paginate(ctx context.Context,
 	// More information about the range-queries:
 	// https://docs.mongodb.com/manual/reference/method/cursor.skip/#using-range-queries
 	offset := (meta.CurrentPage - 1) * meta.perPageNum
-	err = query.Skip(offset).Sort(sortField).Limit(meta.perPageNum).All(result)
+	err = query.Skip(offset).Sort(opts.SortOrder).Limit(meta.perPageNum).All(result)
 	if err != nil {
 		return meta, errors.Wrapf(err, "fail to query database for collection %s", collection)
 	}

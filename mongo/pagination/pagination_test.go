@@ -43,16 +43,16 @@ func newDummyDocuments(t *testing.T, virtualStorageName string, amount int) func
 
 func TestPaginationPaginate(t *testing.T) {
 	runs := []struct {
-		Name               string
-		DummyDocument      func(t *testing.T) func()
-		PaginationOpts     *ServiceOpts
-		PageQueryParams    string
-		PerPageQueryParams string
-		SortField          string
-		ExpectedQuery      bson.M
-		ExpectedMeta       func() Meta
-		ExpectedResult     []dummyDocument
-		Error              string
+		Name           string
+		DummyDocument  func(t *testing.T) func()
+		PaginationOpts *ServiceOpts
+		PageNumber     int
+		AmountItems    int
+		SortOrder      string
+		ExpectedQuery  bson.M
+		ExpectedMeta   func() Meta
+		ExpectedResult []dummyDocument
+		Error          string
 	}{
 		{
 			Name: "It should return an error with a request page out of range",
@@ -64,9 +64,9 @@ func TestPaginationPaginate(t *testing.T) {
 				PerPageDefault: 2,
 				MaxPerPage:     2,
 			},
-			PerPageQueryParams: "",
-			PageQueryParams:    "3",
-			Error:              "* Requested page → must be between 0 and 2",
+			AmountItems: 0,
+			PageNumber:  3,
+			Error:       "* Requested page → must be between 0 and 2",
 		},
 		{
 			Name: "It should return an error with a request item per page superior then max per page",
@@ -78,23 +78,9 @@ func TestPaginationPaginate(t *testing.T) {
 				PerPageDefault: 2,
 				MaxPerPage:     2,
 			},
-			PageQueryParams:    "",
-			PerPageQueryParams: "3",
-			Error:              "* per_page → must be between 0 and 2",
-		},
-		{
-			Name: "It should return an error with a non numeric value as per_page and/or page parameter",
-			DummyDocument: func(t *testing.T) func() {
-				clean := newDummyDocuments(t, "vs_name_1", 4)
-				return clean
-			},
-			PaginationOpts: &ServiceOpts{
-				PerPageDefault: 2,
-				MaxPerPage:     2,
-			},
-			PageQueryParams:    "one",
-			PerPageQueryParams: "three",
-			Error:              "* Requested page → one is not a valid number, must be greater then 0",
+			PageNumber:  0,
+			AmountItems: 3,
+			Error:       "* per_page → must be between 0 and 2",
 		},
 		{
 			Name: "It should return an error with a perPageDefault lower or equal to 0",
@@ -106,9 +92,9 @@ func TestPaginationPaginate(t *testing.T) {
 				PerPageDefault: 0,
 				MaxPerPage:     2,
 			},
-			PageQueryParams:    "",
-			PerPageQueryParams: "",
-			Error:              "invalid pagination service configuration: MaxPerPage > PerPageDefault > 0",
+			PageNumber:  0,
+			AmountItems: 0,
+			Error:       "invalid pagination service configuration: MaxPerPage > PerPageDefault > 0",
 		},
 		{
 			Name: "It should return an error with a perPageDefault greater MaxPerPage",
@@ -120,9 +106,9 @@ func TestPaginationPaginate(t *testing.T) {
 				PerPageDefault: 10,
 				MaxPerPage:     2,
 			},
-			PageQueryParams:    "",
-			PerPageQueryParams: "",
-			Error:              "invalid pagination service configuration: MaxPerPage > PerPageDefault > 0",
+			PageNumber:  0,
+			AmountItems: 0,
+			Error:       "invalid pagination service configuration: MaxPerPage > PerPageDefault > 0",
 		},
 		{
 			Name: "It should return an error with a MaxPerPage lower or equal to 0",
@@ -134,9 +120,9 @@ func TestPaginationPaginate(t *testing.T) {
 				PerPageDefault: 2,
 				MaxPerPage:     -1,
 			},
-			PageQueryParams:    "",
-			PerPageQueryParams: "",
-			Error:              "invalid pagination service configuration: MaxPerPage > PerPageDefault > 0",
+			PageNumber:  0,
+			AmountItems: 0,
+			Error:       "invalid pagination service configuration: MaxPerPage > PerPageDefault > 0",
 		},
 		{
 			Name: "It should return an error with a requested page lower or equal to 0",
@@ -148,9 +134,9 @@ func TestPaginationPaginate(t *testing.T) {
 				PerPageDefault: 5,
 				MaxPerPage:     15,
 			},
-			PageQueryParams:    "-1",
-			PerPageQueryParams: "",
-			Error:              "* Requested page → must be greater then 0",
+			PageNumber:  -1,
+			AmountItems: 0,
+			Error:       "* Requested page → must be greater then 0",
 		},
 		{
 			Name: "It should return an empty result array with Meta object nil",
@@ -161,8 +147,8 @@ func TestPaginationPaginate(t *testing.T) {
 				PerPageDefault: 5,
 				MaxPerPage:     15,
 			},
-			PageQueryParams:    "",
-			PerPageQueryParams: "",
+			PageNumber:  0,
+			AmountItems: 0,
 			ExpectedMeta: func() Meta {
 				return Meta{
 					CurrentPage: 0,
@@ -259,8 +245,8 @@ func TestPaginationPaginate(t *testing.T) {
 				PerPageDefault: 2,
 				MaxPerPage:     2,
 			},
-			PageQueryParams:    "2",
-			PerPageQueryParams: "",
+			PageNumber:  2,
+			AmountItems: 0,
 			ExpectedMeta: func() Meta {
 				prevPage := 1
 				return Meta{
@@ -292,8 +278,8 @@ func TestPaginationPaginate(t *testing.T) {
 				PerPageDefault: 2,
 				MaxPerPage:     2,
 			},
-			PageQueryParams:    "2",
-			PerPageQueryParams: "",
+			PageNumber:  2,
+			AmountItems: 0,
 			ExpectedMeta: func() Meta {
 				prevPage := 1
 				return Meta{
@@ -305,7 +291,7 @@ func TestPaginationPaginate(t *testing.T) {
 					perPageNum:  2,
 				}
 			},
-			SortField: "-_id",
+			SortOrder: "-_id",
 			ExpectedResult: []dummyDocument{
 				{AppID: "1", VirtualStorageName: "vs_name_2"},
 				{AppID: "0", VirtualStorageName: "vs_name_2"},
@@ -332,13 +318,15 @@ func TestPaginationPaginate(t *testing.T) {
 				run.ExpectedQuery = bson.M{"virtual_storage_name": "vs_name_1"}
 			}
 
-			if run.SortField == "" {
-				run.SortField = "_id"
+			paginateOpts := PaginateOpts{
+				PageNumber:  run.PageNumber,
+				AmountItems: run.AmountItems,
+				Query:       run.ExpectedQuery,
+				SortOrder:   run.SortOrder,
 			}
 
 			meta, err := run.PaginationOpts.Paginate(context.Background(),
-				run.PageQueryParams, run.PerPageQueryParams,
-				run.ExpectedQuery, dummyCollection, &results, run.SortField)
+				dummyCollection, &results, paginateOpts)
 			if run.Error != "" {
 				assert.Contains(t, err.Error(), run.Error)
 			} else {

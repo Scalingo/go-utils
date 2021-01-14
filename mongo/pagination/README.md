@@ -24,14 +24,18 @@ Then call the `Paginate` as follow:
 resultObject := []*ResultObject{}
 dbQuery := bson.M{"searched_field": "field_1"}
 
+paginateOpts := PaginateOpts{
+    PageNumber:  5,         // Number of the requested page (can be empty, default 1)
+    AmountItems: 10,        // Amount of items by page (can be empty)
+    Query:       dbQuery,   // Query which will be executed on the database (can be nil)
+    SortOrder:   "-_id",    // The field for the sort order (by default "_id")
+}
+
 meta, err := pageService.Paginate(
     ctx,                    // A context (required)
-    "5",                    // Number of the requested page (can be empty, default 1)
-    "10",                   // Amount of items by page (can be empty)
-    dbQuery,                // Query which will be executed on the database (can be nil)
     "RequestedCollection",  // Name of the collection (required)
     &resultObject,          // The object that will contain the data (must be an array)
-    "-_id")                 // The field for the sort order (required)
+    paginateOpts)
 ```
 
 The returned meta object contains pagination metadata that could be used in the
