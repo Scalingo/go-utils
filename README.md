@@ -3,7 +3,7 @@
 [ ![Travis Status for
 Scalingo/go-utils](https://travis-ci.com/Scalingo/go-utils.svg?branch=master)](https://travis-ci.com/github/Scalingo/go-utils)
 
-## Structure of this repository
+## Structure of This Repository
 
 This repository is hosting modules, each of these modules are independant, they should all have their own:
 
@@ -12,7 +12,7 @@ This repository is hosting modules, each of these modules are independant, they 
 * `CHANGELOG.md`
 * Versioning through git tags. (Example for `etcd` → tag will look like `etcd/v1.0.0`)
 
-## Release a New Version of a module
+## Release a New Version of a Module
 
 Bump new version number in:
 
@@ -29,7 +29,7 @@ git push origin master
 git push --tags
 ```
 
-## Use one module in your project
+## Use One Module in Your Project
 
 With go modules, it's as easy as `go get github.com/Scalingo/go-utils/module`
 
