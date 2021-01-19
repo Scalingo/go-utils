@@ -23,7 +23,7 @@ Commit, tag and create a new release:
 
 ```sh
 git add module/CHANGELOG.md module/README.md
-git commit -m "Bump v1.1.0"
+git commit -m "[module] Bump v1.1.0"
 git tag module/v1.1.0
 git push origin master
 git push --tags
