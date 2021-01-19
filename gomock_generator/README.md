@@ -41,3 +41,8 @@ purpose of every attribute.
 cd $GOPATH/src/github.com/Scalingo/go-utils/gomock_generator
 go install
 ```
+
+## Release a new version of gomock_generator
+
+Please update the variable named `version` in main.go and commit the change before executing the
+release procedure located in [README.md](https://github.com/Scalingo/go-utils/blob/master/README.md).
