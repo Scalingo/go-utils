@@ -14,6 +14,8 @@ import (
 	"github.com/urfave/cli"
 )
 
+var version = "1.2.1"
+
 type app struct {
 	config gomockgenerator.GenerationConfiguration
 	cli    *cli.App
@@ -35,7 +37,7 @@ Reads the mymocks.json file from the current directory and generates the mocks, 
 	}
 	app.cli.Name = "GoMock generator"
 	app.cli.Usage = "Highly parallelized generator of gomock mocks"
-	app.cli.Version = "0.1.0"
+	app.cli.Version = version
 	app.cli.Flags = []cli.Flag{
 		cli.StringFlag{Name: "mocks-filepath", Value: "./mocks.json", Usage: "Path to the JSON file containing the MockConfiguration. Location of this file is the base package.", EnvVar: "MOCKS_FILEPATH"},
 		cli.StringFlag{Name: "signatures-filename", Value: "mocks_sig.json", Usage: "Filename of the signatures cache. Location of this file is the base package.", EnvVar: "SIGNATURES_FILENAME"},
