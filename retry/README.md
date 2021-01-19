@@ -1,4 +1,4 @@
-# Retryer
+# Package `retryer` v1.0.0
 
 This library implements a retryer: a generic way to execute some code at
 regular interval.
