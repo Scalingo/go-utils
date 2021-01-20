@@ -1,5 +1,10 @@
 ## To Release
 
+## v1.2.2
+
+* Set the version in the final binary
+* Update installation help in README.md
+
 ## v1.2.1
 
 * Add notion of `BaseDirectory` when go modules are used, which is sometimes different from `BasePackage`:
