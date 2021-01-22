@@ -1,7 +1,14 @@
 version: 2
 updates:
   - package-ecosystem: "gomod"
-    directory: "/"
+    directory: "/concurrency"
+    allow:
+      - dependency-type: "all"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+  - package-ecosystem: "gomod"
+    directory: "/cronsetup"
     allow:
       - dependency-type: "all"
     schedule:
