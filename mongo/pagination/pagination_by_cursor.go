@@ -9,12 +9,20 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+func NewPaginationByCursorService(opts ServiceOpts) ServiceByCursor {
+	return opts
+}
+
 type PaginateByCursorOpts struct {
 	CursorKey   string
 	CursorValue interface{}
 	AmountItems int
 	Query       bson.M
 	SortOrder   string
+}
+
+type ServiceByCursor interface {
+	PaginateByCursor(ctx context.Context, collection string, result interface{}, opts PaginateByCursorOpts) error
 }
 
 func (s ServiceOpts) paramValidationByCursor(collection string, opts *PaginateByCursorOpts) error {

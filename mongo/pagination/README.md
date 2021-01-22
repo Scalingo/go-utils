@@ -60,9 +60,9 @@ First, set the default value of number of items per page and the maximum of item
 by page as the following snippet:
 
 ```Go
-pageService := pagination.NewPaginationService(pagination.ServiceOpts{
-	PerPageDefault: 5,
-	MaxPerPage:     15,
+pageService := pagination.NewPaginationByCursorService(pagination.ServiceOpts{
+    PerPageDefault: 5,
+    MaxPerPage:     15,
 })
 ```
 
