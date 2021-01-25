@@ -10,7 +10,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v0.27.0
 	github.com/awslabs/smithy-go v0.3.0
 	github.com/golang/mock v1.4.4
-	github.com/ncw/swift v1.0.52
+	github.com/ncw/swift v1.0.53
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/sys v0.0.0-20201112073958-5cba982894dd // indirect
