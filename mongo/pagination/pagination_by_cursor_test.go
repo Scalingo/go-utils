@@ -14,8 +14,7 @@ func TestPaginationPaginateByCursor(t *testing.T) {
 		Name           string
 		DummyDocument  func(t *testing.T) func()
 		PaginationOpts *ServiceOpts
-		CursorKey      string
-		CursorValue    int
+		Cursor         bson.M
 		AmountItems    int
 		SortOrder      string
 		ExpectedQuery  bson.M
@@ -80,7 +79,7 @@ func TestPaginationPaginateByCursor(t *testing.T) {
 				clean := newDummyDocuments(t, "vs_name_1", 1)
 				return clean
 			},
-			CursorValue: -1,
+			Cursor: bson.M{"_id": -1},
 			PaginationOpts: &ServiceOpts{
 				PerPageDefault: 5,
 				MaxPerPage:     15,
@@ -123,9 +122,8 @@ func TestPaginationPaginateByCursor(t *testing.T) {
 					clean2()
 				}
 			},
-			SortOrder: "_id",
 			ExpectedResult: []dummyDocument{
-				{AppID: 0, VirtualStorageName: "vs_name_2"},
+				{AppID: 1, VirtualStorageName: "vs_name_2"},
 			},
 			ExpectedQuery: bson.M{"virtual_storage_name": "vs_name_2"},
 		},
@@ -143,9 +141,7 @@ func TestPaginationPaginateByCursor(t *testing.T) {
 				PerPageDefault: 2,
 				MaxPerPage:     2,
 			},
-			CursorKey:   "app_id",
-			CursorValue: 2,
-			AmountItems: 0,
+			Cursor: bson.M{"app_id": bson.M{"$lt": 2}},
 			ExpectedResult: []dummyDocument{
 				{AppID: 1, VirtualStorageName: "vs_name_2"},
 				{AppID: 0, VirtualStorageName: "vs_name_2"},
@@ -166,13 +162,11 @@ func TestPaginationPaginateByCursor(t *testing.T) {
 				PerPageDefault: 2,
 				MaxPerPage:     2,
 			},
-			CursorKey:   "app_id",
-			CursorValue: 2,
-			AmountItems: 0,
-			SortOrder:   "-_id",
+			Cursor:    bson.M{"app_id": bson.M{"$gt": 1}},
+			SortOrder: "_id",
 			ExpectedResult: []dummyDocument{
-				{AppID: 1, VirtualStorageName: "vs_name_2"},
-				{AppID: 0, VirtualStorageName: "vs_name_2"},
+				{AppID: 2, VirtualStorageName: "vs_name_2"},
+				{AppID: 3, VirtualStorageName: "vs_name_2"},
 			},
 			ExpectedQuery: bson.M{"virtual_storage_name": "vs_name_2"},
 		},
@@ -197,13 +191,10 @@ func TestPaginationPaginateByCursor(t *testing.T) {
 			}
 
 			paginateByCursorOpts := PaginateByCursorOpts{
-				CursorKey:   run.CursorKey,
+				Cursor:      run.Cursor,
 				AmountItems: run.AmountItems,
 				Query:       run.ExpectedQuery,
 				SortOrder:   run.SortOrder,
-			}
-			if run.CursorValue != 0 {
-				paginateByCursorOpts.CursorValue = run.CursorValue
 			}
 
 			err := run.PaginationOpts.PaginateByCursor(context.Background(),

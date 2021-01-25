@@ -14,8 +14,7 @@ func NewPaginationByCursorService(opts ServiceOpts) ServiceByCursor {
 }
 
 type PaginateByCursorOpts struct {
-	CursorKey   string
-	CursorValue interface{}
+	Cursor      bson.M
 	AmountItems int
 	Query       bson.M
 	SortOrder   string
@@ -76,16 +75,12 @@ func (s ServiceOpts) PaginateByCursor(ctx context.Context,
 	var err error
 	var optsQuery bson.M
 
-	if opts.CursorKey == "" {
-		opts.CursorKey = "_id"
-	}
-
-	if opts.CursorValue == nil {
+	if opts.Cursor == nil {
 		optsQuery = opts.Query
 	} else {
 		optsQuery = bson.M{"$and": []bson.M{
 			opts.Query,
-			{opts.CursorKey: bson.M{"$lt": opts.CursorValue}},
+			opts.Cursor,
 		}}
 	}
 

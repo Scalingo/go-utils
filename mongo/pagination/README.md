@@ -50,9 +50,15 @@ frequently updated data.
 It follows the mongoDB pagination using range queries, explained on
 [their documentation](https://docs.mongodb.com/manual/reference/method/cursor.skip/#using-range-queries).
 
-This pagination return results lower than the cursor value passed at parameter.
-Indeed, the `$lt` mongo operator is used to compare with the cursor value. So
-cursor value must be comparable with this operator.
+This pagination takes a bson object as cursor. This bson determines the field
+and the comparaison of mongo document in accordance with the order.
+
+For example, in case of ordered query: to get the next page we must give a
+comparison greater than the last returned value. So the bson should look like this:
+```Go
+bson.M{"app_id": bson.M{"$gt": 10}}
+```
+Where `10` is the last `app_id` found.
 
 ### How to use it
 
@@ -74,11 +80,9 @@ resultObject := []*ResultObject{}
 dbQuery := bson.M{"searched_field": "field_1"}
 
 paginateOpts := PaginateByCursorOpts{
-    CursorKey   ""      // The mongoDB document field of the cursor (can be empty)
-    CursorValue nil     // The cursor it self, it must be comparable with `$lt` mongo operator (can be nil)
     AmountItems 5       // Amount of items by page (can be empty)
     Query       dbQuery // Query which will be executed on the database (can be nil)
-    SortOrder   "-_id"   // The field for the sort order (by default "-_id")
+    SortOrder   "-_id"  // The field for the sort order (by default "-_id")
 }
 
 err := pageService.PaginateByCursor(
@@ -92,9 +96,10 @@ err := pageService.PaginateByCursor(
 // object, in accordance with the order of the data.
 // The following is an example to retrieve the second page in a case of reverse ordered data.
 resultObjectLen := len(resultObjectLen)
+cursor := bson.M{"_id": bson.M{"$lt": resultObject[resultObjectLen-1].ID}}
+
 paginateOpts := PaginateByCursorOpts{
-    CursorKey   "_id"
-    CursorValue resultObject[resultObjectLen].ID
+    Cursor      cursor  // The bson cursor, it must provide the comparison in accordance with the order (can be nil)
     AmountItems 5
     Query       dbQuery
     SortOrder   "-_id"
