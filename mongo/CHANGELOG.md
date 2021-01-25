@@ -1,6 +1,6 @@
-## To Be Released
+# Changelog
 
-## v1.1.1
+## To Be Released
 
 * Add pagination by cursor to the package [#168](https://github.com/Scalingo/go-utils/pull/168/files)
 

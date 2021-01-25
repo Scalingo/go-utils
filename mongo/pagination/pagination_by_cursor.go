@@ -50,11 +50,11 @@ func (s ServiceOpts) paramValidationByCursor(collection string, opts *PaginateBy
 	// Request parameters validation
 	if opts.AmountItems <= 0 {
 		badRequestErr.Errors[perPageErr] =
-			append(badRequestErr.Errors[perPageErr], "must be greater then 0")
+			append(badRequestErr.Errors[perPageErr], "must be strictly positive")
 	}
-	if opts.AmountItems < 0 || opts.AmountItems > s.MaxPerPage {
+	if opts.AmountItems > s.MaxPerPage {
 		badRequestErr.Errors[perPageErr] =
-			append(badRequestErr.Errors[perPageErr], fmt.Sprintf("must be between 0 and %d", s.MaxPerPage))
+			append(badRequestErr.Errors[perPageErr], fmt.Sprintf("must be lower than %d", s.MaxPerPage))
 	}
 
 	if badRequestErr.Errors != nil && len(badRequestErr.Errors) > 0 {
@@ -64,7 +64,7 @@ func (s ServiceOpts) paramValidationByCursor(collection string, opts *PaginateBy
 	return nil
 }
 
-// PaginateByCursor query a mongo database and fill the restult param with a
+// PaginateByCursor queries a MongoDB database and fill the result param with a
 // paginate result. The pagination is made in reverse order and the field on
 // which the comparison is made must be comparable with the `$lt` mongo operator
 func (s ServiceOpts) PaginateByCursor(ctx context.Context,
@@ -72,7 +72,6 @@ func (s ServiceOpts) PaginateByCursor(ctx context.Context,
 	result interface{},
 	opts PaginateByCursorOpts) error {
 
-	var err error
 	var optsQuery bson.M
 
 	if opts.Cursor == nil {
@@ -84,7 +83,7 @@ func (s ServiceOpts) PaginateByCursor(ctx context.Context,
 		}}
 	}
 
-	err = s.paramValidationByCursor(collection, &opts)
+	err: = s.paramValidationByCursor(collection, &opts)
 	if err != nil {
 		return err
 	}
@@ -92,7 +91,6 @@ func (s ServiceOpts) PaginateByCursor(ctx context.Context,
 	query, session := document.WhereQuery(ctx, collection, optsQuery)
 	defer session.Close()
 
-	//{ $and:[{virtual_storage_name: "vs_name_2"}, {app_id: {"$lt": 2}} ]}
 	err = query.Sort(opts.SortOrder).Limit(opts.AmountItems).All(result)
 	if err != nil {
 		return errors.Wrapf(err, "fail to query database for collection %s", collection)

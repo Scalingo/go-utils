@@ -47,11 +47,11 @@ request answer.
 This package also provide a pagination by cursor, could be useful in the case of
 frequently updated data.
 
-It follows the mongoDB pagination using range queries, explained on
+It follows the MongoDB pagination using range queries, explained on
 [their documentation](https://docs.mongodb.com/manual/reference/method/cursor.skip/#using-range-queries).
 
 This pagination takes a bson object as cursor. This bson determines the field
-and the comparaison of mongo document in accordance with the order.
+and the comparison of MongoDB document in accordance with the order.
 
 For example, in case of ordered query: to get the next page we must give a
 comparison greater than the last returned value. So the bson should look like this:
@@ -63,7 +63,7 @@ Where `10` is the last `app_id` found.
 ### How to use it
 
 First, set the default value of number of items per page and the maximum of item
-by page as the following snippet:
+per page as the following snippet:
 
 ```Go
 pageService := pagination.NewPaginationByCursorService(pagination.ServiceOpts{
@@ -80,9 +80,9 @@ resultObject := []*ResultObject{}
 dbQuery := bson.M{"searched_field": "field_1"}
 
 paginateOpts := PaginateByCursorOpts{
-    AmountItems 5       // Amount of items by page (can be empty)
-    Query       dbQuery // Query which will be executed on the database (can be nil)
-    SortOrder   "-_id"  // The field for the sort order (by default "-_id")
+    AmountItems: 5       // Amount of items by page (can be empty)
+    Query:       dbQuery // Query which will be executed on the database (can be nil)
+    SortOrder:   "-_id"  // The field for the sort order (by default "-_id")
 }
 
 err := pageService.PaginateByCursor(
@@ -99,10 +99,10 @@ resultObjectLen := len(resultObjectLen)
 cursor := bson.M{"_id": bson.M{"$lt": resultObject[resultObjectLen-1].ID}}
 
 paginateOpts := PaginateByCursorOpts{
-    Cursor      cursor  // The bson cursor, it must provide the comparison in accordance with the order (can be nil)
-    AmountItems 5
-    Query       dbQuery
-    SortOrder   "-_id"
+    Cursor:      cursor  // The bson cursor, it must provide the comparison in accordance with the order (can be nil)
+    AmountItems: 5
+    Query:       dbQuery
+    SortOrder:   "-_id"
 }
 
 err := pageService.PaginateByCursor(
