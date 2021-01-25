@@ -9,7 +9,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-func NewPaginationByCursorService(opts ServiceOpts) ServiceByCursor {
+func NewByCursorService(opts ServiceOpts) ServiceByCursor {
 	return opts
 }
 
@@ -83,7 +83,7 @@ func (s ServiceOpts) PaginateByCursor(ctx context.Context,
 		}}
 	}
 
-	err: = s.paramValidationByCursor(collection, &opts)
+	err := s.paramValidationByCursor(collection, &opts)
 	if err != nil {
 		return err
 	}

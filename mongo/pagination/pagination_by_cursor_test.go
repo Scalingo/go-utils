@@ -32,7 +32,7 @@ func TestPaginationPaginateByCursor(t *testing.T) {
 				MaxPerPage:     2,
 			},
 			AmountItems: 3,
-			Error:       "* per_page → must be between 0 and 2",
+			Error:       "* per_page → must be lower than",
 		},
 		{
 			Name: "It should return an error with a perPageDefault lower or equal to 0",
@@ -125,6 +125,38 @@ func TestPaginationPaginateByCursor(t *testing.T) {
 			ExpectedResult: []dummyDocument{
 				{AppID: 1, VirtualStorageName: "vs_name_2"},
 			},
+			ExpectedQuery: bson.M{"virtual_storage_name": "vs_name_2"},
+		},
+		{
+			Name: "With empty bson.M cursor parameter, it should return the first page",
+			DummyDocument: func(t *testing.T) func() {
+				clean := newDummyDocuments(t, "vs_name_1", 1)
+				clean2 := newDummyDocuments(t, "vs_name_2", 2)
+				return func() {
+					clean()
+					clean2()
+				}
+			},
+			ExpectedResult: []dummyDocument{
+				{AppID: 1, VirtualStorageName: "vs_name_2"},
+			},
+			Cursor:        bson.M{},
+			ExpectedQuery: bson.M{"virtual_storage_name": "vs_name_2"},
+		},
+		{
+			Name: "With empty cursor parameter, it should return the first page",
+			DummyDocument: func(t *testing.T) func() {
+				clean := newDummyDocuments(t, "vs_name_1", 1)
+				clean2 := newDummyDocuments(t, "vs_name_2", 2)
+				return func() {
+					clean()
+					clean2()
+				}
+			},
+			ExpectedResult: []dummyDocument{
+				{AppID: 1, VirtualStorageName: "vs_name_2"},
+			},
+			Cursor:        nil,
 			ExpectedQuery: bson.M{"virtual_storage_name": "vs_name_2"},
 		},
 		{
