@@ -4,6 +4,8 @@ github.com/Scalingo/logrus-rollbar v1.3.2/go.mod h1:Mo38Fue00mdY/UM5gOMTXAWfiOIJ
 github.com/Soulou/errgo-rollbar v0.1.1/go.mod h1:7+LUv1ler6IXAzrVgw3RPKL9CQ43oaLiEp2zv9Gr45E=
 github.com/aws/aws-sdk-go-v2 v0.27.0 h1:8wAIY9hr16U+qOak9djvIIGCu5zbnPThJkPJgQRYCn4=
 github.com/aws/aws-sdk-go-v2 v0.27.0/go.mod h1:F9alGopZD03PJvZJSuXC9d0nQuvbmgcKgeIrEmLZG3s=
+github.com/aws/aws-sdk-go-v2 v0.31.0 h1:TNTDsz+Xq80nYzZPUFS4a2Oyjz9jKHKcTuNAXtcW8b8=
+github.com/aws/aws-sdk-go-v2 v0.31.0/go.mod h1:IQw4KL7QIoaNDT3WoEBV1fDlVRhp/WTRteoaplV3SHo=
 github.com/aws/aws-sdk-go-v2/config v0.2.0 h1:63AqNmJaCHhvrXcG9AXU8pr0wbQGlkzxQO+C3N0r54Y=
 github.com/aws/aws-sdk-go-v2/config v0.2.0/go.mod h1:iswkkZ9YWgy1Pk1E9pmtxnFrqtNijgJDfa0NBnWvsSA=
 github.com/aws/aws-sdk-go-v2/credentials v0.1.2 h1:Sls7iKWkeOIGiTxXBWW+8fGTCWQN9SzTVK+FLBndd9w=
@@ -20,6 +22,8 @@ github.com/aws/aws-sdk-go-v2/service/s3 v0.27.0 h1:6z9PloMPa+rVtteL8HvWNuUkqZ8Dx
 github.com/aws/aws-sdk-go-v2/service/s3 v0.27.0/go.mod h1:b2J57B0VDlSCSeST1a1r3i3xTJrj776FhirTTSFN3CA=
 github.com/aws/aws-sdk-go-v2/service/sts v0.27.0 h1:9dFiwklBbUgejYe9F9ivK/CVq2uMT2BOPzcvBCsoyr0=
 github.com/aws/aws-sdk-go-v2/service/sts v0.27.0/go.mod h1:0N+L7fP2Zm4s8Ib+ZBCjtX4caWMiMG5xV6RB6ec8x/c=
+github.com/aws/smithy-go v0.5.0 h1:ArsdWUrb1n6/V/REXhuwq2TZv+kuqOBpMlGBd2EkDYM=
+github.com/aws/smithy-go v0.5.0/go.mod h1:EzMw8dbp/YJL4A5/sbhGddag+NPT7q084agLbB9LgIw=
 github.com/awslabs/smithy-go v0.2.0 h1:lXzqqSYp5pLdLyjo4OMkyS57RrZIFPwkOayjqnBA02I=
 github.com/awslabs/smithy-go v0.2.0/go.mod h1:hPOQwnmBLHsUphH13tVSjQhTAFma0/0XoZGbBcOuABI=
 github.com/awslabs/smithy-go v0.3.0 h1:I1EQ1P+VtxpuNnGYymATewaKrlnaYQwFvO8lNTsafbs=
@@ -33,6 +37,8 @@ github.com/golang/mock v1.4.4/go.mod h1:l3mdAwkq5BuhzHwde/uurv3sEJeZMXNpwsxVWU71
 github.com/google/go-cmp v0.2.1-0.20190312032427-6f77996f0c42/go.mod h1:8QqcDgzrUqlUb/G2PQTWiueGozuR1884gddMywk6iLU=
 github.com/google/go-cmp v0.4.1 h1:/exdXoGamhu5ONeUJH0deniYLWYvQwW66yvlfiiKTu0=
 github.com/google/go-cmp v0.4.1/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
+github.com/google/go-cmp v0.5.4 h1:L8R9j+yAqZuZjsqh/z+F1NCffTKKLShY6zXTItVIZ8M=
+github.com/google/go-cmp v0.5.4/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/jmespath/go-jmespath v0.4.0 h1:BEgLn5cpjn8UN1mAw4NjwDrS35OdebyEtFe+9YPoQUg=
 github.com/jmespath/go-jmespath v0.4.0/go.mod h1:T8mJZnbsbmF+m6zOOFylbeCJqk5+pHWvzYPziyZiYoo=
 github.com/jmespath/go-jmespath/internal/testify v1.5.1 h1:shLQSRRSCCPj3f2gpwzGwWFoC7ycTf1rcQZHOlsJ6N8=
