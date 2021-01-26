@@ -74,18 +74,21 @@ func (s ServiceOpts) PaginateByCursor(ctx context.Context,
 
 	var optsQuery bson.M
 
+	err := s.paramValidationByCursor(collection, &opts)
+	if err != nil {
+		return err
+	}
+
 	if opts.Cursor == nil {
+		// In case of empty cursor, we will return the first page.
 		optsQuery = opts.Query
 	} else {
+		// Provide an empty bson.M as cursor will have the same behavior as no
+		// cursor: so it will return the first page.
 		optsQuery = bson.M{"$and": []bson.M{
 			opts.Query,
 			opts.Cursor,
 		}}
-	}
-
-	err := s.paramValidationByCursor(collection, &opts)
-	if err != nil {
-		return err
 	}
 
 	query, session := document.WhereQuery(ctx, collection, optsQuery)
