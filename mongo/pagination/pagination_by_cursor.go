@@ -24,7 +24,7 @@ type ServiceByCursor interface {
 	PaginateByCursor(ctx context.Context, collection string, result interface{}, opts PaginateByCursorOpts) error
 }
 
-func (s ServiceOpts) paramValidationByCursor(collection string, opts *PaginateByCursorOpts) error {
+func (s ServiceOpts) paramValidationByCursor(collection string, opts PaginateByCursorOpts) error {
 	badRequestErr := NewBadRequestErrors()
 	perPageErr := "per_page"
 
@@ -37,14 +37,6 @@ func (s ServiceOpts) paramValidationByCursor(collection string, opts *PaginateBy
 	// Parameter validation
 	if collection == "" {
 		return errors.New("invalid pagination service configuration: collection must be set")
-	}
-
-	// Default values assignation
-	if opts.AmountItems == 0 {
-		opts.AmountItems = s.PerPageDefault
-	}
-	if opts.SortOrder == "" {
-		opts.SortOrder = "-_id"
 	}
 
 	// Request parameters validation
@@ -74,7 +66,15 @@ func (s ServiceOpts) PaginateByCursor(ctx context.Context,
 
 	var optsQuery bson.M
 
-	err := s.paramValidationByCursor(collection, &opts)
+	// Default values assignation
+	if opts.AmountItems == 0 {
+		opts.AmountItems = s.PerPageDefault
+	}
+	if opts.SortOrder == "" {
+		opts.SortOrder = "-_id"
+	}
+
+	err := s.paramValidationByCursor(collection, opts)
 	if err != nil {
 		return err
 	}
