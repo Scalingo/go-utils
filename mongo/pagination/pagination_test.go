@@ -2,6 +2,7 @@ package pagination
 
 import (
 	"context"
+	"strconv"
 	"testing"
 
 	"github.com/Scalingo/go-utils/mongo/document"
@@ -14,7 +15,7 @@ const dummyCollection = "dummy_documents"
 
 type dummyDocument struct {
 	document.Base      `bson:",inline"`
-	AppNum             int    `bson:"app_id" json:"app_id"`
+	AppID              string `bson:"app_id" json:"app_id"`
 	VirtualStorageName string `bson:"virtual_storage_name" json:"virtual_storage_name"`
 }
 
@@ -23,7 +24,7 @@ func newDummyDocuments(t *testing.T, virtualStorageName string, amount int) func
 
 	for i := 0; i < amount; i++ {
 		doc := dummyDocument{
-			AppNum:             i,
+			AppID:              strconv.Itoa(i),
 			VirtualStorageName: virtualStorageName,
 		}
 		require.NoError(t, document.Save(context.Background(), dummyCollection, &doc))
@@ -176,7 +177,7 @@ func TestPaginationPaginate(t *testing.T) {
 				}
 			},
 			ExpectedResult: []dummyDocument{
-				{AppNum: 0, VirtualStorageName: "vs_name_1"},
+				{AppID: "0", VirtualStorageName: "vs_name_1"},
 			},
 		},
 		{
@@ -200,7 +201,7 @@ func TestPaginationPaginate(t *testing.T) {
 				}
 			},
 			ExpectedResult: []dummyDocument{
-				{AppNum: 0, VirtualStorageName: "vs_name_2"},
+				{AppID: "0", VirtualStorageName: "vs_name_2"},
 			},
 			ExpectedQuery: bson.M{"virtual_storage_name": "vs_name_2"},
 		},
@@ -226,7 +227,7 @@ func TestPaginationPaginate(t *testing.T) {
 				}
 			},
 			ExpectedResult: []dummyDocument{
-				{AppNum: 0, VirtualStorageName: "vs_name_2"},
+				{AppID: "0", VirtualStorageName: "vs_name_2"},
 			},
 			ExpectedQuery: bson.M{"virtual_storage_name": "vs_name_2"},
 		},
@@ -258,8 +259,8 @@ func TestPaginationPaginate(t *testing.T) {
 				}
 			},
 			ExpectedResult: []dummyDocument{
-				{AppNum: 2, VirtualStorageName: "vs_name_2"},
-				{AppNum: 3, VirtualStorageName: "vs_name_2"},
+				{AppID: "2", VirtualStorageName: "vs_name_2"},
+				{AppID: "3", VirtualStorageName: "vs_name_2"},
 			},
 			ExpectedQuery: bson.M{"virtual_storage_name": "vs_name_2"},
 		},
@@ -292,8 +293,8 @@ func TestPaginationPaginate(t *testing.T) {
 			},
 			SortOrder: "-_id",
 			ExpectedResult: []dummyDocument{
-				{AppNum: 1, VirtualStorageName: "vs_name_2"},
-				{AppNum: 0, VirtualStorageName: "vs_name_2"},
+				{AppID: "1", VirtualStorageName: "vs_name_2"},
+				{AppID: "0", VirtualStorageName: "vs_name_2"},
 			},
 			ExpectedQuery: bson.M{"virtual_storage_name": "vs_name_2"},
 		},
@@ -337,7 +338,7 @@ func TestPaginationPaginate(t *testing.T) {
 
 				for idx, expectedResult := range run.ExpectedResult {
 					require.Equal(t, expectedResult.VirtualStorageName, results[idx].VirtualStorageName)
-					require.Equal(t, expectedResult.AppNum, results[idx].AppNum)
+					require.Equal(t, expectedResult.AppID, results[idx].AppID)
 				}
 
 			}
