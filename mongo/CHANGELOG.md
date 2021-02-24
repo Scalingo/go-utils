@@ -1,3 +1,9 @@
+# Changelog
+
+## To be Released
+
+* Bump github.com/sirupsen/logrus from 1.7.0 to 1.8.0
+
 ## v1.1.0
 
 * Add Scalingo pagination support to the package [#140](https://github.com/Scalingo/go-utils/pull/140)
