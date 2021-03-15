@@ -9,7 +9,7 @@ require (
 	github.com/golang/mock v1.5.0
 	github.com/nsqio/go-nsq v1.0.8
 	github.com/pkg/errors v0.9.1
-	github.com/sirupsen/logrus v1.8.0
+	github.com/sirupsen/logrus v1.8.1
 	gopkg.in/errgo.v1 v1.0.1
 )
 
