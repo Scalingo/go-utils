@@ -67,7 +67,7 @@ func Create(ctx context.Context, collectionName string, doc document) error {
 	defer c.Database.Session.Close()
 	log.WithFields(logrus.Fields{
 		"collection": collectionName,
-		"doc_id":     doc.getID(),
+		"doc_id":     doc.getID().Hex(),
 	}).Debugf("save '%v'", collectionName)
 	return c.Insert(doc)
 
@@ -87,7 +87,7 @@ func Save(ctx context.Context, collectionName string, doc document) error {
 	defer c.Database.Session.Close()
 	log.WithFields(logrus.Fields{
 		"collection": collectionName,
-		"doc_id":     doc.getID(),
+		"doc_id":     doc.getID().Hex(),
 	}).Debugf("save '%v'", collectionName)
 	_, err := c.UpsertId(doc.getID(), doc)
 	return err
@@ -104,7 +104,7 @@ func ReallyDestroy(ctx context.Context, collectionName string, doc document) err
 	defer c.Database.Session.Close()
 	log.WithFields(logrus.Fields{
 		"collection": collectionName,
-		"doc_id":     doc.getID(),
+		"doc_id":     doc.getID().Hex(),
 	}).Debugf("remove '%v'", collectionName)
 	return c.RemoveId(doc.getID())
 }
@@ -243,7 +243,7 @@ func Update(ctx context.Context, collectionName string, update bson.M, doc docum
 
 	log.WithFields(logrus.Fields{
 		"collection": collectionName,
-		"doc_id":     doc.getID(),
+		"doc_id":     doc.getID().Hex(),
 	}).Debugf("update %v", collectionName)
 	return c.UpdateId(doc.getID(), update)
 }

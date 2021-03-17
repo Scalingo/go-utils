@@ -2,7 +2,8 @@
 
 ## To be Released
 
-* Bump github.com/sirupsen/logrus from 1.7.0 to 1.8.0
+* Display the MongoDB object ID in the correct format on the logs [#187](https://github.com/Scalingo/go-utils/pull/187)
+* Bump github.com/sirupsen/logrus from 1.7.0 to 1.8.1
 
 ## v1.1.0
 
