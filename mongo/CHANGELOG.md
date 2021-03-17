@@ -2,6 +2,7 @@
 
 ## To be Released
 
+* Display the mongodb object id in the correct format on the logs [#187](https://github.com/Scalingo/go-utils/pull/187)
 * Bump github.com/sirupsen/logrus from 1.7.0 to 1.8.0
 
 ## v1.1.0
