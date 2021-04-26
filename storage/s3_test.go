@@ -41,7 +41,7 @@ func TestS3_Size(t *testing.T) {
 			expectMock: func(t *testing.T, m *storagemock.MockS3Client) {
 				m.EXPECT().HeadObject(gomock.Any(), &s3.HeadObjectInput{
 					Bucket: aws.String("bucket"), Key: aws.String("key"),
-				}).Return(&s3.HeadObjectOutput{ContentLength: aws.Int64(10)}, nil)
+				}).Return(&s3.HeadObjectOutput{ContentLength: int64(10)}, nil)
 			},
 		},
 		"it should retry if the first HEAD request return 404": {
@@ -52,7 +52,7 @@ func TestS3_Size(t *testing.T) {
 
 				m.EXPECT().HeadObject(gomock.Any(), &s3.HeadObjectInput{
 					Bucket: aws.String("bucket"), Key: aws.String("key"),
-				}).Return(&s3.HeadObjectOutput{ContentLength: aws.Int64(10)}, nil)
+				}).Return(&s3.HeadObjectOutput{ContentLength: int64(10)}, nil)
 			},
 		},
 		"it should fail if the max amount of retried is passed": {

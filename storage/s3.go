@@ -122,7 +122,7 @@ func (s *S3) Size(ctx context.Context, path string) (int64, error) {
 		if err != nil {
 			return err
 		}
-		res = *stat.ContentLength
+		res = stat.ContentLength
 		return nil
 	})
 
