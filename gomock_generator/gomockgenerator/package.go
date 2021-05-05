@@ -126,7 +126,6 @@ func fieldToString(field ast.Expr) string {
 	}
 
 	if _, ok := field.(*ast.InterfaceType); ok {
-		// TODO: It's the only case I can think of, but they might be others.
 		return "interface{}"
 	}
 
