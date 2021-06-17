@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"testing"
@@ -72,7 +71,7 @@ func TestCreate(t *testing.T) {
 				// Ensuring standard tar command can read the output archive
 				err = exec.Command("tar", "-C", tempDir, "-xf", out.Name()).Run()
 				require.NoError(t, err)
-				content, err := ioutil.ReadFile(tempDir + "/file")
+				content, err := os.ReadFile(tempDir + "/file")
 				require.NoError(t, err)
 				assert.Equal(t, "file content", string(content))
 			},
@@ -87,7 +86,7 @@ func TestCreate(t *testing.T) {
 				// Ensuring standard tar command can read the output archive
 				err = exec.Command("tar", "-C", tempDir, "-xf", out.Name()).Run()
 				require.NoError(t, err)
-				content, err := ioutil.ReadFile(tempDir + "/tmp/file")
+				content, err := os.ReadFile(tempDir + "/tmp/file")
 				require.NoError(t, err)
 				assert.Equal(t, "file content", string(content))
 			},
@@ -96,11 +95,11 @@ func TestCreate(t *testing.T) {
 
 	for title, c := range cases {
 		t.Run(title, func(t *testing.T) {
-			out, err := ioutil.TempFile("/tmp", "fs-test")
+			out, err := os.CreateTemp("/tmp", "fs-test")
 			require.NoError(t, err)
 			defer os.Remove(out.Name())
 
-			dir, err := ioutil.TempDir("/tmp", "fs-test-dir")
+			dir, err := os.MkdirTemp("/tmp", "fs-test-dir")
 			require.NoError(t, err)
 			defer os.RemoveAll(dir)
 

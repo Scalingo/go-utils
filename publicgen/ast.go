@@ -7,7 +7,7 @@ import (
 	"go/format"
 	"go/printer"
 	"go/token"
-	"io/ioutil"
+	"os"
 )
 
 type field struct {
@@ -160,6 +160,6 @@ func writeAst(ast *ast.File, filename string) error {
 	}
 
 	fmt.Println(string(out))
-	err = ioutil.WriteFile(filename, out, 0644)
+	err = os.WriteFile(filename, out, 0644)
 	return err
 }

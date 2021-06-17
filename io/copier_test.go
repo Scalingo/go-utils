@@ -2,12 +2,11 @@ package io
 
 import (
 	"bytes"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 
-	procmeminfo "github.com/guillermo/go.procmeminfo"
+	"github.com/guillermo/go.procmeminfo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -31,10 +30,10 @@ func TestCopier_Copy(t *testing.T) {
 	})
 
 	t.Run("it should work for files to", func(t *testing.T) {
-		src, err := ioutil.TempFile(wd, "go-utils-io")
+		src, err := os.CreateTemp(wd, "go-utils-io")
 		require.NoError(t, err)
 		defer os.Remove(src.Name())
-		dst, err := ioutil.TempFile(wd, "go-utils-io")
+		dst, err := os.CreateTemp(wd, "go-utils-io")
 		require.NoError(t, err)
 		defer os.Remove(dst.Name())
 
@@ -51,21 +50,21 @@ func TestCopier_Copy(t *testing.T) {
 		require.NoError(t, dst.Close())
 		require.NoError(t, src.Close())
 
-		body, err := ioutil.ReadFile(dst.Name())
+		body, err := os.ReadFile(dst.Name())
 		require.NoError(t, err)
 		assert.Equal(t, "hello", string(body))
 	})
 
 	t.Run("it should not impact cache if option is set", func(t *testing.T) {
-		src, err := ioutil.TempFile(wd, "go-utils-io")
+		src, err := os.CreateTemp(wd, "go-utils-io")
 		require.NoError(t, err)
 		defer os.Remove(src.Name())
-		dst, err := ioutil.TempFile(wd, "go-utils-io")
+		dst, err := os.CreateTemp(wd, "go-utils-io")
 		require.NoError(t, err)
 		defer os.Remove(dst.Name())
 
 		// Exactly 1024 bytes in lorem.txt
-		fixture, err := ioutil.ReadFile("test-fixtures/lorem.txt")
+		fixture, err := os.ReadFile("test-fixtures/lorem.txt")
 		require.NoError(t, err)
 
 		// Write down 100MB

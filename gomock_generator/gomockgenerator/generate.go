@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
@@ -81,7 +80,7 @@ func GenerateMocks(ctx context.Context, gcfg GenerationConfiguration, mocksCfg M
 	var mockSigs map[string]string
 	mockSigsPath := path.Join(os.Getenv("GOPATH"), "src", mocksCfg.BaseDirectory, gcfg.SignaturesFilename)
 
-	sigs, err := ioutil.ReadFile(mockSigsPath)
+	sigs, err := os.ReadFile(mockSigsPath)
 	if os.IsNotExist(err) {
 		log.Info("No cache signatures file, generates all mocks")
 	} else if err != nil {
@@ -121,7 +120,7 @@ func GenerateMocks(ctx context.Context, gcfg GenerationConfiguration, mocksCfg M
 	if err != nil {
 		return errors.Wrap(err, "fail to marshal the signatures cache file")
 	}
-	err = ioutil.WriteFile(mockSigsPath, sigs, 0644)
+	err = os.WriteFile(mockSigsPath, sigs, 0644)
 	if err != nil {
 		return errors.Wrap(err, "fail to write the signatures cache file")
 	}
