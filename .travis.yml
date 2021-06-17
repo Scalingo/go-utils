@@ -1,6 +1,6 @@
 language: go
 go:
-- 1.15
+- 1.16
 services: mongodb
 install:
 - set -e ; for module in $(ls -d */) ; do dir=$(basename $module) ; echo "\n==========\nInstalling deps for $dir\n==========\n" ; cd $dir ; go get -v ./... ;  cd .. ; done

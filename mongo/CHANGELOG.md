@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* Bump go version to 1.16
+
 ## v1.1.1
 
 * Display the MongoDB object ID in the correct format on the logs [#187](https://github.com/Scalingo/go-utils/pull/187)

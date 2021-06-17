@@ -3,6 +3,7 @@
 ## To be Released
 
 * Bump github.com/sirupsen/logrus from 1.7.0 to 1.8.1
+* Bump go version to 1.16 and replace ioutil by io/os [#198](https://github.com/Scalingo/go-utils/pull/198)
 
 ## v1.2.2
 
