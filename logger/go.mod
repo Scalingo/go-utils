@@ -1,6 +1,6 @@
 module github.com/Scalingo/go-utils/logger
 
-go 1.14
+go 1.16
 
 require (
 	github.com/Scalingo/logrus-rollbar v1.3.2

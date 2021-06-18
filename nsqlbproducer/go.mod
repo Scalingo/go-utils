@@ -1,6 +1,6 @@
 module github.com/Scalingo/go-utils/nsqlbproducer
 
-go 1.14
+go 1.16
 
 require (
 	github.com/Scalingo/go-utils/env v1.0.1

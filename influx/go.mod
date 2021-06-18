@@ -1,6 +1,6 @@
 module github.com/Scalingo/go-utils/influx
 
-go 1.14
+go 1.16
 
 require (
 	github.com/influxdata/influxdb v1.9.1

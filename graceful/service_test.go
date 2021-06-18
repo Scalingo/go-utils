@@ -2,7 +2,6 @@ package graceful
 
 import (
 	"bytes"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
@@ -154,7 +153,7 @@ func ensureProcessKilled(t *testing.T, cmd *exec.Cmd) {
 }
 
 func ensurePidFileProcessKilled(t *testing.T) {
-	out, err := ioutil.ReadFile("./test-fixtures/server.pid")
+	out, err := os.ReadFile("./test-fixtures/server.pid")
 	if err == nil {
 		pid, err := strconv.Atoi(strings.TrimSpace(string(out)))
 		require.NoError(t, err)

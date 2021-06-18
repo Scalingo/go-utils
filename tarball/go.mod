@@ -1,6 +1,6 @@
 module github.com/Scalingo/go-utils/tarball
 
-go 1.13
+go 1.16
 
 require (
 	github.com/Scalingo/go-utils/fs v1.0.0

@@ -3,7 +3,7 @@ package httpclient
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -48,7 +48,7 @@ func TestNewClient(t *testing.T) {
 			require.NoError(t, err)
 			defer res.Body.Close()
 
-			body, err := ioutil.ReadAll(res.Body)
+			body, err := io.ReadAll(res.Body)
 			require.NoError(t, err)
 			c.Expect(t, string(body))
 		})
@@ -97,7 +97,7 @@ func TestNewClient_WithAuthentication(t *testing.T) {
 			require.NoError(t, err)
 			defer res.Body.Close()
 
-			body, err := ioutil.ReadAll(res.Body)
+			body, err := io.ReadAll(res.Body)
 			require.NoError(t, err)
 			c.Expect(t, string(body))
 		})

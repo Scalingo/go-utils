@@ -1,6 +1,6 @@
 module github.com/Scalingo/go-utils/gomock_generator
 
-go 1.14
+go 1.16
 
 // In Dev you can uncomment the following line to use the local 'logger' package
 // replace github.com/Scalingo/go-utils/logger => ../logger
