@@ -1,4 +1,4 @@
-# Package `nsqproducer` v1.0.0
+# Package `nsqproducer` v1.1.0
 
 ## Generate mock
 
