@@ -3,20 +3,20 @@ package etcd
 import (
 	"fmt"
 
-	"go.etcd.io/etcd/v3/clientv3"
+	client "go.etcd.io/etcd/client/v3"
 )
 
 // ClientFromEnv generates a etcd client (API v3) from the environment
 // Look at ConfigFromEnv to get details about the environment variables used
-func ClientFromEnv() (*clientv3.Client, error) {
+func ClientFromEnv() (*client.Client, error) {
 	config, err := ConfigFromEnv()
 	if err != nil {
 		return nil, fmt.Errorf("fail to create etcd v3 config: %v", err)
 	}
 
-	client, err := clientv3.New(config)
+	newClient, err := client.New(config)
 	if err != nil {
-		return nil, fmt.Errorf("fail to create etcdv3 client: %v", err)
+		return nil, fmt.Errorf("fail to create etcd v3 client: %v", err)
 	}
-	return client, nil
+	return newClient, nil
 }
