@@ -4,13 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	client "go.etcd.io/etcd/client/v3"
+
 	etcdcron "github.com/Scalingo/go-etcd-cron"
 	"github.com/Scalingo/go-utils/logger"
-	"go.etcd.io/etcd/v3/clientv3"
 )
 
 type SetupOpts struct {
-	EtcdConfig func() (clientv3.Config, error)
+	EtcdConfig func() (client.Config, error)
 	Jobs       []etcdcron.Job
 }
 
