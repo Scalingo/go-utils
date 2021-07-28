@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"go.etcd.io/etcd/client/pkg/v3/transport"
-	client "go.etcd.io/etcd/client/v3"
+	etcdtransport "go.etcd.io/etcd/client/pkg/v3/transport"
+	etcdclient "go.etcd.io/etcd/client/v3"
 )
 
 // ConfigFromEnv generates a etcd clientv3 config from the environment using the following variables:
@@ -16,7 +16,7 @@ import (
 // * ETCD_TLS_CERT: Path to the TLS X.509 certificate
 // * ETCD_TLS_KEY: Path to the private key authenticating the certificate
 // * ETCD_CACERT: Path to the CA cert signing the etcd member certifcates
-func ConfigFromEnv() (res client.Config, _ error) {
+func ConfigFromEnv() (res etcdclient.Config, _ error) {
 	var endpoints []string
 	etcdURLs := strings.Split(os.Getenv("ETCD_HOSTS"), ",")
 	tls := false
@@ -32,13 +32,13 @@ func ConfigFromEnv() (res client.Config, _ error) {
 		endpoints = append(endpoints, etcdURL.Host)
 	}
 
-	config := client.Config{
+	config := etcdclient.Config{
 		Endpoints:   endpoints,
 		DialTimeout: 5 * time.Second,
 	}
 
 	if tls {
-		tlsInfo := transport.TLSInfo{
+		tlsInfo := etcdtransport.TLSInfo{
 			CertFile:      os.Getenv("ETCD_TLS_CERT"),
 			KeyFile:       os.Getenv("ETCD_TLS_KEY"),
 			TrustedCAFile: os.Getenv("ETCD_CACERT"),
