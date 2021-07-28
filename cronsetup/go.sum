@@ -1,8 +1,8 @@
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/Scalingo/go-etcd-cron v1.2.2-0.20210728122616-b340a9263e36 h1:3MWMJ1+Tm4gDIdHIdwfkwbR4k0fTsjOdREB9EZPrcPg=
-github.com/Scalingo/go-etcd-cron v1.2.2-0.20210728122616-b340a9263e36/go.mod h1:uwqTf9tqNgzlXbiXPYfIAlT2IJv/xFIpR2lGXM+PSh4=
+github.com/Scalingo/go-etcd-cron v1.3.0 h1:UKV87n1mP/KeAuSQFrKOg3ef1BpRKdNA3k6eIXQ8pqg=
+github.com/Scalingo/go-etcd-cron v1.3.0/go.mod h1:uwqTf9tqNgzlXbiXPYfIAlT2IJv/xFIpR2lGXM+PSh4=
 github.com/Scalingo/go-utils/logger v1.0.0 h1:E0UHcvcxaESKwcMRL6MWHur+EIps3MhhkKk/mHmZqtw=
 github.com/Scalingo/go-utils/logger v1.0.0/go.mod h1:yVs3dRJyj2NvcOfgzcDVc1P8wkwUQP3PgCBDNS8vmB8=
 github.com/Scalingo/logrus-rollbar v1.3.2/go.mod h1:Mo38Fue00mdY/UM5gOMTXAWfiOIJK29/sxL3zxb/68I=
