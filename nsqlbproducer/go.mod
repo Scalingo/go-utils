@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/Scalingo/go-utils/env v1.0.1
-	github.com/Scalingo/go-utils/nsqproducer v1.0.0
+	github.com/Scalingo/go-utils/nsqproducer v1.1.0
 	github.com/golang/mock v1.6.0
 	github.com/golang/snappy v0.0.2 // indirect
 	github.com/nsqio/go-nsq v1.0.8
