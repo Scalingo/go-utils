@@ -21,7 +21,6 @@ const (
 )
 
 const (
-	PublishNoTimeout      = time.Duration(-1)
 	defaultPublishTimeout = 30 * time.Second
 )
 
@@ -149,12 +148,8 @@ func (p *NsqLBProducer) Publish(ctx context.Context, topic string, message nsqpr
 	var err error
 	for i := 0; i < len(p.producers); i++ {
 		// Create a context just for this publish call and add a timeout on this call
-		publishCtx := ctx
-		if p.publishTimeout != PublishNoTimeout {
-			var cancel context.CancelFunc
-			publishCtx, cancel = context.WithTimeout(publishCtx, p.publishTimeout)
-			defer cancel()
-		}
+		publishCtx, cancel := context.WithTimeout(ctx, p.publishTimeout)
+		defer cancel()
 
 		producer := p.producers[(i+firstProducer)%len(p.producers)]
 		err = producer.producer.Publish(publishCtx, topic, message)
@@ -176,12 +171,8 @@ func (p *NsqLBProducer) DeferredPublish(ctx context.Context, topic string, delay
 	var err error
 	for i := 0; i < len(p.producers); i++ {
 		// Create a context just for this publish call and add a timeout on this call
-		publishCtx := ctx
-		if p.publishTimeout != PublishNoTimeout {
-			var cancel context.CancelFunc
-			publishCtx, cancel = context.WithTimeout(publishCtx, p.publishTimeout)
-			defer cancel()
-		}
+		publishCtx, cancel := context.WithTimeout(ctx, p.publishTimeout)
+		defer cancel()
 
 		producer := p.producers[(i+firstProducer)%len(p.producers)]
 		err = producer.producer.DeferredPublish(publishCtx, topic, delay, message)
