@@ -20,6 +20,11 @@ const (
 	RandomStrategy
 )
 
+const (
+	PublishNoTimeout      = time.Duration(-1)
+	defaultPublishTimeout = 30 * time.Second
+)
+
 var (
 	StrategiesFromName = map[string]LBStrategy{
 		"":         FallbackStrategy,
@@ -31,10 +36,11 @@ var (
 // NsqLBProducer a producer that distribute nsq messages across a set of node
 // if a node send an error when receiving the message it will try with another node of the set
 type NsqLBProducer struct {
-	producers []producer
-	randInt   func() int
-	strategy  LBStrategy
-	logger    logrus.FieldLogger
+	producers      []producer
+	randInt        func() int
+	strategy       LBStrategy
+	logger         logrus.FieldLogger
+	publishTimeout time.Duration
 }
 
 type PublishPinger interface {
@@ -59,11 +65,12 @@ func (h Host) String() string {
 }
 
 type LBProducerOpts struct {
-	Hosts      []Host
-	NsqConfig  *nsq.Config
-	Logger     logrus.FieldLogger
-	SkipLogSet map[string]bool
-	Strategy   LBStrategy
+	Hosts          []Host
+	NsqConfig      *nsq.Config
+	Logger         logrus.FieldLogger
+	SkipLogSet     map[string]bool
+	Strategy       LBStrategy
+	PublishTimeout time.Duration
 }
 
 var _ nsqproducer.Producer = &NsqLBProducer{} // Ensure that NsqLBProducer implements the Producer interface
@@ -104,6 +111,11 @@ func New(opts LBProducerOpts) (*NsqLBProducer, error) {
 		lbproducer.randInt = rand.New(rand.NewSource(time.Now().Unix())).Int
 	}
 	lbproducer.logger = opts.Logger
+	if opts.PublishTimeout == 0 {
+		lbproducer.publishTimeout = defaultPublishTimeout
+	} else {
+		lbproducer.publishTimeout = opts.PublishTimeout
+	}
 
 	return lbproducer, nil
 }
@@ -136,8 +148,16 @@ func (p *NsqLBProducer) Publish(ctx context.Context, topic string, message nsqpr
 
 	var err error
 	for i := 0; i < len(p.producers); i++ {
+		// Create a context just for this publish call and add a timeout on this call
+		publishCtx := ctx
+		if p.publishTimeout != PublishNoTimeout {
+			var cancel context.CancelFunc
+			publishCtx, cancel = context.WithTimeout(publishCtx, p.publishTimeout)
+			defer cancel()
+		}
+
 		producer := p.producers[(i+firstProducer)%len(p.producers)]
-		err = producer.producer.Publish(ctx, topic, message)
+		err = producer.producer.Publish(publishCtx, topic, message)
 		if err != nil {
 			if p.logger != nil {
 				p.logger.WithError(err).WithField("host", producer.host.String()).Error("fail to send nsq message to one nsq node")
@@ -155,8 +175,16 @@ func (p *NsqLBProducer) DeferredPublish(ctx context.Context, topic string, delay
 
 	var err error
 	for i := 0; i < len(p.producers); i++ {
+		// Create a context just for this publish call and add a timeout on this call
+		publishCtx := ctx
+		if p.publishTimeout != PublishNoTimeout {
+			var cancel context.CancelFunc
+			publishCtx, cancel = context.WithTimeout(publishCtx, p.publishTimeout)
+			defer cancel()
+		}
+
 		producer := p.producers[(i+firstProducer)%len(p.producers)]
-		err = producer.producer.DeferredPublish(ctx, topic, delay, message)
+		err = producer.producer.DeferredPublish(publishCtx, topic, delay, message)
 		if err != nil {
 			if p.logger != nil {
 				p.logger.WithError(err).WithField("host", producer.host.String()).Error("fail to send nsq message to one nsq node")
