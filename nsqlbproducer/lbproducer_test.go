@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/Scalingo/go-utils/nsqlbproducer/nsqlbproducermock"
 	"github.com/Scalingo/go-utils/nsqproducer"
@@ -28,6 +29,8 @@ type example struct {
 	ExpectP2Call bool
 	P1Error      error
 	P2Error      error
+	P1Delay      time.Duration
+	P2Delay      time.Duration
 	ExpectError  bool
 	RandInt      func() int
 }
@@ -35,8 +38,9 @@ type example struct {
 func randLBProducer(order []int) func(producers []producer) *NsqLBProducer {
 	return func(producers []producer) *NsqLBProducer {
 		return &NsqLBProducer{
-			producers: producers,
-			randInt:   (&mockedRandSource{current: 0, values: order}).Int,
+			producers:      producers,
+			randInt:        (&mockedRandSource{current: 0, values: order}).Int,
+			publishTimeout: 1 * time.Second,
 		}
 	}
 }
@@ -51,7 +55,7 @@ func TestLBPublish(t *testing.T) {
 			P2Error:      nil,
 			ExpectError:  false,
 		},
-		"when a	single host is down": {
+		"when a single host is down": {
 			LBProducer:   randLBProducer([]int{1, 0}),
 			ExpectP1Call: true,
 			ExpectP2Call: true,
@@ -70,8 +74,9 @@ func TestLBPublish(t *testing.T) {
 		"when using the fallback mode, the first node ": {
 			LBProducer: func(producers []producer) *NsqLBProducer {
 				return &NsqLBProducer{
-					producers: producers,
-					randInt:   alwaysZero,
+					producers:      producers,
+					randInt:        alwaysZero,
+					publishTimeout: 1 * time.Second,
 				}
 			},
 			ExpectP1Call: true,
@@ -81,13 +86,41 @@ func TestLBPublish(t *testing.T) {
 		"when using the fallback mode and the firs node is failing, it should call the second one": {
 			LBProducer: func(producers []producer) *NsqLBProducer {
 				return &NsqLBProducer{
-					producers: producers,
-					randInt:   alwaysZero,
+					producers:      producers,
+					randInt:        alwaysZero,
+					publishTimeout: 1 * time.Second,
 				}
 			},
 			ExpectP1Call: true,
 			ExpectP2Call: true,
 			P1Error:      errors.New("FAIL"),
+		},
+		"when there is a timeout on the first load producer": {
+			LBProducer: func(producers []producer) *NsqLBProducer {
+				return &NsqLBProducer{
+					producers:      producers,
+					randInt:        alwaysZero,
+					publishTimeout: 100 * time.Millisecond,
+				}
+			},
+			P1Delay:      200 * time.Millisecond,
+			ExpectP1Call: true,
+			ExpectP2Call: true,
+			ExpectError:  false,
+		},
+		"when there is a timeout on the both producer": {
+			LBProducer: func(producers []producer) *NsqLBProducer {
+				return &NsqLBProducer{
+					producers:      producers,
+					randInt:        alwaysZero,
+					publishTimeout: 10 * time.Millisecond,
+				}
+			},
+			P1Delay:      20 * time.Millisecond,
+			P2Delay:      20 * time.Millisecond,
+			ExpectP1Call: true,
+			ExpectP2Call: true,
+			ExpectError:  true,
 		},
 	}
 
@@ -118,17 +151,26 @@ func runPublishExample(t *testing.T, example example, deferred bool) {
 
 	if example.ExpectP1Call {
 		if deferred {
-			p1.EXPECT().DeferredPublish(ctx, topic, delay, message).Return(example.P1Error)
+			p1.EXPECT().DeferredPublish(gomock.Any(), topic, delay, message).DoAndReturn(func(ctx context.Context, _, _, _ interface{}) error {
+				return timeoutOrError(ctx, example.P1Delay, example.P1Error)
+			})
+
 		} else {
-			p1.EXPECT().Publish(ctx, topic, message).Return(example.P1Error)
+			p1.EXPECT().Publish(gomock.Any(), topic, message).DoAndReturn(func(ctx context.Context, _, _ interface{}) error {
+				return timeoutOrError(ctx, example.P1Delay, example.P1Error)
+			})
 		}
 	}
 
 	if example.ExpectP2Call {
 		if deferred {
-			p2.EXPECT().DeferredPublish(ctx, topic, delay, message).Return(example.P2Error)
+			p2.EXPECT().DeferredPublish(gomock.Any(), topic, delay, message).DoAndReturn(func(ctx context.Context, _, _, _ interface{}) error {
+				return timeoutOrError(ctx, example.P2Delay, example.P2Error)
+			})
 		} else {
-			p2.EXPECT().Publish(ctx, topic, message).Return(example.P2Error)
+			p2.EXPECT().Publish(gomock.Any(), topic, message).DoAndReturn(func(ctx context.Context, _, _ interface{}) error {
+				return timeoutOrError(ctx, example.P2Delay, example.P2Error)
+			})
 		}
 	}
 
@@ -145,5 +187,15 @@ func runPublishExample(t *testing.T, example example, deferred bool) {
 		assert.Error(t, err)
 	} else {
 		assert.NoError(t, err)
+	}
+}
+
+func timeoutOrError(ctx context.Context, delay time.Duration, err error) error {
+	timer := time.NewTimer(delay)
+	select {
+	case <-timer.C:
+		return err
+	case <-ctx.Done():
+		return ctx.Err()
 	}
 }
