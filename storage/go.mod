@@ -3,7 +3,7 @@ module github.com/Scalingo/go-utils/storage
 go 1.16
 
 require (
-	github.com/Scalingo/go-utils/logger v1.0.0
+	github.com/Scalingo/go-utils/logger v1.1.0
 	github.com/aws/aws-sdk-go-v2 v0.31.0
 	github.com/aws/aws-sdk-go-v2/credentials v0.2.0
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v0.2.0
@@ -13,7 +13,7 @@ require (
 	github.com/ncw/swift v1.0.53
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0
-	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
+	golang.org/x/sys v0.0.0-20211020174200-9d6173849985 // indirect
 )
 
 // In Dev you can uncomment the following line to use the local 'logger' package
