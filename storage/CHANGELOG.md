@@ -8,6 +8,9 @@
 * Bump github.com/ncw/swift from 1.0.52 to 1.0.53
 * Bump github.com/golang/mock from 1.4.4 to 1.6.0
 * Bump go version to 1.16
+* Add options to s3 client to control multipart upload:
+	* `func WithPartSize(size int64)`
+	* `func WithUploadConcurrency(concurrency int)`
 
 ## v1.0.0
 
