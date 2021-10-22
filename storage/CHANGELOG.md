@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* build(deps): bump github.com/aws/aws-sdk-go-v2 from 1.9.2 to 1.10.0
+
 ## v1.1.1
 
 * Change github.com/awslabs/smithy-go to github.com/aws/smithy-go
