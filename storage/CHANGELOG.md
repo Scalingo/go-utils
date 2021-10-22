@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.1.1
+
 * Change github.com/awslabs/smithy-go to github.com/aws/smithy-go
 
 ## v1.1.0
