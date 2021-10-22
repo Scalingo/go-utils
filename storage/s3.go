@@ -11,7 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/awslabs/smithy-go"
+	"github.com/aws/smithy-go"
 	"github.com/pkg/errors"
 
 	"github.com/Scalingo/go-utils/logger"
