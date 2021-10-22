@@ -3,6 +3,7 @@
 ## To be Released
 
 * build(deps): bump github.com/aws/aws-sdk-go-v2 from 1.9.2 to 1.10.0
+* build(deps): bump github.com/aws/aws-sdk-go-v2/service/s3 from 1.16.1 to 1.17.0
 
 ## v1.1.1
 
