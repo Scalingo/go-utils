@@ -4,6 +4,7 @@
 
 * build(deps): bump github.com/aws/aws-sdk-go-v2 from 1.9.2 to 1.10.0
 * build(deps): bump github.com/aws/aws-sdk-go-v2/service/s3 from 1.16.1 to 1.17.0
+* build(deps): bump github.com/aws/aws-sdk-go-v2/feature/s3/manager from 1.5.4 to 1.6.0
 
 ## v1.1.1
 
