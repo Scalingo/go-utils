@@ -7,17 +7,24 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Scalingo/go-utils/logger"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/awslabs/smithy-go"
+	"github.com/aws/smithy-go"
 	"github.com/pkg/errors"
+
+	"github.com/Scalingo/go-utils/logger"
 )
 
 const (
 	NotFoundErrCode = "NotFound"
+	// DefaultPartSize 16 MB part size define the size in bytes of the parts
+	// uploaded in a multipart upload
+	DefaultPartSize = int64(16777216)
+	// DefaultUploadConcurrency defines that multipart upload will be done in
+	// parallel in 2 routines
+	DefaultUploadConcurrency = int(2)
 )
 
 type S3Client interface {
@@ -41,10 +48,12 @@ type RetryPolicy struct {
 }
 
 type S3 struct {
-	cfg         S3Config
-	s3client    S3Client
-	s3uploader  *manager.Uploader
-	retryPolicy RetryPolicy
+	cfg               S3Config
+	s3client          S3Client
+	s3uploader        *manager.Uploader
+	retryPolicy       RetryPolicy
+	uploadConcurrency int
+	partSize          int64
 }
 
 type s3Opt func(s3 *S3)
@@ -57,11 +66,23 @@ func WithRetryPolicy(policy RetryPolicy) s3Opt {
 	})
 }
 
+func WithPartSize(size int64) s3Opt {
+	return s3Opt(func(s3 *S3) {
+		s3.partSize = size
+	})
+}
+
+func WithUploadConcurrency(concurrency int) s3Opt {
+	return s3Opt(func(s3 *S3) {
+		s3.uploadConcurrency = concurrency
+	})
+}
+
 func NewS3(cfg S3Config, opts ...s3Opt) *S3 {
 	s3config := s3Config(cfg)
 	s3client := s3.NewFromConfig(s3config)
 	s3 := &S3{
-		cfg: cfg, s3client: s3client, s3uploader: manager.NewUploader(s3client),
+		cfg: cfg, s3client: s3client,
 		retryPolicy: RetryPolicy{
 			WaitDuration: time.Second,
 			Attempts:     3,
@@ -73,6 +94,19 @@ func NewS3(cfg S3Config, opts ...s3Opt) *S3 {
 	for _, opt := range opts {
 		opt(s3)
 	}
+
+	partSize := DefaultPartSize
+	if s3.partSize != 0 {
+		partSize = s3.partSize
+	}
+	concurrency := DefaultUploadConcurrency
+	if s3.uploadConcurrency != 0 {
+		concurrency = s3.uploadConcurrency
+	}
+	s3.s3uploader = manager.NewUploader(s3client, func(u *manager.Uploader) {
+		u.PartSize = partSize
+		u.Concurrency = concurrency
+	})
 	return s3
 }
 
