@@ -1,8 +1,8 @@
 github.com/Scalingo/errgo-rollbar v0.2.0/go.mod h1:InPX+PbaicLpePiWdmay2bJ4gtF4anm2L8T6rITx41A=
 github.com/Scalingo/go-utils/fs v1.0.0 h1:fWO82tMpT8lZdYdnECC+bC4kNL0uUHKKh4fhANyVSBY=
 github.com/Scalingo/go-utils/fs v1.0.0/go.mod h1:30HqnWA7qrHCgNlUwgtUPchkQit5vqMaFW7ZA7B+/L4=
-github.com/Scalingo/go-utils/io v1.0.0 h1:rPIdC9UAPq9fyyq8AnCAhwj3I32bAu2Ga5rJCxtZy9w=
-github.com/Scalingo/go-utils/io v1.0.0/go.mod h1:Cnt3DJiMF5M7fp0OMLvDIdSI9l0epW7LjDmCKmcHrUw=
+github.com/Scalingo/go-utils/io v1.1.0 h1:6Rc3We01UpMjZpBgywvuT7ijnJRmDwb1nTOTeXDa3sQ=
+github.com/Scalingo/go-utils/io v1.1.0/go.mod h1:+OHr9cdAJsRUefWfpg2/H32uM6jPfn7hMogWDAd2PFk=
 github.com/Scalingo/go-utils/logger v1.1.0 h1:wloM9dNhPntCr8W7FicBE4SHx6JHrC/3r/bcbJaSlpo=
 github.com/Scalingo/go-utils/logger v1.1.0/go.mod h1:ZJLfkPJ4kfTAliBBAka0IH06+SS+LmRetKuw00WAe+s=
 github.com/Scalingo/logrus-rollbar v1.4.0/go.mod h1:NDlGhdrfltVSLjElDxRjpqSDzu91zK5jJH4KHNcgf7g=
@@ -38,7 +38,6 @@ github.com/spf13/afero v1.6.0/go.mod h1:Ai8FlHk4v/PARR026UzYexafAt9roJ7LcLMAmO6Z
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
-github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
 github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
@@ -47,7 +46,6 @@ golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3/go.mod h1:t9HGtf8HONx5eT2rtn
 golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20190412213103-97732733099d/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20191026070338-33540a1f6037/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
-golang.org/x/sys v0.0.0-20200428200454-593003d681fa/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20211020174200-9d6173849985 h1:LOlKVhfDyahgmqa97awczplwkjzNaELFg3zRIJ13RYo=
 golang.org/x/sys v0.0.0-20211020174200-9d6173849985/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
@@ -64,4 +62,3 @@ gopkg.in/yaml.v2 v2.2.2/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
 gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 h1:tQIYjPdBoyREyB9XMu+nnTclpTYkz2zFM+lzLJFO4gQ=
 gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
-gotest.tools v2.2.0+incompatible/go.mod h1:DsYFclhRJ6vuDpmuTbkuFWG+y2sxOXAzmJt81HFBacw=
