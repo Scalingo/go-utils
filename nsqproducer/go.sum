@@ -1,6 +1,6 @@
 github.com/Scalingo/errgo-rollbar v0.2.0/go.mod h1:InPX+PbaicLpePiWdmay2bJ4gtF4anm2L8T6rITx41A=
-github.com/Scalingo/go-utils/env v1.0.1 h1:DkizrlHclI+3cBNHGxHZyoj6Rm0YOza0PcSVh8WWAXw=
-github.com/Scalingo/go-utils/env v1.0.1/go.mod h1:0whJY0+EgeLI3sJfK8vlyBw2IlMTdisqCwoRs2wpHe4=
+github.com/Scalingo/go-utils/env v1.1.0 h1:F6MBxtGJrc4SXF18Fqie6Lpvkv7JygJfr1WSRGitst0=
+github.com/Scalingo/go-utils/env v1.1.0/go.mod h1:pYJjGXhXrRldYvXj9vt334BJWRsGup4Uw3XWqp2ADRI=
 github.com/Scalingo/go-utils/logger v1.1.0 h1:wloM9dNhPntCr8W7FicBE4SHx6JHrC/3r/bcbJaSlpo=
 github.com/Scalingo/go-utils/logger v1.1.0/go.mod h1:ZJLfkPJ4kfTAliBBAka0IH06+SS+LmRetKuw00WAe+s=
 github.com/Scalingo/logrus-rollbar v1.4.0/go.mod h1:NDlGhdrfltVSLjElDxRjpqSDzu91zK5jJH4KHNcgf7g=
@@ -34,7 +34,6 @@ github.com/sirupsen/logrus v1.8.1 h1:dJKuHgqk1NNQlqoA6BTlM1Wf9DOH3NBjQyu0h9+AZZE
 github.com/sirupsen/logrus v1.8.1/go.mod h1:yWOB1SBYBC5VeMP7gHvWumXLIWorT60ONWic61uBYv0=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
-github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/yuin/goldmark v1.3.5/go.mod h1:mwnBkeHKe2W/ZEtQ+71ViKU8L12m81fl3OWwC1Zlc8k=
