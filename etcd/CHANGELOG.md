@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* build(deps): bump go.etcd.io/etcd/client/pkg/v3 from 3.5.0 to 3.5.1
+
 ## v1.1.0
 
 * Bump etcd client to 3.5.0
