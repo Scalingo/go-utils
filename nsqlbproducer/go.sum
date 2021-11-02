@@ -1,6 +1,7 @@
 github.com/Scalingo/errgo-rollbar v0.2.0/go.mod h1:InPX+PbaicLpePiWdmay2bJ4gtF4anm2L8T6rITx41A=
-github.com/Scalingo/go-utils/env v1.0.1 h1:DkizrlHclI+3cBNHGxHZyoj6Rm0YOza0PcSVh8WWAXw=
 github.com/Scalingo/go-utils/env v1.0.1/go.mod h1:0whJY0+EgeLI3sJfK8vlyBw2IlMTdisqCwoRs2wpHe4=
+github.com/Scalingo/go-utils/env v1.1.0 h1:F6MBxtGJrc4SXF18Fqie6Lpvkv7JygJfr1WSRGitst0=
+github.com/Scalingo/go-utils/env v1.1.0/go.mod h1:pYJjGXhXrRldYvXj9vt334BJWRsGup4Uw3XWqp2ADRI=
 github.com/Scalingo/go-utils/logger v1.0.0/go.mod h1:yVs3dRJyj2NvcOfgzcDVc1P8wkwUQP3PgCBDNS8vmB8=
 github.com/Scalingo/go-utils/logger v1.1.0 h1:wloM9dNhPntCr8W7FicBE4SHx6JHrC/3r/bcbJaSlpo=
 github.com/Scalingo/go-utils/logger v1.1.0/go.mod h1:ZJLfkPJ4kfTAliBBAka0IH06+SS+LmRetKuw00WAe+s=
