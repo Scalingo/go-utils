@@ -1,5 +1,9 @@
 # Changelog
 
+## To be Released
+
+* build(deps): bump github.com/nsqio/go-nsq from 1.0.8 to 1.1.0
+
 ## v1.1.1
 
 * Bump github.com/go-utils/logger from v1.0.0 to v1.1.0
