@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* build(deps): bump github.com/Scalingo/go-utils/errors from 1.0.0 to 1.1.0
+
 ## v1.2.0
 
 * Bump go version to 1.16
