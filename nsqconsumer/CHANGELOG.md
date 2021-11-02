@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* build(deps): bump github.com/nsqio/go-nsq from 1.0.8 to 1.1.0
+
 ## v1.1.0
 
 * Bump github.com/sirupsen/logrus from 1.7.0 to 1.8.1
