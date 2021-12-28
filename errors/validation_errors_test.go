@@ -1,7 +1,10 @@
 package errors
 
-import "github.com/stretchr/testify/require"
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/require"
+)
 
 func TestValidationErrorsBuilder_Merge(t *testing.T) {
 	cases := map[string]struct {
@@ -57,6 +60,47 @@ func TestValidationErrorsBuilder_MergeWithPrefix(t *testing.T) {
 	for title, c := range cases {
 		t.Run(title, func(t *testing.T) {
 			require.Equal(t, c.Expected, c.Builder.MergeWithPrefix(c.Prefix, c.Error))
+		})
+	}
+}
+
+func TestValidationErrors_Error(t *testing.T) {
+	cases := map[string]struct {
+		Errors         ValidationErrors
+		expectedErrors []string
+	}{
+		"should return a string with one error in it": {
+			Errors: ValidationErrors{
+				Errors: map[string][]string{
+					"name": {"invalid name"},
+				},
+			},
+			expectedErrors: []string{"name=invalid name"},
+		},
+		"should return a string with multiple errors in it with the same field name": {
+			Errors: ValidationErrors{
+				Errors: map[string][]string{
+					"name": {"invalid name", "should contains alphanumeric characters"},
+				},
+			},
+			expectedErrors: []string{"name=invalid name", "should contains alphanumeric characters"},
+		},
+		"should return a string with multiple errors in it with multiple field name": {
+			Errors: ValidationErrors{
+				Errors: map[string][]string{
+					"name": {"invalid name", "should contains alphanumeric characters"},
+					"type": {"invalid type", "type not exist"},
+				},
+			},
+			expectedErrors: []string{"name=invalid name, should contains alphanumeric characters", "type=invalid type, type not exist"},
+		},
+	}
+
+	for title, c := range cases {
+		t.Run(title, func(t *testing.T) {
+			for _, expectedError := range c.expectedErrors {
+				require.Contains(t, c.Errors.Error(), expectedError)
+			}
 		})
 	}
 }

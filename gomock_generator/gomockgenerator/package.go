@@ -8,6 +8,7 @@ import (
 	"go/token"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -16,14 +17,25 @@ import (
 func interfaceHash(pkg, iName string) (string, error) {
 	sig, err := interfaceSignature(pkg, iName)
 	if err != nil {
-		return "", errors.Wrapf(err, "fail to get interface signature for %s", iName)
+		return "", errors.Wrapf(err, "fail to get interface signature for %s:%s", pkg, iName)
+	}
+	if sig == "FORCE_REGENERATE" {
+		return sig, nil
 	}
 	hash := sha1.Sum([]byte(sig))
 	return fmt.Sprintf("% x", hash), nil
 }
 
 func interfaceSignature(pkg, iName string) (string, error) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return "", errors.Wrap(err, "fail to get current working directory")
+	}
 	fullPath := path.Join(os.Getenv("GOPATH"), "src", pkg)
+	vendoredPkg := filepath.Join(cwd, "vendor", pkg)
+	if _, err := os.Stat(vendoredPkg); err == nil {
+		fullPath = vendoredPkg
+	}
 	fileSet := token.NewFileSet()
 	packages, err := parser.ParseDir(fileSet, fullPath, func(info os.FileInfo) bool {
 		return !strings.HasSuffix(info.Name(), "_test.go")
@@ -31,6 +43,10 @@ func interfaceSignature(pkg, iName string) (string, error) {
 
 	if err != nil {
 		return "", errors.Wrap(err, "fail to parse package")
+	}
+
+	if len(packages) == 0 {
+		return "", errors.Errorf("no package found in %v for interface %v", fullPath, iName)
 	}
 
 	if len(packages) != 1 {
@@ -54,6 +70,10 @@ func interfaceSignature(pkg, iName string) (string, error) {
 											switch v := m.Type.(type) {
 											case *ast.Ident:
 												interfaceSig = fmt.Sprintf("%s\nInterface{%s}\n", interfaceSig, v.Name)
+											case *ast.SelectorExpr:
+												// If there is a selector expr (if the interface calls other interfaces: force a regeneration)
+												// Implementing a real signature seems to be really tricky!
+												return "FORCE_REGENERATE", nil
 											case *ast.FuncType:
 												methodName := m.Names[0].String()
 												var methodType string
@@ -72,7 +92,7 @@ func interfaceSignature(pkg, iName string) (string, error) {
 												interfaceSig = fmt.Sprintf("%s\n%s(%s)(%s)\n", interfaceSig, methodName, methodParams, methodType)
 
 											default:
-												panic("Unexpected AST type")
+												panic(fmt.Sprintf("Unexpected AST type: %T for %s.%s", v, pkg, iName))
 											}
 										}
 										return interfaceSig, nil
@@ -106,7 +126,6 @@ func fieldToString(field ast.Expr) string {
 	}
 
 	if _, ok := field.(*ast.InterfaceType); ok {
-		// TODO: It's the only case I can think of, but they might be others.
 		return "interface{}"
 	}
 

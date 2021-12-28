@@ -1,8 +1,3 @@
-## Mock Generation
+# Package `nsqlbproducer` v1.1.0
 
-```
-mockgen -destination nsqlbproducermock/gomock_publish_pinger.go \
-        -package nsqlbproducermock \
-				github.com/Scalingo/go-utils/nsqlbproducer \
-				PublishPinger
-```
+`nsqlbproducer` is used to publish a nsq message with support for multiple `nsqd` instances. This is the library of choice when writing a project which requires to send a nsq message.

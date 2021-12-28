@@ -1,5 +1,5 @@
-## Generate mock
+# Package `nsqproducer` v1.1.0
 
-```
-mockgen -destination nsqproducermock/gomock_producer.go -package nsqproducermock github.com/Scalingo/go-utils/nsqproducer Producer
-```
+`nsqproducer` is a private package used by `nsqlbproducer`. It should **NEVER** be directly used! Please use the `nsqlbproducer` package.
+
+`nsqproducer` contains the code to publish a message to a single `nsqd` instance. This is not good for high availability.

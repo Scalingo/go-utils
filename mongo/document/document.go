@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/sirupsen/logrus"
+
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 
@@ -22,13 +24,22 @@ type document interface {
 	Validable
 }
 
+var _ document = &Base{}
+var _ document = &Paranoid{}
+
 type scopable interface {
 	scope(bson.M) bson.M
 }
 
+var _ scopable = Base{}
+var _ scopable = Paranoid{}
+
 type destroyable interface {
 	destroy(ctx context.Context, collectionName string) error
 }
+
+var _ destroyable = &Base{}
+var _ destroyable = &Paranoid{}
 
 type Closer interface {
 	Close()
@@ -38,7 +49,10 @@ type Validable interface {
 	Validate(ctx context.Context) *ValidationErrors
 }
 
-// Create inser the document in the database, returns an error if document already exists and set CreatedAt timestamp
+var _ Validable = &Base{}
+
+// Create inserts the document in the database, returns an error if document
+// already exists and set CreatedAt timestamp
 func Create(ctx context.Context, collectionName string, doc document) error {
 	log := logger.Get(ctx)
 	doc.ensureID()
@@ -51,8 +65,11 @@ func Create(ctx context.Context, collectionName string, doc document) error {
 
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
-	log.WithField(collectionName, doc).Debugf("save '%v'", collectionName)
-	return c.Insert(&doc)
+	log.WithFields(logrus.Fields{
+		"collection": collectionName,
+		"doc_id":     doc.getID().Hex(),
+	}).Debugf("save '%v'", collectionName)
+	return c.Insert(doc)
 
 }
 
@@ -68,8 +85,11 @@ func Save(ctx context.Context, collectionName string, doc document) error {
 
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
-	log.WithField(collectionName, doc).Debugf("save '%v'", collectionName)
-	_, err := c.UpsertId(doc.getID(), &doc)
+	log.WithFields(logrus.Fields{
+		"collection": collectionName,
+		"doc_id":     doc.getID().Hex(),
+	}).Debugf("save '%v'", collectionName)
+	_, err := c.UpsertId(doc.getID(), doc)
 	return err
 }
 
@@ -82,7 +102,10 @@ func ReallyDestroy(ctx context.Context, collectionName string, doc document) err
 	log := logger.Get(ctx)
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
-	log.WithField(collectionName, doc).Debugf("remove '%v'", collectionName)
+	log.WithFields(logrus.Fields{
+		"collection": collectionName,
+		"doc_id":     doc.getID().Hex(),
+	}).Debugf("remove '%v'", collectionName)
 	return c.RemoveId(doc.getID())
 }
 
@@ -218,6 +241,30 @@ func Update(ctx context.Context, collectionName string, update bson.M, doc docum
 		return err
 	}
 
-	log.WithField("query", update).Debugf("update %v", collectionName)
+	log.WithFields(logrus.Fields{
+		"collection": collectionName,
+		"doc_id":     doc.getID().Hex(),
+	}).Debugf("update %v", collectionName)
 	return c.UpdateId(doc.getID(), update)
+}
+
+func EnsureParanoidIndices(ctx context.Context, collectionNames ...string) {
+	log := logger.Get(ctx)
+
+	for _, collectionName := range collectionNames {
+		log = logger.Get(ctx).WithFields(logrus.Fields{
+			"init":       "setup-indices",
+			"collection": collectionName,
+		})
+		ctx = logger.ToCtx(ctx, log)
+		log.Info("Setup the MongoDB index")
+
+		c := mongo.Session(log).Clone().DB("").C(collectionName)
+		defer c.Database.Session.Close()
+		err := c.EnsureIndexKey("deleted_at")
+		if err != nil {
+			log.WithError(err).Error("fail to setup the deleted_at index")
+			continue
+		}
+	}
 }

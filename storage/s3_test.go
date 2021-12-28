@@ -2,11 +2,10 @@ package storage
 
 import (
 	"context"
-	"net/http"
 	"testing"
 	"time"
 
-	"github.com/Scalingo/go-utils/storage/s3mock"
+	"github.com/Scalingo/go-utils/storage/storagemock"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/golang/mock/gomock"
@@ -35,46 +34,32 @@ func (err KeyNotFoundErr) OrigErr() error {
 
 func TestS3_Size(t *testing.T) {
 	cases := map[string]struct {
-		expectMock func(t *testing.T, m *s3mock.MockS3Client)
+		expectMock func(t *testing.T, m *storagemock.MockS3Client)
 		err        string
 	}{
 		"it should make a HEAD request on the object": {
-			expectMock: func(t *testing.T, m *s3mock.MockS3Client) {
-				m.EXPECT().HeadObjectRequest(&s3.HeadObjectInput{
-					Bucket: aws.String("bucket"), Key: aws.String("/key"),
-				}).Return(s3.HeadObjectRequest{Request: &aws.Request{
-					// Mandatory to create an empty request, otherwise it panics
-					HTTPRequest: new(http.Request),
-					Data:        &s3.HeadObjectOutput{ContentLength: aws.Int64(10)},
-				}})
+			expectMock: func(t *testing.T, m *storagemock.MockS3Client) {
+				m.EXPECT().HeadObject(gomock.Any(), &s3.HeadObjectInput{
+					Bucket: aws.String("bucket"), Key: aws.String("key"),
+				}).Return(&s3.HeadObjectOutput{ContentLength: int64(10)}, nil)
 			},
 		},
 		"it should retry if the first HEAD request return 404": {
-			expectMock: func(t *testing.T, m *s3mock.MockS3Client) {
-				m.EXPECT().HeadObjectRequest(&s3.HeadObjectInput{
-					Bucket: aws.String("bucket"), Key: aws.String("/key"),
-				}).Return(s3.HeadObjectRequest{Request: &aws.Request{
-					HTTPRequest: new(http.Request),
-					Error:       KeyNotFoundErr{},
-				}})
+			expectMock: func(t *testing.T, m *storagemock.MockS3Client) {
+				m.EXPECT().HeadObject(gomock.Any(), &s3.HeadObjectInput{
+					Bucket: aws.String("bucket"), Key: aws.String("key"),
+				}).Return(nil, KeyNotFoundErr{})
 
-				m.EXPECT().HeadObjectRequest(&s3.HeadObjectInput{
-					Bucket: aws.String("bucket"), Key: aws.String("/key"),
-				}).Return(s3.HeadObjectRequest{Request: &aws.Request{
-					// Mandatory to create an empty request, otherwise it panics
-					HTTPRequest: new(http.Request),
-					Data:        &s3.HeadObjectOutput{ContentLength: aws.Int64(10)},
-				}})
+				m.EXPECT().HeadObject(gomock.Any(), &s3.HeadObjectInput{
+					Bucket: aws.String("bucket"), Key: aws.String("key"),
+				}).Return(&s3.HeadObjectOutput{ContentLength: int64(10)}, nil)
 			},
 		},
 		"it should fail if the max amount of retried is passed": {
-			expectMock: func(t *testing.T, m *s3mock.MockS3Client) {
-				m.EXPECT().HeadObjectRequest(&s3.HeadObjectInput{
-					Bucket: aws.String("bucket"), Key: aws.String("/key"),
-				}).Return(s3.HeadObjectRequest{Request: &aws.Request{
-					HTTPRequest: new(http.Request),
-					Error:       KeyNotFoundErr{},
-				}}).Times(3)
+			expectMock: func(t *testing.T, m *storagemock.MockS3Client) {
+				m.EXPECT().HeadObject(gomock.Any(), &s3.HeadObjectInput{
+					Bucket: aws.String("bucket"), Key: aws.String("key"),
+				}).Return(nil, KeyNotFoundErr{}).Times(3)
 			},
 			err: "NotFound",
 		},
@@ -84,7 +69,7 @@ func TestS3_Size(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			mock := s3mock.NewMockS3Client(ctrl)
+			mock := storagemock.NewMockS3Client(ctrl)
 			storage := &S3{
 				cfg:      S3Config{Bucket: "bucket"},
 				s3client: mock,

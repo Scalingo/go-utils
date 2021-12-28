@@ -29,7 +29,7 @@ func FromEnv() (*NsqProducer, error) {
 	}
 
 	return New(ProducerOpts{
-		Host: E["NSQD_TLS"],
+		Host: E["NSQD_HOST"],
 		Port: E["NSQD_PORT"],
 
 		NsqConfig: nsqConfig,

@@ -8,19 +8,15 @@ import (
 	"io"
 	"strings"
 
-	"github.com/Scalingo/go-utils/logger"
 	"github.com/ncw/swift"
 	"github.com/pkg/errors"
+
+	"github.com/Scalingo/go-utils/logger"
 )
 
 const contentType = "application/octet-stream"
 
 type SwiftConfig struct {
-	Username  string
-	Password  string
-	AuthURL   string
-	Region    string
-	Tenant    string
 	Prefix    string
 	Container string
 	ChunkSize int64
@@ -31,15 +27,22 @@ type Swift struct {
 	conn *swift.Connection
 }
 
-func NewSwift(cfg SwiftConfig) *Swift {
-	conn := &swift.Connection{
-		UserName: cfg.Username,
-		ApiKey:   cfg.Password,
-		AuthUrl:  cfg.AuthURL,
-		Region:   cfg.Region,
-		Tenant:   cfg.Tenant,
+// NewSwift instantiate a new connection to a Swift object storage. The
+// configuration is taken from the environment. Refer to the
+// github.com/ncw/swift documentation for more information.
+func NewSwift(cfg SwiftConfig) (*Swift, error) {
+	conn := new(swift.Connection)
+	err := conn.ApplyEnvironment()
+	if err != nil {
+		return nil, errors.Wrapf(err, "fail to get Swift configuration from the environment")
 	}
-	return &Swift{cfg: cfg, conn: conn}
+
+	err = conn.Authenticate()
+	if err != nil {
+		return nil, errors.Wrapf(err, "fail to authentication to Swift")
+	}
+
+	return &Swift{cfg: cfg, conn: conn}, nil
 }
 
 func (s *Swift) Get(ctx context.Context, path string) (io.ReadCloser, error) {
@@ -118,5 +121,5 @@ func (s *Swift) segmentPath(path string) (string, error) {
 }
 
 func (s *Swift) fullPath(path string) string {
-	return strings.TrimLeft(s.cfg.Prefix+"/"+path, "/")
+	return strings.TrimLeft(s.cfg.Prefix+"/"+fullPath(path), "/")
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 
 	"github.com/Scalingo/go-utils/gomock_generator/gomockgenerator"
 	"github.com/Scalingo/go-utils/logger"
@@ -13,15 +14,14 @@ import (
 	"github.com/urfave/cli"
 )
 
+var version = "1.2.2"
+
 type app struct {
 	config gomockgenerator.GenerationConfiguration
 	cli    *cli.App
 }
 
 func main() {
-	log := logger.Default()
-	ctx := logger.ToCtx(context.Background(), log)
-
 	cli.AppHelpTemplate = fmt.Sprintf(`%s
 EXAMPLE:
 
@@ -37,7 +37,7 @@ Reads the mymocks.json file from the current directory and generates the mocks, 
 	}
 	app.cli.Name = "GoMock generator"
 	app.cli.Usage = "Highly parallelized generator of gomock mocks"
-	app.cli.Version = "0.1.0"
+	app.cli.Version = version
 	app.cli.Flags = []cli.Flag{
 		cli.StringFlag{Name: "mocks-filepath", Value: "./mocks.json", Usage: "Path to the JSON file containing the MockConfiguration. Location of this file is the base package.", EnvVar: "MOCKS_FILEPATH"},
 		cli.StringFlag{Name: "signatures-filename", Value: "mocks_sig.json", Usage: "Filename of the signatures cache. Location of this file is the base package.", EnvVar: "SIGNATURES_FILENAME"},
@@ -68,13 +68,20 @@ VERSION:
 		app.config.MocksFilePath = c.GlobalString("mocks-filepath")
 		app.config.SignaturesFilename = c.GlobalString("signatures-filename")
 		app.config.ConcurrentGoroutines = c.GlobalInt("concurrent-goroutines")
-		if c.GlobalBool("debug") {
-			log.SetLevel(logrus.DebugLevel)
-			logger.ToCtx(ctx, log)
-		}
 		return nil
 	}
-	app.cli.Action = func(_ctx *cli.Context) error {
+	app.cli.Action = func(c *cli.Context) error {
+		err := validateBinaryDeps()
+		if err != nil {
+			return err
+		}
+
+		log := logger.Default()
+		if c.GlobalBool("debug") {
+			log = logger.Default(logger.WithLogLevel(logrus.DebugLevel))
+		}
+		ctx := logger.ToCtx(context.Background(), log)
+
 		log.WithFields(logrus.Fields{
 			"mocks_file_path":       app.config.MocksFilePath,
 			"signatures_filename":   app.config.SignaturesFilename,
@@ -101,4 +108,58 @@ VERSION:
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+}
+
+func validateBinaryDeps() error {
+	binaries := []struct {
+		Executable string
+		Package    string
+	}{
+		{
+			Executable: "goimports",
+			Package:    "golang.org/x/tools/cmd/goimports",
+		},
+		{
+			Executable: "mockgen",
+			Package:    "github.com/golang/mock/mockgen",
+		},
+	}
+	for _, binary := range binaries {
+		_, err := exec.LookPath(binary.Executable)
+		if err != nil {
+			fmt.Fprintf(
+				os.Stderr,
+				"Executable '%s' not found. Not in $PATH or not installed. Attempt to install.\n\nRunning 'go get %v'...\n\n",
+				binary.Executable,
+				binary.Package,
+			)
+			cmd := exec.Command("go", "get", binary.Package)
+			err = cmd.Run()
+			if err != nil {
+				output, outputErr := cmd.CombinedOutput()
+				if outputErr != nil {
+					return errors.Wrapf(
+						err,
+						"Fail to run 'go get %v', fail to get command output, error: \n\n%v\n",
+						binary.Package, outputErr,
+					)
+				} else {
+					return errors.Wrapf(
+						err,
+						"Fail to run 'go get %v', output: \n\n%v\n",
+						binary.Package, string(output),
+					)
+				}
+			}
+			_, err = exec.LookPath(binary.Executable)
+			if err != nil {
+				return errors.Wrapf(
+					err,
+					"fail to find '%s' binary after installation, $GOPATH/bin probably not in path, update your shell (bash/zsh) configuration",
+					binary.Executable,
+				)
+			}
+		}
+	}
+	return nil
 }

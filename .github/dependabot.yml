@@ -1,0 +1,170 @@
+version: 2
+updates:
+  - package-ecosystem: "gomod"
+    directory: "/concurrency"
+    allow:
+      - dependency-type: "all"
+    schedule:
+      interval: "monthly"
+    reviewers:
+      - "EtienneM"
+  - package-ecosystem: "gomod"
+    directory: "/cronsetup"
+    allow:
+      - dependency-type: "all"
+    schedule:
+      interval: "monthly"
+    reviewers:
+      - "EtienneM"
+  - package-ecosystem: "gomod"
+    directory: "/difflib"
+    allow:
+      - dependency-type: "all"
+    schedule:
+      interval: "monthly"
+    reviewers:
+      - "EtienneM"
+  - package-ecosystem: "gomod"
+    directory: "/env"
+    allow:
+      - dependency-type: "all"
+    schedule:
+      interval: "monthly"
+    reviewers:
+      - "EtienneM"
+  - package-ecosystem: "gomod"
+    directory: "/errors"
+    allow:
+      - dependency-type: "all"
+    schedule:
+      interval: "monthly"
+    reviewers:
+      - "EtienneM"
+  - package-ecosystem: "gomod"
+    directory: "/etcd"
+    allow:
+      - dependency-type: "all"
+    schedule:
+      interval: "monthly"
+    reviewers:
+      - "EtienneM"
+  - package-ecosystem: "gomod"
+    directory: "/fs"
+    allow:
+      - dependency-type: "all"
+    schedule:
+      interval: "monthly"
+    reviewers:
+      - "EtienneM"
+  - package-ecosystem: "gomod"
+    directory: "/gomock_generator"
+    allow:
+      - dependency-type: "all"
+    schedule:
+      interval: "monthly"
+    reviewers:
+      - "EtienneM"
+  - package-ecosystem: "gomod"
+    directory: "/graceful"
+    allow:
+      - dependency-type: "all"
+    schedule:
+      interval: "monthly"
+    reviewers:
+      - "EtienneM"
+  - package-ecosystem: "gomod"
+    directory: "/httpclient"
+    allow:
+      - dependency-type: "all"
+    schedule:
+      interval: "monthly"
+    reviewers:
+      - "EtienneM"
+  - package-ecosystem: "gomod"
+    directory: "/influx"
+    allow:
+      - dependency-type: "all"
+    schedule:
+      interval: "monthly"
+    reviewers:
+      - "EtienneM"
+  - package-ecosystem: "gomod"
+    directory: "/io"
+    allow:
+      - dependency-type: "all"
+    schedule:
+      interval: "monthly"
+    reviewers:
+      - "EtienneM"
+  - package-ecosystem: "gomod"
+    directory: "/logger"
+    allow:
+      - dependency-type: "all"
+    schedule:
+      interval: "monthly"
+    reviewers:
+      - "EtienneM"
+  - package-ecosystem: "gomod"
+    directory: "/mongo"
+    allow:
+      - dependency-type: "all"
+    schedule:
+      interval: "monthly"
+    reviewers:
+      - "EtienneM"
+  - package-ecosystem: "gomod"
+    directory: "/nsqconsumer"
+    allow:
+      - dependency-type: "all"
+    schedule:
+      interval: "monthly"
+    reviewers:
+      - "EtienneM"
+  - package-ecosystem: "gomod"
+    directory: "/nsqlbproducer"
+    allow:
+      - dependency-type: "all"
+    schedule:
+      interval: "monthly"
+    reviewers:
+      - "EtienneM"
+  - package-ecosystem: "gomod"
+    directory: "/nsqproducer"
+    allow:
+      - dependency-type: "all"
+    schedule:
+      interval: "monthly"
+    reviewers:
+      - "EtienneM"
+  - package-ecosystem: "gomod"
+    directory: "/publicgen"
+    allow:
+      - dependency-type: "all"
+    schedule:
+      interval: "monthly"
+    reviewers:
+      - "EtienneM"
+  - package-ecosystem: "gomod"
+    directory: "/retry"
+    allow:
+      - dependency-type: "all"
+    schedule:
+      interval: "monthly"
+    reviewers:
+      - "EtienneM"
+  - package-ecosystem: "gomod"
+    directory: "/storage"
+    allow:
+      - dependency-type: "all"
+    schedule:
+      interval: "monthly"
+    reviewers:
+      - "EtienneM"
+  - package-ecosystem: "gomod"
+    directory: "/tarball"
+    allow:
+      - dependency-type: "all"
+    schedule:
+      interval: "monthly"
+    reviewers:
+      - "EtienneM"

@@ -1,5 +1,126 @@
 # Changelog
 
+## To Be Released
+
+> From now, versions are managed by submodules, CHANGELOG also, it's directory has its own changelog
+
+## v7.1.0 (August 13 2020)
+
+* [difflib] Add a way to activate/desactivate the colors formatting
+* [difflib] Add colors to have a better display in the shell (only for unified diff)
+* [difflib] New package to print diff between two content in the shell (git diff style)
+* [document] Do not add sensitive information in the log
+
+## v7.0.1 (June 12 2020)
+
+* [storage] Fix Swift authentication
+
+## v7.0.0 (June 09 2020)
+
+* [storage] Get swift configuration from the environment
+
+## v6.7.1 (May 19 2020)
+
+* [tarball] Fix unit: use a buffer of 512kb not MB...
+
+## v6.7.0 (May 12 2020)
+
+* [tarball] Use `io` package and disable disk cache when creating/extracting tarball archives
+
+## v6.6.0 (May 4 2020)
+
+* [io] New package with a configurable io.Copier
+
+    ```
+    io.NewCopier(...opts io.CopierOpt)
+    io.WithBufferSize(int64)
+    io.WithNoDiskCacheRead
+    io.WithNoDiskCacheWrite
+    io.WithNoDiskCache
+    ```
+
+## v6.5.0 (Apr 28 2020)
+
+* [tarball] New package to manipulate tar and gzipped tarballs
+
+    ```
+    tarball.Create(context.Context, file string, in io.Reader, opts tarball.CreateOpts) error
+    tarball.Extract(context.Context, file string, out io.Writer, opts tarball.ExtractOpts) error
+    tarball.Tar(io.Writer, map[string]tarball.TarFileHeader) error
+    ```
+
+## v6.4.0 (Apr 27 2020)
+
+* [fs] New package to manipulate the filesystem through a mockable interface
+
+    ```
+    // Mockable interface
+    fs.Fs
+
+    // Real OS filesystem manipulation
+    fs.NewOsFs()
+    // In-memory empty filesystem
+    fs.NewMemFs()
+    ```
+
+## v6.3.0 (Apr 21 2020)
+
+* [retry] Add WithErrorCallback option to add callbacks when a try fails
+
+## v6.2.1 (Mar 27 2020)
+
+* [retry] Add a constructor for RetryCancelError
+
+## v6.2.0 (Mar 27 2020)
+
+* [retry] Add ability to get the last error (LastErr) in case of timeout
+* [retry] Add a custom error type to cancel a Retry `RetryCancelError`
+
+## v6.1.0 (Mar 27 2020)
+
+* [retry] Add WithMaxDuration option to set a timeout
+
+## v6.0.0 (Mar 13 2020)
+
+* [logger] Add `region_name` field by default if `REGION_NAME` environment variable
+
+## v5.7.1 (Mar 19 2020)
+
+* Fix `ValidationErrors` `Error` output [#109](https://github.com/Scalingo/go-utils/pull/109)
+
+## v5.7.0 (Jan 29 2020)
+
+* Add Retry interface
+
+## v5.6.2 (Nov 14 2019)
+
+* Update errgo, pkg/errors, logrus, and unfreeze their version
+
+## v5.6.1 (Nov 12 2019)
+
+* Update go-etcd-cron dependency with new etcd deps
+
+## v5.6.0 (Nov 12 2019)
+
+* Update deps Related to etcd (new location github.com/coreos/etcd -> go.etcd.io)
+
+## v5.5.15 (Oct 22 2019)
+
+* Update deps related to Rollbar/logging/errors
+
+## v5.5.14 (August 30 2019)
+
+* Add EnsureParanoidIndices method [#49](https://github.com/Scalingo/go-utils/pull/49)
+
+## v5.5.13 (August 27 2019)
+
+* [S3] Trim left slashes [#92](https://github.com/Scalingo/go-utils/pull/92)
+
+## v5.5.11 (August 26 2019)
+
+* Add simple object storage package for S3 and swift
+  [#89](https://github.com/Scalingo/go-utils/pull/89)
+
 ## v5.5.10 (May 14 2019)
 
 * Migration from `github.com/satori/go.uuid` to its fork `github.com/gofrs/uuid`, Reason:

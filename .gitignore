@@ -1,2 +1,5 @@
 vendor
 gomock_generator/gomock_generator
+
+# IDE
+.idea/

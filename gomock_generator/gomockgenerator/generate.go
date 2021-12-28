@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
@@ -26,10 +25,13 @@ type GenerationConfiguration struct {
 	SignaturesFilename string
 	// ConcurrentGoroutines specifies the concurrent amount of goroutines which can execute
 	ConcurrentGoroutines int
+	// NoGoMod by default we'll consider go modules is enabled, mockgen will be called with -mod=mod to read interfaces in modules instead of default GOPATH
+	NoGoMod bool
 }
 
 // MocksConfiguration contains the configuration of the mocks to generate.
 type MocksConfiguration struct {
+	BaseDirectory string `json:"base_directory"`
 	// BasePackage is the project base package. E.g. github.com/Scalingo/go-utils
 	BasePackage string `json:"base_package"`
 	// Mocks contains the configuration of all the mocks to generate
@@ -61,7 +63,10 @@ func GenerateMocks(ctx context.Context, gcfg GenerationConfiguration, mocksCfg M
 	if err != nil {
 		return errors.Wrap(err, "fail to get current directory")
 	}
-	err = os.Chdir(path.Join(os.Getenv("GOPATH"), "src", mocksCfg.BasePackage))
+	if mocksCfg.BaseDirectory == "" {
+		mocksCfg.BaseDirectory = mocksCfg.BasePackage
+	}
+	err = os.Chdir(path.Join(os.Getenv("GOPATH"), "src", mocksCfg.BaseDirectory))
 	if err != nil {
 		return errors.Wrap(err, "fail to move to base package directory")
 	}
@@ -73,9 +78,9 @@ func GenerateMocks(ctx context.Context, gcfg GenerationConfiguration, mocksCfg M
 	}).Infof("Generating %v mocks", len(mocksCfg.Mocks))
 
 	var mockSigs map[string]string
-	mockSigsPath := path.Join(os.Getenv("GOPATH"), "src", mocksCfg.BasePackage, gcfg.SignaturesFilename)
+	mockSigsPath := path.Join(os.Getenv("GOPATH"), "src", mocksCfg.BaseDirectory, gcfg.SignaturesFilename)
 
-	sigs, err := ioutil.ReadFile(mockSigsPath)
+	sigs, err := os.ReadFile(mockSigsPath)
 	if os.IsNotExist(err) {
 		log.Info("No cache signatures file, generates all mocks")
 	} else if err != nil {
@@ -99,7 +104,7 @@ func GenerateMocks(ctx context.Context, gcfg GenerationConfiguration, mocksCfg M
 				<-sem
 			}()
 			sem <- true
-			path, sig, err := generateMock(ctx, mocksCfg.BasePackage, mock, mockSigs)
+			path, sig, err := generateMock(ctx, gcfg, mocksCfg.BaseDirectory, mocksCfg.BasePackage, mock, mockSigs)
 			if err != nil {
 				log.Error(err)
 				return
@@ -111,23 +116,44 @@ func GenerateMocks(ctx context.Context, gcfg GenerationConfiguration, mocksCfg M
 	}
 	wg.Wait()
 
-	sigs, err = json.Marshal(newMockSigs)
+	sigs, err = json.MarshalIndent(newMockSigs, "", "  ")
 	if err != nil {
 		return errors.Wrap(err, "fail to marshal the signatures cache file")
 	}
-	err = ioutil.WriteFile(mockSigsPath, sigs, 0644)
+	err = os.WriteFile(mockSigsPath, sigs, 0644)
 	if err != nil {
 		return errors.Wrap(err, "fail to write the signatures cache file")
 	}
 	return nil
 }
 
-func generateMock(ctx context.Context, basePackage string, mock MockConfiguration, sigs map[string]string) (string, string, error) {
+func generateMock(ctx context.Context, gcfg GenerationConfiguration, baseDirectory, basePackage string, mock MockConfiguration, sigs map[string]string) (string, string, error) {
 	log := logger.Get(ctx)
+
+	if !mock.External {
+		if mock.SrcPackage == "" && mock.MockFile == "" {
+			return "", "", errors.New("SrcPackage or MockFile should be defined to know of guess the source page")
+		}
+
+		if mock.SrcPackage == "" {
+			mock.SrcPackage = filepath.Dir(mock.MockFile)
+		}
+	}
+
 	if mock.MockFile == "" {
+		basepath := filepath.Base(mock.SrcPackage)
+		// If srcPackage is empty, its Base is "."
+		if basepath == "." {
+			basepath = filepath.Base(basePackage)
+		}
+
+		packagePath := path.Join(mock.SrcPackage, fmt.Sprintf("%smock", basepath))
+		if mock.DstPackage != "" {
+			packagePath = mock.DstPackage
+		}
+
 		mock.MockFile = path.Join(
-			mock.SrcPackage,
-			fmt.Sprintf("%smock", filepath.Base(mock.SrcPackage)),
+			packagePath,
 			fmt.Sprintf("%s_mock.go", strings.ToLower(mock.Interface)),
 		)
 	}
@@ -137,15 +163,11 @@ func generateMock(ctx context.Context, basePackage string, mock MockConfiguratio
 		mock.DstPackage = dst
 	}
 
-	if mock.SrcPackage == "" {
-		mock.SrcPackage = filepath.Dir(mock.MockFile)
-	}
-
 	if !mock.External {
 		mock.SrcPackage = path.Join(basePackage, mock.SrcPackage)
 	}
 
-	mockPath := filepath.Join(os.Getenv("GOPATH"), "src", basePackage, mock.MockFile)
+	mockPath := filepath.Join(os.Getenv("GOPATH"), "src", baseDirectory, mock.MockFile)
 	log = log.WithFields(logrus.Fields{
 		"mock_file":   mock.MockFile,
 		"interface":   mock.Interface,
@@ -172,16 +194,18 @@ func generateMock(ctx context.Context, basePackage string, mock MockConfiguratio
 		mock.DstPackage = filepath.Base(mock.SrcPackage)
 	}
 
-	hashKey := fmt.Sprintf("%s.%s", mock.SrcPackage, mock.Interface)
-	hash, err := interfaceHash(mock.SrcPackage, mock.Interface)
+	mockSrcPath := strings.Replace(mock.SrcPackage, basePackage, baseDirectory, -1)
+
+	hashKey := fmt.Sprintf("%s.%s", mockSrcPath, mock.Interface)
+	hash, err := interfaceHash(mockSrcPath, mock.Interface)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to get interface hash")
+		return "", "", errors.Wrapf(err, "fail to get interface hash of %v:%v", mock.SrcPackage, mock.Interface)
 	}
 	if _, err := os.Stat(mockPath); os.IsNotExist(err) {
 		hash = "NOFILE"
 	}
 
-	if sigs[hashKey] == hash {
+	if sigs[hashKey] == hash && hash != "FORCE_REGENERATE" {
 		log.Debug("Skipping!")
 		return hashKey, hash, nil
 	}
@@ -192,10 +216,15 @@ func generateMock(ctx context.Context, basePackage string, mock MockConfiguratio
 		"current":  hash,
 	}).Info("Signature is not matching, regenerating")
 
+	gomod := "--build_flags=--mod=mod"
+	if gcfg.NoGoMod {
+		gomod = ""
+	}
+
 	vendorDir := path.Join(basePackage, "vendor")
 	cmd := fmt.Sprintf(
-		"mockgen -destination %s %s -package %s %s %s && sed -i s,%s,, %s && goimports -w %s",
-		mockPath, selfPackage, mock.DstPackage, mock.SrcPackage, mock.Interface,
+		"mockgen %s -destination %s %s -package %s %s %s && sed -i s,%s,, %s && goimports -w %s",
+		gomod, mockPath, selfPackage, mock.DstPackage, mock.SrcPackage, mock.Interface,
 		vendorDir, mockPath, mockPath,
 	)
 	g := exec.Command("sh", "-c", cmd)
