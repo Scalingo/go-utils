@@ -2,8 +2,9 @@ github.com/Scalingo/errgo-rollbar v0.2.0/go.mod h1:InPX+PbaicLpePiWdmay2bJ4gtF4a
 github.com/Scalingo/go-utils/logger v1.1.0 h1:wloM9dNhPntCr8W7FicBE4SHx6JHrC/3r/bcbJaSlpo=
 github.com/Scalingo/go-utils/logger v1.1.0/go.mod h1:ZJLfkPJ4kfTAliBBAka0IH06+SS+LmRetKuw00WAe+s=
 github.com/Scalingo/logrus-rollbar v1.4.0/go.mod h1:NDlGhdrfltVSLjElDxRjpqSDzu91zK5jJH4KHNcgf7g=
-github.com/aws/aws-sdk-go-v2 v1.11.1 h1:GzvOVAdTbWxhEMRK4FfiblkGverOkAT0UodDxC1jHQM=
 github.com/aws/aws-sdk-go-v2 v1.11.1/go.mod h1:SQfA+m2ltnu1cA0soUkj4dRSsmITiVQUJvBIZjzfPyQ=
+github.com/aws/aws-sdk-go-v2 v1.11.2 h1:SDiCYqxdIYi6HgQfAWRhgdZrdnOuGyLDJVRSWLeHWvs=
+github.com/aws/aws-sdk-go-v2 v1.11.2/go.mod h1:SQfA+m2ltnu1cA0soUkj4dRSsmITiVQUJvBIZjzfPyQ=
 github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.0.0 h1:yVUAwvJC/0WNPbyl0nA3j1L6CW1CN8wBubCRqtG7JLI=
 github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.0.0/go.mod h1:Xn6sxgRuIDflLRJFj5Ev7UxABIkNbccFPV/p8itDReM=
 github.com/aws/aws-sdk-go-v2/config v1.10.3 h1:Hr6xmlQPtoEriXeLl8cQYJD2hkhJNAW5PVM0lHvopnQ=
