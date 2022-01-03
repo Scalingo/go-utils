@@ -10,12 +10,13 @@ import (
 	"runtime/debug"
 	"time"
 
-	"github.com/Scalingo/go-utils/logger"
-	"github.com/Scalingo/go-utils/nsqproducer"
 	"github.com/nsqio/go-nsq"
 	"github.com/sirupsen/logrus"
 	"github.com/stvp/rollbar"
 	"gopkg.in/errgo.v1"
+
+	"github.com/Scalingo/go-utils/logger"
+	"github.com/Scalingo/go-utils/nsqproducer"
 )
 
 const (

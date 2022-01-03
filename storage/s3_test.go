@@ -5,12 +5,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Scalingo/go-utils/storage/storagemock"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/Scalingo/go-utils/storage/storagemock"
 )
 
 // Mock 404 NotFound error from AWS API

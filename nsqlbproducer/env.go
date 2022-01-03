@@ -3,9 +3,10 @@ package nsqlbproducer
 import (
 	"strings"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/Scalingo/go-utils/env"
 	"github.com/Scalingo/go-utils/nsqproducer"
-	"github.com/sirupsen/logrus"
 )
 
 type FromEnvOpts struct {

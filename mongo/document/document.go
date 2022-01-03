@@ -70,7 +70,6 @@ func Create(ctx context.Context, collectionName string, doc document) error {
 		"doc_id":     doc.getID().Hex(),
 	}).Debugf("save '%v'", collectionName)
 	return c.Insert(doc)
-
 }
 
 func Save(ctx context.Context, collectionName string, doc document) error {
@@ -218,7 +217,7 @@ func WhereIterUnscoped(ctx context.Context, collectionName string, query bson.M,
 
 	err := fun(iter)
 	if err != nil {
-		return fmt.Errorf("error occured during iteration over collection %v with query %v: %v", collectionName, query, err)
+		return fmt.Errorf("error occurred during iteration over collection %v with query %v: %v", collectionName, query, err)
 	}
 	if iter.Err() != nil {
 		return fmt.Errorf("fail to iterate over collection %v with query %v: %v", collectionName, query, iter.Err())

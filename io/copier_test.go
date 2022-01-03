@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/guillermo/go.procmeminfo"
+	procmeminfo "github.com/guillermo/go.procmeminfo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -6,11 +6,12 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/Scalingo/go-utils/nsqproducer"
 	nsq "github.com/nsqio/go-nsq"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	errgo "gopkg.in/errgo.v1"
+
+	"github.com/Scalingo/go-utils/nsqproducer"
 )
 
 type LBStrategy int

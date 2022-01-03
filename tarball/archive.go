@@ -11,11 +11,12 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/pkg/errors"
+	"github.com/spf13/afero"
+
 	fspkg "github.com/Scalingo/go-utils/fs"
 	iopkg "github.com/Scalingo/go-utils/io"
 	"github.com/Scalingo/go-utils/logger"
-	"github.com/pkg/errors"
-	"github.com/spf13/afero"
 )
 
 // CreateOpts gathers all possible options to create a tarball archive

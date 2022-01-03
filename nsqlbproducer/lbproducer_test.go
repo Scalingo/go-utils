@@ -6,10 +6,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Scalingo/go-utils/nsqlbproducer/nsqlbproducermock"
-	"github.com/Scalingo/go-utils/nsqproducer"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/Scalingo/go-utils/nsqlbproducer/nsqlbproducermock"
+	"github.com/Scalingo/go-utils/nsqproducer"
 )
 
 type mockedRandSource struct {
@@ -132,7 +133,6 @@ func TestLBPublish(t *testing.T) {
 			t.Run("DeferredPublish", func(t *testing.T) {
 				runPublishExample(t, example, true)
 			})
-
 		})
 	}
 }
@@ -154,7 +154,6 @@ func runPublishExample(t *testing.T, example example, deferred bool) {
 			p1.EXPECT().DeferredPublish(gomock.Any(), topic, delay, message).DoAndReturn(func(ctx context.Context, _, _, _ interface{}) error {
 				return timeoutOrError(ctx, example.P1Delay, example.P1Error)
 			})
-
 		} else {
 			p1.EXPECT().Publish(gomock.Any(), topic, message).DoAndReturn(func(ctx context.Context, _, _ interface{}) error {
 				return timeoutOrError(ctx, example.P1Delay, example.P1Error)
