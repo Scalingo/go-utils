@@ -91,12 +91,12 @@ func TestCopier_Copy(t *testing.T) {
 
 		// If the cache diff is negative, we're all good
 		// If it's positive, let's consider it's noise from the system
-		// And we want to check it's not more than the 100MB of our fixture
+		// And we want to check it's not more than the 110MB of our fixture
 		if cachedAfter > cachedBefore {
 			cacheDiff := cachedAfter - cachedBefore
-			// Let's say we want to check the difference of cache is only of 10MB,
+			// Let's say we want to check the difference of cache is only of 110MB,
 			// indeed it can't be insured since it's global to the system
-			assert.True(t, cacheDiff < 50*1024*1024, "expected diff of cache < 50MB, was %vMB", cacheDiff/1024/1024)
+			assert.True(t, cacheDiff < 110*1024*1024, "expected diff of cache < 110MB, was %vMB", cacheDiff/1024/1024)
 		}
 	})
 }
