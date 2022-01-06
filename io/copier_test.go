@@ -64,7 +64,7 @@ func TestCopier_Copy(t *testing.T) {
 		defer os.Remove(dst.Name())
 
 		// Exactly 1024 bytes in lorem.txt
-		fixture, err := os.ReadFile("test-fixtures/lorem.txt")
+		fixture, err := os.ReadFile("testdata/lorem.txt")
 		require.NoError(t, err)
 
 		// Write down 100MB
