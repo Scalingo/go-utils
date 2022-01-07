@@ -6,11 +6,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Scalingo/go-utils/logger"
 	"github.com/gofrs/uuid"
 	"github.com/nsqio/go-nsq"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/errgo.v1"
+
+	"github.com/Scalingo/go-utils/logger"
 )
 
 type Producer interface {

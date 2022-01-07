@@ -8,10 +8,11 @@ import (
 	"os/exec"
 	"testing"
 
-	"github.com/Scalingo/go-utils/fs"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/Scalingo/go-utils/fs"
 )
 
 type failedWriter struct{}

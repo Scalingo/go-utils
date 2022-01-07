@@ -3,9 +3,10 @@ package nsqproducer
 import (
 	"strconv"
 
-	"github.com/Scalingo/go-utils/env"
 	nsq "github.com/nsqio/go-nsq"
 	"github.com/pkg/errors"
+
+	"github.com/Scalingo/go-utils/env"
 )
 
 func FromEnv() (*NsqProducer, error) {

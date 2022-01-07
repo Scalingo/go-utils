@@ -20,7 +20,7 @@ func main() {
 	ctx := context.Background()
 	s := graceful.NewService(
 		graceful.WithWaitDuration(timeout),
-		graceful.WithPIDFile("./test-fixtures/server.pid"),
+		graceful.WithPIDFile("./testdata/server.pid"),
 	)
 	router := http.NewServeMux()
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

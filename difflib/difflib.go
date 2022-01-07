@@ -105,7 +105,6 @@ func NewMatcher(a, b []string) *SequenceMatcher {
 
 func NewMatcherWithJunk(a, b []string, autoJunk bool,
 	isJunk func(string) bool) *SequenceMatcher {
-
 	m := SequenceMatcher{IsJunk: isJunk, autoJunk: autoJunk}
 	m.SetSeqs(a, b)
 	return &m

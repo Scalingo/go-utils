@@ -7,11 +7,12 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/Scalingo/go-utils/gomock_generator/gomockgenerator"
-	"github.com/Scalingo/go-utils/logger"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
+
+	"github.com/Scalingo/go-utils/gomock_generator/gomockgenerator"
+	"github.com/Scalingo/go-utils/logger"
 )
 
 var version = "1.2.2"
