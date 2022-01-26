@@ -121,17 +121,6 @@ func writeHash(mac hash.Hash, p []byte) error {
 	return nil
 }
 
-func checkedWrite(dst io.Writer, p []byte) (int, error) {
-	n, err := dst.Write(p)
-	if err != nil {
-		return n, errors.Wrapf(err, "fail to write into dst")
-	}
-	if n != len(p) {
-		return n, errors.New("unable to write all bytes into dst")
-	}
-	return len(p), nil
-}
-
 // StreamMeta is metadata about an encrypted stream
 type StreamMeta struct {
 	// IV is the initial value for the crypto function

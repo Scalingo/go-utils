@@ -13,7 +13,7 @@ func CreateKey(keySize int) ([]byte, error) {
 	key := make([]byte, keySize)
 	_, err := cryptorand.Read(key)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "fail to generate random bytes")
 	}
 	return key, nil
 }
@@ -22,7 +22,7 @@ func CreateKey(keySize int) ([]byte, error) {
 func CreateKeyString(keySize int) (string, error) {
 	key, err := CreateKey(keySize)
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "fail to create key")
 	}
 	return hex.EncodeToString(key), nil
 }
@@ -31,7 +31,7 @@ func CreateKeyString(keySize int) (string, error) {
 func CreateKeyBase64String(keySize int) (string, error) {
 	key, err := CreateKey(keySize)
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "fail to create key")
 	}
 	return base64.StdEncoding.EncodeToString(key), nil
 }

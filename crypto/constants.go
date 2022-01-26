@@ -10,6 +10,4 @@ const (
 	KeyVersionSize = (4 + 2 + 2 + 1) // YYYY + MM + DD + :
 	// IVSize is the size of the IV prefix.
 	IVSize = aes.BlockSize
-	// HashSize is the size of the hash prefix.
-	HashSize = 32 // reasons.
 )

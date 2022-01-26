@@ -39,14 +39,3 @@ func Test_Stream_EncrypterDecrypter(t *testing.T) {
 
 	require.Nil(t, sd.Authenticate())
 }
-
-func Test_checkedWrite(t *testing.T) {
-	t.Parallel()
-	its := assert.New(t)
-
-	writer := bytes.NewBuffer(nil)
-	data := []byte{1, 1, 1}
-	v, err := checkedWrite(writer, data)
-	require.NoError(t, err)
-	its.Equal(len(data), v)
-}
