@@ -3,7 +3,7 @@
 ## To be Released
 
 * build(deps): bump github.com/Scalingo/go-utils/io from 1.0.0 to 1.1.0
-* build(deps): bump github.com/spf13/afero from 1.6.0 to 1.7.1
+* build(deps): bump github.com/spf13/afero from 1.6.0 to 1.8.0
 
 ## v1.1.0
 
