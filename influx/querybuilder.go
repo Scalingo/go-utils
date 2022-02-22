@@ -138,6 +138,16 @@ func (q Query) Mean(fieldname string, aliases ...string) Query {
 	return q
 }
 
+// CumulativeSum returns a formated string of the field `cumulative_sum`.
+func (q Query) CumulativeSum(function funcType, fieldname string, aliases ...string) Query {
+	alias := fieldname
+	if len(aliases) > 0 {
+		alias = aliases[0]
+	}
+	q.fields = append(q.fields, fmt.Sprintf("cumulative_sum(%s(\"%s\")) AS %s", function, fieldname, alias))
+	return q
+}
+
 // NonNegativeDerivative returns a formated string of the field `non_negative_derivative`.
 func (q Query) NonNegativeDerivative(function funcType, fieldname string, duration time.Duration, aliases ...string) Query {
 	alias := fieldname
