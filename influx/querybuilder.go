@@ -277,14 +277,9 @@ func (q Query) Fill(value string) Query {
 
 // Build constructs the InfluxQL query in a string form.
 func (q Query) Build() string {
-	query := "SELECT"
+	query := "SELECT "
 
-	for i, f := range q.fields {
-		if i != 0 {
-			query += ","
-		}
-		query += fmt.Sprintf(" %s", f)
-	}
+	query += strings.Join(q.fields, ", ")
 
 	if q.subquery != nil {
 		query += fmt.Sprintf(" FROM (%s)", q.subquery.Build())
