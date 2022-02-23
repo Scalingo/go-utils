@@ -85,7 +85,7 @@ func TestService_Restart(t *testing.T) {
 	cmd := cmdAndOutput.cmd
 	defer ensureProcessKilled(t, cmd)
 
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(50 * time.Millisecond)
 
 	errs := make(chan error, 100)
 	go func() {
