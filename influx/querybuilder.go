@@ -138,7 +138,7 @@ func (q Query) Max(fieldname string, aliases ...string) Query {
 	return q
 }
 
-// Mean returns a formated string of the field `mean`.
+// Mean adds the field `mean` to the query.
 func (q Query) Mean(fieldname string, aliases ...string) Query {
 	alias := fieldname
 	if len(aliases) > 0 {
@@ -148,7 +148,7 @@ func (q Query) Mean(fieldname string, aliases ...string) Query {
 	return q
 }
 
-// Last returns a formated string of the field `last`.
+// Last adds the field `last` to the query.
 func (q Query) Last(fieldname string, aliases ...string) Query {
 	alias := fieldname
 	if len(aliases) > 0 {
@@ -158,7 +158,7 @@ func (q Query) Last(fieldname string, aliases ...string) Query {
 	return q
 }
 
-// CumulativeSum returns a formated string of the field `cumulative_sum`.
+// CumulativeSum adds the field `cumulative_sum` to the query.
 func (q Query) CumulativeSum(function funcType, fieldname string, aliases ...string) Query {
 	alias := fieldname
 	if len(aliases) > 0 {
@@ -168,7 +168,7 @@ func (q Query) CumulativeSum(function funcType, fieldname string, aliases ...str
 	return q
 }
 
-// NonNegativeDerivative returns a formated string of the field `non_negative_derivative`.
+// NonNegativeDerivative adds the field `non_negative_derivative` to the query.
 func (q Query) NonNegativeDerivative(function funcType, fieldname string, duration time.Duration, aliases ...string) Query {
 	alias := fieldname
 	if len(aliases) > 0 {
