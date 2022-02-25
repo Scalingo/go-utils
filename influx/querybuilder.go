@@ -275,6 +275,11 @@ func (q Query) Fill(value string) Query {
 	return q
 }
 
+// LastPoint limits the query to return only the last element.
+func (q Query) LastPoint() Query {
+	return q.OrderByTime("DESC").Limit(1)
+}
+
 // Build constructs the InfluxQL query in a string form.
 func (q Query) Build() string {
 	query := "SELECT "
