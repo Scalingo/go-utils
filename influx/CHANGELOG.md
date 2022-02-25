@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* Adding LastPoint to returns the last element
+
 ## 1.1.0
 
 * Bump github.com/stretchr/testify from 1.6.1 to 1.7.0
