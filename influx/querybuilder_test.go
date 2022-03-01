@@ -146,6 +146,11 @@ func TestQueryBuilder(t *testing.T) {
 			).Min("biniou", "biniou_min_alias"),
 			Expected: `SELECT min("biniou") AS "biniou_min_alias" FROM (SELECT mean("biniou") AS "biniou_alias" FROM "serie")`,
 		},
+		{
+			Name:     "a query that returns the last element",
+			Query:    NewQuery().On("serie").Mean("f1", "f1_alias").LastPoint(),
+			Expected: `SELECT mean("f1") AS "f1_alias" FROM "serie" ORDER BY time DESC LIMIT 1`,
+		},
 	}
 	for _, example := range examples {
 		t.Run(example.Name, func(t *testing.T) {
