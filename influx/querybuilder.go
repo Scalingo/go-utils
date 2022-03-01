@@ -24,6 +24,14 @@ const (
 	Linear   = "linear"
 )
 
+type orderDirection string
+
+// InfluxDB order by directions
+const (
+	Ascending  = "ASC"
+	Descending = "DESC"
+)
+
 type funcType string
 
 // funcType list
@@ -42,7 +50,7 @@ type Query struct {
 	groupByTime    string
 	groupByTag     []string
 	groupByFill    string
-	orderDirection string
+	orderDirection orderDirection
 	limit          int
 }
 
@@ -182,7 +190,7 @@ func (q Query) NonNegativeDerivative(function funcType, fieldname string, durati
 // time order; the first point returned has the oldest timestamp and the last point returned has the
 // most recent timestamp. Calling this method with "DESC" reverses that order such that InfluxDB
 // returns the points with the most recent timestamps first.
-func (q Query) OrderByTime(direction string) Query {
+func (q Query) OrderByTime(direction orderDirection) Query {
 	q.orderDirection = direction
 	return q
 }
@@ -275,9 +283,10 @@ func (q Query) Fill(value string) Query {
 	return q
 }
 
-// LastPoint limits the query to return only the last element.
+// LastPoint limits the query to return only the last element. It sets a `ORDER BY`
+// to the query and a `LIMIT 1`.
 func (q Query) LastPoint() Query {
-	return q.OrderByTime("DESC").Limit(1)
+	return q.OrderByTime(Descending).Limit(1)
 }
 
 // Build constructs the InfluxQL query in a string form.
