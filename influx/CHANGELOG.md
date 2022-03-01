@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## 1.2.0
+
 * Adding LastPoint to returns the last element
 
 ## 1.1.0
