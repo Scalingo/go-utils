@@ -12,7 +12,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/ncw/swift v1.0.53
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 	golang.org/x/sys v0.0.0-20211020174200-9d6173849985 // indirect
 )
 
