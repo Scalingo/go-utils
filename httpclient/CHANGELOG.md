@@ -3,6 +3,7 @@
 ## To be Released
 
 * build(deps): bump github.com/gofrs/uuid from 3.4.0+incompatible to 4.2.0+incompatible
+* build(deps): bump github.com/stretchr/testify from 1.7.0 to 1.7.1
 
 ## v1.1.0
 
