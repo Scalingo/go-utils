@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* build(deps): bump github.com/stretchr/testify from 1.7.0 to 1.7.1
+
 ## v1.1.0
 
 * Bump github.com/rollbar/rollbar-go from 1.2.0 to 1.4.2

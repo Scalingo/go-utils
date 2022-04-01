@@ -3,6 +3,7 @@
 ## To be Released
 
 * build(deps): bump github.com/Scalingo/go-utils/env from 1.0.1 to 1.1.0
+* build(deps): bump github.com/stretchr/testify from 1.7.0 to 1.7.1
 
 ## v1.1.1
 
