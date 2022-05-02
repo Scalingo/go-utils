@@ -2,10 +2,10 @@
 
 ## To be Released
 
-* build(deps): bump github.com/aws/aws-sdk-go-v2 from 1.9.2 to 1.16.2
-* build(deps): bump github.com/aws/aws-sdk-go-v2/credentials from 1.6.3 to 1.11.2
-* build(deps): bump github.com/aws/aws-sdk-go-v2/feature/s3/manager from 1.5.4 to 1.11.3
-* build(deps): bump github.com/aws/aws-sdk-go-v2/service/s3 from 1.16.1 to 1.26.3
+* build(deps): bump github.com/aws/aws-sdk-go-v2 from 1.9.2 to 1.16.3
+* build(deps): bump github.com/aws/aws-sdk-go-v2/credentials from 1.6.3 to 1.12.0
+* build(deps): bump github.com/aws/aws-sdk-go-v2/feature/s3/manager from 1.5.4 to 1.11.7
+* build(deps): bump github.com/aws/aws-sdk-go-v2/service/s3 from 1.16.1 to 1.26.7
 * build(deps): bump github.com/aws/smithy-go from 1.10.0 to 1.11.2
 * build(deps): bump github.com/stretchr/testify from 1.7.0 to 1.7.1
 
