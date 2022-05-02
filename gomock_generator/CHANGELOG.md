@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* build(deps): bump github.com/urfave/cli from 1.22.5 to 1.22.8
+
 ## v1.3.0
 
 * Bump github.com/sirupsen/logrus from 1.7.0 to 1.8.1
