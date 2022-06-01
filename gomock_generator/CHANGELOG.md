@@ -2,7 +2,7 @@
 
 ## To be Released
 
-* build(deps): bump github.com/urfave/cli from 1.22.5 to 1.22.8
+* build(deps): bump github.com/urfave/cli from 1.22.5 to 1.22.9
 
 ## v1.3.0
 
