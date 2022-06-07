@@ -2,6 +2,7 @@
 
 ## To be Released
 
+* chore(go): use go 1.17
 * build(deps): bump github.com/stretchr/testify from 1.7.0 to 1.7.1
 
 ## v1.1.0
