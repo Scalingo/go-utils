@@ -2,7 +2,7 @@
 
 ## To be Released
 
-* Bump go version to 1.16
+* chore(go): use go 1.17
 
 ## v1.0.0
 

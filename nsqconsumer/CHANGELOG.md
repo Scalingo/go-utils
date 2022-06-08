@@ -2,6 +2,7 @@
 
 ## To be Released
 
+* chore(go): use go 1.17
 * build(deps): bump github.com/nsqio/go-nsq from 1.0.8 to 1.1.0
 
 ## v1.1.0

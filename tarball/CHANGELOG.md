@@ -2,6 +2,7 @@
 
 ## To be Released
 
+* chore(go): use go 1.17
 * build(deps): bump github.com/Scalingo/go-utils/io from 1.0.0 to 1.1.0
 * build(deps): bump github.com/spf13/afero from 1.6.0 to 1.8.2
 * build(deps): bump github.com/stretchr/testify from 1.7.0 to 1.7.1
