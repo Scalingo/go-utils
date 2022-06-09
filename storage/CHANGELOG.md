@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.1.2
+
 * chore(go): use go 1.17
 * build(deps): bump github.com/aws/aws-sdk-go-v2 from 1.9.2 to 1.16.4
 * build(deps): bump github.com/aws/aws-sdk-go-v2/credentials from 1.6.3 to 1.12.4

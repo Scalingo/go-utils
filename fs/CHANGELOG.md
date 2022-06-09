@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.0.2
+
 * chore(go): use go 1.17
 * bump github.com/spf13/afero from 1.5.1 to 1.8.2
 
