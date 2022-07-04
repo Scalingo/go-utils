@@ -3,7 +3,7 @@ module github.com/Scalingo/go-utils/nsqconsumer
 go 1.17
 
 require (
-	github.com/Scalingo/go-utils/logger v1.1.0
+	github.com/Scalingo/go-utils/logger v1.1.1
 	github.com/Scalingo/go-utils/nsqproducer v1.1.2
 	github.com/nsqio/go-nsq v1.1.0
 	github.com/sirupsen/logrus v1.8.1
