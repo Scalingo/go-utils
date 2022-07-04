@@ -3,7 +3,7 @@ module github.com/Scalingo/go-utils/graceful
 go 1.17
 
 require (
-	github.com/Scalingo/go-utils/logger v1.1.0
+	github.com/Scalingo/go-utils/logger v1.1.1
 	github.com/facebookgo/grace v0.0.0-20180706040059-75cf19382434
 	github.com/stretchr/testify v1.7.1
 	gopkg.in/errgo.v1 v1.0.1
