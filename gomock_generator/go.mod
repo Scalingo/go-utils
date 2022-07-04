@@ -6,7 +6,7 @@ go 1.17
 // replace github.com/Scalingo/go-utils/logger => ../logger
 
 require (
-	github.com/Scalingo/go-utils/logger v1.1.0
+	github.com/Scalingo/go-utils/logger v1.1.1
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/urfave/cli v1.22.9
