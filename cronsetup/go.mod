@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/Scalingo/go-etcd-cron v1.3.1
-	github.com/Scalingo/go-utils/logger v1.1.0
+	github.com/Scalingo/go-utils/logger v1.1.1
 	go.etcd.io/etcd/client/v3 v3.5.4
 )
 
