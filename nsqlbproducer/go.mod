@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/Scalingo/go-utils/env v1.1.1
-	github.com/Scalingo/go-utils/nsqproducer v1.1.1
+	github.com/Scalingo/go-utils/nsqproducer v1.1.2
 	github.com/golang/mock v1.6.0
 	github.com/nsqio/go-nsq v1.1.0
 	github.com/pkg/errors v0.9.1
@@ -16,7 +16,7 @@ require (
 require (
 	github.com/Scalingo/go-utils/logger v1.1.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/gofrs/uuid v3.4.0+incompatible // indirect
+	github.com/gofrs/uuid v4.2.0+incompatible // indirect
 	github.com/golang/snappy v0.0.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	golang.org/x/sys v0.0.0-20211020174200-9d6173849985 // indirect
