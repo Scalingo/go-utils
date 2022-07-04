@@ -12,7 +12,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/ncw/swift v1.0.53
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.7.1
+	github.com/stretchr/testify v1.8.0
 )
 
 require (
@@ -29,7 +29,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	golang.org/x/sys v0.0.0-20211020174200-9d6173849985 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 // In Dev you can uncomment the following line to use the local 'logger' package
