@@ -3,7 +3,7 @@ module github.com/Scalingo/go-utils/nsqlbproducer
 go 1.17
 
 require (
-	github.com/Scalingo/go-utils/env v1.1.0
+	github.com/Scalingo/go-utils/env v1.1.1
 	github.com/Scalingo/go-utils/nsqproducer v1.1.1
 	github.com/golang/mock v1.6.0
 	github.com/nsqio/go-nsq v1.1.0
