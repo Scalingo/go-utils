@@ -3,7 +3,7 @@ module github.com/Scalingo/go-utils/logger
 go 1.17
 
 require (
-	github.com/Scalingo/logrus-rollbar v1.4.0
+	github.com/Scalingo/logrus-rollbar v1.4.1
 	github.com/rollbar/rollbar-go v1.4.4
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.8.0
