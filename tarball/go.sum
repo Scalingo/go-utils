@@ -41,8 +41,8 @@ github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym
 github.com/Scalingo/errgo-rollbar v0.2.0/go.mod h1:InPX+PbaicLpePiWdmay2bJ4gtF4anm2L8T6rITx41A=
 github.com/Scalingo/go-utils/fs v1.0.0 h1:fWO82tMpT8lZdYdnECC+bC4kNL0uUHKKh4fhANyVSBY=
 github.com/Scalingo/go-utils/fs v1.0.0/go.mod h1:30HqnWA7qrHCgNlUwgtUPchkQit5vqMaFW7ZA7B+/L4=
-github.com/Scalingo/go-utils/io v1.1.0 h1:6Rc3We01UpMjZpBgywvuT7ijnJRmDwb1nTOTeXDa3sQ=
-github.com/Scalingo/go-utils/io v1.1.0/go.mod h1:+OHr9cdAJsRUefWfpg2/H32uM6jPfn7hMogWDAd2PFk=
+github.com/Scalingo/go-utils/io v1.1.1 h1:zFcoyKo4exJsUwwhUSnVk0VwhkZrR6xPKlsuXqlZM1I=
+github.com/Scalingo/go-utils/io v1.1.1/go.mod h1:x5DpQaOaPJ0Nmkm5wRt6XpWc+8ZlulskW0oIirVTf3A=
 github.com/Scalingo/go-utils/logger v1.1.0 h1:wloM9dNhPntCr8W7FicBE4SHx6JHrC/3r/bcbJaSlpo=
 github.com/Scalingo/go-utils/logger v1.1.0/go.mod h1:ZJLfkPJ4kfTAliBBAka0IH06+SS+LmRetKuw00WAe+s=
 github.com/Scalingo/logrus-rollbar v1.4.0/go.mod h1:NDlGhdrfltVSLjElDxRjpqSDzu91zK5jJH4KHNcgf7g=
