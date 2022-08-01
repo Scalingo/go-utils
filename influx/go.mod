@@ -3,7 +3,7 @@ module github.com/Scalingo/go-utils/influx
 go 1.17
 
 require (
-	github.com/influxdata/influxdb v1.9.7
+	github.com/influxdata/influxdb v1.9.8
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.0
 )
