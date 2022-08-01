@@ -3,7 +3,7 @@ module github.com/Scalingo/go-utils/tarball
 go 1.17
 
 require (
-	github.com/Scalingo/go-utils/fs v1.0.0
+	github.com/Scalingo/go-utils/fs v1.0.2
 	github.com/Scalingo/go-utils/io v1.1.1
 	github.com/Scalingo/go-utils/logger v1.1.1
 	github.com/pkg/errors v0.9.1
