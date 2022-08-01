@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* build(deps): bump github.com/influxdata/influxdb from 1.9.7 to 1.9.8
+
 ## v1.2.1
 
 * chore(go): use go 1.17

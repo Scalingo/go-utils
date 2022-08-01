@@ -2,6 +2,13 @@
 
 ## To be Released
 
+* build(deps): bump github.com/aws/aws-sdk-go-v2 from 1.16.4 to 1.16.7
+* build(deps): bump github.com/aws/aws-sdk-go-v2/credentials from 1.12.4 to 1.12.9
+* build(deps): bump github.com/aws/aws-sdk-go-v2/feature/s3/manager from 1.11.14 to 1.11.20
+* build(deps): bump github.com/aws/aws-sdk-go-v2/service/s3 from 1.26.10 to 1.27.1
+* build(deps): bump github.com/aws/smithy-go from 1.11.2 to 1.12.0
+* build(deps): bump github.com/stretchr/testify from 1.7.1 to 1.8.0
+
 ## v1.1.2
 
 * chore(go): use go 1.17

@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* build(deps): bump github.com/sirupsen/logrus from 1.8.1 to 1.9.0
+
 ## v1.1.2
 
 * chore(go): use go 1.17
