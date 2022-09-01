@@ -3,7 +3,7 @@ module github.com/Scalingo/go-utils/storage
 go 1.17
 
 require (
-	github.com/Scalingo/go-utils/logger v1.1.1
+	github.com/Scalingo/go-utils/logger v1.2.0
 	github.com/aws/aws-sdk-go-v2 v1.16.13
 	github.com/aws/aws-sdk-go-v2/credentials v1.12.17
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.30
@@ -27,8 +27,8 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/sirupsen/logrus v1.8.1 // indirect
-	golang.org/x/sys v0.0.0-20211020174200-9d6173849985 // indirect
+	github.com/sirupsen/logrus v1.9.0 // indirect
+	golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
