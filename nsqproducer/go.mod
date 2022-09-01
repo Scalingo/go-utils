@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/Scalingo/go-utils/env v1.1.1
-	github.com/Scalingo/go-utils/logger v1.1.1
+	github.com/Scalingo/go-utils/logger v1.2.0
 	github.com/gofrs/uuid v4.2.0+incompatible
 	github.com/golang/mock v1.6.0
 	github.com/nsqio/go-nsq v1.1.0
