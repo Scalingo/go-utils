@@ -2,6 +2,7 @@
 
 ## To be Released
 
+* build(deps): bump github.com/Scalingo/go-utils/logger from 1.1.1 to 1.2.0
 * build(deps): bump github.com/sirupsen/logrus from 1.8.1 to 1.9.0
 
 ## v1.1.2
