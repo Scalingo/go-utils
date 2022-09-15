@@ -2,9 +2,23 @@
 
 ## To be Released
 
-* build(deps): bump github.com/aws/aws-sdk-go-v2 from 1.9.2 to 1.10.0
-* build(deps): bump github.com/aws/aws-sdk-go-v2/service/s3 from 1.16.1 to 1.20.0
-* build(deps): bump github.com/aws/aws-sdk-go-v2/feature/s3/manager from 1.5.4 to 1.6.0
+* build(deps): bump github.com/Scalingo/go-utils/logger from 1.1.1 to 1.2.0
+* build(deps): bump github.com/aws/aws-sdk-go-v2 from 1.16.4 to 1.16.13
+* build(deps): bump github.com/aws/aws-sdk-go-v2/credentials from 1.12.4 to 1.12.17
+* build(deps): bump github.com/aws/aws-sdk-go-v2/feature/s3/manager from 1.11.14 to 1.11.30
+* build(deps): bump github.com/aws/aws-sdk-go-v2/service/s3 from 1.26.10 to 1.27.8
+* build(deps): bump github.com/aws/smithy-go from 1.11.2 to 1.13.1
+* build(deps): bump github.com/stretchr/testify from 1.7.1 to 1.8.0
+
+## v1.1.2
+
+* chore(go): use go 1.17
+* build(deps): bump github.com/aws/aws-sdk-go-v2 from 1.9.2 to 1.16.4
+* build(deps): bump github.com/aws/aws-sdk-go-v2/credentials from 1.6.3 to 1.12.4
+* build(deps): bump github.com/aws/aws-sdk-go-v2/feature/s3/manager from 1.5.4 to 1.11.14
+* build(deps): bump github.com/aws/aws-sdk-go-v2/service/s3 from 1.16.1 to 1.26.10
+* build(deps): bump github.com/aws/smithy-go from 1.10.0 to 1.11.2
+* build(deps): bump github.com/stretchr/testify from 1.7.0 to 1.7.1
 
 ## v1.1.1
 

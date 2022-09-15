@@ -2,6 +2,12 @@
 
 ## To be Released
 
+* build(deps): bump github.com/Scalingo/go-utils/logger from 1.1.1 to 1.2.0
+* build(deps): bump github.com/sirupsen/logrus from 1.8.1 to 1.9.0
+
+## v1.1.2
+
+* chore(go): use go 1.17
 * build(deps): bump github.com/gofrs/uuid from 3.4.0+incompatible to 4.2.0+incompatible
 * build(deps): bump github.com/nsqio/go-nsq from 1.0.8 to 1.1.0
 

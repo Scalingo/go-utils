@@ -2,7 +2,12 @@
 
 ## To be Released
 
-* build(deps): bump go.etcd.io/etcd/client/v3 from 3.5.0 to 3.5.1
+* build(deps): bump github.com/Scalingo/go-utils/logger from 1.1.1 to 1.2.0
+
+## v1.1.2
+
+* chore(go): use go 1.17
+* build(deps): bump go.etcd.io/etcd/client/v3 from 3.5.0 to 3.5.4
 
 ## v1.1.1
 

@@ -219,7 +219,6 @@ func TestBase_FindOne_WithSort(t *testing.T) {
 			var doc Doc
 			FindOne(context.Background(), DocsCollection, bson.M{}, &doc, example.Sort)
 			assert.Equal(t, example.Expected, doc.Data)
-
 		})
 	}
 }

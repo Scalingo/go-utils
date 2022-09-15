@@ -85,7 +85,7 @@ func TestService_Restart(t *testing.T) {
 	cmd := cmdAndOutput.cmd
 	defer ensureProcessKilled(t, cmd)
 
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(50 * time.Millisecond)
 
 	errs := make(chan error, 100)
 	go func() {
@@ -105,7 +105,7 @@ func TestService_Restart(t *testing.T) {
 }
 
 func startProcess(t *testing.T, args ...string) cmdAndOutput {
-	cmd := exec.Command("./test-fixtures/server", args...)
+	cmd := exec.Command("./testdata/server", args...)
 	b := new(bytes.Buffer)
 	cmd.Stdout = b
 	cmd.Stderr = b
@@ -153,7 +153,7 @@ func ensureProcessKilled(t *testing.T, cmd *exec.Cmd) {
 }
 
 func ensurePidFileProcessKilled(t *testing.T) {
-	out, err := os.ReadFile("./test-fixtures/server.pid")
+	out, err := os.ReadFile("./testdata/server.pid")
 	if err == nil {
 		pid, err := strconv.Atoi(strings.TrimSpace(string(out)))
 		require.NoError(t, err)
@@ -163,7 +163,7 @@ func ensurePidFileProcessKilled(t *testing.T) {
 		if err != nil && !strings.Contains(err.Error(), "already finished") {
 			require.NoError(t, err)
 		}
-		err = os.Remove("./test-fixtures/server.pid")
+		err = os.Remove("./testdata/server.pid")
 		require.NoError(t, err)
 	}
 }

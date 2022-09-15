@@ -24,16 +24,33 @@ const (
 	Linear   = "linear"
 )
 
+type orderDirection string
+
+// InfluxDB order by directions
+const (
+	Ascending  = "ASC"
+	Descending = "DESC"
+)
+
+type funcType string
+
+// funcType list
+const (
+	MeanType   funcType = "mean"
+	MaxType    funcType = "max"
+	MedianType funcType = "median"
+)
+
 // Query is the main structure for the query builder. All methods apply to it.
 type Query struct {
 	measurement    string
 	subquery       *Query
 	conditions     condition
-	fields         []field
+	fields         []string
 	groupByTime    string
 	groupByTag     []string
 	groupByFill    string
-	orderDirection string
+	orderDirection orderDirection
 	limit          int
 }
 
@@ -91,13 +108,81 @@ func (q Query) OnSubquery(subquery Query) Query {
 	return q
 }
 
+// Deprecated: instead use the individual functions.
 // Field adds the given field to the list of fields with the given aggregation method applied. It
 // is possible to add multiple fields with the same name but is highly discouraged.
 func (q Query) Field(fieldname, aggregationMethod string) Query {
-	q.fields = append(q.fields, field{
-		name:              fieldname,
-		aggregationMethod: aggregationMethod,
-	})
+	q.fields = append(q.fields, fmt.Sprintf("%s(\"%s\") AS \"%s\"", aggregationMethod, fieldname, fieldname))
+	return q
+}
+
+// Median adds the field `median` to the query.
+func (q Query) Median(fieldname string, aliases ...string) Query {
+	alias := fieldname
+	if len(aliases) > 0 {
+		alias = aliases[0]
+	}
+	q.fields = append(q.fields, fmt.Sprintf("median(\"%s\") AS \"%s\"", fieldname, alias))
+	return q
+}
+
+// Min adds the field `min` to the query.
+func (q Query) Min(fieldname string, aliases ...string) Query {
+	alias := fieldname
+	if len(aliases) > 0 {
+		alias = aliases[0]
+	}
+	q.fields = append(q.fields, fmt.Sprintf("min(\"%s\") AS \"%s\"", fieldname, alias))
+	return q
+}
+
+// Max adds the field `max` to the query.
+func (q Query) Max(fieldname string, aliases ...string) Query {
+	alias := fieldname
+	if len(aliases) > 0 {
+		alias = aliases[0]
+	}
+	q.fields = append(q.fields, fmt.Sprintf("max(\"%s\") AS \"%s\"", fieldname, alias))
+	return q
+}
+
+// Mean adds the field `mean` to the query.
+func (q Query) Mean(fieldname string, aliases ...string) Query {
+	alias := fieldname
+	if len(aliases) > 0 {
+		alias = aliases[0]
+	}
+	q.fields = append(q.fields, fmt.Sprintf("mean(\"%s\") AS \"%s\"", fieldname, alias))
+	return q
+}
+
+// Last adds the field `last` to the query.
+func (q Query) Last(fieldname string, aliases ...string) Query {
+	alias := fieldname
+	if len(aliases) > 0 {
+		alias = aliases[0]
+	}
+	q.fields = append(q.fields, fmt.Sprintf("last(\"%s\") AS \"%s\"", fieldname, alias))
+	return q
+}
+
+// CumulativeSum adds the field `cumulative_sum` to the query.
+func (q Query) CumulativeSum(function funcType, fieldname string, aliases ...string) Query {
+	alias := fieldname
+	if len(aliases) > 0 {
+		alias = aliases[0]
+	}
+	q.fields = append(q.fields, fmt.Sprintf("cumulative_sum(%s(\"%s\")) AS \"%s\"", function, fieldname, alias))
+	return q
+}
+
+// NonNegativeDerivative adds the field `non_negative_derivative` to the query.
+func (q Query) NonNegativeDerivative(function funcType, fieldname string, duration time.Duration, aliases ...string) Query {
+	alias := fieldname
+	if len(aliases) > 0 {
+		alias = aliases[0]
+	}
+	q.fields = append(q.fields, fmt.Sprintf("non_negative_derivative(%s(\"%s\"), %s) AS \"%s\"", function, fieldname, duration, alias))
 	return q
 }
 
@@ -105,7 +190,7 @@ func (q Query) Field(fieldname, aggregationMethod string) Query {
 // time order; the first point returned has the oldest timestamp and the last point returned has the
 // most recent timestamp. Calling this method with "DESC" reverses that order such that InfluxDB
 // returns the points with the most recent timestamps first.
-func (q Query) OrderByTime(direction string) Query {
+func (q Query) OrderByTime(direction orderDirection) Query {
 	q.orderDirection = direction
 	return q
 }
@@ -198,16 +283,17 @@ func (q Query) Fill(value string) Query {
 	return q
 }
 
+// LastPoint limits the query to return only the last element. It sets a `ORDER BY`
+// to the query and a `LIMIT 1`.
+func (q Query) LastPoint() Query {
+	return q.OrderByTime(Descending).Limit(1)
+}
+
 // Build constructs the InfluxQL query in a string form.
 func (q Query) Build() string {
-	query := "SELECT"
+	query := "SELECT "
 
-	for i, f := range q.fields {
-		if i != 0 {
-			query += ","
-		}
-		query += fmt.Sprintf(" %s(\"%s\") AS \"%s\"", f.aggregationMethod, f.name, f.name)
-	}
+	query += strings.Join(q.fields, ", ")
 
 	if q.subquery != nil {
 		query += fmt.Sprintf(" FROM (%s)", q.subquery.Build())

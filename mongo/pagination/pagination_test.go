@@ -5,10 +5,11 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/Scalingo/go-utils/mongo/document"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/mgo.v2/bson"
+
+	"github.com/Scalingo/go-utils/mongo/document"
 )
 
 const dummyCollection = "dummy_documents"
@@ -340,7 +341,6 @@ func TestPaginationPaginate(t *testing.T) {
 					require.Equal(t, expectedResult.VirtualStorageName, results[idx].VirtualStorageName)
 					require.Equal(t, expectedResult.AppID, results[idx].AppID)
 				}
-
 			}
 		})
 	}

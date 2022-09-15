@@ -2,6 +2,14 @@
 
 ## To be Released
 
+* build(deps): bump github.com/Scalingo/go-utils/logger from 1.1.1 to 1.2.0
+* build(deps): bump github.com/sirupsen/logrus from 1.8.1 to 1.9.0
+
+## v1.3.1
+
+* chore(go): use go 1.17
+* build(deps): bump github.com/urfave/cli from 1.22.5 to 1.22.9
+
 ## v1.3.0
 
 * Bump github.com/sirupsen/logrus from 1.7.0 to 1.8.1

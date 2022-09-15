@@ -11,9 +11,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Scalingo/go-utils/logger"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/mgo.v2"
+
+	"github.com/Scalingo/go-utils/logger"
 )
 
 var (

@@ -26,7 +26,6 @@ func (d *DummyDocument) Validate(ctx context.Context) *ValidationErrors {
 	}
 
 	return err.Build()
-
 }
 
 func TestValidation(t *testing.T) {
@@ -84,5 +83,4 @@ func TestValidation(t *testing.T) {
 			})
 		}
 	})
-
 }

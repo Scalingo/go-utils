@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Scalingo/go-utils/mongo/document"
 	"github.com/pkg/errors"
 	"gopkg.in/mgo.v2/bson"
+
+	"github.com/Scalingo/go-utils/mongo/document"
 )
 
 type BadRequestError struct {
@@ -123,7 +124,6 @@ func (s ServiceOpts) Paginate(ctx context.Context,
 	collection string,
 	result interface{},
 	opts PaginateOpts) (Meta, error) {
-
 	var err error
 	meta := Meta{}
 

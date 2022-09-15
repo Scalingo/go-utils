@@ -12,9 +12,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/Scalingo/go-utils/logger"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+
+	"github.com/Scalingo/go-utils/logger"
 )
 
 // GenerationConfiguration lets you configure the generation of mocks for your project
