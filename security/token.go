@@ -48,19 +48,14 @@ var _ TokenGenerator = TokenManager{}
 var _ TokenChecker = TokenManager{}
 
 // NewTokenManager instantiates a new TokenGenerator with the given token configuration:
-// - tokenSecretKeyHex: secret to generate the token.
+// - tokenSecretKey: secret to generate the token.
 // - tokenValidity: validity duration of the token.
-func NewTokenManager(tokenSecretKeyHex string, tokenValidity time.Duration) (TokenManager, error) {
-	tokenSecretKey, err := hex.DecodeString(tokenSecretKeyHex)
-	if err != nil {
-		return TokenManager{}, errors.Wrap(err, "fail to decode the download token hex representation")
-	}
-
+func NewTokenManager(tokenSecretKey []byte, tokenValidity time.Duration) TokenManager {
 	return TokenManager{
 		tokenSecretKey: tokenSecretKey,
 		tokenValidity:  tokenValidity,
 		now:            time.Now,
-	}, nil
+	}
 }
 
 // GenerateToken generates a new time-limited token hashed with HMAC-SHA256 for the given payload.
