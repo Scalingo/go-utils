@@ -59,7 +59,7 @@ func NewTokenManager(tokenSecretKeyHex string, tokenValidity time.Duration) (Tok
 	}, nil
 }
 
-// GenerateToken generates a new token hashed with HMAC-SHA256 for the given payload.
+// GenerateToken generates a new time-limited token hashed with HMAC-SHA256 for the given payload.
 func (g TokenManager) GenerateToken(ctx context.Context, payload string) (Token, error) {
 	generatedAtTimestamp := g.now().Unix()
 	// Generate a hash for those metadata
