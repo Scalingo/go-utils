@@ -43,6 +43,10 @@ type TokenManager struct {
 	now            func() time.Time
 }
 
+// The TokenManager must implement the TokenGenerator and the TokenChecker interfaces.
+var _ TokenGenerator = TokenManager{}
+var _ TokenChecker = TokenManager{}
+
 // NewTokenManager instantiates a new TokenGenerator with the given token configuration:
 // - tokenSecretKeyHex: secret to generate the token.
 // - tokenValidity: validity duration of the token.
