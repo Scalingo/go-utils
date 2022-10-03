@@ -4,6 +4,7 @@
 
 * build(deps): bump github.com/Scalingo/go-utils/logger from 1.1.1 to 1.2.0
 * build(deps): bump github.com/sirupsen/logrus from 1.8.1 to 1.9.0
+* build(deps): bump github.com/urfave/cli from 1.22.9 to 1.22.10
 
 ## v1.3.1
 

@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* build(deps): bump github.com/gofrs/uuid from 4.2.0+incompatible to 4.3.0+incompatible
+
 ## v1.1.1
 
 * chore(go): use go 1.17
