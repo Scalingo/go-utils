@@ -2,16 +2,19 @@ package storage
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/smithy-go"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/Scalingo/go-utils/storage/storagemock"
+	storageTypes "github.com/Scalingo/go-utils/storage/types"
 )
 
 // Mock 404 NotFound error from AWS API
@@ -76,7 +79,7 @@ func TestS3_Size(t *testing.T) {
 				s3client: mock,
 				retryPolicy: RetryPolicy{
 					Attempts: 3, WaitDuration: 50 * time.Millisecond,
-					MethodHandlers: map[BackendMethod][]string{SizeMethod: []string{NotFoundErrCode}},
+					MethodHandlers: map[BackendMethod][]string{SizeMethod: {NotFoundErrCode}},
 				},
 			}
 
@@ -88,6 +91,85 @@ func TestS3_Size(t *testing.T) {
 				return
 			}
 			require.NoError(t, err)
+		})
+	}
+}
+
+func TestS3_Info(t *testing.T) {
+	cases := map[string]struct {
+		expectMock   func(t *testing.T, m *storagemock.MockS3Client, key string)
+		key          string
+		err          string
+		expectedInfo storageTypes.Info
+	}{
+		"it should return ObjectNotFound error if the object does not exists": {
+			expectMock: func(t *testing.T, m *storagemock.MockS3Client, key string) {
+				m.EXPECT().HeadObject(gomock.Any(), &s3.HeadObjectInput{
+					Bucket: aws.String("bucket"), Key: aws.String(key),
+				}).Return(nil, &smithy.GenericAPIError{
+					Code:    "404",
+					Message: "NotFound",
+				})
+			},
+			key:          "unknown_key",
+			err:          (&ObjectNotFound{}).Error(),
+			expectedInfo: storageTypes.Info{},
+		},
+		"it should return information about the object if the object exists": {
+			expectMock: func(t *testing.T, m *storagemock.MockS3Client, key string) {
+				contentType := "test"
+				m.EXPECT().HeadObject(gomock.Any(), &s3.HeadObjectInput{
+					Bucket: aws.String("bucket"), Key: aws.String(key),
+				}).Return(&s3.HeadObjectOutput{
+					ContentType:   &contentType,
+					ContentLength: 4,
+					ETag:          aws.String("checksum"),
+				}, nil)
+			},
+			err: "",
+			expectedInfo: storageTypes.Info{
+				ContentLength: 4,
+				ContentType:   "test",
+				Checksum:      "checksum",
+			},
+		},
+		"it should fail if s3 does not respond": {
+			expectMock: func(t *testing.T, m *storagemock.MockS3Client, key string) {
+				m.EXPECT().HeadObject(gomock.Any(), &s3.HeadObjectInput{
+					Bucket: aws.String("bucket"), Key: aws.String(key),
+				}).Return(nil, errors.New("there is an issue"))
+			},
+			err:          "there is an issue",
+			expectedInfo: storageTypes.Info{},
+		},
+	}
+	for title, c := range cases {
+		t.Run(title, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mock := storagemock.NewMockS3Client(ctrl)
+			storage := &S3{
+				cfg:      S3Config{Bucket: "bucket"},
+				s3client: mock,
+				retryPolicy: RetryPolicy{
+					Attempts:     3,
+					WaitDuration: 50 * time.Millisecond,
+				},
+			}
+
+			if c.key == "" {
+				c.key = "key"
+			}
+
+			c.expectMock(t, mock, c.key)
+			info, err := storage.Info(context.Background(), c.key)
+			if c.err != "" {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), c.err)
+				return
+			}
+			require.Equal(t, c.expectedInfo, info)
 		})
 	}
 }

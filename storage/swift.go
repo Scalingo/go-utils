@@ -12,6 +12,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/Scalingo/go-utils/logger"
+	"github.com/Scalingo/go-utils/storage/types"
 )
 
 const contentType = "application/octet-stream"
@@ -108,6 +109,22 @@ func (s *Swift) Delete(ctx context.Context, path string) error {
 		return errors.Wrapf(err, "fail to delete object %v", path)
 	}
 	return nil
+}
+
+func (s *Swift) Info(ctx context.Context, path string) (types.Info, error) {
+	path = s.fullPath(path)
+	info, _, err := s.conn.Object(ctx, s.cfg.Container, path)
+	if err != nil {
+		if err.Error() == swift.ObjectNotFound.Error() {
+			return types.Info{}, &ObjectNotFound{}
+		}
+		return types.Info{}, errors.Wrapf(err, "fail to get object info %v", path)
+	}
+
+	return types.Info{
+		ContentLength: info.Bytes,
+		Checksum:      info.Hash,
+	}, nil
 }
 
 func (s *Swift) segmentPath(path string) (string, error) {

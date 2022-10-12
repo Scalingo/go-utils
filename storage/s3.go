@@ -15,6 +15,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/Scalingo/go-utils/logger"
+	"github.com/Scalingo/go-utils/storage/types"
 )
 
 const (
@@ -178,6 +179,38 @@ func (s *S3) Delete(ctx context.Context, path string) error {
 	return nil
 }
 
+// Info returns several information contained in the header.
+// It returns ObjectNotFound custom error if the object does not exists.
+func (s *S3) Info(ctx context.Context, path string) (types.Info, error) {
+	path = fullPath(path)
+	var res *s3.HeadObjectOutput
+	err := s.retryWrapper(ctx, InfoMethod, func(ctx context.Context) error {
+		input := &s3.HeadObjectInput{Bucket: &s.cfg.Bucket, Key: &path}
+		var err error
+		res, err = s.s3client.HeadObject(ctx, input)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+
+	if err != nil {
+		var apiErr smithy.APIError
+		if stderrors.As(err, &apiErr) {
+			if apiErr.ErrorCode() == NotFoundErrCode {
+				return types.Info{}, ObjectNotFound{}
+			}
+		}
+		return types.Info{}, errors.Wrapf(err, "fail to HEAD object '%v'", path)
+	}
+
+	return types.Info{
+		ContentLength: res.ContentLength,
+		ContentType:   *res.ContentType,
+		Checksum:      *res.ETag,
+	}, nil
+}
+
 func (s *S3) retryWrapper(ctx context.Context, method BackendMethod, fun func(ctx context.Context) error) error {
 	var err error
 
@@ -212,7 +245,7 @@ func s3Config(cfg S3Config) aws.Config {
 		Credentials: credentials,
 	}
 	if cfg.Endpoint != "" {
-		config.EndpointResolver = aws.EndpointResolverFunc(func(service, region string) (aws.Endpoint, error) {
+		config.EndpointResolverWithOptions = aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
 			return aws.Endpoint{
 				URL:           "https://" + cfg.Endpoint,
 				SigningRegion: cfg.Region,

@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat: add Info method, it returns object information and ObjectNotFound custom error in case of object not found [393](https://github.com/Scalingo/go-utils/pull/393)
+* fix(s3): NotFoundErrCode is 404 not the string "NotFound" [393](https://github.com/Scalingo/go-utils/pull/393)
 * build(deps): bump github.com/Scalingo/go-utils/logger from 1.1.1 to 1.2.0
 * build(deps): bump github.com/aws/aws-sdk-go-v2 from 1.16.4 to 1.16.16
 * build(deps): bump github.com/aws/aws-sdk-go-v2/credentials from 1.12.4 to 1.12.21

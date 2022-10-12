@@ -9,6 +9,7 @@ import (
 	io "io"
 	reflect "reflect"
 
+	types "github.com/Scalingo/go-utils/storage/types"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -62,6 +63,21 @@ func (m *MockBackend) Get(arg0 context.Context, arg1 string) (io.ReadCloser, err
 func (mr *MockBackendMockRecorder) Get(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockBackend)(nil).Get), arg0, arg1)
+}
+
+// Info mocks base method.
+func (m *MockBackend) Info(arg0 context.Context, arg1 string) (types.Info, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Info", arg0, arg1)
+	ret0, _ := ret[0].(types.Info)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Info indicates an expected call of Info.
+func (mr *MockBackendMockRecorder) Info(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Info", reflect.TypeOf((*MockBackend)(nil).Info), arg0, arg1)
 }
 
 // Size mocks base method.
