@@ -2,6 +2,7 @@
 
 ## To be Released
 
+* fix(cronsetup): add missing err check when adding job [#394](https://github.com/Scalingo/go-utils/pull/394)
 * build(deps): bump github.com/Scalingo/go-utils/logger from 1.1.1 to 1.2.0
 * build(deps): bump go.etcd.io/etcd/client/v3 from 3.5.4 to 3.5.5
 
