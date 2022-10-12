@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pkg/errors"
 	etcdclient "go.etcd.io/etcd/client/v3"
 
 	etcdcron "github.com/Scalingo/go-etcd-cron"
@@ -49,7 +50,10 @@ func Setup(ctx context.Context, opts SetupOpts) (func(), error) {
 	}
 
 	for _, job := range opts.Jobs {
-		c.AddJob(job)
+		err := c.AddJob(job)
+		if err != nil {
+			return nil, errors.Wrap(err, "fail to add the cron job")
+		}
 	}
 
 	log := logger.Get(ctx)
