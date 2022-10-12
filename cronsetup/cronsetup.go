@@ -30,13 +30,13 @@ func Setup(ctx context.Context, opts SetupOpts) (func(), error) {
 	funcCtx := func(ctx context.Context, j etcdcron.Job) context.Context {
 		log := logger.Get(ctx)
 		log = log.WithField("cron-job", j.Name)
-		log.Debug("running cron job")
+		log.Debug("Running cron job")
 		return logger.ToCtx(ctx, log)
 	}
 
 	errorHandler := func(ctx context.Context, j etcdcron.Job, err error) {
 		log := logger.Get(ctx)
-		log.WithError(err).Error("error when running cron job")
+		log.WithError(err).Error("Error when running cron job")
 	}
 
 	c, err := etcdcron.New(
@@ -57,11 +57,11 @@ func Setup(ctx context.Context, opts SetupOpts) (func(), error) {
 	}
 
 	log := logger.Get(ctx)
-	log.Info("starting etcd-cron")
+	log.Info("Starting etcd-cron")
 
 	c.Start(ctx)
 	return func() {
-		log.Info("stopping etcd-cron")
+		log.Info("Stopping etcd-cron")
 		c.Stop()
 	}, nil
 }
