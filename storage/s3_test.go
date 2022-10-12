@@ -65,7 +65,7 @@ func TestS3_Size(t *testing.T) {
 					Bucket: aws.String("bucket"), Key: aws.String("key"),
 				}).Return(nil, KeyNotFoundErr{}).Times(3)
 			},
-			err: "NotFound",
+			err: "404",
 		},
 	}
 	for title, c := range cases {
