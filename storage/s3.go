@@ -82,12 +82,13 @@ func NewS3(cfg S3Config, opts ...s3Opt) *S3 {
 	s3config := s3Config(cfg)
 	s3client := s3.NewFromConfig(s3config)
 	s3 := &S3{
-		cfg: cfg, s3client: s3client,
+		cfg:      cfg,
+		s3client: s3client,
 		retryPolicy: RetryPolicy{
 			WaitDuration: time.Second,
 			Attempts:     3,
 			MethodHandlers: map[BackendMethod][]string{
-				SizeMethod: []string{NotFoundErrCode},
+				SizeMethod: {NotFoundErrCode},
 			},
 		},
 	}
@@ -141,7 +142,7 @@ func (s *S3) Upload(ctx context.Context, file io.Reader, path string) error {
 	return nil
 }
 
-// Size returns the size of the content of the object. A retry mecanism is
+// Size returns the size of the content of the object. A retry mechanism is
 // implemented because of the eventual consistency of S3 backends NotFound
 // error are sometimes returned when the object was just uploaded.
 func (s *S3) Size(ctx context.Context, path string) (int64, error) {

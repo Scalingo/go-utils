@@ -89,7 +89,7 @@ func (s *Swift) Upload(ctx context.Context, reader io.Reader, path string) error
 	return nil
 }
 
-// Size returns the size of the content of the object. A retry mecanism is
+// Size returns the size of the content of the object. A retry mechanism is
 // implemented because of the eventual consistency of Swift backends NotFound
 // error are sometimes returned when the object was just uploaded.
 func (s *Swift) Size(ctx context.Context, path string) (int64, error) {
