@@ -65,7 +65,7 @@ func TestS3_Size(t *testing.T) {
 					Bucket: aws.String("bucket"), Key: aws.String("key"),
 				}).Return(nil, KeyNotFoundErr{}).Times(3)
 			},
-			err: "404",
+			err: "NotFound",
 		},
 	}
 	for title, c := range cases {
@@ -107,8 +107,8 @@ func TestS3_Info(t *testing.T) {
 				m.EXPECT().HeadObject(gomock.Any(), &s3.HeadObjectInput{
 					Bucket: aws.String("bucket"), Key: aws.String(key),
 				}).Return(nil, &smithy.GenericAPIError{
-					Code:    "404",
-					Message: "NotFound",
+					Code:    "NotFound",
+					Message: "Not Found",
 				})
 			},
 			key:          "unknown_key",
