@@ -15,10 +15,11 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/Scalingo/go-utils/logger"
+	"github.com/Scalingo/go-utils/storage/types"
 )
 
 const (
-	NotFoundErrCode = "NotFound"
+	NotFoundErrCode = "404"
 	// DefaultPartSize 16 MB part size define the size in bytes of the parts
 	// uploaded in a multipart upload
 	DefaultPartSize = int64(16777216)
@@ -82,12 +83,13 @@ func NewS3(cfg S3Config, opts ...s3Opt) *S3 {
 	s3config := s3Config(cfg)
 	s3client := s3.NewFromConfig(s3config)
 	s3 := &S3{
-		cfg: cfg, s3client: s3client,
+		cfg:      cfg,
+		s3client: s3client,
 		retryPolicy: RetryPolicy{
 			WaitDuration: time.Second,
 			Attempts:     3,
 			MethodHandlers: map[BackendMethod][]string{
-				SizeMethod: []string{NotFoundErrCode},
+				SizeMethod: {NotFoundErrCode},
 			},
 		},
 	}
@@ -141,7 +143,7 @@ func (s *S3) Upload(ctx context.Context, file io.Reader, path string) error {
 	return nil
 }
 
-// Size returns the size of the content of the object. A retry mecanism is
+// Size returns the size of the content of the object. A retry mechanism is
 // implemented because of the eventual consistency of S3 backends NotFound
 // error are sometimes returned when the object was just uploaded.
 func (s *S3) Size(ctx context.Context, path string) (int64, error) {
@@ -175,6 +177,38 @@ func (s *S3) Delete(ctx context.Context, path string) error {
 	}
 
 	return nil
+}
+
+// Info returns several information contained in the header.
+// It returns ObjectNotFound custom error if the object does not exists.
+func (s *S3) Info(ctx context.Context, path string) (types.Info, error) {
+	path = fullPath(path)
+	var res *s3.HeadObjectOutput
+	err := s.retryWrapper(ctx, InfoMethod, func(ctx context.Context) error {
+		input := &s3.HeadObjectInput{Bucket: &s.cfg.Bucket, Key: &path}
+		var err error
+		res, err = s.s3client.HeadObject(ctx, input)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+
+	if err != nil {
+		var apiErr smithy.APIError
+		if stderrors.As(err, &apiErr) {
+			if apiErr.ErrorCode() == NotFoundErrCode {
+				return types.Info{}, ObjectNotFound{}
+			}
+		}
+		return types.Info{}, errors.Wrapf(err, "fail to HEAD object '%v'", path)
+	}
+
+	return types.Info{
+		ContentLength: res.ContentLength,
+		ContentType:   *res.ContentType,
+		Checksum:      *res.ETag,
+	}, nil
 }
 
 func (s *S3) retryWrapper(ctx context.Context, method BackendMethod, fun func(ctx context.Context) error) error {
@@ -211,7 +245,7 @@ func s3Config(cfg S3Config) aws.Config {
 		Credentials: credentials,
 	}
 	if cfg.Endpoint != "" {
-		config.EndpointResolver = aws.EndpointResolverFunc(func(service, region string) (aws.Endpoint, error) {
+		config.EndpointResolverWithOptions = aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
 			return aws.Endpoint{
 				URL:           "https://" + cfg.Endpoint,
 				SigningRegion: cfg.Region,

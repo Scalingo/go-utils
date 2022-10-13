@@ -10,7 +10,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.27.11
 	github.com/aws/smithy-go v1.13.3
 	github.com/golang/mock v1.6.0
-	github.com/ncw/swift v1.0.53
+	github.com/ncw/swift/v2 v2.0.1
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.0
 )

@@ -8,10 +8,11 @@ import (
 	"io"
 	"strings"
 
-	"github.com/ncw/swift"
+	"github.com/ncw/swift/v2"
 	"github.com/pkg/errors"
 
 	"github.com/Scalingo/go-utils/logger"
+	"github.com/Scalingo/go-utils/storage/types"
 )
 
 const contentType = "application/octet-stream"
@@ -37,7 +38,7 @@ func NewSwift(cfg SwiftConfig) (*Swift, error) {
 		return nil, errors.Wrapf(err, "fail to get Swift configuration from the environment")
 	}
 
-	err = conn.Authenticate()
+	err = conn.Authenticate(context.TODO())
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to authentication to Swift")
 	}
@@ -50,7 +51,7 @@ func (s *Swift) Get(ctx context.Context, path string) (io.ReadCloser, error) {
 	log := logger.Get(ctx)
 	log.WithField("path", path).Info("Get object")
 
-	object, _, err := s.conn.ObjectOpen(s.cfg.Container, path, false, swift.Headers{})
+	object, _, err := s.conn.ObjectOpen(ctx, s.cfg.Container, path, false, swift.Headers{})
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to get object %v", path)
 	}
@@ -63,7 +64,7 @@ func (s *Swift) Upload(ctx context.Context, reader io.Reader, path string) error
 	if err != nil {
 		return errors.Wrapf(err, "fail to generate segment path")
 	}
-	object, err := s.conn.DynamicLargeObjectCreateFile(&swift.LargeObjectOpts{
+	object, err := s.conn.DynamicLargeObjectCreateFile(ctx, &swift.LargeObjectOpts{
 		ObjectName:       path,
 		ContentType:      contentType,
 		Container:        s.cfg.Container,
@@ -81,7 +82,7 @@ func (s *Swift) Upload(ctx context.Context, reader io.Reader, path string) error
 		return errors.Wrapf(err, "fail to upload content of object %v", path)
 	}
 
-	err = object.Flush()
+	err = object.Flush(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "fail to flush object %v", path)
 	}
@@ -89,12 +90,12 @@ func (s *Swift) Upload(ctx context.Context, reader io.Reader, path string) error
 	return nil
 }
 
-// Size returns the size of the content of the object. A retry mecanism is
+// Size returns the size of the content of the object. A retry mechanism is
 // implemented because of the eventual consistency of Swift backends NotFound
 // error are sometimes returned when the object was just uploaded.
 func (s *Swift) Size(ctx context.Context, path string) (int64, error) {
 	path = s.fullPath(path)
-	info, _, err := s.conn.Object(s.cfg.Container, path)
+	info, _, err := s.conn.Object(ctx, s.cfg.Container, path)
 	if err != nil {
 		return -1, errors.Wrapf(err, "fail to get object info %v", path)
 	}
@@ -103,11 +104,27 @@ func (s *Swift) Size(ctx context.Context, path string) (int64, error) {
 
 func (s *Swift) Delete(ctx context.Context, path string) error {
 	path = s.fullPath(path)
-	err := s.conn.DynamicLargeObjectDelete(s.cfg.Container, path)
+	err := s.conn.DynamicLargeObjectDelete(ctx, s.cfg.Container, path)
 	if err != nil {
 		return errors.Wrapf(err, "fail to delete object %v", path)
 	}
 	return nil
+}
+
+func (s *Swift) Info(ctx context.Context, path string) (types.Info, error) {
+	path = s.fullPath(path)
+	info, _, err := s.conn.Object(ctx, s.cfg.Container, path)
+	if err != nil {
+		if err.Error() == swift.ObjectNotFound.Error() {
+			return types.Info{}, &ObjectNotFound{}
+		}
+		return types.Info{}, errors.Wrapf(err, "fail to get object info %v", path)
+	}
+
+	return types.Info{
+		ContentLength: info.Bytes,
+		Checksum:      info.Hash,
+	}, nil
 }
 
 func (s *Swift) segmentPath(path string) (string, error) {
