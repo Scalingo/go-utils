@@ -33,7 +33,7 @@ func Session(log logrus.FieldLogger) *mgo.Session {
 		for err != nil {
 			_session, err = BuildSession(logger.ToCtx(context.Background(), log), os.Getenv("MONGO_URL"))
 			if err != nil {
-				log.WithField("err", err).WithField("action", "wait 10sec").Info("init mongo: fail to create session")
+				log.WithError(err).WithField("action", "wait 10sec").Info("init mongo: fail to create session")
 				time.Sleep(10 * time.Second)
 			}
 		}
@@ -83,7 +83,7 @@ func BuildSession(ctx context.Context, rawURL string) (*mgo.Session, error) {
 		}
 	}
 
-	log.WithField("mongodb_host", u.Host).Info("init mongo")
+	log.WithField("mongodb_host", u.Host).Info("Initialize the MongoDB connection")
 	s, err := mgo.DialWithInfo(info)
 	if err != nil {
 		return nil, err
