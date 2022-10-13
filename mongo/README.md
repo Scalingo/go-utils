@@ -4,11 +4,11 @@ Useful tools around MongoDB.
 
 ```go
 mongo.DefaultDatabaseName = "default-database"
-mongo.Session(logger.Default())
+mongo.Session(context.Background())
 ```
 
 Create a new session based on `MONGO_URL`, connection will be initialized only
-once, so you can call it everytime your need a session.
+once, so you can call it every time your need a session.
 
 Will wait until database is available.
 

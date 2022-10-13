@@ -63,12 +63,12 @@ func Create(ctx context.Context, collectionName string, doc document) error {
 		return err
 	}
 
-	c := mongo.Session(log).Clone().DB("").C(collectionName)
+	c := mongo.Session(ctx).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
 	log.WithFields(logrus.Fields{
 		"collection": collectionName,
 		"doc_id":     doc.getID().Hex(),
-	}).Debugf("save '%v'", collectionName)
+	}).Debugf("Save '%v'", collectionName)
 	return c.Insert(doc)
 }
 
@@ -82,12 +82,12 @@ func Save(ctx context.Context, collectionName string, doc document) error {
 		return err
 	}
 
-	c := mongo.Session(log).Clone().DB("").C(collectionName)
+	c := mongo.Session(ctx).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
 	log.WithFields(logrus.Fields{
 		"collection": collectionName,
 		"doc_id":     doc.getID().Hex(),
-	}).Debugf("save '%v'", collectionName)
+	}).Debugf("Save '%v'", collectionName)
 	_, err := c.UpsertId(doc.getID(), doc)
 	return err
 }
@@ -99,12 +99,12 @@ func Destroy(ctx context.Context, collectionName string, doc destroyable) error 
 
 func ReallyDestroy(ctx context.Context, collectionName string, doc document) error {
 	log := logger.Get(ctx)
-	c := mongo.Session(log).Clone().DB("").C(collectionName)
+	c := mongo.Session(ctx).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
 	log.WithFields(logrus.Fields{
 		"collection": collectionName,
 		"doc_id":     doc.getID().Hex(),
-	}).Debugf("remove '%v'", collectionName)
+	}).Debugf("Remove '%v'", collectionName)
 	return c.RemoveId(doc.getID())
 }
 
@@ -132,8 +132,7 @@ func FindOneUnscoped(ctx context.Context, collectionName string, query bson.M, d
 }
 
 func find(ctx context.Context, collectionName string, query bson.M, doc interface{}, sortFields ...SortField) error {
-	log := logger.Get(ctx)
-	c := mongo.Session(log).Clone().DB("").C(collectionName)
+	c := mongo.Session(ctx).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
 
 	fields := make([]string, len(sortFields))
@@ -155,8 +154,7 @@ func WhereQuery(ctx context.Context, collectionName string, query bson.M, sortFi
 }
 
 func WhereUnscopedQuery(ctx context.Context, collectionName string, query bson.M, sortFields ...SortField) (*mgo.Query, Closer) {
-	log := logger.Get(ctx)
-	c := mongo.Session(log).Clone().DB("").C(collectionName)
+	c := mongo.Session(ctx).Clone().DB("").C(collectionName)
 
 	if query == nil {
 		query = bson.M{}
@@ -200,8 +198,7 @@ func WhereIter(ctx context.Context, collectionName string, query bson.M, fun fun
 }
 
 func WhereIterUnscoped(ctx context.Context, collectionName string, query bson.M, fun func(*mgo.Iter) error, sortFields ...SortField) error {
-	log := logger.Get(ctx)
-	c := mongo.Session(log).Clone().DB("").C(collectionName)
+	c := mongo.Session(ctx).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
 
 	if query == nil {
@@ -227,7 +224,7 @@ func WhereIterUnscoped(ctx context.Context, collectionName string, query bson.M,
 
 func Update(ctx context.Context, collectionName string, update bson.M, doc document) error {
 	log := logger.Get(ctx)
-	c := mongo.Session(log).Clone().DB("").C(collectionName)
+	c := mongo.Session(ctx).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
 
 	now := time.Now()
@@ -243,26 +240,23 @@ func Update(ctx context.Context, collectionName string, update bson.M, doc docum
 	log.WithFields(logrus.Fields{
 		"collection": collectionName,
 		"doc_id":     doc.getID().Hex(),
-	}).Debugf("update %v", collectionName)
+	}).Debugf("Update %v", collectionName)
 	return c.UpdateId(doc.getID(), update)
 }
 
 func EnsureParanoidIndices(ctx context.Context, collectionNames ...string) {
-	log := logger.Get(ctx)
-
 	for _, collectionName := range collectionNames {
-		log = logger.Get(ctx).WithFields(logrus.Fields{
+		ctx, log := logger.WithFieldsToCtx(ctx, logrus.Fields{
 			"init":       "setup-indices",
 			"collection": collectionName,
 		})
-		ctx = logger.ToCtx(ctx, log)
 		log.Info("Setup the MongoDB index")
 
-		c := mongo.Session(log).Clone().DB("").C(collectionName)
+		c := mongo.Session(ctx).Clone().DB("").C(collectionName)
 		defer c.Database.Session.Close()
 		err := c.EnsureIndexKey("deleted_at")
 		if err != nil {
-			log.WithError(err).Error("fail to setup the deleted_at index")
+			log.WithError(err).Error("Fail to setup the deleted_at index")
 			continue
 		}
 	}

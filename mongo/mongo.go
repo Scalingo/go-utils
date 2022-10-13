@@ -11,7 +11,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sirupsen/logrus"
 	"gopkg.in/mgo.v2"
 
 	"github.com/Scalingo/go-utils/logger"
@@ -23,14 +22,14 @@ var (
 	_session            *mgo.Session
 )
 
-func Session(log logrus.FieldLogger) *mgo.Session {
+func Session(ctx context.Context) *mgo.Session {
 	sessionOnce.Do(func() {
-		log = log.WithField("process", "mongo-init")
+		ctx, log := logger.WithFieldToCtx(ctx, "process", "mongo-init")
 		err := errors.New("")
 		for err != nil {
-			_session, err = BuildSession(logger.ToCtx(context.Background(), log), os.Getenv("MONGO_URL"))
+			_session, err = BuildSession(ctx, os.Getenv("MONGO_URL"))
 			if err != nil {
-				log.WithField("err", err).WithField("action", "wait 10sec").Info("init mongo: fail to create session")
+				log.WithError(err).WithField("action", "wait 10sec").Info("init mongo: fail to create session")
 				time.Sleep(10 * time.Second)
 			}
 		}
@@ -80,7 +79,7 @@ func BuildSession(ctx context.Context, rawURL string) (*mgo.Session, error) {
 		}
 	}
 
-	log.WithField("mongodb_host", u.Host).Info("init mongo")
+	log.WithField("mongodb_host", u.Host).Info("Init mongo")
 	s, err := mgo.DialWithInfo(info)
 	if err != nil {
 		return nil, err

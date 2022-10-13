@@ -2,6 +2,7 @@
 
 ## To be Released
 
+* feat(mongo): contextify mongo.Session [#396](https://github.com/Scalingo/go-utils/pull/396)
 * build(deps): bump github.com/Scalingo/go-utils/logger from 1.1.1 to 1.2.0
 * build(deps): bump github.com/sirupsen/logrus from 1.8.1 to 1.9.0
 
