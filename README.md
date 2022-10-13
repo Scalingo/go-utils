@@ -25,11 +25,20 @@ Commit, tag and create a new release:
 module="XXX"
 version="X.Y.Z"
 
+git switch --create release/${module}/${version}
 git add ${module}/CHANGELOG.md ${module}/README.md
 git commit -m "[${module}] Bump v${version}"
+git push --set-upstream origin release/${version}
+gh pr create --reviewer=EtienneM --title "$(git log -1 --pretty=%B)"
+```
+
+Once the pull request merged, you can tag the new release.
+
+### Tag the New Release
+
+```bash
 git tag ${module}/v${version}
-git push origin master
-git push --tags
+git push origin master ${module}/v${version}
 ```
 
 ## Use One Module in Your Project
