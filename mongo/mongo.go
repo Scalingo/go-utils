@@ -23,6 +23,9 @@ var (
 	_session            *mgo.Session
 )
 
+// Session tries to open a session against a MongoDB database in a loop.
+// The argument is NOT a context but a logger for the following reason. We create an initial connection and clone it. It means that only the initial session will have a context. Once this context expires the initial session is closed, and cloning it is not possible anymore, leading to errors in all cloned sessions.
+// The linter `contextcheck` may complain that this function does not take a context in argument. In such case, add the following comment before the line calling this function: "//nolint: contextcheck"
 func Session(log logrus.FieldLogger) *mgo.Session {
 	sessionOnce.Do(func() {
 		log = log.WithField("process", "mongo-init")
