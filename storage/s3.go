@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	NotFoundErrCode = "404"
+	NotFoundErrCode = "NotFound"
 	// DefaultPartSize 16 MB part size define the size in bytes of the parts
 	// uploaded in a multipart upload
 	DefaultPartSize = int64(16777216)
