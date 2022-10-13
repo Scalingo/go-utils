@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.2.0
+
 * feat: add Info method, it returns object information and ObjectNotFound custom error in case of object not found [393](https://github.com/Scalingo/go-utils/pull/393)
 * build(deps): bump github.com/Scalingo/go-utils/logger from 1.1.1 to 1.2.0
 * build(deps): bump github.com/aws/aws-sdk-go-v2 from 1.16.4 to 1.16.16
