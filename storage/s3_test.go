@@ -142,6 +142,39 @@ func TestS3_Info(t *testing.T) {
 			err:          "there is an issue",
 			expectedInfo: storageTypes.Info{},
 		},
+		"it should not fail if s3 return no Content-Type": {
+			expectMock: func(t *testing.T, m *storagemock.MockS3Client, key string) {
+				m.EXPECT().HeadObject(gomock.Any(), &s3.HeadObjectInput{
+					Bucket: aws.String("bucket"), Key: aws.String(key),
+				}).Return(&s3.HeadObjectOutput{
+					ContentType:   nil,
+					ContentLength: 4,
+					ETag:          aws.String("checksum"),
+				}, nil)
+			},
+			expectedInfo: storageTypes.Info{
+				ContentType:   "",
+				ContentLength: 4,
+				Checksum:      "checksum",
+			},
+		},
+		"it should not fail if s3 return no ETag": {
+			expectMock: func(t *testing.T, m *storagemock.MockS3Client, key string) {
+				contentType := "test"
+				m.EXPECT().HeadObject(gomock.Any(), &s3.HeadObjectInput{
+					Bucket: aws.String("bucket"), Key: aws.String(key),
+				}).Return(&s3.HeadObjectOutput{
+					ContentType:   &contentType,
+					ContentLength: 4,
+					ETag:          nil,
+				}, nil)
+			},
+			expectedInfo: storageTypes.Info{
+				ContentType:   "test",
+				ContentLength: 4,
+				Checksum:      "",
+			},
+		},
 	}
 	for title, c := range cases {
 		t.Run(title, func(t *testing.T) {

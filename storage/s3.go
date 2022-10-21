@@ -204,11 +204,19 @@ func (s *S3) Info(ctx context.Context, path string) (types.Info, error) {
 		return types.Info{}, errors.Wrapf(err, "fail to HEAD object '%v'", path)
 	}
 
-	return types.Info{
+	info := types.Info{
 		ContentLength: res.ContentLength,
-		ContentType:   *res.ContentType,
-		Checksum:      *res.ETag,
-	}, nil
+	}
+
+	if res.ContentType != nil {
+		info.ContentType = *res.ContentType
+	}
+
+	if res.ETag != nil {
+		info.Checksum = *res.ETag
+	}
+
+	return info, nil
 }
 
 func (s *S3) retryWrapper(ctx context.Context, method BackendMethod, fun func(ctx context.Context) error) error {
