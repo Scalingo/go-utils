@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* fix: s3.Info no attribution for Content-Type and Checksum if correspondent values returned by s3 are nil pointers [403](https://github.com/Scalingo/go-utils/pull/403)
+
 ## v1.2.0
 
 * feat: add Info method, it returns object information and ObjectNotFound custom error in case of object not found [393](https://github.com/Scalingo/go-utils/pull/393)
