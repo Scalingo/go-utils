@@ -1,0 +1,7 @@
+dependencies = []
+description = "Set of common libraries used in diverses services of the infrastructures, mostly helpers"
+flags = ["lib"]
+languages = ["go"]
+owner = "etienne@scalingo.com"
+team = "IST"
+version = "1.1.0"
