@@ -23,6 +23,8 @@ const (
 	SizeMethod   BackendMethod = "Size"
 	InfoMethod   BackendMethod = "Info"
 	DeleteMethod BackendMethod = "Delete"
+	MoveMethod   BackendMethod = "Move"
+	ListMethod   BackendMethod = "List"
 )
 
 // Backend represents something which is able to store files on an object
@@ -33,6 +35,8 @@ type Backend interface {
 	Size(ctx context.Context, path string) (int64, error)
 	Delete(ctx context.Context, path string) error
 	Info(ctx context.Context, path string) (types.Info, error)
+	Move(ctx context.Context, srcPath, dstPath string) error
+	List(ctx context.Context, prefix string) ([]string, error)
 }
 
 var _ Backend = &S3{}

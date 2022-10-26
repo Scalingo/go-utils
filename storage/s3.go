@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	stderrors "errors"
+	"fmt"
 	"io"
 	"strings"
 	"time"
@@ -32,6 +33,8 @@ type S3Client interface {
 	GetObject(ctx context.Context, input *s3.GetObjectInput, opts ...func(*s3.Options)) (*s3.GetObjectOutput, error)
 	HeadObject(ctx context.Context, input *s3.HeadObjectInput, opts ...func(*s3.Options)) (*s3.HeadObjectOutput, error)
 	DeleteObject(ctx context.Context, input *s3.DeleteObjectInput, opts ...func(*s3.Options)) (*s3.DeleteObjectOutput, error)
+	CopyObject(ctx context.Context, params *s3.CopyObjectInput, optFns ...func(*s3.Options)) (*s3.CopyObjectOutput, error)
+	ListObjectsV2(ctx context.Context, params *s3.ListObjectsV2Input, optFns ...func(*s3.Options)) (*s3.ListObjectsV2Output, error)
 }
 
 type S3Config struct {
@@ -217,6 +220,41 @@ func (s *S3) Info(ctx context.Context, path string) (types.Info, error) {
 	}
 
 	return info, nil
+}
+
+func (s *S3) Move(ctx context.Context, srcPath, dstPath string) error {
+	dstPath = fullPath(dstPath)
+	srcPathWithBucket := fullPath(srcPath)
+	srcPathWithBucket = fmt.Sprintf("%s/%s", s.cfg.Bucket, srcPathWithBucket)
+	copyInput := &s3.CopyObjectInput{
+		Bucket:     &s.cfg.Bucket,
+		Key:        &dstPath,
+		CopySource: &srcPathWithBucket,
+	}
+	_, err := s.s3client.CopyObject(ctx, copyInput)
+	if err != nil {
+		return errors.Wrapf(err, "fail to copy object '%v' to '%v'", srcPathWithBucket, dstPath)
+	}
+
+	err = s.Delete(ctx, srcPath)
+	return err
+}
+
+func (s *S3) List(ctx context.Context, prefix string) ([]string, error) {
+	listInput := &s3.ListObjectsV2Input{
+		Bucket: &s.cfg.Bucket,
+		Prefix: &prefix,
+	}
+	objects, err := s.s3client.ListObjectsV2(ctx, listInput)
+	if err != nil {
+		return nil, errors.Wrapf(err, "fail to list objects")
+	}
+
+	strObjects := make([]string, objects.KeyCount)
+	for i, o := range objects.Contents {
+		strObjects[i] = *o.Key
+	}
+	return strObjects, nil
 }
 
 func (s *S3) retryWrapper(ctx context.Context, method BackendMethod, fun func(ctx context.Context) error) error {

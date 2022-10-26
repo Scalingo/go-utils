@@ -80,6 +80,35 @@ func (mr *MockBackendMockRecorder) Info(arg0, arg1 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Info", reflect.TypeOf((*MockBackend)(nil).Info), arg0, arg1)
 }
 
+// List mocks base method.
+func (m *MockBackend) List(arg0 context.Context, arg1 string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "List", arg0, arg1)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// List indicates an expected call of List.
+func (mr *MockBackendMockRecorder) List(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockBackend)(nil).List), arg0, arg1)
+}
+
+// Move mocks base method.
+func (m *MockBackend) Move(arg0 context.Context, arg1, arg2 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Move", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Move indicates an expected call of Move.
+func (mr *MockBackendMockRecorder) Move(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Move", reflect.TypeOf((*MockBackend)(nil).Move), arg0, arg1, arg2)
+}
+
 // Size mocks base method.
 func (m *MockBackend) Size(arg0 context.Context, arg1 string) (int64, error) {
 	m.ctrl.T.Helper()
