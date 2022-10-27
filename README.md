@@ -28,7 +28,7 @@ version="X.Y.Z"
 git switch --create release/${module}/${version}
 git add ${module}/CHANGELOG.md ${module}/README.md
 git commit -m "[${module}] Bump v${version}"
-git push --set-upstream origin release/${version}
+git push --set-upstream origin release/${module}/${version}
 gh pr create --reviewer=EtienneM --title "$(git log -1 --pretty=%B)"
 ```
 
