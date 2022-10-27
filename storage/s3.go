@@ -225,12 +225,11 @@ func (s *S3) Info(ctx context.Context, path string) (types.Info, error) {
 func (s *S3) Move(ctx context.Context, srcPath, dstPath string) error {
 	dstPath = fullPath(dstPath)
 	srcPathWithBucket := fmt.Sprintf("%s/%s", s.cfg.Bucket, fullPath(srcPath))
-	copyInput := &s3.CopyObjectInput{
+	_, err := s.s3client.CopyObject(ctx, &s3.CopyObjectInput{
 		Bucket:     &s.cfg.Bucket,
 		Key:        &dstPath,
 		CopySource: &srcPathWithBucket,
-	}
-	_, err := s.s3client.CopyObject(ctx, copyInput)
+	})
 	if err != nil {
 		return errors.Wrapf(err, "fail to copy object '%v' to '%v'", srcPathWithBucket, dstPath)
 	}

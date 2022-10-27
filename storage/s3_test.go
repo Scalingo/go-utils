@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -262,6 +263,95 @@ func TestS3_List(t *testing.T) {
 			}
 			require.NoError(t, err)
 			assert.EqualValues(t, test.expectedList, list)
+		})
+	}
+}
+
+func TestS3_Move(t *testing.T) {
+	bucket := "my-bucket"
+	srcPath := "/my-src"
+	dstPath := "/my-dst"
+
+	tests := map[string]struct {
+		expectS3Client func(*testing.T, *storagemock.MockS3Client)
+		expectedError  string
+	}{
+		"it should fail if it fails to copy to the new object": {
+			expectS3Client: func(t *testing.T, m *storagemock.MockS3Client) {
+				srcPathWithBucket := fmt.Sprintf("%s/%s", bucket, fullPath(srcPath))
+
+				m.EXPECT().CopyObject(gomock.Any(), gomock.Any()).
+					Do(func(_ context.Context, input *s3.CopyObjectInput, optFns ...func(*s3.Options)) {
+						assert.Equal(t, bucket, *input.Bucket)
+						assert.Equal(t, fullPath(dstPath), *input.Key)
+						assert.Equal(t, srcPathWithBucket, *input.CopySource)
+					}).
+					Return(nil, errors.New("err copy"))
+			},
+			expectedError: "err copy",
+		},
+		"it should fail if it fails to delete the previous object": {
+			expectS3Client: func(t *testing.T, m *storagemock.MockS3Client) {
+				srcPathWithBucket := fmt.Sprintf("%s/%s", bucket, fullPath(srcPath))
+
+				m.EXPECT().CopyObject(gomock.Any(), gomock.Any()).
+					Do(func(_ context.Context, input *s3.CopyObjectInput, _ ...func(*s3.Options)) {
+						assert.Equal(t, bucket, *input.Bucket)
+						assert.Equal(t, fullPath(dstPath), *input.Key)
+						assert.Equal(t, srcPathWithBucket, *input.CopySource)
+					}).
+					Return(nil, nil)
+
+				m.EXPECT().DeleteObject(gomock.Any(), gomock.Any()).
+					Do(func(_ context.Context, input *s3.DeleteObjectInput, _ ...func(*s3.Options)) {
+						assert.Equal(t, bucket, *input.Bucket)
+						assert.Equal(t, fullPath(srcPath), *input.Key)
+					}).
+					Return(nil, errors.New("err delete"))
+			},
+			expectedError: "err delete",
+		},
+		"it should succeed if all S3 requests succeed": {
+			expectS3Client: func(t *testing.T, m *storagemock.MockS3Client) {
+				srcPathWithBucket := fmt.Sprintf("%s/%s", bucket, fullPath(srcPath))
+
+				m.EXPECT().CopyObject(gomock.Any(), gomock.Any()).
+					Do(func(_ context.Context, input *s3.CopyObjectInput, _ ...func(*s3.Options)) {
+						assert.Equal(t, bucket, *input.Bucket)
+						assert.Equal(t, fullPath(dstPath), *input.Key)
+						assert.Equal(t, srcPathWithBucket, *input.CopySource)
+					}).
+					Return(nil, nil)
+
+				m.EXPECT().DeleteObject(gomock.Any(), gomock.Any()).
+					Do(func(_ context.Context, input *s3.DeleteObjectInput, _ ...func(*s3.Options)) {
+						assert.Equal(t, bucket, *input.Bucket)
+						assert.Equal(t, fullPath(srcPath), *input.Key)
+					}).
+					Return(nil, nil)
+			},
+		},
+	}
+
+	for msg, test := range tests {
+		t.Run(msg, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+
+			s3Client := storagemock.NewMockS3Client(ctrl)
+			test.expectS3Client(t, s3Client)
+
+			storage := &S3{
+				cfg:      S3Config{Bucket: bucket},
+				s3client: s3Client,
+			}
+
+			err := storage.Move(context.Background(), srcPath, dstPath)
+			if test.expectedError != "" {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), test.expectedError)
+				return
+			}
+			require.NoError(t, err)
 		})
 	}
 }
