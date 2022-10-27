@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.3.0
+
 * feat: add methods:
     * List method that returns a slice of string filtered with a prefix.
     * Move method.
