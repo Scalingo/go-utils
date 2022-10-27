@@ -141,7 +141,7 @@ func (s *Swift) List(ctx context.Context, prefix string) ([]string, error) {
 		Prefix: prefix,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to list objects in '%v'", prefix)
+		return nil, errors.Wrapf(err, "fail to list objects in '%v'", prefix)
 	}
 
 	return objects, nil
