@@ -2,6 +2,10 @@
 
 ## To be Released
 
+* feat: add methods:
+    * List method that returns a slice of string filtered with a prefix.
+    * Move method.
+
 ## v1.2.1
 
 * fix: s3.Info Prevent Panic for Content-Type and Checksum if correspondent values returned by s3 are nil pointers [403](https://github.com/Scalingo/go-utils/pull/403)

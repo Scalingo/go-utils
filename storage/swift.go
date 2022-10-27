@@ -127,6 +127,26 @@ func (s *Swift) Info(ctx context.Context, path string) (types.Info, error) {
 	}, nil
 }
 
+func (s *Swift) Move(ctx context.Context, srcPath, dstPath string) error {
+	err := s.conn.ObjectMove(ctx, s.cfg.Container, srcPath, s.cfg.Container, dstPath)
+	if err != nil {
+		return errors.Wrapf(err, "fail to move the Swift object '%v' on Swift", srcPath)
+	}
+
+	return nil
+}
+
+func (s *Swift) List(ctx context.Context, prefix string) ([]string, error) {
+	objects, err := s.conn.ObjectNames(ctx, s.cfg.Container, &swift.ObjectsOpts{
+		Prefix: prefix,
+	})
+	if err != nil {
+		return nil, errors.Wrapf(err, "fail to list objects in '%v'", prefix)
+	}
+
+	return objects, nil
+}
+
 func (s *Swift) segmentPath(path string) (string, error) {
 	checksum := sha1.New()
 	random := make([]byte, 32)
