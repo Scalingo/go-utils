@@ -224,8 +224,7 @@ func (s *S3) Info(ctx context.Context, path string) (types.Info, error) {
 
 func (s *S3) Move(ctx context.Context, srcPath, dstPath string) error {
 	dstPath = fullPath(dstPath)
-	srcPathWithBucket := fullPath(srcPath)
-	srcPathWithBucket = fmt.Sprintf("%s/%s", s.cfg.Bucket, srcPathWithBucket)
+	srcPathWithBucket := fmt.Sprintf("%s/%s", s.cfg.Bucket, fullPath(srcPath))
 	copyInput := &s3.CopyObjectInput{
 		Bucket:     &s.cfg.Bucket,
 		Key:        &dstPath,
