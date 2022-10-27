@@ -237,7 +237,10 @@ func (s *S3) Move(ctx context.Context, srcPath, dstPath string) error {
 	}
 
 	err = s.Delete(ctx, srcPath)
-	return err
+	if err != nil {
+		return errors.Wrapf(err, "fail to delete the old object '%v' on S3", srcPath)
+	}
+	return nil
 }
 
 func (s *S3) List(ctx context.Context, prefix string) ([]string, error) {
