@@ -5,6 +5,9 @@
 * feat: add methods:
     * List method that returns a slice of string filtered with a prefix.
     * Move method.
+* build(deps): bump github.com/aws/aws-sdk-go-v2/credentials from 1.12.21 to 1.12.23
+* build(deps): bump github.com/aws/aws-sdk-go-v2/feature/s3/manager from 1.11.34 to 1.11.37
+* build(deps): bump github.com/stretchr/testify from 1.8.0 to 1.8.1
 
 ## v1.2.1
 
