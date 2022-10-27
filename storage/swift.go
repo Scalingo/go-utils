@@ -137,12 +137,11 @@ func (s *Swift) Move(ctx context.Context, srcPath, dstPath string) error {
 }
 
 func (s *Swift) List(ctx context.Context, prefix string) ([]string, error) {
-	listInput := &swift.ObjectsOpts{
+	objects, err := s.conn.ObjectNames(ctx, s.cfg.Container, &swift.ObjectsOpts{
 		Prefix: prefix,
-	}
-	objects, err := s.conn.ObjectNames(ctx, s.cfg.Container, listInput)
+	})
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to list objects")
+		return nil, errors.Wrap(err, "fail to list objects in '%v'", prefix)
 	}
 
 	return objects, nil
