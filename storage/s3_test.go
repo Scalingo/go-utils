@@ -8,13 +8,14 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/smithy-go"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/Scalingo/go-utils/storage/storagemock"
-	storageTypes "github.com/Scalingo/go-utils/storage/types"
+	storagetypes "github.com/Scalingo/go-utils/storage/types"
 )
 
 // Mock 404 NotFound error from AWS API
@@ -100,7 +101,7 @@ func TestS3_Info(t *testing.T) {
 		expectMock   func(t *testing.T, m *storagemock.MockS3Client, key string)
 		key          string
 		err          string
-		expectedInfo storageTypes.Info
+		expectedInfo storagetypes.Info
 	}{
 		"it should return ObjectNotFound error if the object does not exists": {
 			expectMock: func(t *testing.T, m *storagemock.MockS3Client, key string) {
@@ -113,7 +114,7 @@ func TestS3_Info(t *testing.T) {
 			},
 			key:          "unknown_key",
 			err:          (&ObjectNotFound{}).Error(),
-			expectedInfo: storageTypes.Info{},
+			expectedInfo: storagetypes.Info{},
 		},
 		"it should return information about the object if the object exists": {
 			expectMock: func(t *testing.T, m *storagemock.MockS3Client, key string) {
@@ -127,7 +128,7 @@ func TestS3_Info(t *testing.T) {
 				}, nil)
 			},
 			err: "",
-			expectedInfo: storageTypes.Info{
+			expectedInfo: storagetypes.Info{
 				ContentLength: 4,
 				ContentType:   "test",
 				Checksum:      "checksum",
@@ -140,7 +141,7 @@ func TestS3_Info(t *testing.T) {
 				}).Return(nil, errors.New("there is an issue"))
 			},
 			err:          "there is an issue",
-			expectedInfo: storageTypes.Info{},
+			expectedInfo: storagetypes.Info{},
 		},
 		"it should not fail if s3 return no Content-Type": {
 			expectMock: func(t *testing.T, m *storagemock.MockS3Client, key string) {
@@ -152,7 +153,7 @@ func TestS3_Info(t *testing.T) {
 					ETag:          aws.String("checksum"),
 				}, nil)
 			},
-			expectedInfo: storageTypes.Info{
+			expectedInfo: storagetypes.Info{
 				ContentType:   "",
 				ContentLength: 4,
 				Checksum:      "checksum",
@@ -169,7 +170,7 @@ func TestS3_Info(t *testing.T) {
 					ETag:          nil,
 				}, nil)
 			},
-			expectedInfo: storageTypes.Info{
+			expectedInfo: storagetypes.Info{
 				ContentType:   "test",
 				ContentLength: 4,
 				Checksum:      "",
@@ -203,6 +204,64 @@ func TestS3_Info(t *testing.T) {
 				return
 			}
 			require.Equal(t, c.expectedInfo, info)
+		})
+	}
+}
+
+func TestS3_List(t *testing.T) {
+	bucket := "my-bucket"
+	prefix := "/my-key"
+
+	tests := map[string]struct {
+		expectS3Client func(*testing.T, *storagemock.MockS3Client)
+		expectedError  string
+		expectedList   []string
+	}{
+		"it should return the objects in the given bucket": {
+			expectS3Client: func(t *testing.T, m *storagemock.MockS3Client) {
+				m.EXPECT().ListObjectsV2(gomock.Any(), &s3.ListObjectsV2Input{
+					Bucket: aws.String(bucket),
+					Prefix: aws.String(prefix),
+				}).Return(&s3.ListObjectsV2Output{
+					KeyCount: 1,
+					Contents: []types.Object{
+						{Key: aws.String("my-object")},
+					},
+				}, nil)
+			},
+			expectedList: []string{"my-object"},
+		},
+		"it should fail if the request fails": {
+			expectS3Client: func(t *testing.T, m *storagemock.MockS3Client) {
+				m.EXPECT().ListObjectsV2(gomock.Any(), &s3.ListObjectsV2Input{
+					Bucket: aws.String(bucket),
+					Prefix: aws.String(prefix),
+				}).Return(nil, errors.New("err list"))
+			},
+			expectedError: "err list",
+		},
+	}
+
+	for msg, test := range tests {
+		t.Run(msg, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+
+			s3Client := storagemock.NewMockS3Client(ctrl)
+			test.expectS3Client(t, s3Client)
+
+			storage := &S3{
+				cfg:      S3Config{Bucket: bucket},
+				s3client: s3Client,
+			}
+
+			list, err := storage.List(context.Background(), prefix)
+			if test.expectedError != "" {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), test.expectedError)
+				return
+			}
+			require.NoError(t, err)
+			assert.EqualValues(t, test.expectedList, list)
 		})
 	}
 }

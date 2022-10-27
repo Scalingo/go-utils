@@ -243,11 +243,10 @@ func (s *S3) Move(ctx context.Context, srcPath, dstPath string) error {
 }
 
 func (s *S3) List(ctx context.Context, prefix string) ([]string, error) {
-	listInput := &s3.ListObjectsV2Input{
+	objects, err := s.s3client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
 		Bucket: &s.cfg.Bucket,
 		Prefix: &prefix,
-	}
-	objects, err := s.s3client.ListObjectsV2(ctx, listInput)
+	})
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to list objects")
 	}
