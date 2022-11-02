@@ -3,6 +3,7 @@
 ## To be Released
 
 * build(deps): bump github.com/influxdata/influxdb from 1.9.7 to 1.10.0
+* build(deps): bump github.com/stretchr/testify from 1.8.0 to 1.8.1
 
 ## v1.2.1
 

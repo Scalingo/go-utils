@@ -5,6 +5,7 @@
 * docs: add doc for Session function [#397](https://github.com/Scalingo/go-utils/pull/397)
 * build(deps): bump github.com/Scalingo/go-utils/logger from 1.1.1 to 1.2.0
 * build(deps): bump github.com/sirupsen/logrus from 1.8.1 to 1.9.0
+* build(deps): bump github.com/stretchr/testify from 1.8.0 to 1.8.1
 
 ## v1.2.1
 

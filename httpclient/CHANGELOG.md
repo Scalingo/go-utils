@@ -2,7 +2,8 @@
 
 ## To be Released
 
-* build(deps): bump github.com/gofrs/uuid from 4.2.0+incompatible to 4.3.0+incompatible
+* build(deps): bump github.com/gofrs/uuid from 4.2.0+incompatible to 4.3.1+incompatible
+* build(deps): bump github.com/stretchr/testify from 1.8.0 to 1.8.1
 
 ## v1.1.1
 

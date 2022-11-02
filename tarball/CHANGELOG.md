@@ -5,6 +5,7 @@
 * build(deps): bump github.com/spf13/afero from 1.8.2 to 1.9.2
 * build(deps): bump github.com/Scalingo/go-utils/logger from 1.1.0 to 1.2.0
 * build(deps): bump github.com/Scalingo/go-utils/fs from 1.0.0 to 1.0.2
+* build(deps): bump github.com/stretchr/testify from 1.8.0 to 1.8.1
 
 ## v1.1.1
 
