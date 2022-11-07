@@ -106,6 +106,9 @@ func (s *Swift) Delete(ctx context.Context, path string) error {
 	path = s.fullPath(path)
 	err := s.conn.DynamicLargeObjectDelete(ctx, s.cfg.Container, path)
 	if err != nil {
+		if err.Error() == swift.ObjectNotFound.Error() {
+			return ObjectNotFound{}
+		}
 		return errors.Wrapf(err, "fail to delete object %v", path)
 	}
 	return nil
@@ -116,7 +119,7 @@ func (s *Swift) Info(ctx context.Context, path string) (types.Info, error) {
 	info, _, err := s.conn.Object(ctx, s.cfg.Container, path)
 	if err != nil {
 		if err.Error() == swift.ObjectNotFound.Error() {
-			return types.Info{}, &ObjectNotFound{}
+			return types.Info{}, ObjectNotFound{}
 		}
 		return types.Info{}, errors.Wrapf(err, "fail to get object info %v", path)
 	}

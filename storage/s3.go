@@ -178,6 +178,12 @@ func (s *S3) Delete(ctx context.Context, path string) error {
 	input := &s3.DeleteObjectInput{Bucket: &s.cfg.Bucket, Key: &path}
 	_, err := s.s3client.DeleteObject(ctx, input)
 	if err != nil {
+		var apiErr smithy.APIError
+		if stderrors.As(err, &apiErr) {
+			if apiErr.ErrorCode() == NotFoundErrCode {
+				return ObjectNotFound{}
+			}
+		}
 		return errors.Wrapf(err, "fail to delete object %v", path)
 	}
 
