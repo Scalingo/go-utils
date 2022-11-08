@@ -81,7 +81,7 @@ func (mr *MockBackendMockRecorder) Info(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // List mocks base method.
-func (m *MockBackend) List(arg0 context.Context, arg1 string, arg2 int) ([]string, error) {
+func (m *MockBackend) List(arg0 context.Context, arg1 string, arg2 types.ListOpts) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "List", arg0, arg1, arg2)
 	ret0, _ := ret[0].([]string)
