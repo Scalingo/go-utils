@@ -36,7 +36,7 @@ type Backend interface {
 	Delete(ctx context.Context, path string) error
 	Info(ctx context.Context, path string) (types.Info, error)
 	Move(ctx context.Context, srcPath, dstPath string) error
-	List(ctx context.Context, prefix string) ([]string, error)
+	List(ctx context.Context, prefix string, maxKeys int) ([]string, error)
 }
 
 var _ Backend = &S3{}

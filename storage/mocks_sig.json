@@ -1,4 +1,4 @@
 {
-  "github.com/Scalingo/go-utils/storage.Backend": "e7 31 87 2d ea fb 9e 37 09 a6 e9 6d 76 ea 35 11 25 b8 9a 99",
-  "github.com/Scalingo/go-utils/storage.S3Client": "8f e5 13 98 83 23 90 d2 a8 5a 5e 51 5b 32 40 71 be af f1 01"
+  "github.com/Scalingo/go-utils/storage.Backend": "d2 d6 c0 a3 43 a5 ac 37 2c 09 d9 c0 74 b4 f5 78 c9 8c 94 6e",
+  "github.com/Scalingo/go-utils/storage.S3Client": "65 41 bc d2 8e c3 50 d3 4e f8 07 27 bf 9e 5c ff 1d 40 05 24"
 }
