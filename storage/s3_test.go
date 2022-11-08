@@ -9,13 +9,14 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	s3Types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/smithy-go"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/Scalingo/go-utils/storage/storagemock"
+	"github.com/Scalingo/go-utils/storage/types"
 	storagetypes "github.com/Scalingo/go-utils/storage/types"
 )
 
@@ -226,7 +227,7 @@ func TestS3_List(t *testing.T) {
 					MaxKeys: S3ListMaxKeys,
 				}).Return(&s3.ListObjectsV2Output{
 					KeyCount: 1,
-					Contents: []types.Object{
+					Contents: []s3Types.Object{
 						{Key: aws.String("my-object")},
 					},
 				}, nil)
@@ -257,7 +258,7 @@ func TestS3_List(t *testing.T) {
 				s3client: s3Client,
 			}
 
-			list, err := storage.List(context.Background(), prefix, S3ListMaxKeys)
+			list, err := storage.List(context.Background(), prefix, types.ListOpts{MaxKeys: S3ListMaxKeys})
 			if test.expectedError != "" {
 				require.Error(t, err)
 				assert.Contains(t, err.Error(), test.expectedError)

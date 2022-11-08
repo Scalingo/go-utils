@@ -136,10 +136,10 @@ func (s *Swift) Move(ctx context.Context, srcPath, dstPath string) error {
 	return nil
 }
 
-func (s *Swift) List(ctx context.Context, prefix string, maxKeys int) ([]string, error) {
+func (s *Swift) List(ctx context.Context, prefix string, opts types.ListOpts) ([]string, error) {
 	objects, err := s.conn.ObjectNames(ctx, s.cfg.Container, &swift.ObjectsOpts{
 		Prefix: prefix,
-		Limit:  maxKeys,
+		Limit:  int(opts.MaxKeys),
 	})
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to list objects in '%v'", prefix)

@@ -243,12 +243,13 @@ func (s *S3) Move(ctx context.Context, srcPath, dstPath string) error {
 	return nil
 }
 
-// List function list object contained in bucket up to 1,000 objects, if maxKeys > 1,000, S3 will set maxKeys to 1,000
-func (s *S3) List(ctx context.Context, prefix string, maxKeys int) ([]string, error) {
+// List function lists object contained in bucket up to 1,000 objects.
+// If maxKeys > 1,000, S3 will set maxKeys to 1,000. Source: https://github.com/aws/aws-sdk-go-v2/blob/v1.17.1/service/s3/api_op_ListObjectsV2.go#L16
+func (s *S3) List(ctx context.Context, prefix string, opts types.ListOpts) ([]string, error) {
 	objects, err := s.s3client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
 		Bucket:  &s.cfg.Bucket,
 		Prefix:  &prefix,
-		MaxKeys: int32(maxKeys),
+		MaxKeys: opts.MaxKeys,
 	})
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to list objects")
