@@ -81,18 +81,18 @@ func (mr *MockBackendMockRecorder) Info(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // List mocks base method.
-func (m *MockBackend) List(arg0 context.Context, arg1 string) ([]string, error) {
+func (m *MockBackend) List(arg0 context.Context, arg1 string, arg2 types.ListOpts) ([]string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "List", arg0, arg1)
+	ret := m.ctrl.Call(m, "List", arg0, arg1, arg2)
 	ret0, _ := ret[0].([]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // List indicates an expected call of List.
-func (mr *MockBackendMockRecorder) List(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) List(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockBackend)(nil).List), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockBackend)(nil).List), arg0, arg1, arg2)
 }
 
 // Move mocks base method.

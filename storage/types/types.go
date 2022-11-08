@@ -9,3 +9,8 @@ type Info struct {
 	// For S3, the checksum is an `ETag`. It is calculated from MD5 of each part of the object.
 	Checksum string
 }
+
+type ListOpts struct {
+	// If this var is not set s3 will return S3ListMaxKeys objects
+	MaxKeys int32
+}

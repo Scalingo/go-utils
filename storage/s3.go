@@ -27,6 +27,8 @@ const (
 	// DefaultUploadConcurrency defines that multipart upload will be done in
 	// parallel in 2 routines
 	DefaultUploadConcurrency = int(2)
+	// S3ListMaxKeys is defined here https://github.com/aws/aws-sdk-go-v2/blob/v1.17.1/service/s3/api_op_ListObjectsV2.go#L107-L109
+	S3ListMaxKeys = 1000
 )
 
 type S3Client interface {
@@ -241,10 +243,13 @@ func (s *S3) Move(ctx context.Context, srcPath, dstPath string) error {
 	return nil
 }
 
-func (s *S3) List(ctx context.Context, prefix string) ([]string, error) {
+// List function lists object contained in bucket up to 1,000 objects.
+// If maxKeys > 1,000, S3 will set maxKeys to 1,000. Source: https://github.com/aws/aws-sdk-go-v2/blob/v1.17.1/service/s3/api_op_ListObjectsV2.go#L16
+func (s *S3) List(ctx context.Context, prefix string, opts types.ListOpts) ([]string, error) {
 	objects, err := s.s3client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
-		Bucket: &s.cfg.Bucket,
-		Prefix: &prefix,
+		Bucket:  &s.cfg.Bucket,
+		Prefix:  &prefix,
+		MaxKeys: opts.MaxKeys,
 	})
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to list objects")

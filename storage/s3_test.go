@@ -221,8 +221,9 @@ func TestS3_List(t *testing.T) {
 		"it should return the objects in the given bucket": {
 			expectS3Client: func(t *testing.T, m *storagemock.MockS3Client) {
 				m.EXPECT().ListObjectsV2(gomock.Any(), &s3.ListObjectsV2Input{
-					Bucket: aws.String(bucket),
-					Prefix: aws.String(prefix),
+					Bucket:  aws.String(bucket),
+					Prefix:  aws.String(prefix),
+					MaxKeys: S3ListMaxKeys,
 				}).Return(&s3.ListObjectsV2Output{
 					KeyCount: 1,
 					Contents: []types.Object{
@@ -235,8 +236,9 @@ func TestS3_List(t *testing.T) {
 		"it should fail if the request fails": {
 			expectS3Client: func(t *testing.T, m *storagemock.MockS3Client) {
 				m.EXPECT().ListObjectsV2(gomock.Any(), &s3.ListObjectsV2Input{
-					Bucket: aws.String(bucket),
-					Prefix: aws.String(prefix),
+					Bucket:  aws.String(bucket),
+					Prefix:  aws.String(prefix),
+					MaxKeys: S3ListMaxKeys,
 				}).Return(nil, errors.New("err list"))
 			},
 			expectedError: "err list",
@@ -255,7 +257,7 @@ func TestS3_List(t *testing.T) {
 				s3client: s3Client,
 			}
 
-			list, err := storage.List(context.Background(), prefix)
+			list, err := storage.List(context.Background(), prefix, storagetypes.ListOpts{MaxKeys: S3ListMaxKeys})
 			if test.expectedError != "" {
 				require.Error(t, err)
 				assert.Contains(t, err.Error(), test.expectedError)

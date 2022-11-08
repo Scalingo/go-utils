@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat(list): `List` can take a `maxKeys` which limits the amount of objects in the returned list. By default this variable equals 1,000 [#427](https://github.com/Scalingo/go-utils/pull/427)
+
 ## v1.3.0
 
 * feat: add methods:
