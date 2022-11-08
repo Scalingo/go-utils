@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat(list): list can take a maxKeys that allow to limit list of objetcs. By default this var is equal to 1,000 [#427](https://github.com/Scalingo/go-utils/pull/427)
+
 ## v1.3.0
 
 * feat: add methods:
