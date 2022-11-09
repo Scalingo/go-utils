@@ -181,7 +181,7 @@ func (s *S3) Delete(ctx context.Context, path string) error {
 		var apiErr smithy.APIError
 		if stderrors.As(err, &apiErr) {
 			if apiErr.ErrorCode() == NotFoundErrCode {
-				return ObjectNotFound{}
+				return ObjectNotFound{Path: path}
 			}
 		}
 		return errors.Wrapf(err, "fail to delete S3 object %v", path)
@@ -209,7 +209,7 @@ func (s *S3) Info(ctx context.Context, path string) (types.Info, error) {
 		var apiErr smithy.APIError
 		if stderrors.As(err, &apiErr) {
 			if apiErr.ErrorCode() == NotFoundErrCode {
-				return types.Info{}, ObjectNotFound{}
+				return types.Info{}, ObjectNotFound{Path: path}
 			}
 		}
 		return types.Info{}, errors.Wrapf(err, "fail to HEAD S3 object '%v'", path)
