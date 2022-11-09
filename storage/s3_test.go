@@ -114,7 +114,7 @@ func TestS3_Info(t *testing.T) {
 				})
 			},
 			key:          "unknown_key",
-			err:          (&ObjectNotFound{}).Error(),
+			err:          (&ObjectNotFound{Path: "unknown_key"}).Error(),
 			expectedInfo: storagetypes.Info{},
 		},
 		"it should return information about the object if the object exists": {

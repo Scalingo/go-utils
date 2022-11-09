@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"fmt"
 	"io"
 
 	"github.com/Scalingo/go-utils/storage/types"
@@ -11,10 +12,12 @@ import (
 type BackendMethod string
 
 // ObjectNotFound is a custom error in case the object is not found
-type ObjectNotFound struct{}
+type ObjectNotFound struct {
+	Path string
+}
 
-func (o ObjectNotFound) Error() string {
-	return "Object not found"
+func (err ObjectNotFound) Error() string {
+	return fmt.Sprintf("object %v not found", err.Path)
 }
 
 const (
