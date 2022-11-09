@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.3.2
+
 * feat: `Delete` may return `ObjectNotFound` [#425](https://github.com/Scalingo/go-utils/pull/425)
 
 ## v1.3.1
