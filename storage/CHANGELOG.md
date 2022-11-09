@@ -2,7 +2,7 @@
 
 ## To be Released
 
-* feat(list): `List` can take a `maxKeys` which limits the amount of objects in the returned list. By default this variable equals 1,000 [#427](https://github.com/Scalingo/go-utils/pull/427)
+* feat(list): `List` can take a `ListOpts` which can be used to define a `MaxKeys` field. This field limits the amount of objects in the returned list. By default this variable equals 0 which means that S3 will return the maximum objects he can (max is storage.S3ListMaxKeys = 1,000) [#427](https://github.com/Scalingo/go-utils/pull/427)
 
 ## v1.3.0
 
