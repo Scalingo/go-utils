@@ -128,7 +128,7 @@ func (s *S3) Get(ctx context.Context, path string) (io.ReadCloser, error) {
 	}
 	out, err := s.s3client.GetObject(ctx, input)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to get object %v", path)
+		return nil, errors.Wrapf(err, "fail to get S3 object %v", path)
 	}
 	return out.Body, nil
 }
@@ -142,7 +142,7 @@ func (s *S3) Upload(ctx context.Context, file io.Reader, path string) error {
 	}
 	_, err := s.s3uploader.Upload(ctx, input)
 	if err != nil {
-		return errors.Wrapf(err, "fail to save file to %v", path)
+		return errors.Wrapf(err, "fail to upload file to S3 %v", path)
 	}
 
 	return nil
@@ -168,7 +168,7 @@ func (s *S3) Size(ctx context.Context, path string) (int64, error) {
 	})
 
 	if err != nil {
-		return -1, errors.Wrapf(err, "fail to HEAD object '%v'", path)
+		return -1, errors.Wrapf(err, "fail to HEAD S3 object '%v'", path)
 	}
 	return res, nil
 }
@@ -184,7 +184,7 @@ func (s *S3) Delete(ctx context.Context, path string) error {
 				return ObjectNotFound{}
 			}
 		}
-		return errors.Wrapf(err, "fail to delete object %v", path)
+		return errors.Wrapf(err, "fail to delete S3 object %v", path)
 	}
 
 	return nil
@@ -212,7 +212,7 @@ func (s *S3) Info(ctx context.Context, path string) (types.Info, error) {
 				return types.Info{}, ObjectNotFound{}
 			}
 		}
-		return types.Info{}, errors.Wrapf(err, "fail to HEAD object '%v'", path)
+		return types.Info{}, errors.Wrapf(err, "fail to HEAD S3 object '%v'", path)
 	}
 
 	info := types.Info{
@@ -239,7 +239,7 @@ func (s *S3) Move(ctx context.Context, srcPath, dstPath string) error {
 		CopySource: &srcPathWithBucket,
 	})
 	if err != nil {
-		return errors.Wrapf(err, "fail to copy object '%v' to '%v'", srcPathWithBucket, dstPath)
+		return errors.Wrapf(err, "fail to copy S3 object '%v' to '%v'", srcPathWithBucket, dstPath)
 	}
 
 	err = s.Delete(ctx, srcPath)
@@ -258,7 +258,7 @@ func (s *S3) List(ctx context.Context, prefix string, opts types.ListOpts) ([]st
 		MaxKeys: opts.MaxKeys,
 	})
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to list objects")
+		return nil, errors.Wrapf(err, "fail to list S3 objects")
 	}
 
 	strObjects := make([]string, objects.KeyCount)
