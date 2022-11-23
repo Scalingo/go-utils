@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v2.0.0
+
 * fix: privatify `ErrgoRoot`
 * build(deps): bump github.com/stretchr/testify from 1.8.0 to 1.8.1
 
