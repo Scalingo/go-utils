@@ -2,7 +2,7 @@ package errors
 
 import "gopkg.in/errgo.v1"
 
-func ErrgoRoot(err error) error {
+func errgoRoot(err error) error {
 	for {
 		e, ok := err.(*errgo.Err)
 		if !ok {
