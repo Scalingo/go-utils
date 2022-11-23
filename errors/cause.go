@@ -12,11 +12,12 @@ import (
 // wrapped with errors.Wrapf or errgo.Notef or errgo.NoteMask or errgo.Mask.
 //
 // Example:
-//    errors.IsRootCause(err, &ValidationErrors{})
+//
+//	errors.IsRootCause(err, &ValidationErrors{})
 func IsRootCause(err error, mytype interface{}) bool {
 	t := reflect.TypeOf(mytype)
 	errCause := errors.Cause(err)
-	errRoot := ErrgoRoot(err)
+	errRoot := errgoRoot(err)
 	return reflect.TypeOf(errCause) == t || reflect.TypeOf(errRoot) == t
 }
 
@@ -25,7 +26,7 @@ func IsRootCause(err error, mytype interface{}) bool {
 func RootCause(err error) error {
 	errCause := errors.Cause(err)
 	if errCause == nil {
-		errCause = ErrgoRoot(err)
+		errCause = errgoRoot(err)
 	}
 	return errCause
 }
