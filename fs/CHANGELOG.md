@@ -2,7 +2,7 @@
 
 ## To be Released
 
-* bump github.com/spf13/afero from 1.8.2 to 1.9.2
+* bump github.com/spf13/afero from 1.8.2 to 1.9.3
 
 ## v1.0.2
 

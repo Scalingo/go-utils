@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* build(deps): bump go.etcd.io/etcd/client/v3 from 3.5.5 to 3.5.6
+
 ## v1.1.3
 
 * fix(cronsetup): add missing err check when adding job [#394](https://github.com/Scalingo/go-utils/pull/394)
