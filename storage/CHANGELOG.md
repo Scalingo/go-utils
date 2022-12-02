@@ -2,6 +2,10 @@
 
 ## To be Released
 
+* build(deps): bump github.com/aws/aws-sdk-go-v2/feature/s3/manager from 1.11.37 to 1.11.42
+* build(deps): bump github.com/aws/aws-sdk-go-v2/service/s3 from 1.29.1 to 1.29.4
+* build(deps): bump github.com/aws/aws-sdk-go-v2/credentials from 1.12.23 to 1.13.3
+
 ## v1.3.2
 
 * feat: `Delete` may return `ObjectNotFound` [#425](https://github.com/Scalingo/go-utils/pull/425)

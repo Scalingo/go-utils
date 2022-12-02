@@ -2,7 +2,7 @@
 
 ## To be Released
 
-* build(deps): bump go.etcd.io/etcd/client/v3 from 3.5.4 to 3.5.5
+* build(deps): bump go.etcd.io/etcd/client/v3 from 3.5.4 to 3.5.6
 
 ## v1.1.1
 
