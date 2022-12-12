@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat: add New method to `ErrCtx`
+
 ## v2.0.0
 
 * fix: privatify `ErrgoRoot`

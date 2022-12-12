@@ -21,6 +21,10 @@ func (err ErrCtx) Ctx() context.Context {
 	return err.ctx
 }
 
+func Newf(ctx context.Context, format string, args ...interface{}) error {
+	return ErrCtx{ctx: ctx, err: errgo.Newf(format, args...)}
+}
+
 func Notef(ctx context.Context, err error, format string, args ...interface{}) error {
 	return ErrCtx{ctx: ctx, err: errgo.Notef(err, format, args...)}
 }
