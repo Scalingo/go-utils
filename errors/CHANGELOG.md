@@ -3,6 +3,7 @@
 ## To be Released
 
 * feat: add New method to `ErrCtx`
+* feat: IsRootCause and RootCause are taking in account `ErrCtx` underlying errors
 
 ## v2.0.0
 

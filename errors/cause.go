@@ -2,8 +2,6 @@ package errors
 
 import (
 	"reflect"
-
-	"github.com/pkg/errors"
 )
 
 // IsRootCause return true if the cause of the given error is the same type as
@@ -16,7 +14,7 @@ import (
 //	errors.IsRootCause(err, &ValidationErrors{})
 func IsRootCause(err error, mytype interface{}) bool {
 	t := reflect.TypeOf(mytype)
-	errCause := errors.Cause(err)
+	errCause := errorCause(err)
 	errRoot := errgoRoot(err)
 	return reflect.TypeOf(errCause) == t || reflect.TypeOf(errRoot) == t
 }
@@ -24,7 +22,7 @@ func IsRootCause(err error, mytype interface{}) bool {
 // RootCause returns the cause of an errors stack, whatever the method they used
 // to be stacked: either errgo.Notef or errors.Wrapf.
 func RootCause(err error) error {
-	errCause := errors.Cause(err)
+	errCause := errorCause(err)
 	if errCause == nil {
 		errCause = errgoRoot(err)
 	}

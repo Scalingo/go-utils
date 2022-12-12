@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"context"
 	"testing"
 
 	"github.com/pkg/errors"
@@ -26,6 +27,23 @@ func Test_IsRootCause(t *testing.T) {
 		assert.True(t, IsRootCause(err, &ValidationErrors{}))
 		assert.False(t, IsRootCause(err, ValidationErrors{}))
 	})
+
+	t.Run("given an error stack with Wrapf from ErrCtx", func(t *testing.T) {
+		var err error
+		err = (&ValidationErrors{})
+		err = Wrapf(context.Background(), err, "biniou")
+
+		assert.True(t, IsRootCause(err, &ValidationErrors{}))
+		assert.False(t, IsRootCause(err, ValidationErrors{}))
+	})
+	t.Run("given an error stack with Notef from ErrCtx", func(t *testing.T) {
+		var err error
+		err = (&ValidationErrors{})
+		err = Notef(context.Background(), err, "biniou")
+
+		assert.True(t, IsRootCause(err, &ValidationErrors{}))
+		assert.False(t, IsRootCause(err, ValidationErrors{}))
+	})
 }
 
 func Test_RootCause(t *testing.T) {
@@ -33,7 +51,7 @@ func Test_RootCause(t *testing.T) {
 		var err error
 		err = (&ValidationErrors{
 			Errors: map[string][]string{
-				"test": []string{"biniou"},
+				"test": {"biniou"},
 			},
 		})
 		err = errgo.Mask(err, errgo.Any)
@@ -45,7 +63,7 @@ func Test_RootCause(t *testing.T) {
 		var err error
 		err = (&ValidationErrors{
 			Errors: map[string][]string{
-				"test": []string{"biniou"},
+				"test": {"biniou"},
 			},
 		})
 		err = errgo.Notef(err, "pouet")
@@ -57,10 +75,34 @@ func Test_RootCause(t *testing.T) {
 		var err error
 		err = (&ValidationErrors{
 			Errors: map[string][]string{
-				"test": []string{"biniou"},
+				"test": {"biniou"},
 			},
 		})
 		err = errors.Wrap(err, "pouet")
+
+		assert.Equal(t, "test=biniou", RootCause(err).Error())
+	})
+
+	t.Run("given an error stack with Wrapf from ErrCtx", func(t *testing.T) {
+		var err error
+		err = (&ValidationErrors{
+			Errors: map[string][]string{
+				"test": {"biniou"},
+			},
+		})
+		err = Wrapf(context.Background(), err, "pouet")
+
+		assert.Equal(t, "test=biniou", RootCause(err).Error())
+	})
+
+	t.Run("given an error stack with Notef from ErrCtx", func(t *testing.T) {
+		var err error
+		err = (&ValidationErrors{
+			Errors: map[string][]string{
+				"test": {"biniou"},
+			},
+		})
+		err = Notef(context.Background(), err, "pouet")
 
 		assert.Equal(t, "test=biniou", RootCause(err).Error())
 	})
