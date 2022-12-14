@@ -3,9 +3,8 @@ package errors
 import (
 	"context"
 
-	"gopkg.in/errgo.v1"
-
 	"github.com/pkg/errors"
+	"gopkg.in/errgo.v1"
 )
 
 type ErrCtx struct {
@@ -47,4 +46,50 @@ func Wrapf(ctx context.Context, err error, format string, args ...interface{}) e
 
 func Errorf(ctx context.Context, format string, args ...interface{}) error {
 	return ErrCtx{ctx: ctx, err: errors.Errorf(format, args...)}
+}
+
+// RootCtx unwrap all wrapped errors from err to get the deepest context
+// from ErrCtx errors. If there is no wrapped ErrCtx, RootCtx returns nil.
+func RootCtx(err error) context.Context {
+	var lastCtx context.Context
+
+	type causer interface {
+		Cause() error
+	}
+
+	// Unwrap each error to get the deepest context
+	for err != nil {
+		// First check if the err is type of `*errgo.Err` to be able to call `Underlying()`
+		// method. Both `*errgo.Err` and `*errors.Err` are implementing a causer interface.
+		// Cause() method from errgo skip all underlying errors, so we may skip a context between.
+		// So the order matter, we need to call `Cause()` after `Underlying()`.
+		errgoErr, ok := err.(*errgo.Err)
+		if ok {
+			err = errgoErr.Underlying()
+			continue
+		}
+
+		cause, ok := err.(causer)
+		if ok {
+			err = cause.Cause()
+			continue
+		}
+
+		// if err is type of `ErrCtx` unwrap it by getting errCtx.err
+		ctxerr, ok := err.(ErrCtx)
+		if ok {
+			err = ctxerr.err
+			lastCtx = ctxerr.Ctx()
+
+			continue
+		}
+
+		break
+	}
+
+	if lastCtx == nil {
+		return context.Background()
+	}
+
+	return lastCtx
 }
