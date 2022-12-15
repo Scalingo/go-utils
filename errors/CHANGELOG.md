@@ -4,7 +4,7 @@
 
 * feat: add New function to `ErrCtx`
 * feat: IsRootCause and RootCause are taking in account `ErrCtx` underlying errors
-* feat: RootCtx retrieves the deepest context from wrapped errors.
+* feat: RootCtxOrFallback retrieves the deepest context from wrapped errors.
 
 ## v2.0.0
 

@@ -1,3 +1,6 @@
+// Ignore context.WithValue check
+//
+//nolint:revive,staticcheck
 package errors
 
 import (
@@ -10,23 +13,23 @@ import (
 	"gopkg.in/errgo.v1"
 )
 
-func TestErrCtx_RootCtx(t *testing.T) {
-	t.Run("It should return a default context if the error is not wrapped with ErrCtx", func(t *testing.T) {
+func TestErrCtx_RootCtxOrFallback(t *testing.T) {
+	t.Run("It should return an error and the given context if the error does not contains any ErrCtx", func(t *testing.T) {
 		// Given
 		err := stdErrors.New("main error")
 		err = errgo.Notef(err, "wrapping error in func2")
+		ctx := context.WithValue(context.Background(), "test", "test")
 
 		// When
-		rootCtx := RootCtx(err)
+		rootCtx := RootCtxOrFallback(ctx, err)
 
 		// Then
-		assert.Equal(t, context.Background(), rootCtx)
+		assert.Equal(t, ctx, rootCtx)
 		assert.Contains(t, err.Error(), "wrapping error in func2")
 	})
 
 	t.Run("It should get the root context and contains fields from multiple wrapped error", func(t *testing.T) {
 		// Given
-		//nolint:all
 		ctx := context.WithValue(context.Background(), "field0", "value0")
 		err := funcThrowingError(ctx)
 		err = Notef(ctx, err, "wrapping error in func2")
@@ -34,7 +37,7 @@ func TestErrCtx_RootCtx(t *testing.T) {
 		err = Notef(ctx, err, "wrapping error in func4")
 
 		// When
-		rootCtx := RootCtx(err)
+		rootCtx := RootCtxOrFallback(ctx, err)
 		assert.NotNil(t, rootCtx)
 
 		// Then
@@ -48,14 +51,13 @@ func TestErrCtx_RootCtx(t *testing.T) {
 
 	t.Run("It should get the root context and contains fields from function wrapping the error", func(t *testing.T) {
 		// Given
-		//nolint:all
 		ctx := context.WithValue(context.Background(), "field0", "value0")
 		err := funcWrappingAnError(ctx)
 		err = Notef(ctx, err, "wrapping error in func3")
 		err = Notef(ctx, err, "wrapping error in func4")
 
 		// When
-		rootCtx := RootCtx(err)
+		rootCtx := RootCtxOrFallback(ctx, err)
 		assert.NotNil(t, rootCtx)
 
 		// Then
@@ -69,7 +71,6 @@ func TestErrCtx_RootCtx(t *testing.T) {
 
 	t.Run("It should get the root context and contains first fields", func(t *testing.T) {
 		// Given
-		//nolint:all
 		ctx := context.WithValue(context.Background(), "field0", "value0")
 		// Simulate non ErrCtx error in middle of error path
 		err := funcWrappingAnErrorWithoutErrCtx(ctx)
@@ -77,7 +78,7 @@ func TestErrCtx_RootCtx(t *testing.T) {
 		err = Notef(ctx, err, "wrapping error in func3")
 
 		// When
-		rootCtx := RootCtx(err)
+		rootCtx := RootCtxOrFallback(ctx, err)
 		assert.NotNil(t, rootCtx)
 
 		// Then
@@ -94,12 +95,10 @@ func TestErrCtx_RootCtx(t *testing.T) {
 
 	t.Run("It should get the root context and not contains first fields", func(t *testing.T) {
 		// Given
-		//nolint:all
 		ctx := context.WithValue(context.Background(), "field0", "value0")
 		err := funcThrowingError(ctx)
 		assert.NotNil(t, err)
 		// Simulate non returning error
-		//nolint:all
 		ctx = context.WithValue(ctx, "field2", "value2")
 		err = Newf(ctx, "new error from func2")
 		err = Notef(ctx, err, "wrapping error in func2")
@@ -107,7 +106,7 @@ func TestErrCtx_RootCtx(t *testing.T) {
 		err = Notef(ctx, err, "wrapping error in func4")
 
 		// When
-		rootCtx := RootCtx(err)
+		rootCtx := RootCtxOrFallback(ctx, err)
 		assert.NotNil(t, rootCtx)
 
 		// Then
@@ -124,14 +123,12 @@ func TestErrCtx_RootCtx(t *testing.T) {
 
 // funcThrowingError throw the main error
 func funcThrowingError(ctx context.Context) error {
-	//nolint:all
 	ctx = context.WithValue(ctx, "field1", "value1")
 
 	return Newf(ctx, "main error")
 }
 
 func funcWrappingAnError(ctx context.Context) error {
-	//nolint:all
 	ctx = context.WithValue(ctx, "field2", "value2")
 
 	err := funcThrowingError(ctx)
@@ -142,7 +139,6 @@ func funcWrappingAnError(ctx context.Context) error {
 }
 
 func funcWrappingAnErrorWithoutErrCtx(ctx context.Context) error {
-	//nolint:all
 	ctx = context.WithValue(ctx, "field3", "value3")
 
 	err := funcWrappingAnError(ctx)

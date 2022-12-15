@@ -48,9 +48,9 @@ func Errorf(ctx context.Context, format string, args ...interface{}) error {
 	return ErrCtx{ctx: ctx, err: errors.Errorf(format, args...)}
 }
 
-// RootCtx unwrap all wrapped errors from err to get the deepest context
-// from ErrCtx errors. If there is no wrapped ErrCtx, RootCtx returns nil.
-func RootCtx(err error) context.Context {
+// RootCtxOrFallback unwrap all wrapped errors from err to get the deepest context
+// from ErrCtx errors. If there is no wrapped ErrCtx RootCtxOrFallback returns ctx from parameter.
+func RootCtxOrFallback(ctx context.Context, err error) context.Context {
 	var lastCtx context.Context
 
 	type causer interface {
@@ -88,7 +88,7 @@ func RootCtx(err error) context.Context {
 	}
 
 	if lastCtx == nil {
-		return context.Background()
+		return ctx
 	}
 
 	return lastCtx
