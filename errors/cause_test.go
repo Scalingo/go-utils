@@ -180,3 +180,66 @@ func Test_RootCause(t *testing.T) {
 		assert.Equal(t, "test=biniou", RootCause(err).Error())
 	})
 }
+
+func Test_UnwrapError(t *testing.T) {
+	t.Run("given an error stack with errgo.Mask", func(t *testing.T) {
+		var err error
+		err = (&ValidationErrors{
+			Errors: map[string][]string{
+				"test": {"biniou"},
+			},
+		})
+		err = errgo.Mask(err, errgo.Any)
+
+		assert.Equal(t, "test=biniou", UnwrapError(err).Error())
+	})
+
+	t.Run("given an error stack multiple times with errors.Wrap", func(t *testing.T) {
+		var err error
+		err = (&ValidationErrors{
+			Errors: map[string][]string{
+				"test": {"biniou"},
+			},
+		})
+		err = errors.Wrap(err, "pouet")
+		err = errors.Wrap(err, "pouet")
+		err = errors.Wrap(err, "pouet")
+		err = errors.Wrap(err, "pouet")
+		err = errors.Wrap(err, "pouet")
+
+		var lastErr error
+		for unwrappedErr := err; unwrappedErr != nil; unwrappedErr = UnwrapError(unwrappedErr) {
+			lastErr = unwrappedErr
+		}
+
+		assert.Equal(t, "test=biniou", lastErr.Error())
+	})
+
+	t.Run("given an error stack with NoteMask from ErrCtx", func(t *testing.T) {
+		var err error
+		err = (&ValidationErrors{
+			Errors: map[string][]string{
+				"test": {"biniou"},
+			},
+		})
+		err = NoteMask(context.Background(), err, "pouet")
+
+		assert.Equal(t, "pouet: test=biniou", UnwrapError(err).Error())
+	})
+
+	t.Run("given an error stack with Notef from ErrCtx", func(t *testing.T) {
+		var err error
+		err = (&ValidationErrors{
+			Errors: map[string][]string{
+				"test": {"biniou"},
+			},
+		})
+		err = Notef(context.Background(), err, "pouet")
+
+		assert.Equal(t, "pouet: test=biniou", UnwrapError(err).Error())
+	})
+	t.Run("given an error nil", func(t *testing.T) {
+		var err error
+		assert.Nil(t, UnwrapError(err))
+	})
+}
