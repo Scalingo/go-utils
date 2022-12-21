@@ -15,7 +15,6 @@ import (
 	"github.com/stvp/rollbar"
 	"gopkg.in/errgo.v1"
 
-	scalingoerrors "github.com/Scalingo/go-utils/errors/v2"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/go-utils/nsqproducer"
 )
@@ -223,8 +222,6 @@ func (c *nsqConsumer) Start(ctx context.Context) func() {
 
 		err = c.MessageHandler(ctx, &msg)
 		if err != nil {
-			c.logger = logger.Get(scalingoerrors.RootCtxOrFallback(ctx, err))
-
 			if nsqerr, ok := err.(Error); ok && nsqerr.noRetry {
 				msgLogger.WithError(err).Error("message handling error - noretry")
 				return nil

@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat: add UnwrapError to unwrap one error.
+
 ## v2.1.0
 
 * feat: add New function to `ErrCtx`
