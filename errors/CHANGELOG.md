@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v2.2.0
+
 * feat: add UnwrapError to unwrap one error.
 
 ## v2.1.0
