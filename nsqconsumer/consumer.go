@@ -226,7 +226,8 @@ func (c *nsqConsumer) Start(ctx context.Context) func() {
 			var errLogger logrus.FieldLogger
 			noRetry := false
 
-			for unwrapErr := err; unwrapErr != nil; unwrapErr = scalingoerrors.UnwrapError(unwrapErr) {
+			unwrapErr := err
+			for unwrapErr != nil {
 				switch handlerErr := unwrapErr.(type) {
 				case scalingoerrors.ErrCtx:
 					errLogger = logger.Get(handlerErr.Ctx())
@@ -234,6 +235,7 @@ func (c *nsqConsumer) Start(ctx context.Context) func() {
 					noRetry = handlerErr.noRetry
 					unwrapErr = handlerErr.error
 				}
+				unwrapErr = scalingoerrors.UnwrapError(unwrapErr)
 			}
 			if errLogger == nil {
 				errLogger = msgLogger
