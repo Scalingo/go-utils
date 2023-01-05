@@ -28,10 +28,6 @@ func Newf(ctx context.Context, format string, args ...interface{}) error {
 	return ErrCtx{ctx: ctx, err: errgo.Newf(format, args...)}
 }
 
-func NoteMask(ctx context.Context, err error, message string) error {
-	return ErrCtx{ctx: ctx, err: errgo.NoteMask(err, message)}
-}
-
 func Notef(ctx context.Context, err error, format string, args ...interface{}) error {
 	return ErrCtx{ctx: ctx, err: errgo.Notef(err, format, args...)}
 }

@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* fix: remove `NoteMask`. `Notef` should be use instead.
+
 ## v2.2.0
 
 * feat: add UnwrapError to unwrap one error.
