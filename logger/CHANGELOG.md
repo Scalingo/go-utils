@@ -2,6 +2,7 @@
 
 ## To be Released
 
+* feat(opt): Add ability to set a output io.Writer instead of stdout: `WithOutput(io.Writer)`
 * build(deps): bump github.com/rollbar/rollbar-go from 1.4.4 to 1.4.5
 * build(deps): bump github.com/stretchr/testify from 1.8.0 to 1.8.1
 
