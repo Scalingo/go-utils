@@ -1,7 +1,7 @@
 package document
 
 import (
-	"github.com/Scalingo/go-utils/errors"
+	"github.com/Scalingo/go-utils/errors/v2"
 )
 
 // ValidationErrors is a type alias of errors.ValidationErrors. It is defined to
