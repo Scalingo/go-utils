@@ -15,6 +15,7 @@ import (
 	"github.com/stvp/rollbar"
 	"gopkg.in/errgo.v1"
 
+	scalingoerrors "github.com/Scalingo/go-utils/errors/v2"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/go-utils/nsqproducer"
 )
@@ -167,77 +168,12 @@ func (c *nsqConsumer) Start(ctx context.Context) func() {
 
 	consumer.SetLogger(log.New(os.Stderr, fmt.Sprintf("[nsq-consumer(%s)]", c.Topic), log.Flags()), nsq.LogLevelWarning)
 
-	consumer.AddConcurrentHandlers(nsq.HandlerFunc(func(message *nsq.Message) (err error) {
-		defer func() {
-			if r := recover(); r != nil {
-				var errRecovered error
-				switch value := errRecovered.(type) {
-				case error:
-					errRecovered = value
-				default:
-					errRecovered = errgo.Newf("%v", value)
-				}
-				err = errgo.Newf("recover panic from nsq consumer: %+v", errRecovered)
-				c.logger.WithError(errRecovered).WithFields(logrus.Fields{"stacktrace": string(debug.Stack())}).Error("recover panic")
-			}
-		}()
+	consumer.AddConcurrentHandlers(nsq.HandlerFunc(c.nsqHandler), c.MaxInFlight)
 
-		if len(message.Body) == 0 {
-			err := errgo.New("body is blank, re-enqueued message")
-			c.logger.WithError(err).Error("blank message")
-			return err
-		}
-		var msg NsqMessageDeserialize
-		err = json.Unmarshal(message.Body, &msg)
-		if err != nil {
-			c.logger.WithError(err).Error("failed to unmarshal message")
-			return err
-		}
-		msg.NsqMsg = message
-
-		msgLogger := c.logger.WithFields(logrus.Fields{
-			"message_id":   fmt.Sprintf("%s", message.ID),
-			"message_type": msg.Type,
-			"request_id":   msg.RequestID,
-		})
-
-		ctx := context.WithValue(
-			context.WithValue(
-				context.Background(), "request_id", msg.RequestID,
-			), "logger", msgLogger,
-		)
-
-		if msg.At != 0 {
-			now := time.Now().Unix()
-			delay := msg.At - now
-			if delay > 0 {
-				return c.postponeMessage(ctx, msgLogger, msg, delay)
-			}
-		}
-
-		before := time.Now()
-		if _, ok := c.SkipLogSet[msg.Type]; !ok {
-			msgLogger.Info("BEGIN Message")
-		}
-
-		err = c.MessageHandler(ctx, &msg)
-		if err != nil {
-			if nsqerr, ok := err.(Error); ok && nsqerr.noRetry {
-				msgLogger.WithError(err).Error("message handling error - noretry")
-				return nil
-			}
-			msgLogger.WithError(err).Error("message handling error")
-			return err
-		}
-
-		if _, ok := c.SkipLogSet[msg.Type]; !ok {
-			msgLogger.WithField("duration", time.Since(before)).Info("END Message")
-		}
-		return nil
-	}), c.MaxInFlight)
-
-	if err = consumer.ConnectToNSQLookupds(c.NsqLookupdURLs); err != nil {
-		c.logger.WithError(err).Fatalf("Fail to connect to NSQ lookupd")
+	err = consumer.ConnectToNSQLookupds(c.NsqLookupdURLs)
+	if err != nil {
+		c.logger.WithError(err).Error("Fail to connect to NSQ lookupd")
+		os.Exit(1)
 	}
 
 	return func() {
@@ -245,6 +181,91 @@ func (c *nsqConsumer) Start(ctx context.Context) func() {
 		// block until stop process is complete
 		<-consumer.StopChan
 	}
+}
+
+func (c *nsqConsumer) nsqHandler(message *nsq.Message) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			var errRecovered error
+			switch value := errRecovered.(type) {
+			case error:
+				errRecovered = value
+			default:
+				errRecovered = errgo.Newf("%v", value)
+			}
+			err = errgo.Newf("recover panic from nsq consumer: %+v", errRecovered)
+			c.logger.WithError(errRecovered).WithFields(logrus.Fields{"stacktrace": string(debug.Stack())}).Error("recover panic")
+		}
+	}()
+
+	if len(message.Body) == 0 {
+		err := errgo.New("body is blank, re-enqueued message")
+		c.logger.WithError(err).Error("blank message")
+		return err
+	}
+	var msg NsqMessageDeserialize
+	err = json.Unmarshal(message.Body, &msg)
+	if err != nil {
+		c.logger.WithError(err).Error("Fail to unmarshal message")
+		return err
+	}
+	msg.NsqMsg = message
+
+	msgLogger := c.logger.WithFields(logrus.Fields{
+		"message_id":   fmt.Sprintf("%s", message.ID),
+		"message_type": msg.Type,
+		"request_id":   msg.RequestID,
+	})
+
+	// Ignore linter here due to the usage of string as keys in context.
+	//nolint:staticcheck,revive
+	ctx := context.WithValue(context.WithValue(context.Background(), "request_id", msg.RequestID), "logger", msgLogger)
+
+	if msg.At != 0 {
+		now := time.Now().Unix()
+		delay := msg.At - now
+		if delay > 0 {
+			return c.postponeMessage(ctx, msgLogger, msg, delay)
+		}
+	}
+
+	before := time.Now()
+	if _, ok := c.SkipLogSet[msg.Type]; !ok {
+		msgLogger.Info("BEGIN Message")
+	}
+
+	err = c.MessageHandler(ctx, &msg)
+	if err != nil {
+		var errLogger logrus.FieldLogger
+		noRetry := false
+
+		unwrapErr := err
+		for unwrapErr != nil {
+			switch handlerErr := unwrapErr.(type) {
+			case scalingoerrors.ErrCtx:
+				errLogger = logger.Get(handlerErr.Ctx())
+			case Error:
+				noRetry = handlerErr.noRetry
+				unwrapErr = handlerErr.error
+			}
+			unwrapErr = scalingoerrors.UnwrapError(unwrapErr)
+		}
+		if errLogger == nil {
+			errLogger = msgLogger
+		}
+
+		if noRetry {
+			errLogger.WithError(err).Error("Message handling error - noretry")
+			return nil
+		}
+		errLogger.WithError(err).Error("Message handling error")
+		return err
+	}
+
+	if _, ok := c.SkipLogSet[msg.Type]; !ok {
+		msgLogger.WithField("duration", time.Since(before)).Info("END Message")
+	}
+	return nil
 }
 
 func (c *nsqConsumer) postponeMessage(ctx context.Context, msgLogger logrus.FieldLogger, msg NsqMessageDeserialize, delay int64) error {
