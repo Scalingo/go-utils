@@ -7,12 +7,16 @@ import (
 
 	"github.com/sirupsen/logrus"
 
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/go-utils/mongo"
 )
+
+var tracer = otel.Tracer("github.com/Scalingo/go-utils/mongo/document")
 
 type SortField string
 
@@ -54,6 +58,9 @@ var _ Validable = &Base{}
 // Create inserts the document in the database, returns an error if document
 // already exists and set CreatedAt timestamp
 func Create(ctx context.Context, collectionName string, doc document) error {
+	ctx, span := tracer.Start(ctx, "create")
+	span.SetAttributes(attribute.String("mongo.collection_name", collectionName))
+	defer span.End()
 	log := logger.Get(ctx)
 	doc.ensureID()
 	doc.ensureCreatedAt()
@@ -73,6 +80,9 @@ func Create(ctx context.Context, collectionName string, doc document) error {
 }
 
 func Save(ctx context.Context, collectionName string, doc document) error {
+	ctx, span := tracer.Start(ctx, "save")
+	span.SetAttributes(attribute.String("mongo.collection_name", collectionName))
+	defer span.End()
 	log := logger.Get(ctx)
 	doc.ensureID()
 	doc.ensureCreatedAt()
@@ -94,10 +104,16 @@ func Save(ctx context.Context, collectionName string, doc document) error {
 
 // Destroy really deletes
 func Destroy(ctx context.Context, collectionName string, doc destroyable) error {
+	ctx, span := tracer.Start(ctx, "destroy")
+	span.SetAttributes(attribute.String("mongo.collection_name", collectionName))
+	defer span.End()
 	return doc.destroy(ctx, collectionName)
 }
 
 func ReallyDestroy(ctx context.Context, collectionName string, doc document) error {
+	ctx, span := tracer.Start(ctx, "really_destroy")
+	span.SetAttributes(attribute.String("mongo.collection_name", collectionName))
+	defer span.End()
 	log := logger.Get(ctx)
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
@@ -112,6 +128,9 @@ func ReallyDestroy(ctx context.Context, collectionName string, doc document) err
 // default scope for paranoid documents, it won't look at documents tagged as
 // deleted
 func Find(ctx context.Context, collectionName string, id bson.ObjectId, doc scopable, sortFields ...SortField) error {
+	ctx, span := tracer.Start(ctx, "find")
+	span.SetAttributes(attribute.String("mongo.collection_name", collectionName))
+	defer span.End()
 	query := doc.scope(bson.M{"_id": id})
 	return find(ctx, collectionName, query, doc, sortFields...)
 }
@@ -119,15 +138,24 @@ func Find(ctx context.Context, collectionName string, id bson.ObjectId, doc scop
 // FindUnscoped is similar as Find but does not care of the default scope of
 // the document.
 func FindUnscoped(ctx context.Context, collectionName string, id bson.ObjectId, doc interface{}, sortFields ...SortField) error {
+	ctx, span := tracer.Start(ctx, "find_unscoped")
+	span.SetAttributes(attribute.String("mongo.collection_name", collectionName))
+	defer span.End()
 	query := bson.M{"_id": id}
 	return find(ctx, collectionName, query, doc, sortFields...)
 }
 
 func FindOne(ctx context.Context, collectionName string, query bson.M, doc scopable, sortFields ...SortField) error {
+	ctx, span := tracer.Start(ctx, "find_one")
+	span.SetAttributes(attribute.String("mongo.collection_name", collectionName))
+	defer span.End()
 	return find(ctx, collectionName, doc.scope(query), doc, sortFields...)
 }
 
 func FindOneUnscoped(ctx context.Context, collectionName string, query bson.M, doc interface{}) error {
+	ctx, span := tracer.Start(ctx, "find_unscoped")
+	span.SetAttributes(attribute.String("mongo.collection_name", collectionName))
+	defer span.End()
 	return find(ctx, collectionName, query, doc)
 }
 
@@ -144,6 +172,9 @@ func find(ctx context.Context, collectionName string, query bson.M, doc interfac
 }
 
 func WhereQuery(ctx context.Context, collectionName string, query bson.M, sortFields ...SortField) (*mgo.Query, Closer) {
+	ctx, span := tracer.Start(ctx, "where_query")
+	span.SetAttributes(attribute.String("mongo.collection_name", collectionName))
+	defer span.End()
 	if query == nil {
 		query = bson.M{}
 	}
@@ -155,6 +186,9 @@ func WhereQuery(ctx context.Context, collectionName string, query bson.M, sortFi
 }
 
 func WhereUnscopedQuery(ctx context.Context, collectionName string, query bson.M, sortFields ...SortField) (*mgo.Query, Closer) {
+	ctx, span := tracer.Start(ctx, "where_unscoped_query")
+	span.SetAttributes(attribute.String("mongo.collection_name", collectionName))
+	defer span.End()
 	log := logger.Get(ctx)
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 
@@ -170,6 +204,9 @@ func WhereUnscopedQuery(ctx context.Context, collectionName string, query bson.M
 }
 
 func Where(ctx context.Context, collectionName string, query bson.M, data interface{}, sortFields ...SortField) error {
+	ctx, span := tracer.Start(ctx, "where")
+	span.SetAttributes(attribute.String("mongo.collection_name", collectionName))
+	defer span.End()
 	mongoQuery, session := WhereQuery(ctx, collectionName, query, sortFields...)
 	defer session.Close()
 	err := mongoQuery.All(data)
@@ -180,6 +217,9 @@ func Where(ctx context.Context, collectionName string, query bson.M, data interf
 }
 
 func WhereUnscoped(ctx context.Context, collectionName string, query bson.M, data interface{}, sortFields ...SortField) error {
+	ctx, span := tracer.Start(ctx, "where_unscoped")
+	span.SetAttributes(attribute.String("mongo.collection_name", collectionName))
+	defer span.End()
 	mongoQuery, session := WhereUnscopedQuery(ctx, collectionName, query, sortFields...)
 	defer session.Close()
 	err := mongoQuery.All(data)
@@ -190,6 +230,9 @@ func WhereUnscoped(ctx context.Context, collectionName string, query bson.M, dat
 }
 
 func WhereIter(ctx context.Context, collectionName string, query bson.M, fun func(*mgo.Iter) error, sortFields ...SortField) error {
+	ctx, span := tracer.Start(ctx, "where_iter")
+	span.SetAttributes(attribute.String("mongo.collection_name", collectionName))
+	defer span.End()
 	if query == nil {
 		query = bson.M{}
 	}
@@ -200,6 +243,9 @@ func WhereIter(ctx context.Context, collectionName string, query bson.M, fun fun
 }
 
 func WhereIterUnscoped(ctx context.Context, collectionName string, query bson.M, fun func(*mgo.Iter) error, sortFields ...SortField) error {
+	ctx, span := tracer.Start(ctx, "where_iter_unscoped")
+	span.SetAttributes(attribute.String("mongo.collection_name", collectionName))
+	defer span.End()
 	log := logger.Get(ctx)
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
@@ -226,6 +272,9 @@ func WhereIterUnscoped(ctx context.Context, collectionName string, query bson.M,
 }
 
 func Update(ctx context.Context, collectionName string, update bson.M, doc document) error {
+	ctx, span := tracer.Start(ctx, "update")
+	span.SetAttributes(attribute.String("mongo.collection_name", collectionName))
+	defer span.End()
 	log := logger.Get(ctx)
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 	defer c.Database.Session.Close()
