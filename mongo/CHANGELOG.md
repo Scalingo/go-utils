@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.2.2
+
 * docs: add doc for Session function [#397](https://github.com/Scalingo/go-utils/pull/397)
 * build(deps): bump github.com/Scalingo/go-utils/logger from 1.1.1 to 1.2.0
 * build(deps): bump github.com/Scalingo/go-utils/errors from 1.1.1 to 2.2.0
