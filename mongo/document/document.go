@@ -1,3 +1,4 @@
+// no-lint:contextcheck
 package document
 
 import (
