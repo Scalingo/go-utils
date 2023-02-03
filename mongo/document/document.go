@@ -189,6 +189,29 @@ func WhereUnscoped(ctx context.Context, collectionName string, query bson.M, dat
 	return nil
 }
 
+func Count(ctx context.Context, collectionName string, query bson.M) (int, error) {
+	if query == nil {
+		query = bson.M{}
+	}
+	if _, ok := query["deleted_at"]; !ok {
+		query["deleted_at"] = nil
+	}
+
+	return CountUnscoped(ctx, collectionName, query)
+}
+
+func CountUnscoped(ctx context.Context, collectionName string, query bson.M) (int, error) {
+	log := logger.Get(ctx)
+	// nolint: contextcheck
+	c := mongo.Session(log).Clone().DB("").C(collectionName)
+
+	if query == nil {
+		query = bson.M{}
+	}
+
+	return c.Find(query).Count()
+}
+
 func WhereIter(ctx context.Context, collectionName string, query bson.M, fun func(*mgo.Iter) error, sortFields ...SortField) error {
 	if query == nil {
 		query = bson.M{}

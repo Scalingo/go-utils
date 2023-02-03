@@ -25,6 +25,74 @@ func NewTestParanoidDoc(t *testing.T) (*ParanoidDoc, func()) {
 	}
 }
 
+func TestParanoid_Count(t *testing.T) {
+	examples := []struct {
+		Name         string
+		Query        bson.M
+		ParanoidDocs func(t *testing.T) ([]*ParanoidDoc, func())
+		Count        int
+	}{
+		{
+			Name: "it should count existing documents",
+			ParanoidDocs: func(t *testing.T) ([]*ParanoidDoc, func()) {
+				d1, clean1 := NewTestParanoidDoc(t)
+				d2, clean2 := NewTestParanoidDoc(t)
+				return []*ParanoidDoc{d1, d2}, func() {
+					clean1()
+					clean2()
+				}
+			},
+			Count: 2,
+		}, {
+			Name: "it should not count paranoia-deleted documents",
+			ParanoidDocs: func(t *testing.T) ([]*ParanoidDoc, func()) {
+				d1, clean1 := NewTestParanoidDoc(t)
+				err := Destroy(context.Background(), ParanoidDocsCollection, d1)
+				require.NoError(t, err)
+				d2, clean2 := NewTestParanoidDoc(t)
+				err = Destroy(context.Background(), ParanoidDocsCollection, d2)
+				require.NoError(t, err)
+				return []*ParanoidDoc{d1, d2}, func() {
+					clean1()
+					clean2()
+				}
+			},
+			Count: 0,
+		}, {
+			Name:  "it should find count document, if queried specifically",
+			Query: bson.M{"deleted_at": bson.M{"$exists": true}},
+			ParanoidDocs: func(t *testing.T) ([]*ParanoidDoc, func()) {
+				d1, clean1 := NewTestParanoidDoc(t)
+				err := Destroy(context.Background(), ParanoidDocsCollection, d1)
+				require.NoError(t, err)
+				d2, clean2 := NewTestParanoidDoc(t)
+				err = Destroy(context.Background(), ParanoidDocsCollection, d2)
+				require.NoError(t, err)
+				return []*ParanoidDoc{d1, d2}, func() {
+					clean1()
+					clean2()
+				}
+			},
+			Count: 2,
+		},
+	}
+
+	for _, example := range examples {
+		t.Run(example.Name, func(t *testing.T) {
+			_, clean := example.ParanoidDocs(t)
+			defer clean()
+
+			query := bson.M{}
+			if example.Query != nil {
+				query = example.Query
+			}
+			count, err := Count(context.Background(), ParanoidDocsCollection, query)
+			require.NoError(t, err)
+			require.Equal(t, count, example.Count)
+		})
+	}
+}
+
 func TestParanoid_Find(t *testing.T) {
 	examples := []struct {
 		Name        string

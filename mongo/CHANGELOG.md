@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat(count): Add count method to document package
+
 ## v1.2.2
 
 * docs: add doc for Session function [#397](https://github.com/Scalingo/go-utils/pull/397)
