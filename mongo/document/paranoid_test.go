@@ -67,6 +67,7 @@ func TestParanoid_Count(t *testing.T) {
 				require.NoError(t, err)
 				d2, clean2 := NewTestParanoidDoc(t)
 				err = Destroy(context.Background(), ParanoidDocsCollection, d2)
+				require.NoError(t, err)
 				return []*ParanoidDoc{d1, d2}, func() {
 					clean1()
 					clean2()
