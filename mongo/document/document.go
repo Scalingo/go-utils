@@ -1,4 +1,3 @@
-// no-lint:contextcheck
 package document
 
 import (
@@ -203,6 +202,7 @@ func Count(ctx context.Context, collectionName string, query bson.M) (int, error
 
 func CountUnscoped(ctx context.Context, collectionName string, query bson.M) (int, error) {
 	log := logger.Get(ctx)
+	// no-lint:contextcheck
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
 
 	if query == nil {
