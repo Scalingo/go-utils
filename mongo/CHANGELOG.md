@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.3.0
+
 * feat(count): Add count method to document package
 
 ## v1.2.2
