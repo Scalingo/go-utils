@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.3.1
+
 * fix: Close mongo session on CountUnscoped method
 
 ## v1.3.0
