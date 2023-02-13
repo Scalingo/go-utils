@@ -204,6 +204,7 @@ func CountUnscoped(ctx context.Context, collectionName string, query bson.M) (in
 	log := logger.Get(ctx)
 	// nolint: contextcheck
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
+	defer c.Database.Session.Close()
 
 	if query == nil {
 		query = bson.M{}

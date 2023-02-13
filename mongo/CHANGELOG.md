@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* fix: Close mongo session on CountUnscoped method
+
 ## v1.3.0
 
 * feat(count): Add count method to document package
