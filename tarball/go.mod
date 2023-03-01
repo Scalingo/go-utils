@@ -7,7 +7,7 @@ require (
 	github.com/Scalingo/go-utils/io v1.1.1
 	github.com/Scalingo/go-utils/logger v1.2.0
 	github.com/pkg/errors v0.9.1
-	github.com/spf13/afero v1.9.3
+	github.com/spf13/afero v1.9.4
 	github.com/stretchr/testify v1.8.1
 	gopkg.in/errgo.v1 v1.0.1
 )
