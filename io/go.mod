@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/guillermo/go.procmeminfo v0.0.0-20131127224636-be4355a9fb0e
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.2
 	golang.org/x/sys v0.1.0
 )
 
