@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"go.opentelemetry.io/otel/attribute"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -34,5 +35,8 @@ func (d *Paranoid) destroy(ctx context.Context, collectionName string) error {
 }
 
 func Restore(ctx context.Context, collectionName string, doc document) error {
+	ctx, span := tracer.Start(ctx, "restore")
+	span.SetAttributes(attribute.String("mongo.collection_name", collectionName))
+	defer span.End()
 	return Update(ctx, collectionName, bson.M{"$unset": bson.M{"deleted_at": ""}}, doc)
 }
