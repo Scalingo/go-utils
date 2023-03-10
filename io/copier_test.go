@@ -2,6 +2,7 @@ package io
 
 import (
 	"bytes"
+	"io"
 	"os"
 	"path/filepath"
 	"testing"
@@ -39,7 +40,8 @@ func TestCopier_Copy(t *testing.T) {
 		_, err = src.WriteString("hello")
 		require.NoError(t, err)
 		// Get back the reader at the beginning of the file
-		src.Seek(0, os.SEEK_SET)
+		_, err = src.Seek(0, io.SeekStart)
+		require.NoError(t, err)
 
 		copier := NewCopier()
 		n, err := copier.Copy(dst, src)
@@ -73,7 +75,8 @@ func TestCopier_Copy(t *testing.T) {
 		}
 
 		// Get back the reader at the beginning of the file
-		src.Seek(0, os.SEEK_SET)
+		_, err = src.Seek(0, io.SeekStart)
+		require.NoError(t, err)
 
 		copier := NewCopier(WithNoDiskCache)
 		_, err = copier.Copy(dst, src)

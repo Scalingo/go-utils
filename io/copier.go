@@ -3,6 +3,7 @@ package io
 import (
 	"io"
 
+	"github.com/pkg/errors"
 	"golang.org/x/sys/unix"
 )
 
@@ -47,7 +48,7 @@ func NewCopier(opts ...CopierOpt) Copier {
 	return copier
 }
 
-// copyContent is highly inspired from io.Copy, but calls to fadvise have been
+// Copy is highly inspired from io.Copy, but calls to fadvise have been
 // added to prevent caching the whole content of the files during the process,
 // impacting the whole OS disk cache
 func (c Copier) Copy(dst io.Writer, src io.Reader) (int64, error) {
@@ -61,16 +62,24 @@ func (c Copier) Copy(dst io.Writer, src io.Reader) (int64, error) {
 		if nr > 0 {
 			if fdSrc, ok := src.(Fder); c.noDiskCacheRead && ok {
 				// Fadvise is a system call giving instruction to the OS about how to behave
-				// with the flag FADC_DONTNEED, it tell the OS to drop the disk cache
-				// on a given file, on a give part of the file (initial offset + end offset)
+				// with the flag FADC_DONTNEED. It tells the OS to drop the disk cache
+				// on a given file, on a given part of the file (initial offset + end offset)
 				// http://man7.org/linux/man-pages/man2/posix_fadvise.2.html
-				unix.Fadvise(int(fdSrc.Fd()), written, written+int64(nr), unix.FADV_DONTNEED)
+				errFadvise := unix.Fadvise(int(fdSrc.Fd()), written, written+int64(nr), unix.FADV_DONTNEED)
+				if errFadvise != nil {
+					err = errors.Wrap(errFadvise, "fadvise read source file")
+					break
+				}
 			}
 
 			nw, ew := dst.Write(buf[0:nr])
 			if nw > 0 {
 				if fdDst, ok := dst.(Fder); c.noDiskCacheWrite && ok {
-					unix.Fadvise(int(fdDst.Fd()), written, written+int64(nw), unix.FADV_DONTNEED)
+					errFadvise := unix.Fadvise(int(fdDst.Fd()), written, written+int64(nw), unix.FADV_DONTNEED)
+					if errFadvise != nil {
+						err = errors.Wrap(errFadvise, "fadvise write destination file")
+						break
+					}
 				}
 				written += int64(nw)
 			}
@@ -90,5 +99,6 @@ func (c Copier) Copy(dst io.Writer, src io.Reader) (int64, error) {
 			break
 		}
 	}
+
 	return written, err
 }
