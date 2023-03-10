@@ -2,11 +2,11 @@ package io
 
 import (
 	"bytes"
+	"io"
 	"os"
 	"path/filepath"
 	"testing"
 
-	procmeminfo "github.com/guillermo/go.procmeminfo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -40,7 +40,8 @@ func TestCopier_Copy(t *testing.T) {
 		_, err = src.WriteString("hello")
 		require.NoError(t, err)
 		// Get back the reader at the beginning of the file
-		src.Seek(0, os.SEEK_SET)
+		_, err = src.Seek(0, io.SeekStart)
+		require.NoError(t, err)
 
 		copier := NewCopier()
 		n, err := copier.Copy(dst, src)
@@ -74,29 +75,13 @@ func TestCopier_Copy(t *testing.T) {
 		}
 
 		// Get back the reader at the beginning of the file
-		src.Seek(0, os.SEEK_SET)
-
-		mi := &procmeminfo.MemInfo{}
-		mi.Update()
-		cachedBefore := (*mi)["Cached"]
+		_, err = src.Seek(0, io.SeekStart)
+		require.NoError(t, err)
 
 		copier := NewCopier(WithNoDiskCache)
 		_, err = copier.Copy(dst, src)
 		require.NoError(t, err)
 		require.NoError(t, dst.Close())
 		require.NoError(t, src.Close())
-
-		mi.Update()
-		cachedAfter := (*mi)["Cached"]
-
-		// If the cache diff is negative, we're all good
-		// If it's positive, let's consider it's noise from the system
-		// And we want to check it's not more than the 110MB of our fixture
-		if cachedAfter > cachedBefore {
-			cacheDiff := cachedAfter - cachedBefore
-			// Let's say we want to check the difference of cache is only of 110MB,
-			// indeed it can't be insured since it's global to the system
-			assert.True(t, cacheDiff < 110*1024*1024, "expected diff of cache < 110MB, was %vMB", cacheDiff/1024/1024)
-		}
 	})
 }

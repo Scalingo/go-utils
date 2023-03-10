@@ -3,7 +3,7 @@ module github.com/Scalingo/go-utils/io
 go 1.17
 
 require (
-	github.com/guillermo/go.procmeminfo v0.0.0-20131127224636-be4355a9fb0e
+	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.2
 	golang.org/x/sys v0.5.0
 )
