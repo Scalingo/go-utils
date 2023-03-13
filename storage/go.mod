@@ -1,6 +1,6 @@
 module github.com/Scalingo/go-utils/storage
 
-go 1.17
+go 1.20
 
 require (
 	github.com/Scalingo/go-utils/logger v1.2.0

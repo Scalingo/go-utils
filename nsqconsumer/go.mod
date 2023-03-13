@@ -1,6 +1,6 @@
 module github.com/Scalingo/go-utils/nsqconsumer
 
-go 1.17
+go 1.20
 
 require (
 	github.com/Scalingo/go-utils/errors/v2 v2.2.0
