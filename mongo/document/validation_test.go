@@ -2,6 +2,7 @@ package document
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,12 +11,17 @@ import (
 
 type DummyDocument struct {
 	Base
-	FieldAErrors int
-	FieldBErrors int
+	FieldAErrors  int
+	FieldBErrors  int
+	InternalError bool
 }
 
-func (d *DummyDocument) Validate(ctx context.Context) *ValidationErrors {
+func (d *DummyDocument) Validate(ctx context.Context) (*ValidationErrors, error) {
 	err := NewValidationErrorsBuilder()
+
+	if d.InternalError {
+		return nil, errors.New("Internal error")
+	}
 
 	for i := 0; i < d.FieldAErrors; i++ {
 		err.Set("a", "test")
@@ -25,29 +31,39 @@ func (d *DummyDocument) Validate(ctx context.Context) *ValidationErrors {
 		err.Set("b", "test")
 	}
 
-	return err.Build()
+	return err.Build(), nil
 }
 
 func TestValidation(t *testing.T) {
 	examples := map[string]struct {
-		ExpectedError error
-		Document      *DummyDocument
+		ExpectedError           error
+		ExpectedValidationError error
+		Document                *DummyDocument
 	}{
 		"no errors": {
-			Document:      &DummyDocument{},
-			ExpectedError: nil,
+			Document:                &DummyDocument{},
+			ExpectedError:           nil,
+			ExpectedValidationError: nil,
 		},
-		"with some errors": {
+		"with some validation errors": {
 			Document: &DummyDocument{
 				FieldAErrors: 1,
 				FieldBErrors: 2,
 			},
-			ExpectedError: &ValidationErrors{
+			ExpectedError: nil,
+			ExpectedValidationError: &ValidationErrors{
 				Errors: map[string][]string{
 					"a": []string{"test"},
 					"b": []string{"test", "test"},
 				},
 			},
+		},
+		"with internal error": {
+			Document: &DummyDocument{
+				InternalError: true,
+			},
+			ExpectedValidationError: nil,
+			ExpectedError:           errors.New("Internal error"),
 		},
 	}
 
@@ -57,7 +73,15 @@ func TestValidation(t *testing.T) {
 				d := example.Document
 				err := Create(context.Background(), "test", d)
 
-				assert.Equal(t, example.ExpectedError, err)
+				if example.ExpectedError == nil && example.ExpectedValidationError == nil {
+					assert.NoError(t, err)
+				}
+				if example.ExpectedError != nil {
+					assert.Equal(t, example.ExpectedError, err)
+				}
+				if example.ExpectedValidationError != nil {
+					assert.Equal(t, example.ExpectedValidationError, err)
+				}
 			})
 		}
 	})
@@ -68,7 +92,15 @@ func TestValidation(t *testing.T) {
 				d := example.Document
 				err := Save(context.Background(), "test", d)
 
-				assert.Equal(t, example.ExpectedError, err)
+				if example.ExpectedError == nil && example.ExpectedValidationError == nil {
+					assert.NoError(t, err)
+				}
+				if example.ExpectedError != nil {
+					assert.Equal(t, example.ExpectedError, err)
+				}
+				if example.ExpectedValidationError != nil {
+					assert.Equal(t, example.ExpectedValidationError, err)
+				}
 			})
 		}
 	})
@@ -79,7 +111,15 @@ func TestValidation(t *testing.T) {
 				d := example.Document
 				err := Update(context.Background(), "test", bson.M{}, d)
 
-				assert.Equal(t, example.ExpectedError, err)
+				if example.ExpectedError == nil && example.ExpectedValidationError == nil {
+					assert.NoError(t, err)
+				}
+				if example.ExpectedError != nil {
+					assert.Equal(t, example.ExpectedError, err)
+				}
+				if example.ExpectedValidationError != nil {
+					assert.Equal(t, example.ExpectedValidationError, err)
+				}
 			})
 		}
 	})
