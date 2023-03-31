@@ -16,7 +16,7 @@ type DummyDocument struct {
 	InternalError bool
 }
 
-func (d *DummyDocument) Validate(ctx context.Context) (*ValidationErrors, error) {
+func (d *DummyDocument) Validate(_ context.Context) (*ValidationErrors, error) {
 	err := NewValidationErrorsBuilder()
 
 	if d.InternalError {
