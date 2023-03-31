@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* [BREAKING CHANGE]: feat(mongo/document/validation): Add distinction between internal and validation errors
+
 ## v1.3.1
 
 * fix: Close mongo session on CountUnscoped method
