@@ -39,6 +39,8 @@ func As(receivedErr error, expectedType any) bool {
 
 // RootCause returns the cause of an errors stack, whatever the method they used
 // to be stacked: either errgo.Notef or errors.Wrapf.
+//
+// Deprecated: Use `Is(err, expectedErr)` instead of `if RootCause(err) == expectedErr` to match go standard libraries practices
 func RootCause(err error) error {
 	errCause := errorCause(err)
 	if errCause == nil {
@@ -55,6 +57,8 @@ func RootCause(err error) error {
 // Example:
 //
 //	errors.IsRootCause(err, &ValidationErrors{})
+//
+// Deprecated: Use `As(err, mytype)` instead to match go standard libraries practices
 func IsRootCause(err error, mytype interface{}) bool {
 	t := reflect.TypeOf(mytype)
 	errCause := errorCause(err)
