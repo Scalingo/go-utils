@@ -25,28 +25,39 @@ func (err ErrCtx) Unwrap() error {
 	return err.err
 }
 
-func New(ctx context.Context, message string) error {
-	return ErrCtx{ctx: ctx, err: errgo.New(message)}
+// New wraps errors.New from the pkg/errors library
+//
+// These errors are usually created outside any function code at the top of
+// files, so no context is needed.
+func New(message string) error {
+	return errors.New(message)
+}
+
+func NewWithCtx(ctx context.Context, message string) error {
+	return ErrCtx{ctx: ctx, err: errors.New(message)}
 }
 
 func Newf(ctx context.Context, format string, args ...interface{}) error {
-	return ErrCtx{ctx: ctx, err: errgo.Newf(format, args...)}
-}
-
-func Notef(ctx context.Context, err error, format string, args ...interface{}) error {
-	return ErrCtx{ctx: ctx, err: errgo.Notef(err, format, args...)}
-}
-
-func Wrap(ctx context.Context, err error, message string) error {
-	return ErrCtx{ctx: ctx, err: errors.Wrap(err, message)}
-}
-
-func Wrapf(ctx context.Context, err error, format string, args ...interface{}) error {
-	return ErrCtx{ctx: ctx, err: errors.Wrapf(err, format, args...)}
+	return ErrCtx{ctx: ctx, err: errors.Errorf(format, args...)}
 }
 
 func Errorf(ctx context.Context, format string, args ...interface{}) error {
 	return ErrCtx{ctx: ctx, err: errors.Errorf(format, args...)}
+}
+
+// Notef is wrapping an error with the underneath errgo library
+func Notef(ctx context.Context, err error, format string, args ...interface{}) error {
+	return ErrCtx{ctx: ctx, err: errgo.Notef(err, format, args...)}
+}
+
+// Wrap is wrapping an error with the underneath errgo library
+func Wrap(ctx context.Context, err error, message string) error {
+	return ErrCtx{ctx: ctx, err: errors.Wrap(err, message)}
+}
+
+// Wrapf is wrapping an error with the underneath errgo library
+func Wrapf(ctx context.Context, err error, format string, args ...interface{}) error {
+	return ErrCtx{ctx: ctx, err: errors.Wrapf(err, format, args...)}
 }
 
 // RootCtxOrFallback unwrap all wrapped errors from err to get the deepest context
