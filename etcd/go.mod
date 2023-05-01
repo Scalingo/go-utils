@@ -3,7 +3,7 @@ module github.com/Scalingo/go-utils/etcd
 go 1.20
 
 require (
-	go.etcd.io/etcd/client/pkg/v3 v3.5.7
+	go.etcd.io/etcd/client/pkg/v3 v3.5.8
 	go.etcd.io/etcd/client/v3 v3.5.7
 )
 
