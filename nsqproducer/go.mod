@@ -15,7 +15,7 @@ require (
 
 require (
 	github.com/golang/snappy v0.0.4 // indirect
-	golang.org/x/sys v0.6.0 // indirect
+	golang.org/x/sys v0.7.0 // indirect
 )
 
 // In Dev you can uncomment the following line to use the local packages
