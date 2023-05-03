@@ -55,7 +55,7 @@ func Wrap(ctx context.Context, err error, message string) error {
 	return ErrCtx{ctx: ctx, err: errors.Wrap(err, message)}
 }
 
-// Wrapf is wrapping an error with the underneath errgo library
+// Wrapf is wrapping an error with the underneath errors library
 func Wrapf(ctx context.Context, err error, format string, args ...interface{}) error {
 	return ErrCtx{ctx: ctx, err: errors.Wrapf(err, format, args...)}
 }
