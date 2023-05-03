@@ -50,7 +50,7 @@ func Notef(ctx context.Context, err error, format string, args ...interface{}) e
 	return ErrCtx{ctx: ctx, err: errgo.Notef(err, format, args...)}
 }
 
-// Wrap is wrapping an error with the underneath errgo library
+// Wrap is wrapping an error with the underneath errors library
 func Wrap(ctx context.Context, err error, message string) error {
 	return ErrCtx{ctx: ctx, err: errors.Wrap(err, message)}
 }
