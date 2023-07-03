@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v5"
 	"github.com/nsqio/go-nsq"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/errgo.v1"
