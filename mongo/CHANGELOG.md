@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## 1.3.2
+
 feat(pagination): replace BadRequestError by the one from go-handlers to return HTTP 400.
 feat(pagination): return HTTP 200 when the page is empty instead of BadRequestError
 
