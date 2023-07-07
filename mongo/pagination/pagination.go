@@ -3,31 +3,13 @@ package pagination
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/pkg/errors"
 	"gopkg.in/mgo.v2/bson"
 
+	"github.com/Scalingo/go-handlers"
 	"github.com/Scalingo/go-utils/mongo/document"
 )
-
-type BadRequestError struct {
-	Errors map[string][]string `json:"errors"`
-}
-
-func (err BadRequestError) Error() string {
-	errArray := make([]string, 0, len(err.Errors))
-	for errTitle, errValues := range err.Errors {
-		errArray = append(errArray, fmt.Sprintf("* %s → %s", errTitle, strings.Join(errValues, ", ")))
-	}
-	return strings.Join(errArray, "\n")
-}
-
-func NewBadRequestErrors() *BadRequestError {
-	return &BadRequestError{
-		Errors: make(map[string][]string),
-	}
-}
 
 func NewPaginationService(opts ServiceOpts) Service {
 	return opts
@@ -59,7 +41,7 @@ type ServiceOpts struct {
 }
 
 func (s ServiceOpts) paramValidation(meta *Meta, collection string, opts *PaginateOpts) error {
-	badRequestErr := NewBadRequestErrors()
+	badRequestErr := handlers.NewBadRequestErrors()
 	pageErr := "Requested page"
 	perPageErr := "per_page"
 
@@ -94,11 +76,11 @@ func (s ServiceOpts) paramValidation(meta *Meta, collection string, opts *Pagina
 	meta.perPageNum = opts.AmountItems
 	if meta.perPageNum <= 0 {
 		badRequestErr.Errors[perPageErr] =
-			append(badRequestErr.Errors[perPageErr], "must be greater then 0")
+			append(badRequestErr.Errors[perPageErr], "must be greater than 0")
 	}
-	if meta.perPageNum < 0 || meta.perPageNum > s.MaxPerPage {
+	if meta.perPageNum > s.MaxPerPage {
 		badRequestErr.Errors[perPageErr] =
-			append(badRequestErr.Errors[perPageErr], fmt.Sprintf("must be between 0 and %d", s.MaxPerPage))
+			append(badRequestErr.Errors[perPageErr], fmt.Sprintf("must be lower or equal to %d", s.MaxPerPage))
 	}
 
 	if badRequestErr.Errors != nil && len(badRequestErr.Errors) > 0 {
@@ -110,11 +92,6 @@ func (s ServiceOpts) paramValidation(meta *Meta, collection string, opts *Pagina
 	// We truncate to the higher integer except in the case of a "round" division
 	if meta.TotalCount%meta.perPageNum != 0 {
 		meta.TotalPages++
-	}
-	if meta.CurrentPage > meta.TotalPages {
-		badRequestErr.Errors[pageErr] =
-			append(badRequestErr.Errors[pageErr], fmt.Sprintf("must be between 0 and %d", meta.TotalPages))
-		return badRequestErr
 	}
 
 	return nil
