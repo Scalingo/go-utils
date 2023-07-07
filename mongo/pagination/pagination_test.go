@@ -109,7 +109,7 @@ func TestPaginationPaginate(t *testing.T) {
 			Error:       "* per_page → must be greater than 0",
 		},
 		{
-			Name: "It should return an error when the requested item per page is superior to max per page",
+			Name: "It should return an error when the requested item per page is greater than max per page",
 			DummyDocument: func(t *testing.T) func() {
 				clean := newDummyDocuments(t, "vs_name_1", 4)
 				return clean
