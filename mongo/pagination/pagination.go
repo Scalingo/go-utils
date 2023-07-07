@@ -71,7 +71,7 @@ func (s ServiceOpts) paramValidation(meta *Meta, collection string, opts *Pagina
 	meta.CurrentPage = opts.PageNumber
 	if meta.CurrentPage <= 0 {
 		badRequestErr.Errors[pageErr] =
-			append(badRequestErr.Errors[pageErr], "must be greater then 0")
+			append(badRequestErr.Errors[pageErr], "must be greater than 0")
 	}
 	meta.perPageNum = opts.AmountItems
 	if meta.perPageNum <= 0 {

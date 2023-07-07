@@ -176,7 +176,7 @@ func TestPaginationPaginate(t *testing.T) {
 			},
 			PageNumber:  -1,
 			AmountItems: 0,
-			Error:       "* Requested page → must be greater then 0",
+			Error:       "* Requested page → must be greater than 0",
 		},
 		{
 			Name: "It should return an empty result array with Meta object nil",
