@@ -95,7 +95,7 @@ func TestPaginationPaginate(t *testing.T) {
 			Error:       "* per_page → must be lower or equal to 2",
 		},
 		{
-			Name: "It should return an error when the requested AmountItems is inferior to 0",
+			Name: "It should return an error when the requested AmountItems is lower than 0",
 			DummyDocument: func(t *testing.T) func() {
 				clean := newDummyDocuments(t, "vs_name_1", 4)
 				return clean
