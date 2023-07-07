@@ -368,7 +368,7 @@ func TestPaginationPaginate(t *testing.T) {
 			meta, err := run.PaginationOpts.Paginate(context.Background(),
 				dummyCollection, &results, paginateOpts)
 			if run.Error != "" {
-				require.NotNil(t, err)
+				require.Error(t, err)
 				assert.Contains(t, err.Error(), run.Error)
 			} else {
 				require.NoError(t, err)
