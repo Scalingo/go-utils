@@ -4,6 +4,11 @@
 
 * [BREAKING CHANGE]: feat(mongo/document/validation): Add distinction between internal and validation errors
 
+## 1.3.2
+
+feat(pagination): replace BadRequestError by the one from go-handlers to return HTTP 400.
+feat(pagination): return HTTP 200 when the page is empty instead of BadRequestError
+
 ## v1.3.1
 
 * fix: Close mongo session on CountUnscoped method

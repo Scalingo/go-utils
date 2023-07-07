@@ -2,6 +2,9 @@
 
 ## To be Released
 
+## v2.3.0
+
+* feat: add `Is` and `As` to match standard library
 * fix: remove `NoteMask`. `Notef` should be use instead.
 
 ## v2.2.0

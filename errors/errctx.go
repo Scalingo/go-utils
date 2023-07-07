@@ -20,6 +20,11 @@ func (err ErrCtx) Ctx() context.Context {
 	return err.ctx
 }
 
+// Unwrap implements error management from the standard library
+func (err ErrCtx) Unwrap() error {
+	return err.err
+}
+
 func New(ctx context.Context, message string) error {
 	return ErrCtx{ctx: ctx, err: errgo.New(message)}
 }

@@ -13,7 +13,7 @@ func TestMain(m *testing.M) {
 }
 
 func buildServer() {
-	err := exec.Command("go", "build", "-i", "-o", "./testdata/server", "./testdata/cmd/server").Run()
+	err := exec.Command("go", "build", "-o", "./testdata/server", "./testdata/cmd/server").Run()
 	if err != nil {
 		log.Println("Fail to build test server", err)
 		os.Exit(1)

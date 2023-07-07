@@ -56,7 +56,7 @@ func TestPaginationPaginate(t *testing.T) {
 		Error          string
 	}{
 		{
-			Name: "It should return an error with a request page out of range",
+			Name: "It should return an empty list when the requested PageNumber is out of range",
 			DummyDocument: func(t *testing.T) func() {
 				clean := newDummyDocuments(t, "vs_name_1", 4)
 				return clean
@@ -65,12 +65,23 @@ func TestPaginationPaginate(t *testing.T) {
 				PerPageDefault: 2,
 				MaxPerPage:     2,
 			},
-			AmountItems: 0,
-			PageNumber:  3,
-			Error:       "* Requested page → must be between 0 and 2",
+			AmountItems:    0,
+			PageNumber:     3,
+			ExpectedResult: []dummyDocument{},
+			ExpectedMeta: func() Meta {
+				prevPage := 2
+				return Meta{
+					CurrentPage: 3,
+					PrevPage:    &prevPage,
+					NextPage:    nil,
+					TotalPages:  2,
+					TotalCount:  4,
+					perPageNum:  2,
+				}
+			},
 		},
 		{
-			Name: "It should return an error with a request item per page superior then max per page",
+			Name: "It should return an error when the requested AmountItems is greater than MaxPerPage",
 			DummyDocument: func(t *testing.T) func() {
 				clean := newDummyDocuments(t, "vs_name_1", 4)
 				return clean
@@ -81,7 +92,35 @@ func TestPaginationPaginate(t *testing.T) {
 			},
 			PageNumber:  0,
 			AmountItems: 3,
-			Error:       "* per_page → must be between 0 and 2",
+			Error:       "* per_page → must be lower or equal to 2",
+		},
+		{
+			Name: "It should return an error when the requested AmountItems is lower than 0",
+			DummyDocument: func(t *testing.T) func() {
+				clean := newDummyDocuments(t, "vs_name_1", 4)
+				return clean
+			},
+			PaginationOpts: &ServiceOpts{
+				PerPageDefault: 2,
+				MaxPerPage:     2,
+			},
+			PageNumber:  0,
+			AmountItems: -1,
+			Error:       "* per_page → must be greater than 0",
+		},
+		{
+			Name: "It should return an error when the requested item per page is greater than max per page",
+			DummyDocument: func(t *testing.T) func() {
+				clean := newDummyDocuments(t, "vs_name_1", 4)
+				return clean
+			},
+			PaginationOpts: &ServiceOpts{
+				PerPageDefault: 2,
+				MaxPerPage:     2,
+			},
+			PageNumber:  0,
+			AmountItems: 3,
+			Error:       "* per_page → must be lower or equal to 2",
 		},
 		{
 			Name: "It should return an error with a perPageDefault lower or equal to 0",
@@ -137,7 +176,7 @@ func TestPaginationPaginate(t *testing.T) {
 			},
 			PageNumber:  -1,
 			AmountItems: 0,
-			Error:       "* Requested page → must be greater then 0",
+			Error:       "* Requested page → must be greater than 0",
 		},
 		{
 			Name: "It should return an empty result array with Meta object nil",
@@ -329,6 +368,7 @@ func TestPaginationPaginate(t *testing.T) {
 			meta, err := run.PaginationOpts.Paginate(context.Background(),
 				dummyCollection, &results, paginateOpts)
 			if run.Error != "" {
+				require.Error(t, err)
 				assert.Contains(t, err.Error(), run.Error)
 			} else {
 				require.NoError(t, err)
