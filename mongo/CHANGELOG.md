@@ -2,6 +2,8 @@
 
 ## To be Released
 
+feat(pagination): implement go-handlers 400 errors and return 200 when the page is empty
+
 ## v1.3.1
 
 * fix: Close mongo session on CountUnscoped method
