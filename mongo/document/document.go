@@ -10,6 +10,7 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 
+	"github.com/Scalingo/go-utils/errors/v2"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/go-utils/mongo"
 )
@@ -46,7 +47,7 @@ type Closer interface {
 }
 
 type Validable interface {
-	Validate(ctx context.Context) (*ValidationErrors, error)
+	Validate(ctx context.Context) (*errors.ValidationErrors, error)
 }
 
 var _ Validable = &Base{}

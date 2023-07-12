@@ -2,7 +2,7 @@
 
 ## To be Released
 
-* [BREAKING CHANGE]: feat(mongo/document/validation): Add distinction between internal and validation errors
+* [BREAKING CHANGE]: feat(mongo/document/validation): Add distinction between internal and validation errors ([PR#552](https://github.com/Scalingo/go-utils/pull/552)).
 
 ## 1.3.2
 
