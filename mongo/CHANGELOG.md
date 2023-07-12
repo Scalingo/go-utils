@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* [BREAKING CHANGE]: feat(mongo/document/validation): Add distinction between internal and validation errors ([PR#552](https://github.com/Scalingo/go-utils/pull/552)).
+
 ## 1.3.2
 
 feat(pagination): replace BadRequestError by the one from go-handlers to return HTTP 400.

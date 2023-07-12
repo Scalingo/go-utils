@@ -10,6 +10,7 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 
+	"github.com/Scalingo/go-utils/errors/v2"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/go-utils/mongo"
 )
@@ -46,7 +47,7 @@ type Closer interface {
 }
 
 type Validable interface {
-	Validate(ctx context.Context) *ValidationErrors
+	Validate(ctx context.Context) (*errors.ValidationErrors, error)
 }
 
 var _ Validable = &Base{}
@@ -54,13 +55,21 @@ var _ Validable = &Base{}
 // Create inserts the document in the database, returns an error if document
 // already exists and set CreatedAt timestamp
 func Create(ctx context.Context, collectionName string, doc document) error {
-	log := logger.Get(ctx)
+	log := logger.Get(ctx).WithFields(logrus.Fields{
+		"collection": collectionName,
+		"doc_id":     doc.getID().Hex(),
+	})
 	doc.ensureID()
 	doc.ensureCreatedAt()
 	doc.setUpdatedAt(time.Now())
 
-	if err := doc.Validate(ctx); err != nil {
+	validationErrors, err := doc.Validate(ctx)
+	if err != nil {
+		log.WithError(err).Error("Internal error while validating the document")
 		return err
+	}
+	if validationErrors != nil {
+		return validationErrors
 	}
 
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
@@ -78,8 +87,13 @@ func Save(ctx context.Context, collectionName string, doc document) error {
 	doc.ensureCreatedAt()
 	doc.setUpdatedAt(time.Now())
 
-	if err := doc.Validate(ctx); err != nil {
+	validationErrors, err := doc.Validate(ctx)
+	if err != nil {
+		log.WithError(err).Error("Internal error while validating the document")
 		return err
+	}
+	if validationErrors != nil {
+		return validationErrors
 	}
 
 	c := mongo.Session(log).Clone().DB("").C(collectionName)
@@ -88,7 +102,7 @@ func Save(ctx context.Context, collectionName string, doc document) error {
 		"collection": collectionName,
 		"doc_id":     doc.getID().Hex(),
 	}).Debugf("save '%v'", collectionName)
-	_, err := c.UpsertId(doc.getID(), doc)
+	_, err = c.UpsertId(doc.getID(), doc)
 	return err
 }
 
@@ -260,8 +274,13 @@ func Update(ctx context.Context, collectionName string, update bson.M, doc docum
 		update["$set"].(bson.M)["updated_at"] = now
 	}
 
-	if err := doc.Validate(ctx); err != nil {
+	validationErrors, err := doc.Validate(ctx)
+	if err != nil {
+		log.WithError(err).Error("Internal error while validating the document")
 		return err
+	}
+	if validationErrors != nil {
+		return validationErrors
 	}
 
 	log.WithFields(logrus.Fields{
