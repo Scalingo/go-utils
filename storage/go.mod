@@ -5,8 +5,8 @@ go 1.20
 require (
 	github.com/Scalingo/go-utils/logger v1.2.0
 	github.com/aws/aws-sdk-go-v2 v1.20.0
-	github.com/aws/aws-sdk-go-v2/credentials v1.13.26
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.71
+	github.com/aws/aws-sdk-go-v2/credentials v1.13.30
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.75
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.38.0
 	github.com/aws/smithy-go v1.14.0
 	github.com/golang/mock v1.6.0
