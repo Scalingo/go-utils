@@ -4,11 +4,11 @@ go 1.20
 
 require (
 	github.com/Scalingo/go-utils/logger v1.2.0
-	github.com/aws/aws-sdk-go-v2 v1.20.0
+	github.com/aws/aws-sdk-go-v2 v1.21.0
 	github.com/aws/aws-sdk-go-v2/credentials v1.13.30
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.75
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.38.0
-	github.com/aws/smithy-go v1.14.0
+	github.com/aws/smithy-go v1.14.2
 	github.com/golang/mock v1.6.0
 	github.com/ncw/swift/v2 v2.0.1
 	github.com/pkg/errors v0.9.1
@@ -18,7 +18,7 @@ require (
 require (
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.4.11 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.37 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.31 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.35 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.1.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.9.12 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.1.32 // indirect
