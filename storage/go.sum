@@ -3,8 +3,9 @@ github.com/Scalingo/go-utils/logger v1.2.0/go.mod h1:JArjD1gHdB/vwnlcVG7rYxuIY0t
 github.com/aws/aws-sdk-go-v2 v1.20.0/go.mod h1:uWOr0m0jDsiWw8nnXiqZ+YG6LdvAlGYDLLf2NmHZoy4=
 github.com/aws/aws-sdk-go-v2 v1.21.0 h1:gMT0IW+03wtYJhRqTVYn0wLzwdnK9sRMcxmtfGzRdJc=
 github.com/aws/aws-sdk-go-v2 v1.21.0/go.mod h1:/RfNgGmRxI+iFOB1OeJUyxiU+9s88k3pfHvDagGEp0M=
-github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.4.11 h1:/MS8AzqYNAhhRNalOmxUvYs8VEbNGifTnzhPFdcRQkQ=
 github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.4.11/go.mod h1:va22++AdXht4ccO3kH2SHkHHYvZ2G9Utz+CXKmm2CaU=
+github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.4.13 h1:OPLEkmhXf6xFPiz0bLeDArZIDx1NNS4oJyG4nv3Gct0=
+github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.4.13/go.mod h1:gpAbvyDGQFozTEmlTFO8XcQKHzubdq0LzRyJpG6MiXM=
 github.com/aws/aws-sdk-go-v2/config v1.18.31 h1:CcacHsJjsPtHpe1MaopwPddUErmLnl+X77+7n4G2KkY=
 github.com/aws/aws-sdk-go-v2/config v1.18.31/go.mod h1:pnSeuahFFvtScCHy0INXLxJ4N8H7KncD5u6A48bx3/8=
 github.com/aws/aws-sdk-go-v2/credentials v1.13.30 h1:4pt4sI4OwXrrWUGuGr5NEb2g+4IBUB/I2BVj0t2Ak7Q=
