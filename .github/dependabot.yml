@@ -8,6 +8,11 @@ updates:
       interval: "monthly"
     reviewers:
       - "EtienneM"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: "gomod"
     directory: "/cronsetup"
     allow:
@@ -16,6 +21,11 @@ updates:
       interval: "monthly"
     reviewers:
       - "EtienneM"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: "gomod"
     directory: "/difflib"
     allow:
@@ -24,6 +34,11 @@ updates:
       interval: "monthly"
     reviewers:
       - "EtienneM"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: "gomod"
     directory: "/env"
     allow:
@@ -32,6 +47,11 @@ updates:
       interval: "monthly"
     reviewers:
       - "EtienneM"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: "gomod"
     directory: "/errors"
     allow:
@@ -40,6 +60,11 @@ updates:
       interval: "monthly"
     reviewers:
       - "EtienneM"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: "gomod"
     directory: "/etcd"
     allow:
@@ -48,6 +73,11 @@ updates:
       interval: "monthly"
     reviewers:
       - "EtienneM"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: "gomod"
     directory: "/fs"
     allow:
@@ -56,6 +86,11 @@ updates:
       interval: "monthly"
     reviewers:
       - "EtienneM"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: "gomod"
     directory: "/gomock_generator"
     allow:
@@ -64,6 +99,11 @@ updates:
       interval: "monthly"
     reviewers:
       - "EtienneM"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: "gomod"
     directory: "/graceful"
     allow:
@@ -72,6 +112,11 @@ updates:
       interval: "monthly"
     reviewers:
       - "EtienneM"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: "gomod"
     directory: "/httpclient"
     allow:
@@ -80,6 +125,11 @@ updates:
       interval: "monthly"
     reviewers:
       - "EtienneM"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: "gomod"
     directory: "/influx"
     allow:
@@ -88,6 +138,11 @@ updates:
       interval: "monthly"
     reviewers:
       - "EtienneM"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: "gomod"
     directory: "/io"
     allow:
@@ -96,6 +151,11 @@ updates:
       interval: "monthly"
     reviewers:
       - "EtienneM"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: "gomod"
     directory: "/logger"
     allow:
@@ -104,6 +164,11 @@ updates:
       interval: "monthly"
     reviewers:
       - "EtienneM"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: "gomod"
     directory: "/mongo"
     allow:
@@ -112,6 +177,11 @@ updates:
       interval: "monthly"
     reviewers:
       - "EtienneM"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: "gomod"
     directory: "/nsqconsumer"
     allow:
@@ -120,6 +190,11 @@ updates:
       interval: "monthly"
     reviewers:
       - "EtienneM"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: "gomod"
     directory: "/nsqlbproducer"
     allow:
@@ -128,6 +203,11 @@ updates:
       interval: "monthly"
     reviewers:
       - "EtienneM"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: "gomod"
     directory: "/nsqproducer"
     allow:
@@ -136,6 +216,11 @@ updates:
       interval: "monthly"
     reviewers:
       - "EtienneM"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: "gomod"
     directory: "/publicgen"
     allow:
@@ -144,6 +229,11 @@ updates:
       interval: "monthly"
     reviewers:
       - "EtienneM"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: "gomod"
     directory: "/retry"
     allow:
@@ -152,6 +242,11 @@ updates:
       interval: "monthly"
     reviewers:
       - "EtienneM"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: "gomod"
     directory: "/storage"
     allow:
@@ -160,6 +255,11 @@ updates:
       interval: "monthly"
     reviewers:
       - "EtienneM"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: "gomod"
     directory: "/tarball"
     allow:
@@ -168,6 +268,11 @@ updates:
       interval: "monthly"
     reviewers:
       - "EtienneM"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
