@@ -47,7 +47,7 @@ func TestS3_Size(t *testing.T) {
 			expectMock: func(t *testing.T, m *storagemock.MockS3Client) {
 				m.EXPECT().HeadObject(gomock.Any(), &s3.HeadObjectInput{
 					Bucket: aws.String("bucket"), Key: aws.String("key"),
-				}).Return(&s3.HeadObjectOutput{ContentLength: int64(10)}, nil)
+				}).Return(&s3.HeadObjectOutput{ContentLength: aws.Int64(10)}, nil)
 			},
 		},
 		"it should retry if the first HEAD request return 404": {
@@ -58,7 +58,7 @@ func TestS3_Size(t *testing.T) {
 
 				m.EXPECT().HeadObject(gomock.Any(), &s3.HeadObjectInput{
 					Bucket: aws.String("bucket"), Key: aws.String("key"),
-				}).Return(&s3.HeadObjectOutput{ContentLength: int64(10)}, nil)
+				}).Return(&s3.HeadObjectOutput{ContentLength: aws.Int64(10)}, nil)
 			},
 		},
 		"it should fail if the max amount of retried is passed": {
@@ -124,7 +124,7 @@ func TestS3_Info(t *testing.T) {
 					Bucket: aws.String("bucket"), Key: aws.String(key),
 				}).Return(&s3.HeadObjectOutput{
 					ContentType:   &contentType,
-					ContentLength: 4,
+					ContentLength: aws.Int64(4),
 					ETag:          aws.String("checksum"),
 				}, nil)
 			},
@@ -150,7 +150,7 @@ func TestS3_Info(t *testing.T) {
 					Bucket: aws.String("bucket"), Key: aws.String(key),
 				}).Return(&s3.HeadObjectOutput{
 					ContentType:   nil,
-					ContentLength: 4,
+					ContentLength: aws.Int64(4),
 					ETag:          aws.String("checksum"),
 				}, nil)
 			},
@@ -167,7 +167,7 @@ func TestS3_Info(t *testing.T) {
 					Bucket: aws.String("bucket"), Key: aws.String(key),
 				}).Return(&s3.HeadObjectOutput{
 					ContentType:   &contentType,
-					ContentLength: 4,
+					ContentLength: aws.Int64(4),
 					ETag:          nil,
 				}, nil)
 			},
@@ -223,9 +223,9 @@ func TestS3_List(t *testing.T) {
 				m.EXPECT().ListObjectsV2(gomock.Any(), &s3.ListObjectsV2Input{
 					Bucket:  aws.String(bucket),
 					Prefix:  aws.String(prefix),
-					MaxKeys: S3ListMaxKeys,
+					MaxKeys: aws.Int32(S3ListMaxKeys),
 				}).Return(&s3.ListObjectsV2Output{
-					KeyCount: 1,
+					KeyCount: aws.Int32(1),
 					Contents: []types.Object{
 						{Key: aws.String("my-object")},
 					},
@@ -238,7 +238,7 @@ func TestS3_List(t *testing.T) {
 				m.EXPECT().ListObjectsV2(gomock.Any(), &s3.ListObjectsV2Input{
 					Bucket:  aws.String(bucket),
 					Prefix:  aws.String(prefix),
-					MaxKeys: S3ListMaxKeys,
+					MaxKeys: aws.Int32(S3ListMaxKeys),
 				}).Return(nil, errors.New("err list"))
 			},
 			expectedError: "err list",
