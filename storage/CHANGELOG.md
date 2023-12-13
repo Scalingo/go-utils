@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.3.3
+
 * build(deps): bump github.com/aws/aws-sdk-go-v2/feature/s3/manager from 1.11.37 to 1.11.46
 * build(deps): bump github.com/aws/aws-sdk-go-v2/service/s3 from 1.29.1 to 1.29.6
 * build(deps): bump github.com/aws/aws-sdk-go-v2/credentials from 1.12.23 to 1.13.3
