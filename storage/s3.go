@@ -163,7 +163,7 @@ func (s *S3) Size(ctx context.Context, path string) (int64, error) {
 		if err != nil {
 			return err
 		}
-		res = stat.ContentLength
+		res = *stat.ContentLength
 		return nil
 	})
 
@@ -216,7 +216,7 @@ func (s *S3) Info(ctx context.Context, path string) (types.Info, error) {
 	}
 
 	info := types.Info{
-		ContentLength: res.ContentLength,
+		ContentLength: *res.ContentLength,
 	}
 
 	if res.ContentType != nil {
@@ -255,13 +255,13 @@ func (s *S3) List(ctx context.Context, prefix string, opts types.ListOpts) ([]st
 	objects, err := s.s3client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
 		Bucket:  &s.cfg.Bucket,
 		Prefix:  &prefix,
-		MaxKeys: opts.MaxKeys,
+		MaxKeys: &opts.MaxKeys,
 	})
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to list S3 objects")
 	}
 
-	strObjects := make([]string, objects.KeyCount)
+	strObjects := make([]string, *objects.KeyCount)
 	for i, o := range objects.Contents {
 		strObjects[i] = *o.Key
 	}
