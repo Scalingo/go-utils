@@ -3,7 +3,7 @@ module github.com/Scalingo/go-utils/nsqconsumer
 go 1.20
 
 require (
-	github.com/Scalingo/go-utils/errors/v2 v2.3.0
+	github.com/Scalingo/go-utils/errors/v2 v2.4.0
 	github.com/Scalingo/go-utils/logger v1.2.0
 	github.com/Scalingo/go-utils/nsqproducer v1.1.2
 	github.com/nsqio/go-nsq v1.1.0
@@ -17,7 +17,7 @@ require (
 	github.com/gofrs/uuid v4.4.0+incompatible // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	golang.org/x/sys v0.16.0 // indirect
+	golang.org/x/sys v0.17.0 // indirect
 )
 
 // In Dev you can uncomment the following line to use the local packages
