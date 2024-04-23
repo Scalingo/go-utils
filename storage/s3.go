@@ -305,6 +305,7 @@ func s3Config(cfg S3Config) aws.Config {
 	}
 	if cfg.Endpoint != "" {
 		if endpointIsAllowed(cfg.Endpoint) {
+			//nolint:all // AWS v1 function is deprecated, switching to v2 requires a refactoring of the package
 			config.EndpointResolverWithOptions = aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
 				return aws.Endpoint{
 					URL:           "https://" + cfg.Endpoint,
@@ -334,10 +335,9 @@ func getAllowListFromEnv() []string {
 func endpointIsAllowed(endpoint string) bool {
 	allowedEndpoints := getAllowListFromEnv()
 	if allowedEndpoints != nil {
-		return slices.IndexFunc(getAllowListFromEnv(), func(allowedEndpoint string) bool {
+		return slices.ContainsFunc(getAllowListFromEnv(), func(allowedEndpoint string) bool {
 			return strings.HasPrefix(endpoint, allowedEndpoint)
-		}) != -1
+		})
 	}
-
 	return true
 }
