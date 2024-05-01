@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/Scalingo/go-utils/env v1.1.1
 	github.com/Scalingo/go-utils/logger v1.2.0
-	github.com/gofrs/uuid/v5 v5.0.0
+	github.com/gofrs/uuid/v5 v5.1.0
 	github.com/golang/mock v1.6.0
 	github.com/nsqio/go-nsq v1.1.0
 	github.com/pkg/errors v0.9.1
@@ -15,7 +15,7 @@ require (
 
 require (
 	github.com/golang/snappy v0.0.4 // indirect
-	golang.org/x/sys v0.18.0 // indirect
+	golang.org/x/sys v0.19.0 // indirect
 )
 
 // In Dev you can uncomment the following line to use the local packages
