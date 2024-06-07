@@ -1,4 +1,4 @@
-module github.com/Scalingo/go-utils/cockroachdb
+module github.com/Scalingo/go-utils/postgresql
 
 go 1.22.1
 
@@ -8,6 +8,12 @@ require (
 )
 
 require (
+	github.com/pkg/errors v0.9.1 // indirect
+	gopkg.in/errgo.v1 v1.0.1 // indirect
+)
+
+require (
+	github.com/Scalingo/go-utils/errors/v2 v2.4.0
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
