@@ -14,8 +14,10 @@ type PgxContextMigration func(context.Context, *pgx.Conn) error
 
 func AddPgxContextMigration(upMigration PgxContextMigration, downMigration PgxContextMigration) {
 	// runtime.Caller returns the filename of the migration file that calls this function
-	//nolint:dogsled directive
-	_, filename, _, _ := runtime.Caller(1)
+	_, filename, _, ok := runtime.Caller(1)
+	if !ok {
+		panic("Could not get caller filename")
+	}
 	goose.AddNamedMigrationNoTxContext(
 		filename,
 		wrapNoTxContextMigrationToPgxContextMigration(upMigration),
