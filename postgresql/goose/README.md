@@ -1,6 +1,6 @@
 # Goose
 
-Goose is a package that provide some useful functions to interact with a Postgres database.
+Goose is a package that provides some useful functions to interact with a PostgreSQL database.
 
 ### Add a migration using a pgx connection as parameter
 
