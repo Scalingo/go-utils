@@ -34,19 +34,22 @@ func AddPgxContextMigration(upMigration PgxContextMigration, downMigration PgxCo
 func wrapNoTxContextMigrationToPgxContextMigration(pgxContextMigration PgxContextMigration) goose.GoMigrationNoTxContext {
 	return func(ctx context.Context, db *sql.DB) error {
 		// sqlConn is a single connection to the database coming from the sql.DB pool
+		// it allows to run queries on the database with the raw driver connection
 		sqlConn, err := db.Conn(ctx)
 		if err != nil {
 			return errors.Wrap(ctx, err, "could not get a connection from the connection pool")
 		}
-		// Raw is a function that allows to run a function with the raw driver connection as argument
+		// Raw is the function that allows to run a function with the raw driver connection as argument
 		err = sqlConn.Raw(func(driverConn interface{}) error {
 			// stdlibConn is the raw driver connection casted to a pgx stdlib connection
-			// stdlib is a package that wraps the pgx driver to make it compatible with the sql.DB interface
+			// stdlib is a package that wraps the pgx driver to make it compatible with the sql.DB interface used by goose
 			stdlibConn, ok := driverConn.(*stdlib.Conn)
 			if !ok {
 				return errors.New(ctx, "could not cast the driver connection to a pgx.Conn")
 			}
-			// pgxConn is the pgx connection extracted from the stdlib connection
+
+			// pgxConn is the real pgx driver connection that we will use to run the migration
+			// the stdlib interface doesn't have all the functions of the pgx driver so this conversion is mandatory
 			pgxConn := stdlibConn.Conn()
 			return pgxContextMigration(ctx, pgxConn)
 		})
