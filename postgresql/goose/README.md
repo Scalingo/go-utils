@@ -23,6 +23,7 @@ func init() {
 }
 
 func upMigration(ctx context.Context, conn *pgx.Conn) error {
+    // db is the package containing the sqlc querier
     querier := db.New(conn)
     ...
 }
