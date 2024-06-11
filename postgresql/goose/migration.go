@@ -16,12 +16,12 @@ type PgxContextMigration func(context.Context, *pgx.Conn) error
 
 // AddPgxContextMigration registers a migration in the goose migrations list using a pgx.Conn instead of a sql.DB
 // It can only be used with a pgx driver
-func AddPgxContextMigration(upMigration PgxContextMigration, downMigration PgxContextMigration) error {
+func AddPgxContextMigration(ctx context.Context, upMigration PgxContextMigration, downMigration PgxContextMigration) error {
 	// runtime.Caller returns the filename of the migration file that calls this function
 	// it is used to save the migration in the goose migrations list
 	_, filename, _, ok := runtime.Caller(1)
 	if !ok {
-		return errors.New(context.Background(), "could not get caller filename")
+		return errors.New(ctx, "could not get caller filename")
 	}
 	goose.AddNamedMigrationNoTxContext(
 		filename,
