@@ -2,168 +2,457 @@ package graceful
 
 import (
 	"bytes"
+	"errors"
+	"io"
 	"net/http"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-type cmdAndOutput struct {
-	cmd    *exec.Cmd
-	output *bytes.Buffer
+const pidFile = "./testdata/server.pid"
+
+// getCmd returns a command to run the server
+// In this function we build and run a binary, rather than using "go run"
+// When running a Go program with go run, the interrupt signal (SIGINT) is not propagated to the
+// child process by default.
+//
+// If "go run" is used tests that rely on the child process receiving the signal (those where the
+// SIGHUP signal has been sent will leave the child process running indefinitely.)
+func getCmd(t *testing.T, args ...string) *exec.Cmd {
+	binaryPath := "./testdata/server"
+
+	// Build main.go
+	err := exec.Command("go", "build", "-o", binaryPath, "./testdata/cmd/server/server.go").Run()
+	require.NoError(t, err)
+
+	return exec.Command(binaryPath, args...)
 }
 
+// TestService_Shutdown_WithoutRequest tests the shutdown of the service without any request
 func TestService_Shutdown_WithoutRequest(t *testing.T) {
+	upgradeTimeout := time.Millisecond * 200
+	shutdownTimeout := time.Millisecond * 100
+
 	for _, s := range []os.Signal{syscall.SIGINT, syscall.SIGTERM} {
-		t.Run("Signal "+s.String(), func(t *testing.T) {
-			cmdAndOutput := startProcess(t)
-			cmd := cmdAndOutput.cmd
-			defer ensureProcessKilled(t, cmd)
-			cmd.Process.Signal(s)
-			isStoppedAfter(t, cmdAndOutput, 50*time.Millisecond)
+		t.Run("Send signal "+s.String()+" and expect service to stop", func(t *testing.T) {
+			// Configure isGraceful
+			isGraceful := newCmdAndOutput(t,
+				withCmd(getCmd(t)),
+				withUpgradeWaitDuration(upgradeTimeout),
+				withShutdownWaitDuration(shutdownTimeout),
+				withPidFile(pidFile),
+			)
+
+			// start the command
+			isGraceful.start()
+			defer isGraceful.stop()
+
+			// Send the signal
+			isGraceful.signal(s)
+			isGraceful.isStoppedAfter(shutdownTimeout)
+
+			// Check the output
+			output := isGraceful.getOutput()
+			require.Contains(t, output, "http server is stopped")
+			require.Contains(t, output, "no more connection running")
 		})
 	}
 }
 
+// TestService_Shutdown_WithRequest tests the shutdown of the service with a request
 func TestService_Shutdown_WithRequest(t *testing.T) {
-	for _, s := range []os.Signal{syscall.SIGINT, syscall.SIGTERM} {
-		t.Run("Signal "+s.String(), func(t *testing.T) {
-			cmdAndOutput := startProcess(t)
-			cmd := cmdAndOutput.cmd
-			defer ensureProcessKilled(t, cmd)
+	upgradeTimeout := time.Millisecond * 200
+	shutdownTimeout := time.Millisecond * 100
 
-			time.Sleep(10 * time.Millisecond)
+	for _, s := range []os.Signal{syscall.SIGINT, syscall.SIGTERM} {
+		t.Run("signal "+s.String()+" expect service to stop", func(t *testing.T) {
+			// Configure isGraceful
+			isGraceful := newCmdAndOutput(t,
+				withCmd(getCmd(t)),
+				withUpgradeWaitDuration(upgradeTimeout),
+				withShutdownWaitDuration(shutdownTimeout),
+				withPidFile(pidFile),
+			)
+
+			// start the command
+			isGraceful.start()
+			defer isGraceful.stop()
 
 			errs := make(chan error)
 			go func() {
-				_, err := http.Get("http://localhost:9000/?sleep=200")
+				resp, err := http.Get("http://localhost:9000/?sleep=200")
 				errs <- err
+				if err == nil {
+					// Response body must be closed
+					err = resp.Body.Close()
+					errs <- err
+				}
 			}()
+
 			time.Sleep(10 * time.Millisecond)
 
-			cmd.Process.Signal(s)
-			isRunningAfter(t, cmdAndOutput, 100*time.Millisecond)
-			isStoppedAfter(t, cmdAndOutput, 300*time.Millisecond)
+			// Send the signal
+			isGraceful.signal(s)
+			isGraceful.isRunningAfterAsync(100 * time.Millisecond)
+			isGraceful.isStoppedAfterAsync(300 * time.Millisecond)
+
 			require.NoError(t, <-errs)
+
+			// Check the output
+			output := isGraceful.getOutput()
+			require.Contains(t, output, "http server is stopped")
+			require.Contains(t, output, "no more connection running")
 		})
 	}
 }
 
+// TestService_Shutdown_WithTimeout tests the shutdown of the service with a request that takes too long
 func TestService_Shutdown_WithTimeout(t *testing.T) {
 	for _, s := range []os.Signal{syscall.SIGINT, syscall.SIGTERM} {
-		t.Run("Signal "+s.String(), func(t *testing.T) {
-			cmdAndOutput := startProcess(t, "100")
-			cmd := cmdAndOutput.cmd
-			defer ensureProcessKilled(t, cmd)
+		t.Run("signal "+s.String(), func(t *testing.T) {
+			// Configure isGraceful
+			isGraceful := newCmdAndOutput(t,
+				withCmd(getCmd(t, "100")),
+				withUpgradeWaitDuration(200*time.Millisecond),
+				withShutdownWaitDuration(100*time.Millisecond),
+				withPidFile(pidFile),
+			)
 
-			time.Sleep(10 * time.Millisecond)
+			// start the command
+			isGraceful.start()
+			defer isGraceful.stop()
 
 			// Request will but cut
 			errs := make(chan error)
 			go func() {
-				_, err := http.Get("http://localhost:9000/?sleep=1000")
+				resp, err := http.Get("http://localhost:9000/?sleep=1000")
 				errs <- err
+				if err == nil {
+					// Response body must be closed
+					err = resp.Body.Close()
+					errs <- err
+				}
 			}()
+
 			time.Sleep(10 * time.Millisecond)
 
-			cmd.Process.Signal(s)
-			isRunningAfter(t, cmdAndOutput, 50*time.Millisecond)
-			isStoppedAfter(t, cmdAndOutput, 150*time.Millisecond)
-			require.Error(t, <-errs)
+			// Send the signal
+			isGraceful.signal(s)
+			isGraceful.isRunningAfterAsync(50 * time.Millisecond)
+			isGraceful.isStoppedAfterAsync(150 * time.Millisecond)
+
+			// Block waiting for errors
+			err := <-errs
+
+			// Check the output
+			output := isGraceful.getOutput()
+			assert.Contains(t, output, "I'm dead because of fail to shutdown server")
+
+			// The request should be unexpectedly terminated
+			require.Error(t, err)
 		})
 	}
 }
 
+// TestService_Restart tests the restart of the service by sending a SIGHUP signal
+// whilst the service receiving multiple requests
 func TestService_Restart(t *testing.T) {
-	cmdAndOutput := startProcess(t)
-	cmd := cmdAndOutput.cmd
-	defer ensureProcessKilled(t, cmd)
+	// Configure isGraceful
+	isGraceful := newCmdAndOutput(t,
+		withCmd(getCmd(t)),
+		withUpgradeWaitDuration(100*time.Millisecond),
+		withShutdownWaitDuration(50*time.Millisecond),
+		withPidFile(pidFile),
+	)
 
-	time.Sleep(50 * time.Millisecond)
+	// start the command
+	isGraceful.start()
+	defer isGraceful.stop()
 
 	errs := make(chan error, 100)
 	go func() {
 		defer close(errs)
 		for i := 0; i < 100; i++ {
-			_, err := http.Get("http://localhost:9000/?sleep=20")
+			resp, err := http.Get("http://localhost:9000/?sleep=20")
 			errs <- err
+			if err == nil {
+				// Response body must be closed
+				err = resp.Body.Close()
+				errs <- err
+			}
+
 			time.Sleep(10 * time.Millisecond)
 		}
 	}()
 
-	cmd.Process.Signal(syscall.SIGHUP)
+	time.Sleep(10 * time.Millisecond)
 
+	// Send the signal
+	isGraceful.signal(syscall.SIGHUP)
+	isGraceful.isRunningAfterAsync(50 * time.Millisecond)
+	isGraceful.isRunningAfter(3000 * time.Millisecond)
+
+	// The request should be no errors
 	for err := range errs {
 		require.NoError(t, err)
 	}
+
+	isGraceful.stop()
+
+	// Check the output
+	output := isGraceful.getOutput()
+	require.Contains(t, output, "request graceful restart")
 }
 
-func startProcess(t *testing.T, args ...string) cmdAndOutput {
-	cmd := exec.Command("./testdata/server", args...)
-	b := new(bytes.Buffer)
-	cmd.Stdout = b
-	cmd.Stderr = b
-	require.NoError(t, cmd.Start())
-	return cmdAndOutput{cmd: cmd, output: b}
+type cmdAndOutput struct {
+	t   *testing.T
+	Cmd *exec.Cmd
+	pid int
+
+	waitGroup sync.WaitGroup
+
+	output    *bytes.Buffer
+	outputMu  sync.Mutex
+	oldStdout io.Writer
+	oldStderr io.Writer
+
+	// shutdownWaitDuration is the duration which is waited for all connections to stop
+	shutdownWaitDuration time.Duration
+
+	// startWaitDuration is the duration to wait for a child process to start
+	startWaitDuration time.Duration
+
+	// upgradeWaitDuration is the duration the old process is waiting for
+	// connection to close when a graceful restart has been ordered.
+	upgradeWaitDuration time.Duration
+
+	// pidFile tracks the pid of the last child among the chain of graceful restart
+	pidFile string
 }
 
-func isRunningAfter(t *testing.T, co cmdAndOutput, d time.Duration) {
-	checkProcessAfter(t, co, d, true)
+// newCmdAndOutput creates a new cmdAndOutput struct using the functional options pattern
+func newCmdAndOutput(t *testing.T, options ...func(*cmdAndOutput)) *cmdAndOutput {
+	t.Helper()
+	c := &cmdAndOutput{
+		t:                    t,
+		output:               new(bytes.Buffer),
+		startWaitDuration:    100 * time.Millisecond,
+		upgradeWaitDuration:  30 * time.Second,
+		shutdownWaitDuration: 60 * time.Second,
+	}
+	for _, option := range options {
+		option(c)
+	}
+	return c
 }
 
-func isStoppedAfter(t *testing.T, co cmdAndOutput, d time.Duration) {
-	checkProcessAfter(t, co, d, false)
+// withCmd sets the Cmd field of the cmdAndOutput struct
+func withCmd(cmd *exec.Cmd) func(*cmdAndOutput) {
+	return func(c *cmdAndOutput) {
+		c.Cmd = cmd
+	}
 }
 
-func checkProcessAfter(t *testing.T, co cmdAndOutput, d time.Duration, shouldBeAlive bool) {
-	cmd := co.cmd
-	w := make(chan *os.ProcessState)
+// withStartWaitDuration sets the duration to wait for a child process to start
+func withStartWaitDuration(duration time.Duration) func(output *cmdAndOutput) {
+	return func(c *cmdAndOutput) {
+		c.startWaitDuration = duration
+	}
+}
+
+// withPidFile sets the pidFile field of the cmdAndOutput struct
+func withPidFile(pidFile string) func(*cmdAndOutput) {
+	return func(c *cmdAndOutput) {
+		c.pidFile = pidFile
+	}
+}
+
+// withUpgradeWaitDuration sets the duration the old process is waiting for
+func withUpgradeWaitDuration(duration time.Duration) func(output *cmdAndOutput) {
+	return func(c *cmdAndOutput) {
+		c.upgradeWaitDuration = duration
+	}
+}
+
+// withShutdownWaitDuration sets the duration which is waited for all connections to stop
+func withShutdownWaitDuration(duration time.Duration) func(output *cmdAndOutput) {
+	return func(c *cmdAndOutput) {
+		c.shutdownWaitDuration = duration
+	}
+}
+
+// signal sends a signal to the process
+func (c *cmdAndOutput) signal(signal os.Signal) {
+	c.t.Helper()
+
+	err := c.findProcess().Signal(signal)
+	if err != nil {
+		c.t.Fatalf("send signal %v: %v", signal, err)
+	}
+}
+
+// start starts the process
+func (c *cmdAndOutput) start() {
+	c.t.Helper()
+
+	c.oldStdout = c.Cmd.Stdout
+	c.oldStderr = c.Cmd.Stderr
+	r, w, _ := os.Pipe()
+	c.Cmd.Stdout = w
+	c.Cmd.Stderr = w
+
+	// Read from pipe and append to buffer with locking
 	go func() {
-		cmd.Wait()
-		w <- cmd.ProcessState
-		close(w)
+		b := make([]byte, 1024)
+		for {
+			n, err := r.Read(b)
+			if n > 0 {
+				c.outputMu.Lock()
+				c.output.Write(b[:n])
+				c.outputMu.Unlock()
+			}
+			if err != nil {
+				break
+			}
+		}
 	}()
-	timeout := time.NewTimer(d)
-	defer timeout.Stop()
-	select {
-	case <-timeout.C:
-		if !shouldBeAlive {
-			t.Errorf("process %v was up after %v, output: \n\n%v", cmd, d, co.output.String())
-		}
-	case st := <-w:
-		if shouldBeAlive {
-			t.Errorf("process %v is dead after %v, status: %v, output: \n\n%v", cmd.Args, d, st.Success(), co.output.String())
-		}
+
+	err := c.Cmd.Start()
+	if err != nil {
+		c.t.Fatalf("failed to start process: %v", err)
 	}
-	<-w
+
+	// Get the pid
+	c.pid = c.Cmd.Process.Pid
+
+	// Write the pid to the pid file
+	if c.pidFile != "" {
+		err := os.WriteFile(c.pidFile, []byte(strconv.Itoa(c.pid)), 0600)
+		require.NoError(c.t, err)
+	}
+
+	// Wait for a short duration to allow the child process to start
+	time.Sleep(c.startWaitDuration)
 }
 
-func ensureProcessKilled(t *testing.T, cmd *exec.Cmd) {
-	ensurePidFileProcessKilled(t)
-	err := cmd.Process.Kill()
-	if err != nil && !strings.Contains(err.Error(), "already finished") {
-		require.NoError(t, err)
+// stop stops the process
+func (c *cmdAndOutput) stop() {
+	// Wait for all (isRunningAfter / isStoppedAfter) operations to finish
+	c.waitGroup.Wait()
+
+	// send signal to parent process
+	err := syscall.Kill(c.Cmd.Process.Pid, syscall.SIGTERM)
+	if err != nil && !errors.Is(err, syscall.ESRCH) {
+		c.t.Logf("kill process: %v", err)
+	}
+
+	// send signal to pid process
+	err = syscall.Kill(c.pid, syscall.SIGTERM)
+	if err != nil && !errors.Is(err, syscall.ESRCH) {
+		c.t.Logf("kill process: %v", err)
+	}
+
+	// Wait for the parent or child processes to finish
+	c.isStoppedAfter(c.shutdownWaitDuration)
+}
+
+// isRunningAfter checks if the process is running after a certain duration
+func (c *cmdAndOutput) isRunningAfter(timeout time.Duration) {
+	c.t.Helper()
+	c.checkProcessAfter(timeout, true)
+}
+
+// isRunningAfterAsync checks if the process is running after a certain duration, asynchronously
+func (c *cmdAndOutput) isRunningAfterAsync(timeout time.Duration) {
+	c.t.Helper()
+	c.waitGroup.Add(1)
+	go func() {
+		defer c.waitGroup.Done()
+		c.checkProcessAfter(timeout, true)
+	}()
+}
+
+// isStoppedAfter checks if the process is stopped after a certain duration
+func (c *cmdAndOutput) isStoppedAfter(timeout time.Duration) {
+	c.t.Helper()
+	c.checkProcessAfter(timeout, false)
+}
+
+// isStoppedAfterAsync checks if the process is stopped after a certain duration, asynchronously
+func (c *cmdAndOutput) isStoppedAfterAsync(timeout time.Duration) {
+	c.t.Helper()
+	c.waitGroup.Add(1)
+	go func() {
+		defer c.waitGroup.Done()
+		c.checkProcessAfter(timeout, false)
+	}()
+}
+
+// checkProcessAfter checks the process is running after a certain duration
+func (c *cmdAndOutput) checkProcessAfter(timeout time.Duration, shouldBeAlive bool) {
+	c.t.Helper()
+
+	// Has any process started
+	require.NotNilf(c.t, c.Cmd.Process, "process %v hasn't started", c.Cmd)
+
+	if shouldBeAlive {
+		// Wait and then search for the process (parent or child)
+		time.Sleep(timeout)
+		p := c.findProcess()
+		require.NoErrorf(c.t, p.Signal(syscall.Signal(0)), "process %v is dead after %v", c.pid, timeout)
+	} else {
+		// Race between the timer and the process
+		w := make(chan *os.ProcessState)
+		go func() {
+			processState, _ := c.findProcess().Wait()
+			w <- processState
+			close(w)
+		}()
+
+		timer := time.NewTimer(timeout)
+		defer timer.Stop()
+		select {
+		case <-timer.C:
+			c.t.Errorf("%v process %v was up after %v", time.Now(), c.pid, timeout)
+		case <-w:
+		}
 	}
 }
 
-func ensurePidFileProcessKilled(t *testing.T) {
-	out, err := os.ReadFile("./testdata/server.pid")
-	if err == nil {
-		pid, err := strconv.Atoi(strings.TrimSpace(string(out)))
-		require.NoError(t, err)
-		process, err := os.FindProcess(pid)
-		require.NoError(t, err)
-		err = process.Kill()
-		if err != nil && !strings.Contains(err.Error(), "already finished") {
-			require.NoError(t, err)
-		}
-		err = os.Remove("./testdata/server.pid")
-		require.NoError(t, err)
+// getOutput returns the output of the process
+func (c *cmdAndOutput) getOutput() string {
+	c.waitGroup.Wait()
+
+	c.outputMu.Lock()
+	defer c.outputMu.Unlock()
+	return c.output.String()
+}
+
+func (c *cmdAndOutput) readPidFile() int {
+	c.t.Helper()
+	data, err := os.ReadFile(c.pidFile)
+	require.NoError(c.t, err)
+	pid, err := strconv.Atoi(strings.TrimSpace(string(data)))
+	require.NoError(c.t, err)
+	return pid
+}
+
+func (c *cmdAndOutput) findProcess() *os.Process {
+	// get pid from pid file
+	if c.pidFile != "" {
+		c.pid = c.readPidFile()
 	}
+
+	p, err := os.FindProcess(c.pid)
+	require.NoError(c.t, err)
+	return p
 }
