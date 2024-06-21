@@ -3,6 +3,7 @@ package graceful
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -17,8 +18,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-const pidFile = "./testdata/server.pid"
 
 // getCmd returns a command to run the server
 // In this function we build and run a binary, rather than using "go run"
@@ -42,14 +41,14 @@ func TestService_Shutdown_WithoutRequest(t *testing.T) {
 	upgradeTimeout := time.Millisecond * 200
 	shutdownTimeout := time.Millisecond * 100
 
-	for _, s := range []os.Signal{syscall.SIGINT, syscall.SIGTERM} {
+	for i, s := range []os.Signal{syscall.SIGINT, syscall.SIGTERM} {
 		t.Run("Send signal "+s.String()+" and expect service to stop", func(t *testing.T) {
 			// Configure isGraceful
 			isGraceful := newCmdAndOutput(t,
 				withCmd(getCmd(t)),
 				withUpgradeWaitDuration(upgradeTimeout),
 				withShutdownWaitDuration(shutdownTimeout),
-				withPidFile(pidFile),
+				withPidFile(fmt.Sprintf("./testdata/server-%d.pid", i)),
 			)
 
 			// start the command
@@ -73,14 +72,14 @@ func TestService_Shutdown_WithRequest(t *testing.T) {
 	upgradeTimeout := time.Millisecond * 200
 	shutdownTimeout := time.Millisecond * 100
 
-	for _, s := range []os.Signal{syscall.SIGINT, syscall.SIGTERM} {
+	for i, s := range []os.Signal{syscall.SIGINT, syscall.SIGTERM} {
 		t.Run("signal "+s.String()+" expect service to stop", func(t *testing.T) {
 			// Configure isGraceful
 			isGraceful := newCmdAndOutput(t,
 				withCmd(getCmd(t)),
 				withUpgradeWaitDuration(upgradeTimeout),
 				withShutdownWaitDuration(shutdownTimeout),
-				withPidFile(pidFile),
+				withPidFile(fmt.Sprintf("./testdata/server-%d.pid", i)),
 			)
 
 			// start the command
@@ -117,14 +116,14 @@ func TestService_Shutdown_WithRequest(t *testing.T) {
 
 // TestService_Shutdown_WithTimeout tests the shutdown of the service with a request that takes too long
 func TestService_Shutdown_WithTimeout(t *testing.T) {
-	for _, s := range []os.Signal{syscall.SIGINT, syscall.SIGTERM} {
+	for i, s := range []os.Signal{syscall.SIGINT, syscall.SIGTERM} {
 		t.Run("signal "+s.String(), func(t *testing.T) {
 			// Configure isGraceful
 			isGraceful := newCmdAndOutput(t,
 				withCmd(getCmd(t, "100")),
 				withUpgradeWaitDuration(200*time.Millisecond),
 				withShutdownWaitDuration(100*time.Millisecond),
-				withPidFile(pidFile),
+				withPidFile(fmt.Sprintf("./testdata/server-%d.pid", i)),
 			)
 
 			// start the command
@@ -171,7 +170,7 @@ func TestService_Restart(t *testing.T) {
 		withCmd(getCmd(t)),
 		withUpgradeWaitDuration(100*time.Millisecond),
 		withShutdownWaitDuration(50*time.Millisecond),
-		withPidFile(pidFile),
+		withPidFile("./testdata/server.pid"),
 	)
 
 	// start the command
@@ -206,7 +205,8 @@ func TestService_Restart(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	isGraceful.stop()
+	isGraceful.signal(syscall.SIGHUP)
+	isGraceful.isStoppedAfter(100 * time.Millisecond)
 
 	// Check the output
 	output := isGraceful.getOutput()
@@ -363,6 +363,13 @@ func (c *cmdAndOutput) stop() {
 
 	// Wait for the parent or child processes to finish
 	c.isStoppedAfter(c.shutdownWaitDuration)
+
+	// Delete pid file
+	time.Sleep(10 * time.Millisecond)
+	if c.pidFile != "" {
+		require.NoError(c.t, os.Remove(c.pidFile))
+	}
+
 }
 
 // isRunningAfter checks if the process is running after a certain duration

@@ -84,14 +84,14 @@ func (s *Service) ListenAndServe(ctx context.Context, proto string, addr string,
 	return s.listenAndServe(ctx, proto, addr, httpServer)
 }
 
-func (s *Service) listenAndServe(ctx context.Context, proto string, addr string, server *http.Server) error {
+func (s *Service) listenAndServe(ctx context.Context, _ string, addr string, server *http.Server) error {
 	log := logger.Get(ctx)
 
 	if s.pidFile != "" {
 		pid := os.Getpid()
 		err := os.WriteFile(s.pidFile, []byte(fmt.Sprintf("%d\n", pid)), 0600)
 		if err != nil {
-			return errors.Wrapf(ctx, err, "fail to write PID file")
+			return errors.Wrap(ctx, err, "fail to write PID file")
 		}
 	}
 
@@ -103,7 +103,6 @@ func (s *Service) listenAndServe(ctx context.Context, proto string, addr string,
 	if err != nil {
 		log.Fatalln(err)
 	}
-	defer upg.Stop()
 	s.graceful = upg
 
 	// setup the signal handling
@@ -112,8 +111,11 @@ func (s *Service) listenAndServe(ctx context.Context, proto string, addr string,
 	// Listen must be called before Ready
 	ln, err := upg.Listen("tcp", addr)
 	if err != nil {
+		upg.Stop()
 		log.Fatalln("Can't listen:", err)
 	}
+
+	defer upg.Stop()
 
 	if server.TLSConfig != nil {
 		ln = tls.NewListener(ln, server.TLSConfig)
@@ -147,7 +149,7 @@ func (s *Service) listenAndServe(ctx context.Context, proto string, addr string,
 	}
 
 	// Wait for connections to drain.
-	err = server.Shutdown(context.Background())
+	err = server.Shutdown(ctx)
 	if err != nil {
 		log.Println("server shutdown:", err)
 	}
