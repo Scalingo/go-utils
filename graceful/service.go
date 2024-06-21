@@ -3,16 +3,15 @@ package graceful
 import (
 	"context"
 	"crypto/tls"
-	"errors"
 	"fmt"
 	"net/http"
 	"os"
 	"sync"
 	"time"
 
-	"github.com/cloudflare/tableflip"
+	"github.com/Scalingo/go-utils/errors/v2"
 
-	"gopkg.in/errgo.v1"
+	"github.com/cloudflare/tableflip"
 
 	"github.com/Scalingo/go-utils/logger"
 )
@@ -92,7 +91,7 @@ func (s *Service) listenAndServe(ctx context.Context, proto string, addr string,
 		pid := os.Getpid()
 		err := os.WriteFile(s.pidFile, []byte(fmt.Sprintf("%d\n", pid)), 0600)
 		if err != nil {
-			return errgo.Notef(err, "fail to write PID file")
+			return errors.Wrapf(ctx, err, "fail to write PID file")
 		}
 	}
 
@@ -144,7 +143,7 @@ func (s *Service) listenAndServe(ctx context.Context, proto string, addr string,
 	log.Println("shutting down")
 	err = s.shutdown(ctx)
 	if err != nil {
-		return errgo.Notef(err, "fail to shutdown server")
+		return errors.Wrapf(ctx, err, "fail to shutdown server")
 	}
 
 	// Wait for connections to drain.
@@ -182,14 +181,14 @@ func (s *Service) shutdown(ctx context.Context) error {
 	log.Info("shutting down http server")
 	err := s.httpServer.Shutdown(ctx)
 	if err != nil {
-		return errgo.Notef(err, "fail to shutdown http server")
+		return errors.Wrapf(ctx, err, "fail to shutdown http server")
 	}
 	log.Info("http server is stopped")
 
 	log.Info("wait hijacked connections")
 	err = s.waitHijackedConnections(ctx)
 	if err != nil {
-		return errgo.Notef(err, "fail to wait hijacked connections")
+		return errors.Wrapf(ctx, err, "fail to wait hijacked connections")
 	}
 	log.Info("no more connection running")
 
