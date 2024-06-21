@@ -20,20 +20,8 @@ import (
 )
 
 // getCmd returns a command to run the server
-// In this function we build and run a binary, rather than using "go run"
-// When running a Go program with go run, the interrupt signal (SIGINT) is not propagated to the
-// child process by default.
-//
-// If "go run" is used tests that rely on the child process receiving the signal (those where the
-// SIGHUP signal has been sent will leave the child process running indefinitely.)
-func getCmd(t *testing.T, args ...string) *exec.Cmd {
-	binaryPath := "./testdata/server"
-
-	// Build main.go
-	err := exec.Command("go", "build", "-o", binaryPath, "./testdata/cmd/server/server.go").Run()
-	require.NoError(t, err)
-
-	return exec.Command(binaryPath, args...)
+func getCmd(args ...string) *exec.Cmd {
+	return exec.Command("./testdata/server", args...)
 }
 
 // TestService_Shutdown_WithoutRequest tests the shutdown of the service without any request
@@ -45,7 +33,7 @@ func TestService_Shutdown_WithoutRequest(t *testing.T) {
 		t.Run("Send signal "+s.String()+" and expect service to stop", func(t *testing.T) {
 			// Configure isGraceful
 			isGraceful := newCmdAndOutput(t,
-				withCmd(getCmd(t)),
+				withCmd(getCmd()),
 				withUpgradeWaitDuration(upgradeTimeout),
 				withShutdownWaitDuration(shutdownTimeout),
 				withPidFile(fmt.Sprintf("./testdata/server-%d.pid", i)),
@@ -76,7 +64,7 @@ func TestService_Shutdown_WithRequest(t *testing.T) {
 		t.Run("signal "+s.String()+" expect service to stop", func(t *testing.T) {
 			// Configure isGraceful
 			isGraceful := newCmdAndOutput(t,
-				withCmd(getCmd(t)),
+				withCmd(getCmd()),
 				withUpgradeWaitDuration(upgradeTimeout),
 				withShutdownWaitDuration(shutdownTimeout),
 				withPidFile(fmt.Sprintf("./testdata/server-%d.pid", i)),
@@ -120,7 +108,7 @@ func TestService_Shutdown_WithTimeout(t *testing.T) {
 		t.Run("signal "+s.String(), func(t *testing.T) {
 			// Configure isGraceful
 			isGraceful := newCmdAndOutput(t,
-				withCmd(getCmd(t, "100")),
+				withCmd(getCmd("100")),
 				withUpgradeWaitDuration(200*time.Millisecond),
 				withShutdownWaitDuration(100*time.Millisecond),
 				withPidFile(fmt.Sprintf("./testdata/server-%d.pid", i)),
@@ -167,7 +155,7 @@ func TestService_Shutdown_WithTimeout(t *testing.T) {
 func TestService_Restart(t *testing.T) {
 	// Configure isGraceful
 	isGraceful := newCmdAndOutput(t,
-		withCmd(getCmd(t)),
+		withCmd(getCmd()),
 		withUpgradeWaitDuration(100*time.Millisecond),
 		withShutdownWaitDuration(50*time.Millisecond),
 		withPidFile("./testdata/server.pid"),
