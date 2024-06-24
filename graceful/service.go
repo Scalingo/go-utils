@@ -20,7 +20,6 @@ type Service struct {
 	httpServer *http.Server
 	graceful   *tableflip.Upgrader
 	wg         *sync.WaitGroup
-	stopped    chan error
 	// waitDuration is the duration which is waited for all connections to stop
 	// in order to graceful shutdown the server. If some connections are still up
 	// after this timer they'll be cut aggressively.
@@ -39,7 +38,6 @@ type Option func(*Service)
 func NewService(opts ...Option) *Service {
 	s := &Service{
 		wg:                 &sync.WaitGroup{},
-		stopped:            make(chan error),
 		waitDuration:       time.Minute,
 		reloadWaitDuration: 30 * time.Minute,
 	}
@@ -140,10 +138,9 @@ func (s *Service) listenAndServe(ctx context.Context, _ string, addr string, ser
 	// security to free resource but should be unreachable
 	ctx, cancel := context.WithTimeout(ctx, s.waitDuration)
 	defer cancel()
-	log.Info("shutting down")
 	err = s.shutdown(ctx)
 	if err != nil {
-		return errors.Wrapf(ctx, err, "fail to shutdown server")
+		return errors.Wrapf(ctx, err, "fail to shutdown service")
 	}
 
 	// Wait for connections to drain.
@@ -193,10 +190,6 @@ func (s *Service) shutdown(ctx context.Context) error {
 	log.Info("no more connection running")
 
 	return nil
-}
-
-func (s *Service) waitStopped() error {
-	return <-s.stopped
 }
 
 func (s *Service) waitHijackedConnections(ctx context.Context) error {

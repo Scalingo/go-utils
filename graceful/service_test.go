@@ -142,7 +142,7 @@ func TestService_Shutdown_WithTimeout(t *testing.T) {
 
 			// Check the output
 			output := isGraceful.getOutput()
-			assert.Containsf(t, output, "I'm dead because of fail to shutdown server", "OUTPUT:\n%v", output)
+			assert.Containsf(t, output, "I'm dead because of fail to shutdown service", "OUTPUT:\n%v", output)
 
 			// The request should be unexpectedly terminated
 			require.Error(t, err)
