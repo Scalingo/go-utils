@@ -101,9 +101,10 @@ func (s *Service) listenAndServe(ctx context.Context, _ string, addr string, ser
 		PIDFile:        s.pidFile,
 	})
 	if err != nil {
-		log.Fatalln(err)
+		return errors.Wrap(ctx, err, "creating tableflip upgrader")
 	}
 	s.graceful = upg
+	defer upg.Stop()
 
 	// setup the signal handling
 	go s.setupSignals(ctx)
@@ -111,11 +112,8 @@ func (s *Service) listenAndServe(ctx context.Context, _ string, addr string, ser
 	// Listen must be called before Ready
 	ln, err := upg.Listen("tcp", addr)
 	if err != nil {
-		upg.Stop()
-		log.Fatalln("Can't listen:", err)
+		return errors.Wrap(ctx, err, "upgrader listen")
 	}
-
-	defer upg.Stop()
 
 	if server.TLSConfig != nil {
 		ln = tls.NewListener(ln, server.TLSConfig)
@@ -126,7 +124,7 @@ func (s *Service) listenAndServe(ctx context.Context, _ string, addr string, ser
 	go func() {
 		err := server.Serve(ln)
 		if !errors.Is(err, http.ErrServerClosed) {
-			log.Println("HTTP server:", err)
+			log.Error("http server serve", err)
 		}
 	}()
 
@@ -151,7 +149,7 @@ func (s *Service) listenAndServe(ctx context.Context, _ string, addr string, ser
 	// Wait for connections to drain.
 	err = server.Shutdown(ctx)
 	if err != nil {
-		log.Println("server shutdown:", err)
+		return errors.Wrap(ctx, err, "server shutdown")
 	}
 
 	return nil

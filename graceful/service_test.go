@@ -193,7 +193,7 @@ func TestService_Restart(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	isGraceful.signal(syscall.SIGHUP)
+	isGraceful.signal(syscall.SIGINT)
 	isGraceful.isStoppedAfter(100 * time.Millisecond)
 
 	// Check the output
