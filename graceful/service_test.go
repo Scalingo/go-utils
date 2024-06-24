@@ -49,8 +49,8 @@ func TestService_Shutdown_WithoutRequest(t *testing.T) {
 
 			// Check the output
 			output := isGraceful.getOutput()
-			require.Contains(t, output, "http server is stopped")
-			require.Contains(t, output, "no more connection running")
+			require.Containsf(t, output, "http server is stopped", "OUTPUT:\n%v", output)
+			require.Containsf(t, output, "no more connection running", "OUTPUT:\n%v", output)
 		})
 	}
 }
@@ -96,8 +96,8 @@ func TestService_Shutdown_WithRequest(t *testing.T) {
 
 			// Check the output
 			output := isGraceful.getOutput()
-			require.Contains(t, output, "http server is stopped")
-			require.Contains(t, output, "no more connection running")
+			require.Containsf(t, output, "http server is stopped", "OUTPUT:\n%v", output)
+			require.Containsf(t, output, "no more connection running", "OUTPUT:\n%v", output)
 		})
 	}
 }
@@ -142,7 +142,7 @@ func TestService_Shutdown_WithTimeout(t *testing.T) {
 
 			// Check the output
 			output := isGraceful.getOutput()
-			assert.Contains(t, output, "I'm dead because of fail to shutdown server")
+			assert.Containsf(t, output, "I'm dead because of fail to shutdown server", "OUTPUT:\n%v", output)
 
 			// The request should be unexpectedly terminated
 			require.Error(t, err)
@@ -198,7 +198,7 @@ func TestService_Restart(t *testing.T) {
 
 	// Check the output
 	output := isGraceful.getOutput()
-	require.Contains(t, output, "request graceful restart")
+	require.Containsf(t, output, "request graceful restart", "OUTPUT:\n%v", output)
 }
 
 type cmdAndOutput struct {

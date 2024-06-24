@@ -124,7 +124,7 @@ func (s *Service) listenAndServe(ctx context.Context, _ string, addr string, ser
 	go func() {
 		err := server.Serve(ln)
 		if !errors.Is(err, http.ErrServerClosed) {
-			log.Error("http server serve", err)
+			log.WithError(err).Error("http server serve")
 		}
 	}()
 
