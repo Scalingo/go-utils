@@ -27,7 +27,7 @@ func (s *Service) setupSignals(ctx context.Context) {
 			log.Info("request graceful restart")
 			err := s.graceful.Upgrade()
 			if err != nil {
-				log.Println("fail to start new service:", err)
+				log.WithError(err).Error("fail to start new service")
 			}
 		}
 	}
