@@ -128,9 +128,9 @@ func (s *Service) listenAndServe(ctx context.Context, _ string, addr string, ser
 		}
 	}()
 
-	log.Printf("ready")
+	log.Info("ready")
 	if err := upg.Ready(); err != nil {
-		panic(err)
+		return errors.Wrapf(ctx, err, "upgrader notify ready")
 	}
 	<-upg.Exit()
 
@@ -140,7 +140,7 @@ func (s *Service) listenAndServe(ctx context.Context, _ string, addr string, ser
 	// security to free resource but should be unreachable
 	ctx, cancel := context.WithTimeout(ctx, s.waitDuration)
 	defer cancel()
-	log.Println("shutting down")
+	log.Info("shutting down")
 	err = s.shutdown(ctx)
 	if err != nil {
 		return errors.Wrapf(ctx, err, "fail to shutdown server")
