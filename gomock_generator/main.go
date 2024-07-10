@@ -42,6 +42,7 @@ Reads the mymocks.json file from the current directory and generates the mocks, 
 	app.cli.Flags = []cli.Flag{
 		cli.StringFlag{Name: "mocks-filepath", Value: "./mocks.json", Usage: "Path to the JSON file containing the MockConfiguration. Location of this file is the base package.", EnvVar: "MOCKS_FILEPATH"},
 		cli.StringFlag{Name: "signatures-filename", Value: "mocks_sig.json", Usage: "Filename of the signatures cache. Location of this file is the base package.", EnvVar: "SIGNATURES_FILENAME"},
+		cli.StringFlag{Name: "output-path", Value: "", Usage: "The base path for all the output", EnvVar: "OUTPUT_PATH"},
 		cli.IntFlag{Name: "concurrent-goroutines", Value: 4, Usage: "Concurrent amount of goroutines to generate mock.", EnvVar: "CONCURRENT_GOROUTINES"},
 		cli.BoolFlag{Name: "debug", Usage: "Activate debug logs"},
 	}
@@ -66,6 +67,7 @@ VERSION:
    {{end}}
 `
 	app.cli.Before = func(c *cli.Context) error {
+		app.config.OutputPath = c.GlobalString("output-path")
 		app.config.MocksFilePath = c.GlobalString("mocks-filepath")
 		app.config.SignaturesFilename = c.GlobalString("signatures-filename")
 		app.config.ConcurrentGoroutines = c.GlobalInt("concurrent-goroutines")
@@ -84,6 +86,7 @@ VERSION:
 		ctx := logger.ToCtx(context.Background(), log)
 
 		log.WithFields(logrus.Fields{
+			"output-path":           app.config.OutputPath,
 			"mocks_file_path":       app.config.MocksFilePath,
 			"signatures_filename":   app.config.SignaturesFilename,
 			"concurrent_goroutines": app.config.ConcurrentGoroutines,

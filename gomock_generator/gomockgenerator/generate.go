@@ -28,6 +28,8 @@ type GenerationConfiguration struct {
 	ConcurrentGoroutines int
 	// NoGoMod by default we'll consider go modules is enabled, mockgen will be called with -mod=mod to read interfaces in modules instead of default GOPATH
 	NoGoMod bool
+	// OutputPath override the output base path of the mocks
+	OutputPath string
 }
 
 // MocksConfiguration contains the configuration of the mocks to generate.
@@ -169,6 +171,9 @@ func generateMock(ctx context.Context, gcfg GenerationConfiguration, baseDirecto
 	}
 
 	mockPath := filepath.Join(os.Getenv("GOPATH"), "src", baseDirectory, mock.MockFile)
+	if gcfg.OutputPath != "" {
+		mockPath = path.Join(gcfg.OutputPath, mock.MockFile)
+	}
 	log = log.WithFields(logrus.Fields{
 		"mock_file":   mock.MockFile,
 		"interface":   mock.Interface,
