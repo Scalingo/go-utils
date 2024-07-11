@@ -5,6 +5,8 @@ import (
 	stderrors "errors"
 	"fmt"
 	"io"
+	"os"
+	"slices"
 	"strings"
 	"time"
 
@@ -302,12 +304,15 @@ func s3Config(cfg S3Config) aws.Config {
 		Credentials: credentials,
 	}
 	if cfg.Endpoint != "" {
-		config.EndpointResolverWithOptions = aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
-			return aws.Endpoint{
-				URL:           "https://" + cfg.Endpoint,
-				SigningRegion: cfg.Region,
-			}, nil
-		})
+		if endpointIsAllowed(cfg.Endpoint) {
+			//nolint:all // AWS v1 function is deprecated, switching to v2 requires a refactoring of the package
+			config.EndpointResolverWithOptions = aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
+				return aws.Endpoint{
+					URL:           "https://" + cfg.Endpoint,
+					SigningRegion: cfg.Region,
+				}, nil
+			})
+		}
 	}
 
 	return config
@@ -315,4 +320,24 @@ func s3Config(cfg S3Config) aws.Config {
 
 func fullPath(path string) string {
 	return strings.TrimLeft("/"+path, "/")
+}
+
+func getAllowListFromEnv() []string {
+	s3EndpointsAllowList := os.Getenv("OBJECT_STORAGE_ALLOWLIST")
+	if s3EndpointsAllowList == "" {
+		log := logger.Default()
+		log.Warningln("S3 endpoint allowlist is not configured in your environment")
+		return nil
+	}
+	return strings.Split(s3EndpointsAllowList, ",")
+}
+
+func endpointIsAllowed(endpoint string) bool {
+	allowedEndpoints := getAllowListFromEnv()
+	if allowedEndpoints != nil {
+		return slices.ContainsFunc(getAllowListFromEnv(), func(allowedEndpoint string) bool {
+			return strings.HasPrefix(endpoint, allowedEndpoint)
+		})
+	}
+	return true
 }
