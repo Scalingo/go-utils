@@ -10,14 +10,13 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/errgo.v1"
 )
 
 func TestErrCtx_RootCtxOrFallback(t *testing.T) {
 	t.Run("It should return an error and the given context if the error does not contains any ErrCtx", func(t *testing.T) {
 		// Given
 		err := stdErrors.New("main error")
-		err = errgo.Notef(err, "wrapping error in func2")
+		err = errors.Wrapf(err, "wrapping error in func2")
 		ctx := context.WithValue(context.Background(), "test", "test")
 
 		// When
@@ -32,9 +31,9 @@ func TestErrCtx_RootCtxOrFallback(t *testing.T) {
 		// Given
 		ctx := context.WithValue(context.Background(), "field0", "value0")
 		err := funcThrowingError(ctx)
-		err = Notef(ctx, err, "wrapping error in func2")
-		err = Notef(ctx, err, "wrapping error in func3")
-		err = Notef(ctx, err, "wrapping error in func4")
+		err = Wrapf(ctx, err, "wrapping error in func2")
+		err = Wrapf(ctx, err, "wrapping error in func3")
+		err = Wrapf(ctx, err, "wrapping error in func4")
 
 		// When
 		rootCtx := RootCtxOrFallback(ctx, err)
@@ -53,8 +52,8 @@ func TestErrCtx_RootCtxOrFallback(t *testing.T) {
 		// Given
 		ctx := context.WithValue(context.Background(), "field0", "value0")
 		err := funcWrappingAnError(ctx)
-		err = Notef(ctx, err, "wrapping error in func3")
-		err = Notef(ctx, err, "wrapping error in func4")
+		err = Wrapf(ctx, err, "wrapping error in func3")
+		err = Wrapf(ctx, err, "wrapping error in func4")
 
 		// When
 		rootCtx := RootCtxOrFallback(ctx, err)
@@ -74,8 +73,8 @@ func TestErrCtx_RootCtxOrFallback(t *testing.T) {
 		ctx := context.WithValue(context.Background(), "field0", "value0")
 		// Simulate non ErrCtx error in middle of error path
 		err := funcWrappingAnErrorWithoutErrCtx(ctx)
-		err = Notef(ctx, err, "wrapping error in func2")
-		err = Notef(ctx, err, "wrapping error in func3")
+		err = Wrapf(ctx, err, "wrapping error in func2")
+		err = Wrapf(ctx, err, "wrapping error in func3")
 
 		// When
 		rootCtx := RootCtxOrFallback(ctx, err)
@@ -101,9 +100,9 @@ func TestErrCtx_RootCtxOrFallback(t *testing.T) {
 		// Simulate non returning error
 		ctx = context.WithValue(ctx, "field2", "value2")
 		err = Newf(ctx, "new error from func2")
-		err = Notef(ctx, err, "wrapping error in func2")
-		err = Notef(ctx, err, "wrapping error in func3")
-		err = Notef(ctx, err, "wrapping error in func4")
+		err = Wrapf(ctx, err, "wrapping error in func2")
+		err = Wrapf(ctx, err, "wrapping error in func3")
+		err = Wrapf(ctx, err, "wrapping error in func4")
 
 		// When
 		rootCtx := RootCtxOrFallback(ctx, err)
@@ -133,7 +132,7 @@ func funcWrappingAnError(ctx context.Context) error {
 
 	err := funcThrowingError(ctx)
 	if err != nil {
-		return Notef(ctx, err, "wrapping error from funcWrappingAnError")
+		return Wrapf(ctx, err, "wrapping error from funcWrappingAnError")
 	}
 	return nil
 }
