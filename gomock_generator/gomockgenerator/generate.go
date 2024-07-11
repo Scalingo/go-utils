@@ -28,8 +28,8 @@ type GenerationConfiguration struct {
 	ConcurrentGoroutines int
 	// NoGoMod by default we'll consider go modules is enabled, mockgen will be called with -mod=mod to read interfaces in modules instead of default GOPATH
 	NoGoMod bool
-	// SourcePath override the output base path of the mocks
-	SourcePath string
+	// MocksRootPath override the output root path of the mocks
+	MocksRootPath string
 }
 
 // MocksConfiguration contains the configuration of the mocks to generate.
@@ -71,8 +71,8 @@ func GenerateMocks(ctx context.Context, gcfg GenerationConfiguration, mocksCfg M
 	}
 
 	mocksPath := path.Join(path.Join(os.Getenv("GOPATH"), "src"), mocksCfg.BaseDirectory)
-	if gcfg.SourcePath != "" {
-		mocksPath = gcfg.SourcePath
+	if gcfg.MocksRootPath != "" {
+		mocksPath = gcfg.MocksRootPath
 	}
 	err = os.Chdir(mocksPath)
 	if err != nil {
@@ -86,9 +86,9 @@ func GenerateMocks(ctx context.Context, gcfg GenerationConfiguration, mocksCfg M
 	}).Infof("Generating %v mocks", len(mocksCfg.Mocks))
 
 	var mockSigs map[string]string
-	mockSigsPath := path.Join(gcfg.SourcePath, mocksCfg.BaseDirectory, gcfg.SignaturesFilename)
-	if gcfg.SourcePath != "" {
-		mockSigsPath = path.Join(gcfg.SourcePath, gcfg.SignaturesFilename)
+	mockSigsPath := path.Join(gcfg.MocksRootPath, mocksCfg.BaseDirectory, gcfg.SignaturesFilename)
+	if gcfg.MocksRootPath != "" {
+		mockSigsPath = path.Join(gcfg.MocksRootPath, gcfg.SignaturesFilename)
 	}
 
 	sigs, err := os.ReadFile(mockSigsPath)
@@ -178,9 +178,9 @@ func generateMock(ctx context.Context, gcfg GenerationConfiguration, baseDirecto
 		mock.SrcPackage = path.Join(basePackage, mock.SrcPackage)
 	}
 
-	mockPath := filepath.Join(gcfg.SourcePath, baseDirectory, mock.MockFile)
-	if gcfg.SourcePath != "" {
-		mockPath = path.Join(gcfg.SourcePath, mock.MockFile)
+	mockPath := filepath.Join(gcfg.MocksRootPath, baseDirectory, mock.MockFile)
+	if gcfg.MocksRootPath != "" {
+		mockPath = path.Join(gcfg.MocksRootPath, mock.MockFile)
 	}
 	log = log.WithFields(logrus.Fields{
 		"mock_file":   mock.MockFile,
@@ -212,8 +212,8 @@ func generateMock(ctx context.Context, gcfg GenerationConfiguration, baseDirecto
 
 	hashKey := fmt.Sprintf("%s.%s", mockSrcPath, mock.Interface)
 	fullPath := path.Join(os.Getenv("GOPATH"), "src", mockSrcPath)
-	if gcfg.SourcePath != "" {
-		fullPath = path.Join(gcfg.SourcePath, strings.ReplaceAll(mock.SrcPackage, baseDirectory, ""))
+	if gcfg.MocksRootPath != "" {
+		fullPath = path.Join(gcfg.MocksRootPath, strings.ReplaceAll(mock.SrcPackage, baseDirectory, ""))
 	}
 	hash, err := interfaceHash(fullPath, mockSrcPath, mock.Interface)
 	if err != nil {
