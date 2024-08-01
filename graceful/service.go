@@ -134,8 +134,6 @@ func (s *Service) listenAndServe(ctx context.Context, _ string, addr string, ser
 		ln = tls.NewListener(ln, server.TLSConfig)
 	}
 
-	s.httpServers = append(s.httpServers, server)
-
 	go func() {
 		err := server.Serve(ln)
 		if !errors.Is(err, http.ErrServerClosed) {
@@ -143,6 +141,8 @@ func (s *Service) listenAndServe(ctx context.Context, _ string, addr string, ser
 		}
 	}()
 
+	s.mx.Lock()
+	s.httpServers = append(s.httpServers, server)
 	if len(s.httpServers) == s.numServers {
 		err := s.finalize(ctx)
 		if err != nil {
@@ -150,6 +150,7 @@ func (s *Service) listenAndServe(ctx context.Context, _ string, addr string, ser
 			return err
 		}
 	}
+	s.mx.Unlock()
 
 	return nil
 }
