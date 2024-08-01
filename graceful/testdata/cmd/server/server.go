@@ -16,7 +16,7 @@ import (
 )
 
 func main() {
-	numListeners := 1
+	numServers := 1
 
 	// default options
 	options := []graceful.Option{
@@ -41,8 +41,8 @@ func main() {
 			timeoutI, _ := strconv.Atoi(val)
 			options = append(options, graceful.WithWaitDuration(time.Duration(timeoutI)*time.Millisecond))
 		case "num-servers":
-			numListeners, _ = strconv.Atoi(val)
-			options = append(options, graceful.WithNumServers(numListeners))
+			numServers, _ = strconv.Atoi(val)
+			options = append(options, graceful.WithNumServers(numServers))
 		}
 	}
 
@@ -51,10 +51,10 @@ func main() {
 		options...,
 	)
 
-	errChan := make(chan error, numListeners)
+	errChan := make(chan error, numServers)
 	var wg sync.WaitGroup
 
-	for i := 0; i < numListeners; i++ {
+	for i := 0; i < numServers; i++ {
 		wg.Add(1)
 		port := 9000 + i
 		endpoint := "/"
@@ -69,8 +69,6 @@ func main() {
 			if sleep != 0 {
 				time.Sleep(time.Duration(sleep) * time.Millisecond)
 			}
-			w.Header().Set("Content-Type", "text/plain")
-			w.Write([]byte("Hello, world! Listener: " + endpoint))
 		})
 
 		go func(i int) {

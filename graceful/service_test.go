@@ -164,7 +164,7 @@ func TestService_Shutdown_MultipleServers_WithRequest(t *testing.T) {
 			}()
 
 			go func() {
-				resp, err := http.Get("http://localhost:9000/1?sleep=160")
+				resp, err := http.Get("http://localhost:9000/1?sleep=200")
 				errs <- err
 				if err == nil {
 					// Response body must be closed

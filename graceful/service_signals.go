@@ -14,8 +14,6 @@ import (
 // child process to keep receiving new connections while waiting for the old one to finish
 // properly.
 func (s *Service) setupSignals(ctx context.Context) {
-	s.mx.Lock()
-	defer s.mx.Unlock()
 	log := logger.Get(ctx)
 	ch := make(chan os.Signal, 10)
 	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
@@ -23,11 +21,11 @@ func (s *Service) setupSignals(ctx context.Context) {
 		sig := <-ch
 		switch sig {
 		case syscall.SIGINT, syscall.SIGTERM:
-			s.graceful.Stop()
+			s.upg.Stop()
 			return
 		case syscall.SIGHUP:
 			log.Info("request graceful restart")
-			err := s.graceful.Upgrade()
+			err := s.upg.Upgrade()
 			if err != nil {
 				log.WithError(err).Error("fail to start new service")
 			}

@@ -16,7 +16,7 @@ import (
 
 type Service struct {
 	httpServers []*http.Server
-	graceful    *tableflip.Upgrader
+	upg         *tableflip.Upgrader
 	mx          sync.Mutex
 	wg          *sync.WaitGroup
 	// waitDuration is the duration which is waited for all connections to stop
@@ -74,20 +74,20 @@ func WithNumServers(n int) Option {
 	})
 }
 
-func (s *Service) getTableflipUpgrader(ctx context.Context) (*tableflip.Upgrader, error) {
+func (s *Service) initTableflipUpgrader(ctx context.Context) error {
 	var err error
 	s.mx.Lock()
-	if s.graceful == nil {
-		s.graceful, err = tableflip.New(tableflip.Options{
+	if s.upg == nil {
+		s.upg, err = tableflip.New(tableflip.Options{
 			UpgradeTimeout: s.reloadWaitDuration,
 			PIDFile:        s.pidFile,
 		})
 		if err != nil {
-			return nil, errors.Wrap(ctx, err, "creating tableflip upgrader")
+			return errors.Wrap(ctx, err, "creating tableflip upgrader")
 		}
 	}
 	s.mx.Unlock()
-	return s.graceful, nil
+	return nil
 }
 
 func (s *Service) ListenAndServeTLS(ctx context.Context, proto string, addr string, handler http.Handler, tlsConfig *tls.Config) error {
@@ -108,9 +108,13 @@ func (s *Service) ListenAndServe(ctx context.Context, proto string, addr string,
 }
 
 func (s *Service) listenAndServe(ctx context.Context, _ string, addr string, server *http.Server) error {
+	err := s.initTableflipUpgrader(ctx)
+	if err != nil {
+		return errors.Wrap(ctx, err, "init tableflip upgrader")
+	}
+
 	log := logger.Get(ctx)
 
-	s.mx.Lock()
 	curServerCount := len(s.httpServers)
 	s.httpServers = append(s.httpServers, server)
 	if curServerCount == 0 {
@@ -120,16 +124,9 @@ func (s *Service) listenAndServe(ctx context.Context, _ string, addr string, ser
 			return err
 		}
 	}
-	s.mx.Unlock()
-
-	// Use tableflip to handle graceful restart requests
-	upg, err := s.getTableflipUpgrader(ctx)
-	if err != nil {
-		return errors.Wrap(ctx, err, "get upgrader")
-	}
 
 	// Listen must be called before Ready
-	ln, err := upg.Listen("tcp", addr)
+	ln, err := s.upg.Listen("tcp", addr)
 	if err != nil {
 		return errors.Wrap(ctx, err, "upgrader listen")
 	}
@@ -175,17 +172,13 @@ func (s *Service) prepare(ctx context.Context) error {
 func (s *Service) finalize(ctx context.Context) error {
 	log := logger.Get(ctx)
 
-	upg, err := s.getTableflipUpgrader(ctx)
-	if err != nil {
-		return errors.Wrap(ctx, err, "get upgrader")
-	}
-	defer upg.Stop()
+	defer s.upg.Stop()
 
 	log.Info("ready")
-	if err := upg.Ready(); err != nil {
+	if err := s.upg.Ready(); err != nil {
 		return errors.Wrapf(ctx, err, "upgrader notify ready")
 	}
-	<-upg.Exit()
+	<-s.upg.Exit()
 	log.Info("upgrader finished")
 
 	// Normally the server should be always gracefully stopped and entering the
@@ -194,13 +187,12 @@ func (s *Service) finalize(ctx context.Context) error {
 	// security to free resource but should be unreachable
 	ctx, cancel := context.WithTimeout(ctx, s.waitDuration)
 	defer cancel()
-	err = s.shutdown(ctx)
+	err := s.shutdown(ctx)
 	if err != nil {
 		return errors.Wrapf(ctx, err, "fail to shutdown service")
 	}
 
 	// Wait for connections to drain.
-	s.mx.Lock()
 	errChan := make(chan error, len(s.httpServers))
 	for i, httpServer := range s.httpServers {
 		err = httpServer.Shutdown(ctx)
@@ -208,7 +200,6 @@ func (s *Service) finalize(ctx context.Context) error {
 			errChan <- errors.Wrapf(ctx, err, "server shutdown %d", i)
 		}
 	}
-	s.mx.Unlock()
 	close(errChan)
 	var shutdownErr error
 	for err := range errChan {
