@@ -14,6 +14,8 @@ import (
 // child process to keep receiving new connections while waiting for the old one to finish
 // properly.
 func (s *Service) setupSignals(ctx context.Context) {
+	s.mx.Lock()
+	defer s.mx.Unlock()
 	log := logger.Get(ctx)
 	ch := make(chan os.Signal, 10)
 	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)

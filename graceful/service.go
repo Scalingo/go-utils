@@ -110,13 +110,17 @@ func (s *Service) ListenAndServe(ctx context.Context, proto string, addr string,
 func (s *Service) listenAndServe(ctx context.Context, _ string, addr string, server *http.Server) error {
 	log := logger.Get(ctx)
 
-	if len(s.httpServers) == 0 {
+	s.mx.Lock()
+	curServerCount := len(s.httpServers)
+	s.httpServers = append(s.httpServers, server)
+	if curServerCount == 0 {
 		err := s.prepare(ctx)
 		if err != nil {
 			// purposefully do not wrap error here, as it is wrapped in prepare
 			return err
 		}
 	}
+	s.mx.Unlock()
 
 	// Use tableflip to handle graceful restart requests
 	upg, err := s.getTableflipUpgrader(ctx)
@@ -141,16 +145,13 @@ func (s *Service) listenAndServe(ctx context.Context, _ string, addr string, ser
 		}
 	}()
 
-	s.mx.Lock()
-	s.httpServers = append(s.httpServers, server)
-	if len(s.httpServers) == s.numServers {
+	if curServerCount+1 == s.numServers {
 		err := s.finalize(ctx)
 		if err != nil {
 			// purposefully do not wrap error here, as it is wrapped in finalize
 			return err
 		}
 	}
-	s.mx.Unlock()
 
 	return nil
 }
@@ -199,19 +200,15 @@ func (s *Service) finalize(ctx context.Context) error {
 	}
 
 	// Wait for connections to drain.
+	s.mx.Lock()
 	errChan := make(chan error, len(s.httpServers))
-	var wg sync.WaitGroup
 	for i, httpServer := range s.httpServers {
-		wg.Add(1)
-		go func(i int, httpServer *http.Server) {
-			defer wg.Done()
-			err = httpServer.Shutdown(ctx)
-			if err != nil {
-				errChan <- errors.Wrapf(ctx, err, "server shutdown %d", i)
-			}
-		}(i, httpServer)
+		err = httpServer.Shutdown(ctx)
+		if err != nil {
+			errChan <- errors.Wrapf(ctx, err, "server shutdown %d", i)
+		}
 	}
-	wg.Wait()
+	s.mx.Unlock()
 	close(errChan)
 	var shutdownErr error
 	for err := range errChan {
