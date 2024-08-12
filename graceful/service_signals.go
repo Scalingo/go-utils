@@ -24,7 +24,7 @@ func (s *Service) setupSignals(ctx context.Context) {
 			s.upg.Stop()
 			return
 		case syscall.SIGHUP:
-			log.Info("request graceful restart")
+			log.Info("Request graceful restart")
 			err := s.upg.Upgrade()
 			if err != nil {
 				log.WithError(err).Error("fail to start new service")

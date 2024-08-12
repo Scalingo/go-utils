@@ -49,8 +49,8 @@ func TestService_Shutdown_WithoutRequest(t *testing.T) {
 
 			// Check the output
 			output := isGraceful.getOutput()
-			require.Containsf(t, output, "http server is stopped", "OUTPUT:\n%v", output)
-			require.Containsf(t, output, "no more connection running", "OUTPUT:\n%v", output)
+			require.Containsf(t, output, "Http server is stopped", "OUTPUT:\n%v", output)
+			require.Containsf(t, output, "No more connection running", "OUTPUT:\n%v", output)
 		})
 	}
 }
@@ -96,8 +96,8 @@ func TestService_Shutdown_WithRequest(t *testing.T) {
 
 			// Check the output
 			output := isGraceful.getOutput()
-			require.Containsf(t, output, "http server is stopped", "OUTPUT:\n%v", output)
-			require.Containsf(t, output, "no more connection running", "OUTPUT:\n%v", output)
+			require.Containsf(t, output, "Http server is stopped", "OUTPUT:\n%v", output)
+			require.Containsf(t, output, "No more connection running", "OUTPUT:\n%v", output)
 		})
 	}
 }
@@ -127,8 +127,8 @@ func TestService_Shutdown_MultipleServers_WithoutRequest(t *testing.T) {
 
 			// Check the output
 			output := isGraceful.getOutput()
-			require.Containsf(t, output, "http server is stopped", "OUTPUT:\n%v", output)
-			require.Containsf(t, output, "no more connection running", "OUTPUT:\n%v", output)
+			require.Containsf(t, output, "Http server is stopped", "OUTPUT:\n%v", output)
+			require.Containsf(t, output, "No more connection running", "OUTPUT:\n%v", output)
 		})
 	}
 }
@@ -184,8 +184,8 @@ func TestService_Shutdown_MultipleServers_WithRequest(t *testing.T) {
 
 			// Check the output
 			output := isGraceful.getOutput()
-			require.Containsf(t, output, "http server is stopped", "OUTPUT:\n%v", output)
-			require.Containsf(t, output, "no more connection running", "OUTPUT:\n%v", output)
+			require.Containsf(t, output, "Http server is stopped", "OUTPUT:\n%v", output)
+			require.Containsf(t, output, "No more connection running", "OUTPUT:\n%v", output)
 		})
 	}
 }
@@ -286,9 +286,9 @@ func TestService_Restart(t *testing.T) {
 
 	// Check the output
 	output := isGraceful.getOutput()
-	require.Containsf(t, output, "request graceful restart", "OUTPUT:\n%v", output)
-	require.Containsf(t, output, "http server is stopped", "OUTPUT:\n%v", output)
-	require.Containsf(t, output, "no more connection running", "OUTPUT:\n%v", output)
+	require.Containsf(t, output, "Request graceful restart", "OUTPUT:\n%v", output)
+	require.Containsf(t, output, "Http server is stopped", "OUTPUT:\n%v", output)
+	require.Containsf(t, output, "No more connection running", "OUTPUT:\n%v", output)
 }
 
 type cmdAndOutput struct {

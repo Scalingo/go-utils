@@ -254,7 +254,7 @@ func (s *Service) shutdown(ctx context.Context) error {
 			log.Info("Shutting down http server")
 			err := httpServer.Shutdown(ctx)
 			if err != nil {
-				log.WithError(err).Error("Fail to shutdown http server")
+				log.WithError(err).Error("fail to shutdown http server")
 				errChan <- errors.Wrapf(ctx, err, "shutdown http server %d", i)
 			} else {
 				log.Info("Http server is stopped")
