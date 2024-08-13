@@ -115,15 +115,15 @@ func (s *Service) listenAndServe(ctx context.Context, _ string, addr string, ser
 
 	log := logger.Get(ctx)
 
-	curServerCount := len(s.httpServers)
-	s.httpServers = append(s.httpServers, server)
-	if curServerCount == 0 {
+	if len(s.httpServers) == 0 {
 		err := s.prepare(ctx)
 		if err != nil {
 			// purposefully do not wrap error here, as it is wrapped in prepare
 			return err
 		}
 	}
+
+	s.httpServers = append(s.httpServers, server)
 
 	// Listen must be called before Ready
 	ln, err := s.upg.Listen("tcp", addr)
@@ -142,7 +142,7 @@ func (s *Service) listenAndServe(ctx context.Context, _ string, addr string, ser
 		}
 	}()
 
-	if curServerCount+1 == s.numServers {
+	if len(s.httpServers) == s.numServers {
 		err := s.finalize(ctx)
 		if err != nil {
 			// purposefully do not wrap error here, as it is wrapped in finalize
@@ -178,6 +178,8 @@ func (s *Service) finalize(ctx context.Context) error {
 	if err := s.upg.Ready(); err != nil {
 		return errors.Wrapf(ctx, err, "upgrader notify ready")
 	}
+
+	// Once the service has started, it will be blocked here until a signal is received.
 	<-s.upg.Exit()
 	log.Info("Upgrader finished")
 
