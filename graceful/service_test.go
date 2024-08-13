@@ -49,8 +49,8 @@ func TestService_Shutdown_WithoutRequest(t *testing.T) {
 
 			// Check the output
 			output := isGraceful.getOutput()
-			require.Containsf(t, output, "http server is stopped", "OUTPUT:\n%v", output)
-			require.Containsf(t, output, "no more connection running", "OUTPUT:\n%v", output)
+			require.Containsf(t, output, "Http server is stopped", "OUTPUT:\n%v", output)
+			require.Containsf(t, output, "No more connection running", "OUTPUT:\n%v", output)
 		})
 	}
 }
@@ -96,8 +96,96 @@ func TestService_Shutdown_WithRequest(t *testing.T) {
 
 			// Check the output
 			output := isGraceful.getOutput()
-			require.Containsf(t, output, "http server is stopped", "OUTPUT:\n%v", output)
-			require.Containsf(t, output, "no more connection running", "OUTPUT:\n%v", output)
+			require.Containsf(t, output, "Http server is stopped", "OUTPUT:\n%v", output)
+			require.Containsf(t, output, "No more connection running", "OUTPUT:\n%v", output)
+		})
+	}
+}
+
+// TestService_Shutdown_MultipleServers_WithoutRequest tests the shutdown of the service with a request
+func TestService_Shutdown_MultipleServers_WithoutRequest(t *testing.T) {
+	upgradeTimeout := time.Millisecond * 200
+	shutdownTimeout := time.Millisecond * 100
+
+	for i, s := range []os.Signal{syscall.SIGINT, syscall.SIGTERM} {
+		t.Run("signal "+s.String()+" expect service to stop", func(t *testing.T) {
+			// Configure isGraceful
+			isGraceful := newCmdAndOutput(t,
+				withCmd(getCmd("num-servers=2")),
+				withUpgradeWaitDuration(upgradeTimeout),
+				withShutdownWaitDuration(shutdownTimeout),
+				withPidFile(fmt.Sprintf("./testdata/server-%d.pid", i)),
+			)
+
+			// start the command
+			isGraceful.start()
+			defer isGraceful.stop()
+
+			// Send the signal
+			isGraceful.signal(s)
+			isGraceful.isStoppedAfter(shutdownTimeout)
+
+			// Check the output
+			output := isGraceful.getOutput()
+			require.Containsf(t, output, "Http server is stopped", "OUTPUT:\n%v", output)
+			require.Containsf(t, output, "No more connection running", "OUTPUT:\n%v", output)
+		})
+	}
+}
+
+// TestService_Shutdown_MultipleServers_WithRequest tests the shutdown of the service with a request
+func TestService_Shutdown_MultipleServers_WithRequest(t *testing.T) {
+	upgradeTimeout := time.Millisecond * 200
+	shutdownTimeout := time.Millisecond * 100
+
+	for i, s := range []os.Signal{syscall.SIGINT, syscall.SIGTERM} {
+		t.Run("signal "+s.String()+" expect service to stop", func(t *testing.T) {
+			// Configure isGraceful
+			isGraceful := newCmdAndOutput(t,
+				withCmd(getCmd("num-servers=2")),
+				withUpgradeWaitDuration(upgradeTimeout),
+				withShutdownWaitDuration(shutdownTimeout),
+				withPidFile(fmt.Sprintf("./testdata/server-%d.pid", i)),
+			)
+
+			// start the command
+			isGraceful.start()
+			defer isGraceful.stop()
+
+			errs := make(chan error)
+			go func() {
+				resp, err := http.Get("http://localhost:9000/?sleep=200")
+				errs <- err
+				if err == nil {
+					// Response body must be closed
+					err = resp.Body.Close()
+					errs <- err
+				}
+			}()
+
+			go func() {
+				resp, err := http.Get("http://localhost:9000/1?sleep=200")
+				errs <- err
+				if err == nil {
+					// Response body must be closed
+					err = resp.Body.Close()
+					errs <- err
+				}
+			}()
+
+			time.Sleep(10 * time.Millisecond)
+
+			// Send the signal
+			isGraceful.signal(s)
+			isGraceful.isRunningAfterAsync(100 * time.Millisecond)
+			isGraceful.isStoppedAfterAsync(300 * time.Millisecond)
+
+			require.NoError(t, <-errs)
+
+			// Check the output
+			output := isGraceful.getOutput()
+			require.Containsf(t, output, "Http server is stopped", "OUTPUT:\n%v", output)
+			require.Containsf(t, output, "No more connection running", "OUTPUT:\n%v", output)
 		})
 	}
 }
@@ -108,7 +196,7 @@ func TestService_Shutdown_WithTimeout(t *testing.T) {
 		t.Run("signal "+s.String(), func(t *testing.T) {
 			// Configure isGraceful
 			isGraceful := newCmdAndOutput(t,
-				withCmd(getCmd("100")),
+				withCmd(getCmd("wait-duration=100")),
 				withUpgradeWaitDuration(200*time.Millisecond),
 				withShutdownWaitDuration(100*time.Millisecond),
 				withPidFile(fmt.Sprintf("./testdata/server-%d.pid", i)),
@@ -198,7 +286,9 @@ func TestService_Restart(t *testing.T) {
 
 	// Check the output
 	output := isGraceful.getOutput()
-	require.Containsf(t, output, "request graceful restart", "OUTPUT:\n%v", output)
+	require.Containsf(t, output, "Request graceful restart", "OUTPUT:\n%v", output)
+	require.Containsf(t, output, "Http server is stopped", "OUTPUT:\n%v", output)
+	require.Containsf(t, output, "No more connection running", "OUTPUT:\n%v", output)
 }
 
 type cmdAndOutput struct {
