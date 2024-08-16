@@ -12,8 +12,8 @@ type Pagination struct {
 }
 
 type Paginated[T interface{}] struct {
-	Data T
-	Pagination
+	Data T          `json:"data"`
+	Meta Pagination `json:"meta"`
 }
 
 func NewPaginated[T interface{}](data T, pageRequest PageRequest, totalCount int64) Paginated[T] {
@@ -35,7 +35,7 @@ func NewPaginated[T interface{}](data T, pageRequest PageRequest, totalCount int
 
 	return Paginated[T]{
 		Data: data,
-		Pagination: Pagination{
+		Meta: Pagination{
 			CurrentPage: pageRequest.page,
 			PageSize:    pageRequest.pageSize,
 			PrevPage:    prevPage,
@@ -43,12 +43,5 @@ func NewPaginated[T interface{}](data T, pageRequest PageRequest, totalCount int
 			TotalPages:  totalPages,
 			TotalCount:  totalCount,
 		},
-	}
-}
-
-func ConvertData[T, S any](paginated Paginated[T], callback func(T) S) Paginated[S] {
-	return Paginated[S]{
-		Data:       callback(paginated.Data),
-		Pagination: paginated.Pagination,
 	}
 }
