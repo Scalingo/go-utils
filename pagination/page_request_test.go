@@ -1,8 +1,9 @@
 package pagination
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewPageRequest(t *testing.T) {
