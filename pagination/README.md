@@ -1,6 +1,6 @@
-## Package `pagination` v0.0.1
+## Package `pagination` v0
 
-This is a simple pagination library for Go.
+This is a pagination library for Go.
 
 The `PageRequest` struct is used to define the page number and the page size when requesting a page of items.
 
@@ -45,8 +45,7 @@ func main() {
 		{ID: 4, Name: "Item 4"},
 	}
 	
-    p := pagination.NewPaginated[[]Item](
-		items, pagination.NewPageRequest(1, 2), 4)
+    p := pagination.NewPaginated[[]Item](items, pagination.NewPageRequest(1, 2), 4)
     fmt.Println(p)
 }
 ```
