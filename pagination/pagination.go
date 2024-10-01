@@ -11,12 +11,12 @@ type Pagination struct {
 	TotalCount  int64 `json:"total_count"`
 }
 
-type Paginated[T interface{}] struct {
+type Paginated[T any] struct {
 	Data T          `json:"data"`
 	Meta Pagination `json:"meta"`
 }
 
-func NewService[T interface{}](data T, pageRequest PageRequest, totalCount int64) Paginated[T] {
+func NewService[T any](data T, pageRequest PageRequest, totalCount int64) Paginated[T] {
 	prevPage := pageRequest.Page - 1
 	if prevPage < 1 {
 		prevPage = 1
