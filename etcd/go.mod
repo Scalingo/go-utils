@@ -1,8 +1,6 @@
 module github.com/Scalingo/go-utils/etcd
 
-go 1.21
-
-toolchain go1.22.5
+go 1.20
 
 require (
 	go.etcd.io/etcd/client/pkg/v3 v3.5.15
