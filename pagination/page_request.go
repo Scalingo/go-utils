@@ -3,8 +3,8 @@ package pagination
 const defaultPageSize = 20
 
 type PageRequest struct {
-	page     int // page requested (default 1)
-	pageSize int // Number of items per page
+	Page     int // page requested (default 1)
+	PageSize int // Number of items per page
 }
 
 func NewPageRequest(page, pageSize int) PageRequest {
@@ -15,23 +15,15 @@ func NewPageRequest(page, pageSize int) PageRequest {
 		pageSize = defaultPageSize
 	}
 	return PageRequest{
-		page:     page,
-		pageSize: pageSize,
+		Page:     page,
+		PageSize: pageSize,
 	}
 }
 
-func (p PageRequest) Page() int {
-	return p.page
+func (p PageRequest) Limit() int {
+	return p.PageSize
 }
 
-func (p PageRequest) PageSize() int {
-	return p.pageSize
-}
-
-func (p PageRequest) Limit() int32 {
-	return int32(p.pageSize)
-}
-
-func (p PageRequest) Offset() int32 {
-	return int32((p.page - 1) * p.pageSize)
+func (p PageRequest) Offset() int {
+	return (p.Page - 1) * p.PageSize
 }

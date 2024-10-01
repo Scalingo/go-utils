@@ -17,18 +17,18 @@ type Paginated[T interface{}] struct {
 }
 
 func NewPaginated[T interface{}](data T, pageRequest PageRequest, totalCount int64) Paginated[T] {
-	prevPage := pageRequest.page - 1
+	prevPage := pageRequest.Page - 1
 	if prevPage < 1 {
 		prevPage = 1
 	}
 
-	totalPages := int(math.Ceil(float64(totalCount) / float64(pageRequest.pageSize)))
+	totalPages := int(math.Ceil(float64(totalCount) / float64(pageRequest.PageSize)))
 	if totalPages == 0 {
 		// We always want at least one page, even if it is empty
 		totalPages = 1
 	}
 
-	nextPage := pageRequest.page + 1
+	nextPage := pageRequest.Page + 1
 	if nextPage > totalPages {
 		nextPage = totalPages
 	}
@@ -36,8 +36,8 @@ func NewPaginated[T interface{}](data T, pageRequest PageRequest, totalCount int
 	return Paginated[T]{
 		Data: data,
 		Meta: Pagination{
-			CurrentPage: pageRequest.page,
-			PageSize:    pageRequest.pageSize,
+			CurrentPage: pageRequest.Page,
+			PageSize:    pageRequest.PageSize,
 			PrevPage:    prevPage,
 			NextPage:    nextPage,
 			TotalPages:  totalPages,
