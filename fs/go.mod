@@ -4,4 +4,4 @@ go 1.20
 
 require github.com/spf13/afero v1.11.0
 
-require golang.org/x/text v0.17.0 // indirect
+require golang.org/x/text v0.18.0 // indirect
