@@ -16,7 +16,7 @@ func TestNewPaginated(t *testing.T) {
 		totalCount := int64(0)
 
 		// When
-		got := NewService(data, pageRequest, totalCount)
+		got := New(data, pageRequest, totalCount)
 
 		// Then
 		require.Equal(t, Paginated[testTypeA]{
@@ -39,7 +39,7 @@ func TestNewPaginated(t *testing.T) {
 		totalCount := int64(10)
 
 		// When
-		got := NewService(data, pageRequest, totalCount)
+		got := New(data, pageRequest, totalCount)
 
 		// Then
 		require.Equal(t, Paginated[testTypeA]{

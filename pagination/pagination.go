@@ -8,7 +8,7 @@ type Pagination struct {
 	PrevPage    int   `json:"prev_page"`
 	NextPage    int   `json:"next_page"`
 	TotalPages  int   `json:"total_pages"`
-	TotalCount  int64 `json:"total_count"`
+	TotalCount  int64 `json:"total_count"` // int64 to support result sets with >2.17B rows
 }
 
 type Paginated[T any] struct {
@@ -16,7 +16,7 @@ type Paginated[T any] struct {
 	Meta Pagination `json:"meta"`
 }
 
-func NewService[T any](data T, pageRequest PageRequest, totalCount int64) Paginated[T] {
+func New[T any](data T, pageRequest PageRequest, totalCount int64) Paginated[T] {
 	prevPage := pageRequest.Page - 1
 	if prevPage < 1 {
 		prevPage = 1
