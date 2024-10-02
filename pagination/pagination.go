@@ -2,7 +2,7 @@ package pagination
 
 import "math"
 
-type Pagination struct {
+type Meta struct {
 	CurrentPage int   `json:"current_page"`
 	PageSize    int   `json:"per_page"`
 	PrevPage    int   `json:"prev_page"`
@@ -12,8 +12,8 @@ type Pagination struct {
 }
 
 type Paginated[T any] struct {
-	Data T          `json:"data"`
-	Meta Pagination `json:"meta"`
+	Data T    `json:"data"`
+	Meta Meta `json:"meta"`
 }
 
 func New[T any](data T, pageRequest PageRequest, totalCount int64) Paginated[T] {
@@ -35,7 +35,7 @@ func New[T any](data T, pageRequest PageRequest, totalCount int64) Paginated[T] 
 
 	return Paginated[T]{
 		Data: data,
-		Meta: Pagination{
+		Meta: Meta{
 			CurrentPage: pageRequest.Page,
 			PageSize:    pageRequest.PageSize,
 			PrevPage:    prevPage,

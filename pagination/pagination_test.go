@@ -21,7 +21,7 @@ func TestNewPaginated(t *testing.T) {
 		// Then
 		require.Equal(t, Paginated[testTypeA]{
 			Data: testTypeA{},
-			Meta: Pagination{
+			Meta: Meta{
 				CurrentPage: 1,
 				PageSize:    10,
 				PrevPage:    1,
@@ -44,7 +44,7 @@ func TestNewPaginated(t *testing.T) {
 		// Then
 		require.Equal(t, Paginated[testTypeA]{
 			Data: testTypeA{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
-			Meta: Pagination{
+			Meta: Meta{
 				CurrentPage: 1,
 				PageSize:    10,
 				PrevPage:    1,
