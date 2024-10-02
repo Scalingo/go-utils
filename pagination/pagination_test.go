@@ -9,7 +9,7 @@ import (
 type testTypeA []int
 
 func TestNewPaginated(t *testing.T) {
-	t.Run("new paginated pageSize 10 empty", func(t *testing.T) {
+	t.Run("new paginated perPage 10 empty", func(t *testing.T) {
 		// Given
 		data := testTypeA{}
 		pageRequest := NewRequest(1, 10)
@@ -23,7 +23,7 @@ func TestNewPaginated(t *testing.T) {
 			Data: testTypeA{},
 			Meta: Meta{
 				CurrentPage: 1,
-				PageSize:    10,
+				PerPage:     10,
 				PrevPage:    1,
 				NextPage:    1,
 				TotalPages:  1,
@@ -32,7 +32,7 @@ func TestNewPaginated(t *testing.T) {
 		}, got)
 	})
 
-	t.Run("new paginated pageSize 10 one full page", func(t *testing.T) {
+	t.Run("new paginated perPage 10 one full page", func(t *testing.T) {
 		// Given
 		data := testTypeA{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 		pageRequest := NewRequest(1, 10)
@@ -46,7 +46,7 @@ func TestNewPaginated(t *testing.T) {
 			Data: testTypeA{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
 			Meta: Meta{
 				CurrentPage: 1,
-				PageSize:    10,
+				PerPage:     10,
 				PrevPage:    1,
 				NextPage:    1,
 				TotalPages:  1,

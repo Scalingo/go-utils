@@ -10,22 +10,22 @@ func TestNewPageRequest(t *testing.T) {
 	t.Run("creates new page request correctly initialised", func(t *testing.T) {
 		got := NewRequest(2, 22)
 		require.Equal(t, Request{
-			Page:     2,
-			PageSize: 22,
+			Page:    2,
+			PerPage: 22,
 		}, got)
 	})
 
 	t.Run("creates new page request with defaults when badly initialised", func(t *testing.T) {
 		got := NewRequest(0, 0)
 		require.Equal(t, Request{
-			Page:     1,
-			PageSize: 20,
+			Page:    1,
+			PerPage: 20,
 		}, got)
 	})
 }
 
 func TestPageRequest_Limit(t *testing.T) {
-	t.Run("get limit same size as initialised pageSize", func(t *testing.T) {
+	t.Run("get limit same size as initialised perPage", func(t *testing.T) {
 		// Given
 		p := NewRequest(1, 20)
 

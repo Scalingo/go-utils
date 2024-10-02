@@ -4,7 +4,7 @@ import "math"
 
 type Meta struct {
 	CurrentPage int   `json:"current_page"`
-	PageSize    int   `json:"page_size"`
+	PerPage     int   `json:"per_page"`
 	PrevPage    int   `json:"prev_page"`
 	NextPage    int   `json:"next_page"`
 	TotalPages  int   `json:"total_pages"`
@@ -22,7 +22,7 @@ func New[T any](data T, pageRequest Request, totalCount int64) Paginated[T] {
 		prevPage = 1
 	}
 
-	totalPages := int(math.Ceil(float64(totalCount) / float64(pageRequest.PageSize)))
+	totalPages := int(math.Ceil(float64(totalCount) / float64(pageRequest.PerPage)))
 	if totalPages == 0 {
 		// We always want at least one page, even if it is empty
 		totalPages = 1
@@ -37,7 +37,7 @@ func New[T any](data T, pageRequest Request, totalCount int64) Paginated[T] {
 		Data: data,
 		Meta: Meta{
 			CurrentPage: pageRequest.Page,
-			PageSize:    pageRequest.PageSize,
+			PerPage:     pageRequest.PerPage,
 			PrevPage:    prevPage,
 			NextPage:    nextPage,
 			TotalPages:  totalPages,
