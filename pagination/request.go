@@ -2,28 +2,28 @@ package pagination
 
 const defaultPageSize = 20
 
-type PageRequest struct {
+type Request struct {
 	Page     int // page requested (default 1)
 	PageSize int // Number of items per page
 }
 
-func NewPageRequest(page, pageSize int) PageRequest {
+func NewRequest(page, pageSize int) Request {
 	if page < 1 {
 		page = 1
 	}
 	if pageSize < 1 {
 		pageSize = defaultPageSize
 	}
-	return PageRequest{
+	return Request{
 		Page:     page,
 		PageSize: pageSize,
 	}
 }
 
-func (p PageRequest) Limit() int {
+func (p Request) Limit() int {
 	return p.PageSize
 }
 
-func (p PageRequest) Offset() int {
+func (p Request) Offset() int {
 	return (p.Page - 1) * p.PageSize
 }

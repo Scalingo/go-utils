@@ -12,7 +12,7 @@ func TestNewPaginated(t *testing.T) {
 	t.Run("new paginated pageSize 10 empty", func(t *testing.T) {
 		// Given
 		data := testTypeA{}
-		pageRequest := NewPageRequest(1, 10)
+		pageRequest := NewRequest(1, 10)
 		totalCount := int64(0)
 
 		// When
@@ -35,7 +35,7 @@ func TestNewPaginated(t *testing.T) {
 	t.Run("new paginated pageSize 10 one full page", func(t *testing.T) {
 		// Given
 		data := testTypeA{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-		pageRequest := NewPageRequest(1, 10)
+		pageRequest := NewRequest(1, 10)
 		totalCount := int64(10)
 
 		// When

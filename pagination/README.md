@@ -2,6 +2,20 @@
 
 This is a pagination library for Go.
 
+This library provides a data structure to transport paginated data. It is useful when you need to return a page of items
+along with the total number of items and other Metadata.
+
+**What this library does:**
+
+* it provides a data structure to transport paginated data.
+* it provides functions to create "paginated data" and "page request" structures.
+* it accepts data as a slice of any type. The data supplied must be 1 page of items.
+
+**What this library does NOT do:**
+
+* it is NOT responsible for fetching the data from the database.
+* it is NOT responsible for splitting a result set into pages.
+
 The `PageRequest` struct is used to define the page number and the page size when requesting a page of items.
 
 The `Paginated` struct is used to return a page of items along with the total number of items.
@@ -13,7 +27,7 @@ The `Paginated` struct is used to return a page of items along with the total nu
   "meta": {
     "current_page": 1,
     "next_page": 1,
-    "per_page": 20,
+    "page_size": 20,
     "prev_page": 1,
     "total_count": 0,
     "total_pages": 1
@@ -23,6 +37,13 @@ The `Paginated` struct is used to return a page of items along with the total nu
 
 
 ### Usage
+
+#### Example of the first page of data of a small dataset:
+
+In this example, we create a new `Paginated` struct with a slice of `Item` and a `PageRequest` struct.
+* The total number of items in the database is 4.
+* The `PageRequest` struct specifies that we want the first page with 10 items per page.
+* The `items` slice contains 4 items (the same as the number of total items, but less than a full page).
 
 ```go
 package main
@@ -45,7 +66,32 @@ func main() {
 		{ID: 4, Name: "Item 4"},
 	}
 	
-    p := pagination.NewPaginated[[]Item](items, pagination.NewPageRequest(1, 2), 4)
+    p := pagination.New[[]Item](items, pagination.NewPageRequest(1, 10), 4)
     fmt.Println(p)
 }
 ```
+
+#### An example of the second page of data of a larger dataset:
+
+In this example:
+* The total number of items in the database is 123.
+* The `PageRequest` struct specifies that we want the second page with 10 items per page.
+* The `items` slice contains 10 items (the second page of data).
+
+```go
+	items := []Item{
+		{ID: 21, Name: "Item 21"},
+		{ID: 22, Name: "Item 22"},
+		{ID: 23, Name: "Item 23"},
+		{ID: 24, Name: "Item 24"},
+		...
+		{ID: 29, Name: "Item 29"},
+        {ID: 30, Name: "Item 30"},
+}
+	
+    p := pagination.New[[]Item](items, pagination.NewPageRequest(2, 10), 123)
+```
+
+In both examples we rely on the database query to return the correct page of data. The `Paginated` struct is used to 
+transport the data to the client.
+

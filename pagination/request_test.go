@@ -8,16 +8,16 @@ import (
 
 func TestNewPageRequest(t *testing.T) {
 	t.Run("creates new page request correctly initialised", func(t *testing.T) {
-		got := NewPageRequest(2, 22)
-		require.Equal(t, PageRequest{
+		got := NewRequest(2, 22)
+		require.Equal(t, Request{
 			Page:     2,
 			PageSize: 22,
 		}, got)
 	})
 
 	t.Run("creates new page request with defaults when badly initialised", func(t *testing.T) {
-		got := NewPageRequest(0, 0)
-		require.Equal(t, PageRequest{
+		got := NewRequest(0, 0)
+		require.Equal(t, Request{
 			Page:     1,
 			PageSize: 20,
 		}, got)
@@ -27,7 +27,7 @@ func TestNewPageRequest(t *testing.T) {
 func TestPageRequest_Limit(t *testing.T) {
 	t.Run("get limit same size as initialised pageSize", func(t *testing.T) {
 		// Given
-		p := NewPageRequest(1, 20)
+		p := NewRequest(1, 20)
 
 		// When
 		limit := p.Limit()
@@ -40,7 +40,7 @@ func TestPageRequest_Limit(t *testing.T) {
 func TestPageRequest_Offset(t *testing.T) {
 	t.Run("get offset 0 if page is 1", func(t *testing.T) {
 		// Given
-		p := NewPageRequest(1, 20)
+		p := NewRequest(1, 20)
 
 		// When
 		offset := p.Offset()
@@ -50,7 +50,7 @@ func TestPageRequest_Offset(t *testing.T) {
 	})
 	t.Run("get offset 20 if page is 2", func(t *testing.T) {
 		// Given
-		p := NewPageRequest(2, 20)
+		p := NewRequest(2, 20)
 
 		// When
 		offset := p.Offset()
@@ -60,7 +60,7 @@ func TestPageRequest_Offset(t *testing.T) {
 	})
 	t.Run("get offset 40 if page is 3", func(t *testing.T) {
 		// Given
-		p := NewPageRequest(3, 20)
+		p := NewRequest(3, 20)
 
 		// When
 		offset := p.Offset()
@@ -70,7 +70,7 @@ func TestPageRequest_Offset(t *testing.T) {
 	})
 	t.Run("get offset 30 if page is 2 and page size is 30", func(t *testing.T) {
 		// Given
-		p := NewPageRequest(2, 30)
+		p := NewRequest(2, 30)
 
 		// When
 		offset := p.Offset()

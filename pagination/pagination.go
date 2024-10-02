@@ -4,7 +4,7 @@ import "math"
 
 type Meta struct {
 	CurrentPage int   `json:"current_page"`
-	PageSize    int   `json:"per_page"`
+	PageSize    int   `json:"page_size"`
 	PrevPage    int   `json:"prev_page"`
 	NextPage    int   `json:"next_page"`
 	TotalPages  int   `json:"total_pages"`
@@ -16,7 +16,7 @@ type Paginated[T any] struct {
 	Meta Meta `json:"meta"`
 }
 
-func New[T any](data T, pageRequest PageRequest, totalCount int64) Paginated[T] {
+func New[T any](data T, pageRequest Request, totalCount int64) Paginated[T] {
 	prevPage := pageRequest.Page - 1
 	if prevPage < 1 {
 		prevPage = 1
