@@ -68,7 +68,7 @@ func main() {
 
 	page := 1
 	perPage := 2
-	p := pagination.New[[]Item](items, pagination.NewPageRequest(page, perPage), 4)
+	p := pagination.New[[]Item](items, pagination.NewRequest(page, perPage), 4)
 	fmt.Println(p)
 }
 ```
@@ -94,7 +94,7 @@ In this example:
         
     page := 2
 	perPage := 10
-    p := pagination.New[[]Item](items, pagination.NewPageRequest(page, perPage), 123)
+    p := pagination.New[[]Item](items, pagination.NewRequest(page, perPage), 123)
 ```
 
 In both examples we rely on the database query to return the correct page of data. The `Paginated` struct is used to
