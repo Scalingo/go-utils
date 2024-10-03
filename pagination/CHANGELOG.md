@@ -2,4 +2,6 @@
 
 ## To be released
 
-* Initial version of pagination
+## v1.0.0
+
+* Initial version of pagination module
