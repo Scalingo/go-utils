@@ -20,10 +20,14 @@ func NewRequest(page, perPage int) Request {
 	}
 }
 
-func (p Request) Limit() int {
-	return p.PerPage
+// QueryLimit The limit value to use when querying the DB
+func (p Request) QueryLimit() int32 {
+	// Returns an int32 so that the value can be used as a query argument without typecasting
+	return int32(p.PerPage)
 }
 
-func (p Request) Offset() int {
-	return (p.Page - 1) * p.PerPage
+// QueryOffset The offset value to use when querying the DB
+func (p Request) QueryOffset() int32 {
+	// Returns an int32 so that the value can be used as a query argument without typecasting
+	return int32((p.Page - 1) * p.PerPage)
 }

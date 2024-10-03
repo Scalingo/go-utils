@@ -30,10 +30,10 @@ func TestPageRequest_Limit(t *testing.T) {
 		p := NewRequest(1, 20)
 
 		// When
-		limit := p.Limit()
+		limit := p.QueryLimit()
 
 		// Then
-		require.Equal(t, 20, limit)
+		require.Equal(t, int32(20), limit)
 	})
 }
 
@@ -43,39 +43,39 @@ func TestPageRequest_Offset(t *testing.T) {
 		p := NewRequest(1, 20)
 
 		// When
-		offset := p.Offset()
+		offset := p.QueryOffset()
 
 		// Then
-		require.Equal(t, 0, offset)
+		require.Equal(t, int32(0), offset)
 	})
 	t.Run("get offset 20 if page is 2", func(t *testing.T) {
 		// Given
 		p := NewRequest(2, 20)
 
 		// When
-		offset := p.Offset()
+		offset := p.QueryOffset()
 
 		// Then
-		require.Equal(t, 20, offset)
+		require.Equal(t, int32(20), offset)
 	})
 	t.Run("get offset 40 if page is 3", func(t *testing.T) {
 		// Given
 		p := NewRequest(3, 20)
 
 		// When
-		offset := p.Offset()
+		offset := p.QueryOffset()
 
 		// Then
-		require.Equal(t, 40, offset)
+		require.Equal(t, int32(40), offset)
 	})
 	t.Run("get offset 30 if page is 2 and page size is 30", func(t *testing.T) {
 		// Given
 		p := NewRequest(2, 30)
 
 		// When
-		offset := p.Offset()
+		offset := p.QueryOffset()
 
 		// Then
-		require.Equal(t, 30, offset)
+		require.Equal(t, int32(30), offset)
 	})
 }
