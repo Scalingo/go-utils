@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat: add a configurable log level
+
 ## v1.2.0
 
 * feat: Start unwraps errors to find noRetry field that can be wrapped in ErrCtx. Also use ErrCtx to enrich the logger
