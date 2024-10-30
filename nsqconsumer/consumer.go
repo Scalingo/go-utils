@@ -42,6 +42,21 @@ const (
 	LogLevelError
 )
 
+func ParseLogLevel(logLevel string) LogLevel {
+	switch logLevel {
+	case "debug":
+		return LogLevelDebug
+	case "info":
+		return LogLevelInfo
+	case "warn":
+		return LogLevelWarning
+	case "error":
+		return LogLevelError
+	default:
+		return DefaultLogLevel
+	}
+}
+
 func (l LogLevel) toNSQLogLevel() nsq.LogLevel {
 	switch l {
 	case LogLevelDebug:
@@ -311,7 +326,7 @@ func (c *nsqConsumer) postponeMessage(ctx context.Context, msgLogger logrus.Fiel
 		Payload: msg.Payload,
 	}
 
-	msgLogger.Info("POSTPONE Messaage")
+	msgLogger.Info("POSTPONE Message")
 
 	if c.PostponeProducer == nil {
 		return errors.New("no postpone producer configured in this consumer")
