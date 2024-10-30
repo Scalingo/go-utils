@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.3.0
+
 * feat: add a configurable log level
 
 ## v1.2.0
