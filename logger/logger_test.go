@@ -2,12 +2,12 @@ package logger
 
 import (
 	"context"
-	"github.com/stretchr/testify/require"
 	"regexp"
 	"testing"
 
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDefault(t *testing.T) {
@@ -42,7 +42,7 @@ type TestHook struct {
 	Fired bool
 }
 
-func (h *TestHook) Fire(entry *logrus.Entry) error {
+func (h *TestHook) Fire(_ *logrus.Entry) error {
 	h.Fired = true
 	return nil
 }
@@ -186,14 +186,14 @@ func TestWithRedactedFields(t *testing.T) {
 
 func TestNewContextWithLogger(t *testing.T) {
 	ctx := NewContextWithLogger()
-	logger := ctx.Value("logger")
+	logger := ctx.Value(loggerContextKey)
 	assert.NotNil(t, logger)
 }
 
 func TestAddLoggerToContext(t *testing.T) {
 	ctx := context.Background()
 	ctx = AddLoggerToContext(ctx)
-	logger := ctx.Value("logger")
+	logger := ctx.Value(loggerContextKey)
 	assert.NotNil(t, logger)
 }
 
@@ -208,7 +208,7 @@ func TestGet(t *testing.T) {
 
 func TestWithFieldToCtx(t *testing.T) {
 	ctx := context.Background()
-	ctx, logger := WithFieldToCtx(ctx, "key", "value")
+	_, logger := WithFieldToCtx(ctx, "key", "value")
 	assert.NotNil(t, logger)
 	assert.Equal(t, "value", logger.(*logrus.Entry).Data["key"])
 }
@@ -216,7 +216,7 @@ func TestWithFieldToCtx(t *testing.T) {
 func TestWithFieldsToCtx(t *testing.T) {
 	ctx := context.Background()
 	fields := logrus.Fields{"key1": "value1", "key2": "value2"}
-	ctx, logger := WithFieldsToCtx(ctx, fields)
+	_, logger := WithFieldsToCtx(ctx, fields)
 	assert.NotNil(t, logger)
 	assert.Equal(t, "value1", logger.(*logrus.Entry).Data["key1"])
 	assert.Equal(t, "value2", logger.(*logrus.Entry).Data["key2"])
@@ -226,5 +226,5 @@ func TestToCtx(t *testing.T) {
 	ctx := context.Background()
 	logger := logrus.New()
 	ctx = ToCtx(ctx, logger)
-	assert.Equal(t, logger, ctx.Value("logger"))
+	assert.Equal(t, logger, ctx.Value(loggerContextKey))
 }

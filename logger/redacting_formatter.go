@@ -1,8 +1,9 @@
 package logger
 
 import (
-	"github.com/sirupsen/logrus"
 	"regexp"
+
+	"github.com/sirupsen/logrus"
 )
 
 type RedactionOption struct {
@@ -17,25 +18,26 @@ type RedactingFormatter struct {
 
 func (f *RedactingFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	for field, redactionOption := range f.fields {
-		if _, ok := entry.Data[field]; ok {
-			replaceWith := "REDACTED"
-
-			if redactionOption == nil {
-				entry.Data[field] = replaceWith
-				continue
-			}
-
-			if redactionOption.ReplaceWith != "" {
-				replaceWith = redactionOption.ReplaceWith
-			}
-
-			if redactionOption.Regexp == nil {
-				entry.Data[field] = replaceWith
-				continue
-			}
-
-			entry.Data[field] = redactionOption.Regexp.ReplaceAllString(entry.Data[field].(string), replaceWith)
+		if _, ok := entry.Data[field]; !ok {
+			continue
 		}
+		replaceWith := "REDACTED"
+
+		if redactionOption == nil {
+			entry.Data[field] = replaceWith
+			continue
+		}
+
+		if redactionOption.ReplaceWith != "" {
+			replaceWith = redactionOption.ReplaceWith
+		}
+
+		if redactionOption.Regexp == nil {
+			entry.Data[field] = replaceWith
+			continue
+		}
+
+		entry.Data[field] = redactionOption.Regexp.ReplaceAllString(entry.Data[field].(string), replaceWith)
 	}
 	return f.Formatter.Format(entry)
 }
