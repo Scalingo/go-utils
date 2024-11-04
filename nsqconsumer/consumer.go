@@ -30,6 +30,50 @@ var (
 	maxPostponeDelay int64 = 3600
 )
 
+// LogLevel is a wrapper around nsq.LogLevel to ensure that the default log level is set to Warning and not Debug
+type LogLevel int
+
+const (
+	// DefaultLogLevel is the default log level for NSQ when no log level is provided
+	DefaultLogLevel LogLevel = iota
+	LogLevelDebug
+	LogLevelInfo
+	LogLevelWarning
+	LogLevelError
+)
+
+func ParseLogLevel(logLevel string) LogLevel {
+	switch logLevel {
+	case "debug":
+		return LogLevelDebug
+	case "info":
+		return LogLevelInfo
+	case "warning":
+		return LogLevelWarning
+	case "error":
+		return LogLevelError
+	default:
+		return DefaultLogLevel
+	}
+}
+
+func (l LogLevel) toNSQLogLevel() nsq.LogLevel {
+	switch l {
+	case LogLevelDebug:
+		return nsq.LogLevelDebug
+	case LogLevelInfo:
+		return nsq.LogLevelInfo
+	case LogLevelWarning:
+		return nsq.LogLevelWarning
+	case LogLevelError:
+		return nsq.LogLevelError
+	case DefaultLogLevel:
+		return nsq.LogLevelWarning
+	default:
+		return nsq.LogLevelWarning
+	}
+}
+
 type Error struct {
 	error   error
 	noRetry bool
@@ -98,6 +142,7 @@ type nsqConsumer struct {
 	PostponeProducer nsqproducer.Producer
 	count            uint64
 	logger           logrus.FieldLogger
+	logLevel         LogLevel
 }
 
 type ConsumerOpts struct {
@@ -107,6 +152,7 @@ type ConsumerOpts struct {
 	Channel        string
 	MaxInFlight    int
 	SkipLogSet     map[string]bool
+	LogLevel       LogLevel
 	// PostponeProducer is an NSQ producer user to send postponed messages
 	PostponeProducer nsqproducer.Producer
 	// How long can the consumer keep the message before the message is considered as 'Timed Out'
@@ -135,6 +181,7 @@ func New(opts ConsumerOpts) (Consumer, error) {
 		MessageHandler: opts.MessageHandler,
 		MaxInFlight:    opts.MaxInFlight,
 		SkipLogSet:     opts.SkipLogSet,
+		logLevel:       opts.LogLevel,
 	}
 	if consumer.MaxInFlight == 0 {
 		consumer.MaxInFlight = opts.NsqConfig.MaxInFlight
@@ -166,7 +213,7 @@ func (c *nsqConsumer) Start(ctx context.Context) func() {
 		c.logger.WithError(err).Fatalf("fail to create new NSQ consumer")
 	}
 
-	consumer.SetLogger(log.New(os.Stderr, fmt.Sprintf("[nsq-consumer(%s)]", c.Topic), log.Flags()), nsq.LogLevelWarning)
+	consumer.SetLogger(log.New(os.Stderr, fmt.Sprintf("[nsq-consumer(%s)]", c.Topic), log.Flags()), c.logLevel.toNSQLogLevel())
 
 	consumer.AddConcurrentHandlers(nsq.HandlerFunc(c.nsqHandler), c.MaxInFlight)
 
@@ -279,7 +326,7 @@ func (c *nsqConsumer) postponeMessage(ctx context.Context, msgLogger logrus.Fiel
 		Payload: msg.Payload,
 	}
 
-	msgLogger.Info("POSTPONE Messaage")
+	msgLogger.Info("POSTPONE Message")
 
 	if c.PostponeProducer == nil {
 		return errors.New("no postpone producer configured in this consumer")
