@@ -2,9 +2,8 @@ package logger
 
 import (
 	"context"
-	"os"
-
 	"github.com/sirupsen/logrus"
+	"os"
 )
 
 // Opt is a function-option type for the Default() method.
@@ -31,11 +30,13 @@ func WithHooks(hooks []logrus.Hook) Opt {
 	}
 }
 
-func WithSetRedactedFields(fieldNames []string) Opt {
+// WithSetRedactedFields redacts fields or parts of fields according to the regular expressions provided.
+// If the regular expression is nil, the field is replaced by "REDACTED".
+func WithSetRedactedFields(fields map[string]*RedactionOption) Opt {
 	return func(l *logrus.Logger) {
 		l.SetFormatter(&RedactingFormatter{
 			Formatter: l.Formatter,
-			fields:    fieldNames,
+			fields:    fields,
 		})
 	}
 }
