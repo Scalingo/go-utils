@@ -108,12 +108,12 @@ func TestWithRedactedFields(t *testing.T) {
 		assert.Equal(t, "secret", hook.lastEntry.Data["password"])
 		assert.Equal(t, "value", hook.lastEntry.Data["other"])
 	})
-	t.Run("a field is fully redacted when the redactionOption is nil", func(t *testing.T) {
+	t.Run("nothing is redacted when the redactionOption is nil", func(t *testing.T) {
 		// Given
 		hook := TestLastEntryHook{}
 		hookOpt := WithHooks([]logrus.Hook{&hook})
-		redactedFieldsOpt := WithSetRedactedFields(map[string]*RedactionOption{
-			"password": nil,
+		redactedFieldsOpt := WithSetRedactedFields([]*RedactionOption{
+			nil,
 		})
 		logger := Default(hookOpt, redactedFieldsOpt)
 
@@ -127,15 +127,41 @@ func TestWithRedactedFields(t *testing.T) {
 		assert.IsType(t, &RedactingFormatter{}, logger.(*logrus.Logger).Formatter)
 		require.Len(t, hook.lastEntry.Data, 2)
 		require.Equal(t, "test", hook.lastEntry.Message)
-		assert.Equal(t, "REDACTED", hook.lastEntry.Data["password"])
+		assert.Equal(t, "secret", hook.lastEntry.Data["password"])
+		assert.Equal(t, "value", hook.lastEntry.Data["other"])
+	})
+	t.Run("a field is fully redacted when the regexp is nil", func(t *testing.T) {
+		// Given
+		hook := TestLastEntryHook{}
+		hookOpt := WithHooks([]logrus.Hook{&hook})
+		redactedFieldsOpt := WithSetRedactedFields([]*RedactionOption{
+			{
+				Field:  "password",
+				Regexp: nil,
+			},
+		})
+		logger := Default(hookOpt, redactedFieldsOpt)
+
+		// When
+		logger.WithFields(logrus.Fields{
+			"password": "secret",
+			"other":    "value",
+		}).Info("test")
+
+		// Then
+		assert.IsType(t, &RedactingFormatter{}, logger.(*logrus.Logger).Formatter)
+		require.Len(t, hook.lastEntry.Data, 2)
+		require.Equal(t, "test", hook.lastEntry.Message)
+		assert.Equal(t, "[REDACTED]", hook.lastEntry.Data["password"])
 		assert.Equal(t, "value", hook.lastEntry.Data["other"])
 	})
 	t.Run("a field is partially redacted when redactionOption with no replacement is provided", func(t *testing.T) {
 		// Given
 		hook := TestLastEntryHook{}
 		hookOpt := WithHooks([]logrus.Hook{&hook})
-		redactedFieldsOpt := WithSetRedactedFields(map[string]*RedactionOption{
-			"path": {
+		redactedFieldsOpt := WithSetRedactedFields([]*RedactionOption{
+			{
+				Field:  "path",
 				Regexp: regexp.MustCompile(`token=[^&]+`),
 			},
 		})
@@ -152,7 +178,7 @@ func TestWithRedactedFields(t *testing.T) {
 		assert.IsType(t, &RedactingFormatter{}, logger.(*logrus.Logger).Formatter)
 		require.Len(t, hook.lastEntry.Data, 2)
 		require.Equal(t, "test", hook.lastEntry.Message)
-		assert.Equal(t, "/apps/66b24069fb0de6002981dd79/logs?timestamp=1727183062&REDACTED&stream=true", hook.lastEntry.Data["path"])
+		assert.Equal(t, "/apps/66b24069fb0de6002981dd79/logs?timestamp=1727183062&[REDACTED]&stream=true", hook.lastEntry.Data["path"])
 		assert.Equal(t, "value", hook.lastEntry.Data["other"])
 	})
 
@@ -160,8 +186,9 @@ func TestWithRedactedFields(t *testing.T) {
 		// Given
 		hook := TestLastEntryHook{}
 		hookOpt := WithHooks([]logrus.Hook{&hook})
-		redactedFieldsOpt := WithSetRedactedFields(map[string]*RedactionOption{
-			"path": {
+		redactedFieldsOpt := WithSetRedactedFields([]*RedactionOption{
+			{
+				Field:       "path",
 				Regexp:      regexp.MustCompile(`(token=)[^&]+`),
 				ReplaceWith: "token=[HIDDEN]",
 			},

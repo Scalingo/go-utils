@@ -37,7 +37,7 @@ func WithHooks(hooks []logrus.Hook) Opt {
 
 // WithSetRedactedFields redacts fields or parts of fields according to the regular expressions provided.
 // If the regular expression is nil, the field is replaced by "REDACTED".
-func WithSetRedactedFields(fields map[string]*RedactionOption) Opt {
+func WithSetRedactedFields(fields []*RedactionOption) Opt {
 	return func(l *logrus.Logger) {
 		l.SetFormatter(&RedactingFormatter{
 			Formatter: l.Formatter,

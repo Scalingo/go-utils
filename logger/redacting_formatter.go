@@ -7,37 +7,42 @@ import (
 )
 
 type RedactionOption struct {
+	Field       string
 	Regexp      *regexp.Regexp
 	ReplaceWith string
 }
 
 type RedactingFormatter struct {
 	logrus.Formatter
-	fields map[string]*RedactionOption
+	fields []*RedactionOption
 }
 
 func (f *RedactingFormatter) Format(entry *logrus.Entry) ([]byte, error) {
-	for field, redactionOption := range f.fields {
-		if _, ok := entry.Data[field]; !ok {
-			continue
-		}
-		replaceWith := "REDACTED"
-
-		if redactionOption == nil {
-			entry.Data[field] = replaceWith
+	for _, redactionOption := range f.fields {
+		if redactionOption == nil || redactionOption.Field == "" {
 			continue
 		}
 
+		// If the field does not exist in this entry, skip it
+		_, ok := entry.Data[redactionOption.Field]
+		if !ok {
+			continue
+		}
+
+		replaceWith := "[REDACTED]"
 		if redactionOption.ReplaceWith != "" {
 			replaceWith = redactionOption.ReplaceWith
 		}
 
+		// Replace the whole field if no regexp is provided
 		if redactionOption.Regexp == nil {
-			entry.Data[field] = replaceWith
+			entry.Data[redactionOption.Field] = replaceWith
 			continue
 		}
 
-		entry.Data[field] = redactionOption.Regexp.ReplaceAllString(entry.Data[field].(string), replaceWith)
+		// Replace field content according to the regexp
+		entry.Data[redactionOption.Field] = redactionOption.Regexp.
+			ReplaceAllString(entry.Data[redactionOption.Field].(string), replaceWith)
 	}
 	return f.Formatter.Format(entry)
 }
