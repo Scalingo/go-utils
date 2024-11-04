@@ -31,6 +31,15 @@ func WithHooks(hooks []logrus.Hook) Opt {
 	}
 }
 
+func WithSetRedactedFields(fieldNames []string) Opt {
+	return func(l *logrus.Logger) {
+		l.SetFormatter(&RedactingFormatter{
+			Formatter: l.Formatter,
+			fields:    fieldNames,
+		})
+	}
+}
+
 // Default generate a logrus logger with the configuration defined in the environment and the hooks used in the plugins
 func Default(opts ...Opt) logrus.FieldLogger {
 	logger := logrus.New()
