@@ -38,38 +38,6 @@ func TestRedactingFormatter_Format(t *testing.T) {
 		require.Equal(t, "time=\"0001-01-01T00:00:00Z\" level=panic\n", string(got))
 	})
 
-	t.Run("nil fields and an empty entry produces a basic log entry", func(t *testing.T) {
-		// Given
-		f := &RedactingFormatter{
-			Formatter: &logrus.TextFormatter{},
-			fields:    nil,
-		}
-		entry := &logrus.Entry{}
-
-		// When
-		got, err := f.Format(entry)
-
-		// Then
-		require.NoError(t, err)
-		require.Equal(t, "time=\"0001-01-01T00:00:00Z\" level=panic\n", string(got))
-	})
-
-	t.Run("nil fields and an empty entry produces a basic log entry", func(t *testing.T) {
-		// Given
-		f := &RedactingFormatter{
-			Formatter: &logrus.TextFormatter{},
-			fields:    nil,
-		}
-		entry := &logrus.Entry{}
-
-		// When
-		got, err := f.Format(entry)
-
-		// Then
-		require.NoError(t, err)
-		require.Equal(t, "time=\"0001-01-01T00:00:00Z\" level=panic\n", string(got))
-	})
-
 	t.Run("nil fields and a single field in the entry produces a basic log entry", func(t *testing.T) {
 		// Given
 		f := &RedactingFormatter{
