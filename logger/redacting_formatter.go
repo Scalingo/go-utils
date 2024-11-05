@@ -3,6 +3,7 @@ package logger
 import (
 	"regexp"
 
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -18,6 +19,10 @@ type RedactingFormatter struct {
 }
 
 func (f *RedactingFormatter) Format(entry *logrus.Entry) ([]byte, error) {
+	if f.Formatter == nil {
+		return nil, errors.New("no formatter set")
+	}
+
 	for _, redactionOption := range f.fields {
 		if redactionOption == nil || redactionOption.Field == "" {
 			continue
