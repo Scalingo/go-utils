@@ -75,7 +75,7 @@ func TestPluginHooks(t *testing.T) {
 	for _, example := range examples {
 		t.Run(example.Name, func(t *testing.T) {
 			manager := PluginManager{plugins: example.BasePlugins}
-			assert.Equal(t, example.HookLength, len(manager.Hooks()))
+			assert.Len(t, manager.Hooks(), example.HookLength)
 		})
 	}
 }

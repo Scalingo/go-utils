@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -52,8 +51,8 @@ func TestLogLevel(t *testing.T) {
 	}
 
 	for k, v := range examples {
-		t.Run(fmt.Sprintf("when LOGGER_LEVEL=%s", k), func(t *testing.T) {
-			os.Setenv("LOGGER_LEVEL", k)
+		t.Run("when LOGGER_LEVEL="+k, func(t *testing.T) {
+			t.Setenv("LOGGER_LEVEL", k)
 			assert.Equal(t, v, logLevel())
 		})
 	}
