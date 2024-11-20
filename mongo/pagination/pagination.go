@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
+	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/Scalingo/go-handlers"
@@ -29,6 +30,7 @@ type PaginateOpts struct {
 	AmountItems int
 	Query       bson.M
 	SortOrder   string
+	WhereMethod func(ctx context.Context, collectionName string, query bson.M, sortFields ...document.SortField) (*mgo.Query, document.Closer)
 }
 
 type Service interface {
@@ -83,7 +85,7 @@ func (s ServiceOpts) paramValidation(meta *Meta, collection string, opts *Pagina
 			append(badRequestErr.Errors[perPageErr], fmt.Sprintf("must be lower or equal to %d", s.MaxPerPage))
 	}
 
-	if badRequestErr.Errors != nil && len(badRequestErr.Errors) > 0 {
+	if len(badRequestErr.Errors) > 0 {
 		return badRequestErr
 	}
 
@@ -104,7 +106,12 @@ func (s ServiceOpts) Paginate(ctx context.Context,
 	var err error
 	meta := Meta{}
 
-	query, session := document.WhereQuery(ctx, collection, opts.Query)
+	whereMethod := document.WhereQuery
+	if opts.WhereMethod != nil {
+		whereMethod = opts.WhereMethod
+	}
+
+	query, session := whereMethod(ctx, collection, opts.Query)
 	defer session.Close()
 
 	meta.TotalCount, err = query.Count()
