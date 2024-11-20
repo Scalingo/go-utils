@@ -15,13 +15,17 @@ import (
 const dummyCollection = "dummy_documents"
 
 type dummyDocument struct {
-	document.Base      `bson:",inline"`
+	document.Paranoid `bson:",inline"`
 	AppID              string `bson:"app_id" json:"app_id"`
 	VirtualStorageName string `bson:"virtual_storage_name" json:"virtual_storage_name"`
 }
 
 func newDummyDocuments(t *testing.T, virtualStorageName string, amount int) func() {
-	var d []*dummyDocument
+	return newDummyDocumentsIncludingDeleted(t, virtualStorageName, amount, 0)
+}
+
+func newDummyDocumentsIncludingDeleted(t *testing.T, virtualStorageName string, amount int, amountDeleted int) func() {
+	d := make([]*dummyDocument, amount)
 
 	for i := 0; i < amount; i++ {
 		doc := dummyDocument{
@@ -29,11 +33,10 @@ func newDummyDocuments(t *testing.T, virtualStorageName string, amount int) func
 			VirtualStorageName: virtualStorageName,
 		}
 		require.NoError(t, document.Save(context.Background(), dummyCollection, &doc))
-
-		if d == nil {
-			d = make([]*dummyDocument, amount)
-		}
 		d[i] = &doc
+	}
+	for i := 0; i < amountDeleted; i++ {
+		require.NoError(t, document.Destroy(context.Background(), dummyCollection, d[i]))
 	}
 	return func() {
 		for _, doc := range d {
@@ -41,6 +44,7 @@ func newDummyDocuments(t *testing.T, virtualStorageName string, amount int) func
 		}
 	}
 }
+
 
 func TestPaginationPaginate(t *testing.T) {
 	runs := []struct {
@@ -53,6 +57,7 @@ func TestPaginationPaginate(t *testing.T) {
 		ExpectedQuery  bson.M
 		ExpectedMeta   func() Meta
 		ExpectedResult []dummyDocument
+		ExpectedQueryFunc QueryFunc
 		Error          string
 	}{
 		{
@@ -338,6 +343,59 @@ func TestPaginationPaginate(t *testing.T) {
 			},
 			ExpectedQuery: bson.M{"virtual_storage_name": "vs_name_2"},
 		},
+		{
+			Name: "it should not return deleted documents by default",
+			DummyDocument: func(t *testing.T) func() {
+				clean := newDummyDocumentsIncludingDeleted(t, "vs_name_1", 2, 1)
+				return func() {
+					clean()
+				}
+			},
+			ExpectedMeta: func() Meta {
+				return Meta{
+					CurrentPage: 1,
+					PrevPage:    nil,
+					NextPage:    nil,
+					TotalPages:  1,
+					TotalCount:  1,
+					perPageNum:  1,
+				}
+			},
+			ExpectedResult: []dummyDocument{
+				{AppID: "1", VirtualStorageName: "vs_name_1"},
+			},
+			ExpectedQuery: bson.M{"virtual_storage_name": "vs_name_1"},
+		},
+		{
+			Name: "it should not return deleted documents by default, with custom QueryFunc to document.WhereQueryUnscoped",
+			DummyDocument: func(t *testing.T) func() {
+				clean := newDummyDocumentsIncludingDeleted(t, "vs_name_1", 2, 1)
+				return func() {
+					clean()
+				}
+			},
+			PaginationOpts: &ServiceOpts{
+				PerPageDefault: 10,
+				MaxPerPage:     10,
+			},
+			AmountItems: 10,
+			ExpectedMeta: func() Meta {
+				return Meta{
+					CurrentPage: 1,
+					PrevPage:    nil,
+					NextPage:    nil,
+					TotalPages:  1,
+					TotalCount:  2,
+					perPageNum:  10,
+				}
+			},
+			ExpectedResult: []dummyDocument{
+				{AppID: "0", VirtualStorageName: "vs_name_1"},
+				{AppID: "1", VirtualStorageName: "vs_name_1"},
+			},
+			ExpectedQuery: bson.M{"virtual_storage_name": "vs_name_1"},
+			ExpectedQueryFunc: document.WhereUnscopedQuery,
+		},
 	}
 
 	for _, run := range runs {
@@ -363,6 +421,7 @@ func TestPaginationPaginate(t *testing.T) {
 				AmountItems: run.AmountItems,
 				Query:       run.ExpectedQuery,
 				SortOrder:   run.SortOrder,
+				QueryFunc:   run.ExpectedQueryFunc,
 			}
 
 			meta, err := run.PaginationOpts.Paginate(context.Background(),

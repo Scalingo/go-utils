@@ -25,12 +25,14 @@ type Meta struct {
 	perPageNum  int
 }
 
+type QueryFunc func(ctx context.Context, collectionName string, query bson.M, sortFields ...document.SortField) (*mgo.Query, document.Closer)
+
 type PaginateOpts struct {
 	PageNumber  int
 	AmountItems int
 	Query       bson.M
 	SortOrder   string
-	WhereMethod func(ctx context.Context, collectionName string, query bson.M, sortFields ...document.SortField) (*mgo.Query, document.Closer)
+	QueryFunc  QueryFunc
 }
 
 type Service interface {
@@ -106,12 +108,12 @@ func (s ServiceOpts) Paginate(ctx context.Context,
 	var err error
 	meta := Meta{}
 
-	whereMethod := document.WhereQuery
-	if opts.WhereMethod != nil {
-		whereMethod = opts.WhereMethod
+	queryFunc := document.WhereQuery
+	if opts.QueryFunc != nil {
+		queryFunc = opts.QueryFunc
 	}
 
-	query, session := whereMethod(ctx, collection, opts.Query)
+	query, session := queryFunc(ctx, collection, opts.Query)
 	defer session.Close()
 
 	meta.TotalCount, err = query.Count()
