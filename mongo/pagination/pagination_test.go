@@ -15,7 +15,7 @@ import (
 const dummyCollection = "dummy_documents"
 
 type dummyDocument struct {
-	document.Paranoid `bson:",inline"`
+	document.Paranoid  `bson:",inline"`
 	AppID              string `bson:"app_id" json:"app_id"`
 	VirtualStorageName string `bson:"virtual_storage_name" json:"virtual_storage_name"`
 }
@@ -45,20 +45,19 @@ func newDummyDocumentsIncludingDeleted(t *testing.T, virtualStorageName string, 
 	}
 }
 
-
 func TestPaginationPaginate(t *testing.T) {
 	runs := []struct {
-		Name           string
-		DummyDocument  func(t *testing.T) func()
-		PaginationOpts *ServiceOpts
-		PageNumber     int
-		AmountItems    int
-		SortOrder      string
-		ExpectedQuery  bson.M
-		ExpectedMeta   func() Meta
-		ExpectedResult []dummyDocument
+		Name              string
+		DummyDocument     func(t *testing.T) func()
+		PaginationOpts    *ServiceOpts
+		PageNumber        int
+		AmountItems       int
+		SortOrder         string
+		ExpectedQuery     bson.M
+		ExpectedMeta      func() Meta
+		ExpectedResult    []dummyDocument
 		ExpectedQueryFunc QueryFunc
-		Error          string
+		Error             string
 	}{
 		{
 			Name: "It should return an empty list when the requested PageNumber is out of range",
@@ -344,7 +343,7 @@ func TestPaginationPaginate(t *testing.T) {
 			ExpectedQuery: bson.M{"virtual_storage_name": "vs_name_2"},
 		},
 		{
-			Name: "it should not return deleted documents by default",
+			Name: "it should not return soft-deleted documents by default",
 			DummyDocument: func(t *testing.T) func() {
 				clean := newDummyDocumentsIncludingDeleted(t, "vs_name_1", 2, 1)
 				return func() {
@@ -367,7 +366,7 @@ func TestPaginationPaginate(t *testing.T) {
 			ExpectedQuery: bson.M{"virtual_storage_name": "vs_name_1"},
 		},
 		{
-			Name: "it should not return deleted documents by default, with custom QueryFunc to document.WhereQueryUnscoped",
+			Name: "With custom QueryFunc to document.WhereQueryUnscoped, it should return soft-deleted documents",
 			DummyDocument: func(t *testing.T) func() {
 				clean := newDummyDocumentsIncludingDeleted(t, "vs_name_1", 2, 1)
 				return func() {
@@ -393,7 +392,39 @@ func TestPaginationPaginate(t *testing.T) {
 				{AppID: "0", VirtualStorageName: "vs_name_1"},
 				{AppID: "1", VirtualStorageName: "vs_name_1"},
 			},
-			ExpectedQuery: bson.M{"virtual_storage_name": "vs_name_1"},
+			ExpectedQuery:     bson.M{"virtual_storage_name": "vs_name_1"},
+			ExpectedQueryFunc: document.WhereUnscopedQuery,
+		},
+		{
+			Name: "With custom QueryFunc to document.WhereQueryUnscoped, it should respect custom sort order",
+			DummyDocument: func(t *testing.T) func() {
+				clean := newDummyDocumentsIncludingDeleted(t, "vs_name_1", 3, 1)
+				return func() {
+					clean()
+				}
+			},
+			PaginationOpts: &ServiceOpts{
+				PerPageDefault: 10,
+				MaxPerPage:     10,
+			},
+			AmountItems: 10,
+			SortOrder:   "-app_id",
+			ExpectedMeta: func() Meta {
+				return Meta{
+					CurrentPage: 1,
+					PrevPage:    nil,
+					NextPage:    nil,
+					TotalPages:  1,
+					TotalCount:  3,
+					perPageNum:  10,
+				}
+			},
+			ExpectedResult: []dummyDocument{
+				{AppID: "2", VirtualStorageName: "vs_name_1"},
+				{AppID: "1", VirtualStorageName: "vs_name_1"},
+				{AppID: "0", VirtualStorageName: "vs_name_1"},
+			},
+			ExpectedQuery:     bson.M{"virtual_storage_name": "vs_name_1"},
 			ExpectedQueryFunc: document.WhereUnscopedQuery,
 		},
 	}
