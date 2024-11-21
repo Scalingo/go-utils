@@ -39,6 +39,10 @@ func (d *Base) setUpdatedAt(t time.Time) {
 	d.UpdatedAt = t
 }
 
+func (d *Base) getUpdatedAt() time.Time {
+	return d.UpdatedAt
+}
+
 func (d Base) scope(query bson.M) bson.M {
 	return query
 }
@@ -47,6 +51,10 @@ func (d *Base) destroy(ctx context.Context, collection string) error {
 	return ReallyDestroy(ctx, collection, d)
 }
 
-func (d *Base) Validate(_ context.Context) (*errors.ValidationErrors, error) {
-	return nil, nil
+func (d *Base) Validate(_ context.Context) *errors.ValidationErrors {
+	return nil
+}
+
+func (d *Base) ValidateWithInternalError(_ context.Context) (*errors.ValidationErrors, error) {
+	return nil, ErrValidateNoInternalErrorFunc
 }
