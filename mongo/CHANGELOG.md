@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## 1.4.0
+
 * feat(mongo/document/validation): Add distinction between internal and validation errors, introduce `ValidateWithInternalError` method which will be used in priority.
 * feat(pagination): Add `QueryFunc` parameter to be able to customize the query builder and user `WhereUnsopedQuery` for instance
 
