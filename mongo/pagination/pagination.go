@@ -32,7 +32,7 @@ type PaginateOpts struct {
 	AmountItems int
 	Query       bson.M
 	SortOrder   string
-	// QueryFunc is an optional parameter to verride the default query builder function
+	// QueryFunc is an optional parameter to override the default query builder function
 	// By default `document.WhereQuery` is used to build the query, implying that if the model
 	// includes `document.Paranoid`, soft-deleted documents won't be included in the results
 	// It only change the query builder function, the query itself is not modified (sort/amount/page)
