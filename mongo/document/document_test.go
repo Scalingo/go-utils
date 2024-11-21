@@ -4,12 +4,13 @@ import (
 	"context"
 	"testing"
 
-	"github.com/Scalingo/go-utils/errors/v2"
-	"github.com/Scalingo/go-utils/logger"
-	"github.com/Scalingo/go-utils/mongo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/mgo.v2"
+
+	"github.com/Scalingo/go-utils/errors/v2"
+	"github.com/Scalingo/go-utils/logger"
+	"github.com/Scalingo/go-utils/mongo"
 )
 
 type unvalidatedDocument struct {
@@ -23,7 +24,7 @@ type validatedDocument struct {
 	Valid bool `bson:"valid" json:"valid"`
 }
 
-func (d *validatedDocument) Validate(ctx context.Context) *errors.ValidationErrors {
+func (d *validatedDocument) Validate(_ context.Context) *errors.ValidationErrors {
 	verr := errors.NewValidationErrorsBuilder()
 	if !d.Valid {
 		verr.Set("valid", "must be true")

@@ -69,6 +69,7 @@ var _ Validable = &Base{}
 func Create(ctx context.Context, collectionName string, doc document) error {
 	return save(ctx, collectionName, doc, func(ctx context.Context, collectionName string, doc document) error {
 		log := logger.Get(ctx)
+		//nolint contextcheck
 		c := mongo.Session(log).Clone().DB("").C(collectionName)
 		defer c.Database.Session.Close()
 		log.WithFields(logrus.Fields{
@@ -82,6 +83,7 @@ func Create(ctx context.Context, collectionName string, doc document) error {
 func Save(ctx context.Context, collectionName string, doc document) error {
 	return save(ctx, collectionName, doc, func(ctx context.Context, collectionName string, doc document) error {
 		log := logger.Get(ctx)
+		//nolint contextcheck
 		c := mongo.Session(log).Clone().DB("").C(collectionName)
 		defer c.Database.Session.Close()
 		log.Debugf("save '%v'", collectionName)
@@ -93,6 +95,7 @@ func Save(ctx context.Context, collectionName string, doc document) error {
 func Update(ctx context.Context, collectionName string, update bson.M, doc document) error {
 	return save(ctx, collectionName, doc, func(ctx context.Context, collectionName string, doc document) error {
 		log := logger.Get(ctx)
+		//nolint contextcheck
 		c := mongo.Session(log).Clone().DB("").C(collectionName)
 		defer c.Database.Session.Close()
 
