@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
+	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/Scalingo/go-handlers"
@@ -24,11 +25,18 @@ type Meta struct {
 	perPageNum  int
 }
 
+type QueryFunc func(ctx context.Context, collectionName string, query bson.M, sortFields ...document.SortField) (*mgo.Query, document.Closer)
+
 type PaginateOpts struct {
 	PageNumber  int
 	AmountItems int
 	Query       bson.M
 	SortOrder   string
+	// QueryFunc is an optional parameter to override the default query builder function
+	// By default `document.WhereQuery` is used to build the query, implying that if the model
+	// includes `document.Paranoid`, soft-deleted documents won't be included in the results
+	// It only change the query builder function, the query itself is not modified (sort/amount/page)
+	QueryFunc QueryFunc
 }
 
 type Service interface {
@@ -83,7 +91,7 @@ func (s ServiceOpts) paramValidation(meta *Meta, collection string, opts *Pagina
 			append(badRequestErr.Errors[perPageErr], fmt.Sprintf("must be lower or equal to %d", s.MaxPerPage))
 	}
 
-	if badRequestErr.Errors != nil && len(badRequestErr.Errors) > 0 {
+	if len(badRequestErr.Errors) > 0 {
 		return badRequestErr
 	}
 
@@ -104,7 +112,12 @@ func (s ServiceOpts) Paginate(ctx context.Context,
 	var err error
 	meta := Meta{}
 
-	query, session := document.WhereQuery(ctx, collection, opts.Query)
+	queryFunc := document.WhereQuery
+	if opts.QueryFunc != nil {
+		queryFunc = opts.QueryFunc
+	}
+
+	query, session := queryFunc(ctx, collection, opts.Query)
 	defer session.Close()
 
 	meta.TotalCount, err = query.Count()
