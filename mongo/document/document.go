@@ -2,6 +2,7 @@ package document
 
 import (
 	"context"
+	stderrors "errors"
 	"fmt"
 	"time"
 
@@ -22,6 +23,7 @@ type document interface {
 	ensureID()
 	ensureCreatedAt()
 	setUpdatedAt(time.Time)
+	getUpdatedAt() time.Time
 	Validable
 }
 
@@ -46,8 +48,18 @@ type Closer interface {
 	Close()
 }
 
+var ErrValidateNoInternalErrorFunc = stderrors.New("no validation returning an internal error has been implemented")
+
 type Validable interface {
-	Validate(ctx context.Context) (*errors.ValidationErrors, error)
+	// Validate will be used if no ValidateWithInternalError is defined on a document
+	// It is not useful to have both defined on a document, only ValidationWithInternalError
+	// would be used in this case
+	Validate(ctx context.Context) *errors.ValidationErrors
+
+	// ValidateWithInternalError will be used in priority if defined on a document
+	// It will be called for all modifying operations (Create, Save, Update)
+	// If it returns an internal error, the validation error will be nil.
+	ValidateWithInternalError(ctx context.Context) (*errors.ValidationErrors, error)
 }
 
 var _ Validable = &Base{}
@@ -55,55 +67,66 @@ var _ Validable = &Base{}
 // Create inserts the document in the database, returns an error if document
 // already exists and set CreatedAt timestamp
 func Create(ctx context.Context, collectionName string, doc document) error {
-	log := logger.Get(ctx).WithFields(logrus.Fields{
-		"collection": collectionName,
-		"doc_id":     doc.getID().Hex(),
+	return save(ctx, collectionName, doc, func(ctx context.Context, collectionName string, doc document) error {
+		log := logger.Get(ctx)
+		c := mongo.Session(log).Clone().DB("").C(collectionName)
+		defer c.Database.Session.Close()
+		log.WithFields(logrus.Fields{
+			"collection": collectionName,
+			"doc_id":     doc.getID().Hex(),
+		}).Debugf("save '%v'", collectionName)
+		return c.Insert(doc)
 	})
-	doc.ensureID()
-	doc.ensureCreatedAt()
-	doc.setUpdatedAt(time.Now())
-
-	validationErrors, err := doc.Validate(ctx)
-	if err != nil {
-		log.WithError(err).Error("Internal error while validating the document")
-		return err
-	}
-	if validationErrors != nil {
-		return validationErrors
-	}
-
-	c := mongo.Session(log).Clone().DB("").C(collectionName)
-	defer c.Database.Session.Close()
-	log.WithFields(logrus.Fields{
-		"collection": collectionName,
-		"doc_id":     doc.getID().Hex(),
-	}).Debugf("save '%v'", collectionName)
-	return c.Insert(doc)
 }
 
 func Save(ctx context.Context, collectionName string, doc document) error {
-	log := logger.Get(ctx)
-	doc.ensureID()
-	doc.ensureCreatedAt()
-	doc.setUpdatedAt(time.Now())
-
-	validationErrors, err := doc.Validate(ctx)
-	if err != nil {
-		log.WithError(err).Error("Internal error while validating the document")
+	return save(ctx, collectionName, doc, func(ctx context.Context, collectionName string, doc document) error {
+		log := logger.Get(ctx)
+		c := mongo.Session(log).Clone().DB("").C(collectionName)
+		defer c.Database.Session.Close()
+		log.WithFields(logrus.Fields{
+			"collection": collectionName,
+			"doc_id":     doc.getID().Hex(),
+		}).Debugf("save '%v'", collectionName)
+		_, err := c.UpsertId(doc.getID(), doc)
 		return err
+	})
+}
+
+func Update(ctx context.Context, collectionName string, update bson.M, doc document) error {
+	return save(ctx, collectionName, doc, func(ctx context.Context, collectionName string, doc document) error {
+		log := logger.Get(ctx)
+		c := mongo.Session(log).Clone().DB("").C(collectionName)
+		defer c.Database.Session.Close()
+
+		if _, ok := update["$set"]; ok {
+			update["$set"].(bson.M)["updated_at"] = doc.getUpdatedAt()
+		}
+
+		log.WithFields(logrus.Fields{
+			"collection": collectionName,
+			"doc_id":     doc.getID().Hex(),
+		}).Debugf("update %v", collectionName)
+		return c.UpdateId(doc.getID(), update)
+	})
+}
+
+func save(ctx context.Context, collectionName string, doc document, saveFunc func(context.Context, string, document) error) error {
+	validationErrors, err := doc.ValidateWithInternalError(ctx)
+	if err == ErrValidateNoInternalErrorFunc {
+		validationErrors = doc.Validate(ctx)
+	} else if err != nil {
+		return errors.Wrap(ctx, err, "fail to validate document")
 	}
 	if validationErrors != nil {
 		return validationErrors
 	}
 
-	c := mongo.Session(log).Clone().DB("").C(collectionName)
-	defer c.Database.Session.Close()
-	log.WithFields(logrus.Fields{
-		"collection": collectionName,
-		"doc_id":     doc.getID().Hex(),
-	}).Debugf("save '%v'", collectionName)
-	_, err = c.UpsertId(doc.getID(), doc)
-	return err
+	doc.ensureID()
+	doc.ensureCreatedAt()
+	doc.setUpdatedAt(time.Now())
+
+	return saveFunc(ctx, collectionName, doc)
 }
 
 // Destroy really deletes
@@ -261,33 +284,6 @@ func WhereIterUnscoped(ctx context.Context, collectionName string, query bson.M,
 		return fmt.Errorf("fail to iterate over collection %v with query %v: %v", collectionName, query, iter.Err())
 	}
 	return nil
-}
-
-func Update(ctx context.Context, collectionName string, update bson.M, doc document) error {
-	log := logger.Get(ctx)
-	c := mongo.Session(log).Clone().DB("").C(collectionName)
-	defer c.Database.Session.Close()
-
-	now := time.Now()
-	doc.setUpdatedAt(now)
-	if _, ok := update["$set"]; ok {
-		update["$set"].(bson.M)["updated_at"] = now
-	}
-
-	validationErrors, err := doc.Validate(ctx)
-	if err != nil {
-		log.WithError(err).Error("Internal error while validating the document")
-		return err
-	}
-	if validationErrors != nil {
-		return validationErrors
-	}
-
-	log.WithFields(logrus.Fields{
-		"collection": collectionName,
-		"doc_id":     doc.getID().Hex(),
-	}).Debugf("update %v", collectionName)
-	return c.UpdateId(doc.getID(), update)
 }
 
 func EnsureParanoidIndices(ctx context.Context, collectionNames ...string) {
