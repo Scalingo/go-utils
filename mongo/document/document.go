@@ -84,10 +84,7 @@ func Save(ctx context.Context, collectionName string, doc document) error {
 		log := logger.Get(ctx)
 		c := mongo.Session(log).Clone().DB("").C(collectionName)
 		defer c.Database.Session.Close()
-		log.WithFields(logrus.Fields{
-			"collection": collectionName,
-			"doc_id":     doc.getID().Hex(),
-		}).Debugf("save '%v'", collectionName)
+		log.Debugf("save '%v'", collectionName)
 		_, err := c.UpsertId(doc.getID(), doc)
 		return err
 	})
@@ -103,10 +100,7 @@ func Update(ctx context.Context, collectionName string, update bson.M, doc docum
 			update["$set"].(bson.M)["updated_at"] = doc.getUpdatedAt()
 		}
 
-		log.WithFields(logrus.Fields{
-			"collection": collectionName,
-			"doc_id":     doc.getID().Hex(),
-		}).Debugf("update %v", collectionName)
+		log.Debugf("update %v", collectionName)
 		return c.UpdateId(doc.getID(), update)
 	})
 }
@@ -116,7 +110,7 @@ func save(ctx context.Context, collectionName string, doc document, saveFunc fun
 	if err == ErrValidateNoInternalErrorFunc {
 		validationErrors = doc.Validate(ctx)
 	} else if err != nil {
-		return errors.Wrap(ctx, err, "fail to validate document")
+		return errors.Wrap(ctx, err, "validate document")
 	}
 	if validationErrors != nil {
 		return validationErrors
@@ -125,6 +119,11 @@ func save(ctx context.Context, collectionName string, doc document, saveFunc fun
 	doc.ensureID()
 	doc.ensureCreatedAt()
 	doc.setUpdatedAt(time.Now())
+
+	ctx, _ = logger.WithFieldsToCtx(ctx, logrus.Fields{
+		"collection": collectionName,
+		"doc_id":     doc.getID().Hex(),
+	})
 
 	return saveFunc(ctx, collectionName, doc)
 }
