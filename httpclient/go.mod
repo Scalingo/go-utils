@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/gofrs/uuid/v5 v5.3.0
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 )
 
 require (
