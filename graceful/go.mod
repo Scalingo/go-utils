@@ -1,6 +1,7 @@
 module github.com/Scalingo/go-utils/graceful
 
-go 1.22
+go 1.23.3
+
 require (
 	github.com/Scalingo/go-utils/errors/v2 v2.4.0
 	github.com/Scalingo/go-utils/logger v1.3.0
