@@ -1,6 +1,6 @@
 module github.com/Scalingo/go-utils/mongo
 
-go 1.20
+go 1.23.3
 
 require (
 	github.com/Scalingo/go-handlers v1.8.2
