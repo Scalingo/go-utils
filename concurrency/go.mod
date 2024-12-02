@@ -1,6 +1,6 @@
 module github.com/Scalingo/go-utils/concurrency
 
-go 1.20
+go 1.23.3
 
 require github.com/Scalingo/go-utils/logger v1.3.0
 
