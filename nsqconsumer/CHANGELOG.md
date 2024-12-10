@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* fix: Use API for github.com/go-utils/logger instead of setting logger manually in context
+
 ## v1.3.0
 
 * feat: add a configurable log level
