@@ -266,7 +266,7 @@ func (c *nsqConsumer) nsqHandler(message *nsq.Message) (err error) {
 
 	// Ignore linter here due to the usage of string as keys in context.
 	//nolint:staticcheck,revive
-	ctx := context.WithValue(context.WithValue(context.Background(), "request_id", msg.RequestID), "logger", msgLogger)
+	ctx := logger.ToCtx(context.WithValue(context.Background(), "request_id", msg.RequestID), msgLogger)
 
 	if msg.At != 0 {
 		now := time.Now().Unix()
