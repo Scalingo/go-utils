@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.3.1
+
 * fix: Use API for github.com/go-utils/logger instead of setting logger manually in context
 
 ## v1.3.0
