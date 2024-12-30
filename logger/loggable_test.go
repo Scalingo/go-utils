@@ -13,6 +13,18 @@ type StructWithTags struct {
 	Field3 string
 }
 
+type StructWithTagsAndLoggable struct {
+	Field1 string `log:"field1"`
+	Field2 string `log:"field2"`
+	Field3 string
+}
+
+func (s StructWithTagsAndLoggable) ToLogrusFields() logrus.Fields {
+	return logrus.Fields{
+		"another": "test",
+	}
+}
+
 type StructWithoutTagsButWithStringer struct {
 	Field1 string
 	Field2 string
@@ -43,6 +55,23 @@ func TestFieldsFor(t *testing.T) {
 		assert.Equal(t, logrus.Fields{
 			"prefix_field1": "value1",
 			"prefix_field2": "value2",
+		}, fields)
+	})
+
+	t.Run("when the struct has some tags and implements Loggable", func(t *testing.T) {
+		// Given a struct with tags and that implements Loggable
+		s := StructWithTagsAndLoggable{
+			Field1: "value1",
+			Field2: "value2",
+			Field3: "value3",
+		}
+
+		// When we try to add it to a logger
+		fields := FieldsFor(s, "prefix")
+
+		// Then it should be added as separate fields
+		assert.Equal(t, logrus.Fields{
+			"prefix_another": "test",
 		}, fields)
 	})
 
