@@ -41,7 +41,7 @@ func FieldsFor(value interface{}, prefix string) logrus.Fields {
 		return fields
 	}
 
-	val := reflect.ValueOf(value)
+	val := reflect.Indirect(reflect.ValueOf(value))
 
 	for i := 0; i < val.NumField(); i++ {
 		name, found := val.Type().Field(i).Tag.Lookup("log")

@@ -58,6 +58,24 @@ func TestFieldsFor(t *testing.T) {
 		}, fields)
 	})
 
+	t.Run("when we get a pointer to a struct with some tags", func(t *testing.T) {
+		// Given a pointer to a struct with tags
+		s := &StructWithTags{
+			Field1: "value1",
+			Field2: "value2",
+			Field3: "value3",
+		}
+
+		// When we try to add it to a logger
+		fields := FieldsFor(s, "prefix")
+
+		// Then it should be added as separate fields
+		assert.Equal(t, logrus.Fields{
+			"prefix_field1": "value1",
+			"prefix_field2": "value2",
+		}, fields)
+	})
+
 	t.Run("when the struct has some tags and implements Loggable", func(t *testing.T) {
 		// Given a struct with tags and that implements Loggable
 		s := StructWithTagsAndLoggable{
