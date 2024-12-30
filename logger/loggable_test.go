@@ -124,4 +124,22 @@ func TestFieldsFor(t *testing.T) {
 			"prefix": "failed to use FieldsFor on struct: Invalid type",
 		}, fields)
 	})
+
+	t.Run("It should not panic on non struct types", func(t *testing.T) {
+		assert.Equal(t, logrus.Fields{
+			"prefix": "failed to use FieldsFor on struct: Invalid type",
+		}, FieldsFor("test", "prefix"))
+
+		assert.Equal(t, logrus.Fields{
+			"prefix": "failed to use FieldsFor on struct: Invalid type",
+		}, FieldsFor(10.45, "prefix"))
+
+		assert.Equal(t, logrus.Fields{
+			"prefix": "failed to use FieldsFor on struct: Invalid type",
+		}, FieldsFor(nil, "prefix"))
+
+		assert.Equal(t, logrus.Fields{
+			"prefix": "failed to use FieldsFor on struct: Invalid type",
+		}, FieldsFor(true, "prefix"))
+	})
 }
