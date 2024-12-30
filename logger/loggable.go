@@ -43,10 +43,12 @@ func FieldsFor(value interface{}, prefix string) logrus.Fields {
 
 	val := reflect.Indirect(reflect.ValueOf(value))
 
-	for i := 0; i < val.NumField(); i++ {
-		name, found := val.Type().Field(i).Tag.Lookup("log")
-		if found {
-			fields[fmt.Sprintf("%s_%s", prefix, name)] = val.Field(i).Interface()
+	if val.Kind() == reflect.Struct {
+		for i := 0; i < val.NumField(); i++ {
+			name, found := val.Type().Field(i).Tag.Lookup("log")
+			if found {
+				fields[fmt.Sprintf("%s_%s", prefix, name)] = val.Field(i).Interface()
+			}
 		}
 	}
 
