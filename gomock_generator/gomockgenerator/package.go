@@ -7,15 +7,14 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
 	"github.com/pkg/errors"
 )
 
-func interfaceHash(pkg, iName string) (string, error) {
-	sig, err := interfaceSignature(pkg, iName)
+func interfaceHash(fullPath, pkg, iName string) (string, error) {
+	sig, err := interfaceSignature(fullPath, pkg, iName)
 	if err != nil {
 		return "", errors.Wrapf(err, "fail to get interface signature for %s:%s", pkg, iName)
 	}
@@ -26,12 +25,11 @@ func interfaceHash(pkg, iName string) (string, error) {
 	return fmt.Sprintf("% x", hash), nil
 }
 
-func interfaceSignature(pkg, iName string) (string, error) {
+func interfaceSignature(fullPath, pkg, iName string) (string, error) {
 	cwd, err := os.Getwd()
 	if err != nil {
 		return "", errors.Wrap(err, "fail to get current working directory")
 	}
-	fullPath := path.Join(os.Getenv("GOPATH"), "src", pkg)
 	vendoredPkg := filepath.Join(cwd, "vendor", pkg)
 	if _, err := os.Stat(vendoredPkg); err == nil {
 		fullPath = vendoredPkg
