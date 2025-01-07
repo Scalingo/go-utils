@@ -59,7 +59,7 @@ func FieldsFor(prefix string, value interface{}) logrus.Fields {
 	if valueStr, ok := value.(fmt.Stringer); ok {
 		fields[prefix] = valueStr.String()
 	} else {
-		fields[prefix] = "failed to use FieldsFor on struct: Invalid type"
+		fields[prefix] = "failed to use FieldsFor on struct: invalid type"
 	}
 
 	return fields

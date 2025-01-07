@@ -121,25 +121,25 @@ func TestFieldsFor(t *testing.T) {
 
 		// Then it should be added as a single field
 		assert.Equal(t, logrus.Fields{
-			"prefix": "failed to use FieldsFor on struct: Invalid type",
+			"prefix": "failed to use FieldsFor on struct: invalid type",
 		}, fields)
 	})
 
 	t.Run("It should not panic on non struct types", func(t *testing.T) {
 		assert.Equal(t, logrus.Fields{
-			"prefix": "failed to use FieldsFor on struct: Invalid type",
+			"prefix": "failed to use FieldsFor on struct: invalid type",
 		}, FieldsFor("prefix", "test"))
 
 		assert.Equal(t, logrus.Fields{
-			"prefix": "failed to use FieldsFor on struct: Invalid type",
+			"prefix": "failed to use FieldsFor on struct: invalid type",
 		}, FieldsFor("prefix", 10.45))
 
 		assert.Equal(t, logrus.Fields{
-			"prefix": "failed to use FieldsFor on struct: Invalid type",
+			"prefix": "failed to use FieldsFor on struct: invalid type",
 		}, FieldsFor("prefix", nil))
 
 		assert.Equal(t, logrus.Fields{
-			"prefix": "failed to use FieldsFor on struct: Invalid type",
+			"prefix": "failed to use FieldsFor on struct: invalid type",
 		}, FieldsFor("prefix", true))
 	})
 }
