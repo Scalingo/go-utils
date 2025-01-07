@@ -7,34 +7,34 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type StructWithTags struct {
+type structWithTags struct {
 	Field1 string `log:"field1"`
 	Field2 string `log:"field2"`
 	Field3 string
 }
 
-type StructWithTagsAndLoggable struct {
+type structWithTagsAndLoggable struct {
 	Field1 string `log:"field1"`
 	Field2 string `log:"field2"`
 	Field3 string
 }
 
-func (s StructWithTagsAndLoggable) ToLogrusFields() logrus.Fields {
+func (s structWithTagsAndLoggable) ToLogrusFields() logrus.Fields {
 	return logrus.Fields{
 		"another": "test",
 	}
 }
 
-type StructWithoutTagsButWithStringer struct {
+type structWithoutTagsButWithStringer struct {
 	Field1 string
 	Field2 string
 }
 
-func (s StructWithoutTagsButWithStringer) String() string {
+func (s structWithoutTagsButWithStringer) String() string {
 	return "My Stringer"
 }
 
-type StructWithoutTags struct {
+type structWithoutTags struct {
 	Field1 string
 	Field2 string
 }
@@ -42,7 +42,7 @@ type StructWithoutTags struct {
 func TestFieldsFor(t *testing.T) {
 	t.Run("when the struct has some tags", func(t *testing.T) {
 		// Given a struct with tags
-		s := StructWithTags{
+		s := structWithTags{
 			Field1: "value1",
 			Field2: "value2",
 			Field3: "value3",
@@ -60,7 +60,7 @@ func TestFieldsFor(t *testing.T) {
 
 	t.Run("when we get a pointer to a struct with some tags", func(t *testing.T) {
 		// Given a pointer to a struct with tags
-		s := &StructWithTags{
+		s := &structWithTags{
 			Field1: "value1",
 			Field2: "value2",
 			Field3: "value3",
@@ -78,7 +78,7 @@ func TestFieldsFor(t *testing.T) {
 
 	t.Run("when the struct has some tags and implements Loggable", func(t *testing.T) {
 		// Given a struct with tags and that implements Loggable
-		s := StructWithTagsAndLoggable{
+		s := structWithTagsAndLoggable{
 			Field1: "value1",
 			Field2: "value2",
 			Field3: "value3",
@@ -95,7 +95,7 @@ func TestFieldsFor(t *testing.T) {
 
 	t.Run("when the struct has no tags but has a stringer", func(t *testing.T) {
 		// Given a struct without tags but with a stringer
-		s := StructWithoutTagsButWithStringer{
+		s := structWithoutTagsButWithStringer{
 			Field1: "value1",
 			Field2: "value2",
 		}
@@ -111,7 +111,7 @@ func TestFieldsFor(t *testing.T) {
 
 	t.Run("when the struct has no tags and no stringer", func(t *testing.T) {
 		// Given a struct without tags
-		s := StructWithoutTags{
+		s := structWithoutTags{
 			Field1: "value1",
 			Field2: "value2",
 		}
