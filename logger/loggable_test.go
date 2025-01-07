@@ -49,7 +49,7 @@ func TestFieldsFor(t *testing.T) {
 		}
 
 		// When we try to add it to a logger
-		fields := FieldsFor(s, "prefix")
+		fields := FieldsFor("prefix", s)
 
 		// Then it should be added as separate fields
 		assert.Equal(t, logrus.Fields{
@@ -67,7 +67,7 @@ func TestFieldsFor(t *testing.T) {
 		}
 
 		// When we try to add it to a logger
-		fields := FieldsFor(s, "prefix")
+		fields := FieldsFor("prefix", s)
 
 		// Then it should be added as separate fields
 		assert.Equal(t, logrus.Fields{
@@ -85,7 +85,7 @@ func TestFieldsFor(t *testing.T) {
 		}
 
 		// When we try to add it to a logger
-		fields := FieldsFor(s, "prefix")
+		fields := FieldsFor("prefix", s)
 
 		// Then it should be added as separate fields
 		assert.Equal(t, logrus.Fields{
@@ -101,7 +101,7 @@ func TestFieldsFor(t *testing.T) {
 		}
 
 		// When we try to add it to a logger
-		fields := FieldsFor(s, "prefix")
+		fields := FieldsFor("prefix", s)
 
 		// Then it should be added as a single field
 		assert.Equal(t, logrus.Fields{
@@ -117,7 +117,7 @@ func TestFieldsFor(t *testing.T) {
 		}
 
 		// When we try to add it to a logger
-		fields := FieldsFor(s, "prefix")
+		fields := FieldsFor("prefix", s)
 
 		// Then it should be added as a single field
 		assert.Equal(t, logrus.Fields{
@@ -128,18 +128,18 @@ func TestFieldsFor(t *testing.T) {
 	t.Run("It should not panic on non struct types", func(t *testing.T) {
 		assert.Equal(t, logrus.Fields{
 			"prefix": "failed to use FieldsFor on struct: Invalid type",
-		}, FieldsFor("test", "prefix"))
+		}, FieldsFor("prefix", "test"))
 
 		assert.Equal(t, logrus.Fields{
 			"prefix": "failed to use FieldsFor on struct: Invalid type",
-		}, FieldsFor(10.45, "prefix"))
+		}, FieldsFor("prefix", 10.45))
 
 		assert.Equal(t, logrus.Fields{
 			"prefix": "failed to use FieldsFor on struct: Invalid type",
-		}, FieldsFor(nil, "prefix"))
+		}, FieldsFor("prefix", nil))
 
 		assert.Equal(t, logrus.Fields{
 			"prefix": "failed to use FieldsFor on struct: Invalid type",
-		}, FieldsFor(true, "prefix"))
+		}, FieldsFor("prefix", true))
 	})
 }

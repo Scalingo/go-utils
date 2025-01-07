@@ -31,7 +31,7 @@ type Loggable interface {
 //
 // Returns:
 // - logrus.Fields: A map of loggable fields.
-func FieldsFor(value interface{}, prefix string) logrus.Fields {
+func FieldsFor(prefix string, value interface{}) logrus.Fields {
 	fields := logrus.Fields{}
 
 	if loggableValue, ok := value.(Loggable); ok {
@@ -65,6 +65,6 @@ func FieldsFor(value interface{}, prefix string) logrus.Fields {
 	return fields
 }
 
-func WithStructToCtx(ctx context.Context, value interface{}, prefix string) (context.Context, logrus.FieldLogger) {
-	return WithFieldsToCtx(ctx, FieldsFor(value, prefix))
+func WithStructToCtx(ctx context.Context, prefix string, value interface{}) (context.Context, logrus.FieldLogger) {
+	return WithFieldsToCtx(ctx, FieldsFor(prefix, value))
 }
