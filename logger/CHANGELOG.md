@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat(logger): add support for `log` tags
+
 ## v1.3.1
 
 * fix(logger): remove custom type (use string) for logger context key
