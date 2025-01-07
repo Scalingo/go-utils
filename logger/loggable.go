@@ -9,7 +9,7 @@ import (
 )
 
 type Loggable interface {
-	ToLogrusFields() logrus.Fields
+	LogFields() logrus.Fields
 }
 
 // FieldsFor extracts loggable fields from a struct based on the "log" tag.
@@ -17,7 +17,7 @@ type Loggable interface {
 // with the provided prefix, and the values are the corresponding field values.
 //
 // If the struct implements the Loggable interface. The `log` tags are ignored
-// and the ToLogrusFields method is used to extract the fields.
+// and the LogFields method is used to extract the fields.
 //
 // If the struct has no fields with the "log" tag, it checks if the struct
 // implements the fmt.Stringer interface. If it does, it adds a single field
@@ -35,7 +35,7 @@ func FieldsFor(prefix string, value interface{}) logrus.Fields {
 	fields := logrus.Fields{}
 
 	if loggableValue, ok := value.(Loggable); ok {
-		for k, v := range loggableValue.ToLogrusFields() {
+		for k, v := range loggableValue.LogFields() {
 			fields[fmt.Sprintf("%s_%s", prefix, k)] = v
 		}
 		return fields

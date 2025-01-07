@@ -19,7 +19,7 @@ type structWithTagsAndLoggable struct {
 	Field3 string
 }
 
-func (s structWithTagsAndLoggable) ToLogrusFields() logrus.Fields {
+func (s structWithTagsAndLoggable) LogFields() logrus.Fields {
 	return logrus.Fields{
 		"another": "test",
 	}
