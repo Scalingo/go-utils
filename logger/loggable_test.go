@@ -39,6 +39,22 @@ type structWithoutTags struct {
 	Field2 string
 }
 
+type structInStructWithTags struct {
+	Field1 structWithoutTags `log:"field1"`
+}
+
+type structInStructWithoutTagsButWithStringer struct {
+	Field1 structWithoutTags
+}
+
+func (s structInStructWithoutTagsButWithStringer) String() string {
+	return "Embedded Field2 is " + s.Field1.Field2
+}
+
+type structInStructWithoutTags struct {
+	Field1 structWithoutTags
+}
+
 func TestFieldsFor(t *testing.T) {
 	t.Run("when the struct has some tags", func(t *testing.T) {
 		// Given a struct with tags
@@ -141,5 +157,60 @@ func TestFieldsFor(t *testing.T) {
 		assert.Equal(t, logrus.Fields{
 			"prefix": "failed to use FieldsFor on struct: invalid type",
 		}, FieldsFor("prefix", true))
+	})
+
+	// We didn't implement yet the support for struct in struct.
+	// Hence the output is uggly.
+	t.Run("when a struct in struct has a tag", func(t *testing.T) {
+		// Given a struct with tags
+		s := structInStructWithTags{
+			Field1: structWithoutTags{
+				Field2: "value2",
+			},
+		}
+
+		// When we try to add it to a logger
+		fields := FieldsFor("prefix", s)
+
+		// Then
+		assert.Equal(t, logrus.Fields{
+			"prefix_field1": structWithoutTags{
+				Field2: "value2",
+			},
+		}, fields)
+	})
+
+	t.Run("when a struct in struct has no tag but implements Stringer", func(t *testing.T) {
+		// Given a struct with tags
+		s := structInStructWithoutTagsButWithStringer{
+			Field1: structWithoutTags{
+				Field2: "value2",
+			},
+		}
+
+		// When we try to add it to a logger
+		fields := FieldsFor("prefix", s)
+
+		// Then
+		assert.Equal(t, logrus.Fields{
+			"prefix": "Embedded Field2 is value2",
+		}, fields)
+	})
+
+	t.Run("when a struct in struct has no tag", func(t *testing.T) {
+		// Given a struct with tags
+		s := structInStructWithoutTags{
+			Field1: structWithoutTags{
+				Field2: "value2",
+			},
+		}
+
+		// When we try to add it to a logger
+		fields := FieldsFor("prefix", s)
+
+		// Then
+		assert.Equal(t, logrus.Fields{
+			"prefix": "failed to use FieldsFor on struct: invalid type",
+		}, fields)
 	})
 }
