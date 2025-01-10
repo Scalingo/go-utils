@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.4.0
+
 * feat(logger): add support for `log` tags
 
 ## v1.3.1
