@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.3.2
+
 * feat: nsqconsumer.Error - `Unwrap` method to be compatible with `errors.Is/As()`
 * feat: nsqconsumer.Error - `NoRetry` to get if the message should be retried or not to be consumed.
 
