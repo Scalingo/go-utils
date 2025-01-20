@@ -83,6 +83,16 @@ func (nsqerr Error) Error() string {
 	return nsqerr.error.Error()
 }
 
+// Unwrap returns the cause of the error to be compatible with errors.As/Is()
+func (nsqerr Error) Unwrap() error {
+	return nsqerr.error
+}
+
+// NoRetry returns true if the message should not be retried to be handled
+func (nsqerr Error) NoRetry() bool {
+	return nsqerr.noRetry
+}
+
 type ErrorOpts struct {
 	NoRetry bool
 }
