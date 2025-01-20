@@ -2,6 +2,9 @@
 
 ## To be Released
 
+* feat: nsqconsumer.Error - `Unwrap` method to be compatible with `errors.Is/As()`
+* feat: nsqconsumer.Error - `NoRetry` to get if the message should be retried or not to be consumed.
+
 ## v1.3.1
 
 * fix: Use API for github.com/go-utils/logger instead of setting logger manually in context
