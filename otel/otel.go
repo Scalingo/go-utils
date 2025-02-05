@@ -2,8 +2,6 @@ package otel
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"sync"
 	"time"
 
@@ -11,109 +9,95 @@ import (
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
 	"go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
-	"go.opentelemetry.io/otel/metric"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
+
+	"github.com/Scalingo/go-utils/errors/v2"
 )
 
-// Config defines the Otel Wrapper configuration for metrics
 type Config struct {
-	ServiceName               string
-	Debug                     bool
-	ExporterType              string
-	ExporterEndpoint          string
-	ExporterTimeout           string
-	ExporterCertificate       string
-	ExporterClientCertificate string
-	ExporterClientKey         string
-	CollectionInterval        time.Duration
-	MetricsReader             sdkmetric.Reader
-	MetricsExporter           sdkmetric.Exporter
+	ServiceName        string        `required:"true" split_words:"true"`
+	Debug              bool          `default:"false"`
+	ExporterType       string        `default:"http" split_words:"true"`
+	CollectionInterval time.Duration `default:"10s" split_words:"true"`
 }
 
-// OtelWrapper encapsulates OpenTelemetry MetricProvider and utilities
-type OtelWrapper struct {
+// OtelProviders encapsulates OpenTelemetry providers and utilities
+type OtelProviders struct {
 	meterProvider *sdkmetric.MeterProvider
-	globalMeter   metric.Meter
+	shutdownFunc  func(context.Context) error
 	config        Config
 }
 
 var (
-	globalWrapper *OtelWrapper
-
-	// singletonShutdown holds the shutdown function once the meter provider is initialized.
-	singletonShutdown func(context.Context) error
+	globalProvider *OtelProviders
 
 	// once ensures that initialization happens only once.
 	globalOnce sync.Once
-
-	// initErr captures any error encountered during initialization.
-	initErr error
 )
 
-// InitSingleton initializes the MeterProvider as a singleton.
-// Subsequent calls to this function will return the same shutdown function and error.
+// Initializes the OtelWrapper as a singleton.
 // The configuration is used only on the first call.
-func InitGlobalWrapper(ctx context.Context, cfg Config) (func(context.Context) error, error) {
+func New(ctx context.Context, cfg Config) error {
+	var err error
 	globalOnce.Do(func() {
-		singletonShutdown, initErr = New(ctx, cfg)
+		globalProvider, err = setupProviders(ctx, cfg)
 	})
-	return singletonShutdown, initErr
+	return err
 }
 
-func New(ctx context.Context, cfg Config) (shutdown func(context.Context) error, err error) {
+func setupProviders(ctx context.Context, cfg Config) (*OtelProviders, error) {
 	var shutdownFuncs []func(context.Context) error
 
 	// shutdown calls cleanup functions registered via shutdownFuncs.
 	// The errors from the calls are joined.
 	// Each registered cleanup will be invoked once.
-	shutdown = func(ctx context.Context) error {
+	shutdown := func(ctx context.Context) error {
 		var err error
 		for _, fn := range shutdownFuncs {
-			err = errors.Join(err, fn(ctx))
+			shutdownErr := fn(ctx)
+			if shutdownErr != nil {
+				err = errors.Wrapf(ctx, err, "failed to shutdown provider: %v", shutdownErr)
+			}
 		}
 		shutdownFuncs = nil
 		return err
 	}
 
 	// handleErr calls shutdown for cleanup and makes sure that all errors are returned.
-	handleErr := func(inErr error) {
-		err = errors.Join(inErr, shutdown(ctx))
+	handleErr := func(inErr error) error {
+		err := shutdown(ctx)
+		if err != nil {
+			return errors.Wrapf(ctx, inErr, "failed to shutdown otel providers: %v", err)
+		}
+		return inErr
 	}
 
 	// Set up meter provider.
 	meterProvider, err := newMeterProvider(ctx, cfg)
 	if err != nil {
-		handleErr(err)
-		return
+		return nil, handleErr(err)
 	}
 	shutdownFuncs = append(shutdownFuncs, meterProvider.Shutdown)
 	otelsdk.SetMeterProvider(meterProvider)
 
-	globalWrapper = &OtelWrapper{
+	return &OtelProviders{
 		meterProvider: meterProvider,
-		globalMeter:   meterProvider.Meter(cfg.ServiceName),
+		shutdownFunc:  shutdown,
 		config:        cfg,
-	}
-
-	return
+	}, nil
 }
 
 func newMeterProvider(ctx context.Context, cfg Config) (*sdkmetric.MeterProvider, error) {
 	if cfg.ServiceName == "" {
-		return nil, errors.New("ServiceName is required")
+		return nil, errors.New(ctx, "ServiceName is required")
 	}
-	if cfg.MetricsExporter == nil {
-		exporter, err := newMetricsExporter(ctx, cfg)
-		if err != nil {
-			return nil, fmt.Errorf("failed to load exporter", err)
-		}
-		cfg.MetricsExporter = exporter
+	metricsExporter, err := newMetricsExporter(ctx, cfg)
+	if err != nil {
+		return nil, errors.Wrap(ctx, err, "failed to load exporter")
 	}
-	if cfg.MetricsReader == nil {
-		cfg.MetricsReader = sdkmetric.NewPeriodicReader(cfg.MetricsExporter, sdkmetric.WithInterval(cfg.CollectionInterval))
-	}
+	metricsReader := sdkmetric.NewPeriodicReader(metricsExporter, sdkmetric.WithInterval(cfg.CollectionInterval))
 
 	res, err := resource.Merge(
 		resource.Default(),
@@ -123,12 +107,12 @@ func newMeterProvider(ctx context.Context, cfg Config) (*sdkmetric.MeterProvider
 		),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create resource: %w", err)
+		return nil, errors.Wrap(ctx, err, "failed to create resource")
 	}
 
 	// Initialize MeterProvider
 	provider := sdkmetric.NewMeterProvider(
-		sdkmetric.WithReader(cfg.MetricsReader),
+		sdkmetric.WithReader(metricsReader),
 		sdkmetric.WithResource(res),
 	)
 
@@ -145,27 +129,14 @@ func newMetricsExporter(ctx context.Context, cfg Config) (sdkmetric.Exporter, er
 	case "grpc":
 		return otlpmetricgrpc.New(ctx)
 	default:
-		return nil, errors.New("invalid exporter type")
+		return nil, errors.New(ctx, "invalid exporter type")
 	}
 }
 
-// GetGlobalMeter returns the global Meter
-func GetGlobalMeter() metric.Meter {
-	if globalWrapper == nil {
-		panic("Global OtelWrapper is not initialized")
+// Gracefully shuts down the providers
+func Shutdown(ctx context.Context) error {
+	if err := globalProvider.shutdownFunc(ctx); err != nil {
+		return errors.Wrap(ctx, err, "failed to shutdown otel providers")
 	}
-	return globalWrapper.globalMeter
-}
-
-// SendMetric wraps the meter to send a metric
-func SendMetric(ctx context.Context, name string, value float64, description string) error {
-	counter, err := GetGlobalMeter().Float64Counter(
-		name,
-		metric.WithDescription(description),
-	)
-	if err != nil {
-		return fmt.Errorf("failed to create counter: %w", err)
-	}
-	counter.Add(ctx, value)
 	return nil
 }
