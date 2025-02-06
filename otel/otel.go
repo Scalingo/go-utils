@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/kelseyhightower/envconfig"
 	otelsdk "go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
@@ -12,8 +13,6 @@ import (
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
-
-	"github.com/kelseyhightower/envconfig"
 
 	"github.com/Scalingo/go-utils/errors/v2"
 )
@@ -28,7 +27,6 @@ type Config struct {
 // Providers encapsulates OpenTelemetry providers and utilities
 type Providers struct {
 	meterProvider *sdkmetric.MeterProvider
-	shutdownFunc  func(context.Context) error
 	config        Config
 }
 
@@ -55,43 +53,16 @@ func New(ctx context.Context) error {
 }
 
 func setupProviders(ctx context.Context, cfg Config) (*Providers, error) {
-	var shutdownFuncs []func(context.Context) error
-
-	// shutdown calls cleanup functions registered via shutdownFuncs.
-	// The errors from the calls are joined.
-	// Each registered cleanup will be invoked once.
-	shutdown := func(ctx context.Context) error {
-		var err error
-		for _, fn := range shutdownFuncs {
-			shutdownErr := fn(ctx)
-			if shutdownErr != nil {
-				err = errors.Wrapf(ctx, err, "failed to shutdown provider: %v", shutdownErr)
-			}
-		}
-		shutdownFuncs = nil
-		return err
-	}
-
-	// handleErr calls shutdown for cleanup and makes sure that all errors are returned.
-	handleErr := func(inErr error) error {
-		err := shutdown(ctx)
-		if err != nil {
-			return errors.Wrapf(ctx, inErr, "failed to shutdown otel providers: %v", err)
-		}
-		return inErr
-	}
-
 	// Set up meter provider.
 	meterProvider, err := newMeterProvider(ctx, cfg)
 	if err != nil {
-		return nil, handleErr(err)
+		return nil, errors.Wrap(ctx, err, "create meter provider")
 	}
-	shutdownFuncs = append(shutdownFuncs, meterProvider.Shutdown)
+
 	otelsdk.SetMeterProvider(meterProvider)
 
 	return &Providers{
 		meterProvider: meterProvider,
-		shutdownFunc:  shutdown,
 		config:        cfg,
 	}, nil
 }
@@ -102,7 +73,7 @@ func newMeterProvider(ctx context.Context, cfg Config) (*sdkmetric.MeterProvider
 	}
 	metricsExporter, err := newMetricsExporter(ctx, cfg)
 	if err != nil {
-		return nil, errors.Wrap(ctx, err, "failed to load exporter")
+		return nil, errors.Wrap(ctx, err, "load exporter")
 	}
 	metricsReader := sdkmetric.NewPeriodicReader(metricsExporter, sdkmetric.WithInterval(cfg.CollectionInterval))
 
@@ -114,7 +85,7 @@ func newMeterProvider(ctx context.Context, cfg Config) (*sdkmetric.MeterProvider
 		),
 	)
 	if err != nil {
-		return nil, errors.Wrap(ctx, err, "failed to create resource")
+		return nil, errors.Wrap(ctx, err, "create resource")
 	}
 
 	// Initialize MeterProvider
@@ -142,8 +113,11 @@ func newMetricsExporter(ctx context.Context, cfg Config) (sdkmetric.Exporter, er
 
 // Gracefully shuts down the providers
 func Shutdown(ctx context.Context) error {
-	if err := globalProviders.shutdownFunc(ctx); err != nil {
-		return errors.Wrap(ctx, err, "failed to shutdown otel providers")
+	if globalProviders.meterProvider != nil {
+		err := globalProviders.meterProvider.Shutdown(ctx)
+		if err != nil {
+			return errors.Wrap(ctx, err, "shutdown meter provider")
+		}
 	}
 	return nil
 }
