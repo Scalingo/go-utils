@@ -3,6 +3,7 @@ package nsqconsumer
 import (
 	"context"
 	"encoding/json"
+	stderrors "errors"
 	"fmt"
 	"log"
 	"os"
@@ -12,7 +13,6 @@ import (
 	"github.com/nsqio/go-nsq"
 	"github.com/sirupsen/logrus"
 	"github.com/stvp/rollbar"
-	"gopkg.in/errgo.v1"
 
 	"github.com/Scalingo/go-utils/errors/v2"
 	"github.com/Scalingo/go-utils/logger"
@@ -198,10 +198,10 @@ func New(opts ConsumerOpts) (Consumer, error) {
 		opts.NsqConfig.MaxInFlight = consumer.MaxInFlight
 	}
 	if opts.Topic == "" {
-		return nil, errgo.New("topic can't be blank")
+		return nil, stderrors.New("topic can't be blank")
 	}
 	if opts.MessageHandler == nil {
-		return nil, errgo.New("message handler can't be blank")
+		return nil, stderrors.New("message handler can't be blank")
 	}
 	if opts.Channel == "" {
 		consumer.Channel = defaultChannel
@@ -241,7 +241,6 @@ func (c *nsqConsumer) Start(ctx context.Context) func() {
 
 func (c *nsqConsumer) nsqHandler(message *nsq.Message) (err error) {
 	ctx := logger.ToCtx(context.Background(), c.logger)
-	_ = ctx
 	// We create a new `log` variable because we are so used to call `log.Something` in our codebase
 	log := c.logger
 
@@ -252,15 +251,17 @@ func (c *nsqConsumer) nsqHandler(message *nsq.Message) (err error) {
 			case error:
 				errRecovered = value
 			default:
-				errRecovered = errgo.Newf("%v", value)
+				errRecovered = errors.Newf(ctx, "%v", value)
 			}
-			err = errgo.Newf("recover panic from nsq consumer: %+v", errRecovered)
-			log.WithError(errRecovered).WithFields(logrus.Fields{"stacktrace": string(debug.Stack())}).Error("Recover panic")
+			err = errors.Newf(ctx, "recover panic from nsq consumer: %+v", errRecovered)
+			log.WithError(errRecovered).WithFields(logrus.Fields{
+				"stacktrace": string(debug.Stack()),
+			}).Error("Recover panic")
 		}
 	}()
 
 	if len(message.Body) == 0 {
-		err := errgo.New("body is blank, re-enqueued message")
+		err := errors.New(ctx, "body is blank, re-enqueued message")
 		log.WithError(err).Error("Blank message")
 		return err
 	}

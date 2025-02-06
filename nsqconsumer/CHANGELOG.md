@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* refactor(consumer): match our current best practices around logging and errors
+
 ## v1.3.2
 
 * feat: nsqconsumer.Error - `Unwrap` method to be compatible with `errors.Is/As()`
