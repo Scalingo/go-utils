@@ -3,7 +3,7 @@ package nsqconsumer
 import (
 	"context"
 	"encoding/json"
-	"errors"
+	stderrors "errors"
 	"fmt"
 	"log"
 	"os"
@@ -13,9 +13,8 @@ import (
 	"github.com/nsqio/go-nsq"
 	"github.com/sirupsen/logrus"
 	"github.com/stvp/rollbar"
-	"gopkg.in/errgo.v1"
 
-	scalingoerrors "github.com/Scalingo/go-utils/errors/v2"
+	"github.com/Scalingo/go-utils/errors/v2"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/go-utils/nsqproducer"
 )
@@ -199,10 +198,10 @@ func New(opts ConsumerOpts) (Consumer, error) {
 		opts.NsqConfig.MaxInFlight = consumer.MaxInFlight
 	}
 	if opts.Topic == "" {
-		return nil, errgo.New("topic can't be blank")
+		return nil, stderrors.New("topic can't be blank")
 	}
 	if opts.MessageHandler == nil {
-		return nil, errgo.New("message handler can't be blank")
+		return nil, stderrors.New("message handler can't be blank")
 	}
 	if opts.Channel == "" {
 		consumer.Channel = defaultChannel
@@ -215,12 +214,12 @@ func (c *nsqConsumer) Start(ctx context.Context) func() {
 		"topic":   c.Topic,
 		"channel": c.Channel,
 	})
-	c.logger.Info("starting consumer")
+	c.logger.Info("Starting consumer")
 
 	consumer, err := nsq.NewConsumer(c.Topic, c.Channel, c.NsqConfig)
 	if err != nil {
 		rollbar.Error(rollbar.ERR, err, &rollbar.Field{Name: "worker", Data: "nsq-consumer"})
-		c.logger.WithError(err).Fatalf("fail to create new NSQ consumer")
+		c.logger.WithError(err).Fatalf("Fail to create new NSQ consumer")
 	}
 
 	consumer.SetLogger(log.New(os.Stderr, fmt.Sprintf("[nsq-consumer(%s)]", c.Topic), log.Flags()), c.logLevel.toNSQLogLevel())
@@ -241,6 +240,10 @@ func (c *nsqConsumer) Start(ctx context.Context) func() {
 }
 
 func (c *nsqConsumer) nsqHandler(message *nsq.Message) (err error) {
+	ctx := logger.ToCtx(context.Background(), c.logger)
+	// We create a new `log` variable because we are so used to call `log.Something` in our codebase
+	log := c.logger
+
 	defer func() {
 		if r := recover(); r != nil {
 			var errRecovered error
@@ -248,35 +251,37 @@ func (c *nsqConsumer) nsqHandler(message *nsq.Message) (err error) {
 			case error:
 				errRecovered = value
 			default:
-				errRecovered = errgo.Newf("%v", value)
+				errRecovered = errors.Newf(ctx, "%v", value)
 			}
-			err = errgo.Newf("recover panic from nsq consumer: %+v", errRecovered)
-			c.logger.WithError(errRecovered).WithFields(logrus.Fields{"stacktrace": string(debug.Stack())}).Error("recover panic")
+			err = errors.Newf(ctx, "recover panic from nsq consumer: %+v", errRecovered)
+			log.WithError(errRecovered).WithFields(logrus.Fields{
+				"stacktrace": string(debug.Stack()),
+			}).Error("Recover panic")
 		}
 	}()
 
 	if len(message.Body) == 0 {
-		err := errgo.New("body is blank, re-enqueued message")
-		c.logger.WithError(err).Error("blank message")
+		err := errors.New(ctx, "body is blank, re-enqueued message")
+		log.WithError(err).Error("Blank message")
 		return err
 	}
 	var msg NsqMessageDeserialize
 	err = json.Unmarshal(message.Body, &msg)
 	if err != nil {
-		c.logger.WithError(err).Error("Fail to unmarshal message")
+		log.WithError(err).Error("Fail to unmarshal message")
 		return err
 	}
 	msg.NsqMsg = message
 
-	msgLogger := c.logger.WithFields(logrus.Fields{
+	// We want to create a new dedicated logger for the NSQ message handling.
+	// That way we distinguish between the logger during normal operation, and the error logger (named `errLogger`) found when unwrapping the error raised during message handling.
+	msgLogger := logger.Default()
+	ctx = logger.ToCtx(context.Background(), msgLogger)
+	ctx, msgLogger = logger.WithFieldsToCtx(ctx, logrus.Fields{
 		"message_id":   fmt.Sprintf("%s", message.ID),
 		"message_type": msg.Type,
 		"request_id":   msg.RequestID,
 	})
-
-	// Ignore linter here due to the usage of string as keys in context.
-	//nolint:staticcheck,revive
-	ctx := logger.ToCtx(context.WithValue(context.Background(), "request_id", msg.RequestID), msgLogger)
 
 	if msg.At != 0 {
 		now := time.Now().Unix()
@@ -299,13 +304,13 @@ func (c *nsqConsumer) nsqHandler(message *nsq.Message) (err error) {
 		unwrapErr := err
 		for unwrapErr != nil {
 			switch handlerErr := unwrapErr.(type) {
-			case scalingoerrors.ErrCtx:
+			case errors.ErrCtx:
 				errLogger = logger.Get(handlerErr.Ctx())
 			case Error:
 				noRetry = handlerErr.noRetry
 				unwrapErr = handlerErr.error
 			}
-			unwrapErr = scalingoerrors.UnwrapError(unwrapErr)
+			unwrapErr = errors.UnwrapError(unwrapErr)
 		}
 		if errLogger == nil {
 			errLogger = msgLogger
@@ -339,7 +344,7 @@ func (c *nsqConsumer) postponeMessage(ctx context.Context, msgLogger logrus.Fiel
 	msgLogger.Info("POSTPONE Message")
 
 	if c.PostponeProducer == nil {
-		return errors.New("no postpone producer configured in this consumer")
+		return errors.New(ctx, "no postpone producer configured in this consumer")
 	}
 
 	return c.PostponeProducer.DeferredPublish(ctx, c.Topic, delay, publishedMsg)
