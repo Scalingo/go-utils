@@ -214,12 +214,12 @@ func (c *nsqConsumer) Start(ctx context.Context) func() {
 		"topic":   c.Topic,
 		"channel": c.Channel,
 	})
-	c.logger.Info("starting consumer")
+	c.logger.Info("Starting consumer")
 
 	consumer, err := nsq.NewConsumer(c.Topic, c.Channel, c.NsqConfig)
 	if err != nil {
 		rollbar.Error(rollbar.ERR, err, &rollbar.Field{Name: "worker", Data: "nsq-consumer"})
-		c.logger.WithError(err).Fatalf("fail to create new NSQ consumer")
+		c.logger.WithError(err).Fatalf("Fail to create new NSQ consumer")
 	}
 
 	consumer.SetLogger(log.New(os.Stderr, fmt.Sprintf("[nsq-consumer(%s)]", c.Topic), log.Flags()), c.logLevel.toNSQLogLevel())
@@ -250,13 +250,13 @@ func (c *nsqConsumer) nsqHandler(message *nsq.Message) (err error) {
 				errRecovered = errgo.Newf("%v", value)
 			}
 			err = errgo.Newf("recover panic from nsq consumer: %+v", errRecovered)
-			c.logger.WithError(errRecovered).WithFields(logrus.Fields{"stacktrace": string(debug.Stack())}).Error("recover panic")
+			c.logger.WithError(errRecovered).WithFields(logrus.Fields{"stacktrace": string(debug.Stack())}).Error("Recover panic")
 		}
 	}()
 
 	if len(message.Body) == 0 {
 		err := errgo.New("body is blank, re-enqueued message")
-		c.logger.WithError(err).Error("blank message")
+		c.logger.WithError(err).Error("Blank message")
 		return err
 	}
 	var msg NsqMessageDeserialize
