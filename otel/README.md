@@ -14,15 +14,8 @@ import (
 func main() {
   ctx := context.Background()
 
-  // Get Otel configuration from environment
-  var otelConfig otel.Config
-  err := envconfig.Process("OTEL", &otelConfig)
-  if err != nil {
-    return
-  }
-
   // Initialize Otel
-  err := otel.New(ctx, otelConfig)
+  err := otel.New(ctx)
   if err != nil {
     return
   }

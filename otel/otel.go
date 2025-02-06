@@ -13,6 +13,8 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 
+	"github.com/kelseyhightower/envconfig"
+
 	"github.com/Scalingo/go-utils/errors/v2"
 )
 
@@ -23,31 +25,36 @@ type Config struct {
 	CollectionInterval time.Duration `default:"10s" split_words:"true"`
 }
 
-// OtelProviders encapsulates OpenTelemetry providers and utilities
-type OtelProviders struct {
+// Providers encapsulates OpenTelemetry providers and utilities
+type Providers struct {
 	meterProvider *sdkmetric.MeterProvider
 	shutdownFunc  func(context.Context) error
 	config        Config
 }
 
 var (
-	globalProvider *OtelProviders
+	globalProviders *Providers
 
 	// once ensures that initialization happens only once.
 	globalOnce sync.Once
 )
 
-// Initializes the OtelWrapper as a singleton.
-// The configuration is used only on the first call.
-func New(ctx context.Context, cfg Config) error {
+// Initializes the Providers as a singleton.
+func New(ctx context.Context) error {
 	var err error
 	globalOnce.Do(func() {
-		globalProvider, err = setupProviders(ctx, cfg)
+		// Get Otel configuration from environment
+		var cfg Config
+		err = envconfig.Process("OTEL", &cfg)
+		if err != nil {
+			return
+		}
+		globalProviders, err = setupProviders(ctx, cfg)
 	})
 	return err
 }
 
-func setupProviders(ctx context.Context, cfg Config) (*OtelProviders, error) {
+func setupProviders(ctx context.Context, cfg Config) (*Providers, error) {
 	var shutdownFuncs []func(context.Context) error
 
 	// shutdown calls cleanup functions registered via shutdownFuncs.
@@ -82,7 +89,7 @@ func setupProviders(ctx context.Context, cfg Config) (*OtelProviders, error) {
 	shutdownFuncs = append(shutdownFuncs, meterProvider.Shutdown)
 	otelsdk.SetMeterProvider(meterProvider)
 
-	return &OtelProviders{
+	return &Providers{
 		meterProvider: meterProvider,
 		shutdownFunc:  shutdown,
 		config:        cfg,
@@ -135,7 +142,7 @@ func newMetricsExporter(ctx context.Context, cfg Config) (sdkmetric.Exporter, er
 
 // Gracefully shuts down the providers
 func Shutdown(ctx context.Context) error {
-	if err := globalProvider.shutdownFunc(ctx); err != nil {
+	if err := globalProviders.shutdownFunc(ctx); err != nil {
 		return errors.Wrap(ctx, err, "failed to shutdown otel providers")
 	}
 	return nil
