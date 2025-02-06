@@ -3,7 +3,6 @@ package nsqconsumer
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -15,7 +14,7 @@ import (
 	"github.com/stvp/rollbar"
 	"gopkg.in/errgo.v1"
 
-	scalingoerrors "github.com/Scalingo/go-utils/errors/v2"
+	"github.com/Scalingo/go-utils/errors/v2"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/go-utils/nsqproducer"
 )
@@ -299,13 +298,13 @@ func (c *nsqConsumer) nsqHandler(message *nsq.Message) (err error) {
 		unwrapErr := err
 		for unwrapErr != nil {
 			switch handlerErr := unwrapErr.(type) {
-			case scalingoerrors.ErrCtx:
+			case errors.ErrCtx:
 				errLogger = logger.Get(handlerErr.Ctx())
 			case Error:
 				noRetry = handlerErr.noRetry
 				unwrapErr = handlerErr.error
 			}
-			unwrapErr = scalingoerrors.UnwrapError(unwrapErr)
+			unwrapErr = errors.UnwrapError(unwrapErr)
 		}
 		if errLogger == nil {
 			errLogger = msgLogger
@@ -339,7 +338,7 @@ func (c *nsqConsumer) postponeMessage(ctx context.Context, msgLogger logrus.Fiel
 	msgLogger.Info("POSTPONE Message")
 
 	if c.PostponeProducer == nil {
-		return errors.New("no postpone producer configured in this consumer")
+		return errors.New(ctx, "no postpone producer configured in this consumer")
 	}
 
 	return c.PostponeProducer.DeferredPublish(ctx, c.Topic, delay, publishedMsg)
