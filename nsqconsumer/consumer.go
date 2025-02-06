@@ -240,6 +240,11 @@ func (c *nsqConsumer) Start(ctx context.Context) func() {
 }
 
 func (c *nsqConsumer) nsqHandler(message *nsq.Message) (err error) {
+	ctx := logger.ToCtx(context.Background(), c.logger)
+	_ = ctx
+	// We create a new `log` variable because we are so used to call `log.Something` in our codebase
+	log := c.logger
+
 	defer func() {
 		if r := recover(); r != nil {
 			var errRecovered error
@@ -250,32 +255,32 @@ func (c *nsqConsumer) nsqHandler(message *nsq.Message) (err error) {
 				errRecovered = errgo.Newf("%v", value)
 			}
 			err = errgo.Newf("recover panic from nsq consumer: %+v", errRecovered)
-			c.logger.WithError(errRecovered).WithFields(logrus.Fields{"stacktrace": string(debug.Stack())}).Error("Recover panic")
+			log.WithError(errRecovered).WithFields(logrus.Fields{"stacktrace": string(debug.Stack())}).Error("Recover panic")
 		}
 	}()
 
 	if len(message.Body) == 0 {
 		err := errgo.New("body is blank, re-enqueued message")
-		c.logger.WithError(err).Error("Blank message")
+		log.WithError(err).Error("Blank message")
 		return err
 	}
 	var msg NsqMessageDeserialize
 	err = json.Unmarshal(message.Body, &msg)
 	if err != nil {
-		c.logger.WithError(err).Error("Fail to unmarshal message")
+		log.WithError(err).Error("Fail to unmarshal message")
 		return err
 	}
 	msg.NsqMsg = message
 
-	msgLogger := c.logger.WithFields(logrus.Fields{
+	// We want to create a new dedicated logger for the NSQ message handling.
+	// That way we distinguish between the logger during normal operation, and the error logger (named `errLogger`) found when unwrapping the error raised during message handling.
+	msgLogger := logger.Default()
+	ctx = logger.ToCtx(context.Background(), msgLogger)
+	ctx, msgLogger = logger.WithFieldsToCtx(ctx, logrus.Fields{
 		"message_id":   fmt.Sprintf("%s", message.ID),
 		"message_type": msg.Type,
 		"request_id":   msg.RequestID,
 	})
-
-	// Ignore linter here due to the usage of string as keys in context.
-	//nolint:staticcheck,revive
-	ctx := logger.ToCtx(context.WithValue(context.Background(), "request_id", msg.RequestID), msgLogger)
 
 	if msg.At != 0 {
 		now := time.Now().Unix()
