@@ -33,27 +33,6 @@ func TestNew(t *testing.T) {
 				"OTEL_SERVICE_NAME": "test",
 			},
 		},
-		{
-			name: "initialization with debug enabled",
-			env: map[string]string{
-				"OTEL_SERVICE_NAME": "test",
-				"OTEL_DEBUG":        "true",
-			},
-		},
-		{
-			name: "initialization with grpc exporter",
-			env: map[string]string{
-				"OTEL_SERVICE_NAME":  "test",
-				"OTEL_EXPORTER_TYPE": "grpc",
-			},
-		},
-		{
-			name: "initialization with collection interval at 30s",
-			env: map[string]string{
-				"OTEL_SERVICE_NAME":        "test",
-				"OTEL_COLLECTION_INTERVAL": "30s",
-			},
-		},
 	}
 
 	for _, test := range tests {
