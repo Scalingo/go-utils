@@ -21,9 +21,17 @@ func TestNew(t *testing.T) {
 			expectError: "required key OTEL_SERVICE_NAME missing value",
 		},
 		{
+			name:        "initialization without exporter endpoint defined should result in error",
+			expectError: "OTLP endpoint is required",
+			env: map[string]string{
+				"OTEL_SERVICE_NAME": "test",
+			},
+		},
+		{
 			name: "minimal initialization",
 			env: map[string]string{
 				"OTEL_SERVICE_NAME": "test",
+				"OTEL_DEBUG":        "true",
 			},
 		},
 		{
@@ -31,6 +39,7 @@ func TestNew(t *testing.T) {
 			reinit: true,
 			env: map[string]string{
 				"OTEL_SERVICE_NAME": "test",
+				"OTEL_DEBUG":        "true",
 			},
 		},
 	}
