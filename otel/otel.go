@@ -18,10 +18,11 @@ import (
 )
 
 type Config struct {
-	ServiceName        string        `required:"true" split_words:"true"`
-	Debug              bool          `default:"false"`
-	ExporterType       string        `default:"http" split_words:"true"`
-	CollectionInterval time.Duration `default:"10s" split_words:"true"`
+	ServiceName          string        `required:"true" split_words:"true"`
+	Debug                bool          `default:"false"`
+	ExporterType         string        `default:"http" split_words:"true"`
+	ExporterOtlpEndpoint string        `default:"" split_words:"true"`
+	CollectionInterval   time.Duration `default:"10s" split_words:"true"`
 }
 
 // Providers encapsulates OpenTelemetry providers and utilities
@@ -100,6 +101,9 @@ func newMeterProvider(ctx context.Context, cfg Config) (*sdkmetric.MeterProvider
 func newMetricsExporter(ctx context.Context, cfg Config) (sdkmetric.Exporter, error) {
 	if cfg.Debug {
 		return stdoutmetric.New(stdoutmetric.WithPrettyPrint())
+	}
+	if cfg.ExporterOtlpEndpoint == "" {
+		return nil, errors.New(ctx, "OTLP endpoint is required")
 	}
 	switch cfg.ExporterType {
 	case "http":
