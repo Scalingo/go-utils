@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.3.3
+
 * refactor(consumer): match our current best practices around logging and errors
 
 ## v1.3.2
