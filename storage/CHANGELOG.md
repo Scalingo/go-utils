@@ -2,8 +2,6 @@
 
 ## To be Released
 
-## v1.4.0
-
 * feat(s3): Add method `GetWithRetries` taking a writer as argument and which
   will handle gracefully if a `GetObject` sent to the object storage is failing
   and has to be retried.

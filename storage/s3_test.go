@@ -360,6 +360,31 @@ func TestS3_Move(t *testing.T) {
 	}
 }
 
+type partialContentReader struct {
+	content          []byte
+	offset           int
+	failingReadCount int
+}
+
+func (r *partialContentReader) Read(p []byte) (int, error) {
+	// Read 'failingReadCount' times 2 bytes
+	if r.failingReadCount > 0 {
+		nextOffset := r.offset + 2
+		if nextOffset > len(r.content) {
+			nextOffset = len(r.content)
+		}
+		copy(p, r.content[r.offset:nextOffset])
+		lengthCopied := nextOffset - r.offset
+		r.offset = nextOffset
+		r.failingReadCount--
+		return lengthCopied, io.ErrUnexpectedEOF
+	}
+
+	// Then read the rest
+	copy(p, r.content[r.offset:])
+	return len(r.content) - r.offset, io.EOF
+}
+
 func TestS3_GetWithRetries(t *testing.T) {
 	bucket := "my-bucket"
 	key := "my-key"
@@ -384,8 +409,9 @@ func TestS3_GetWithRetries(t *testing.T) {
 			},
 			expectedSize: int64(len(content)),
 		},
-		"it should retry if the connection is closed before the end of the download": {
+		"it should retry if the body reading fails with io.UnepectedEOF": {
 			expectS3Client: func(_ *testing.T, m *storagemock.MockS3Client) {
+				reader := &partialContentReader{content: []byte(content), failingReadCount: 2}
 				m.EXPECT().HeadObject(gomock.Any(), &s3.HeadObjectInput{
 					Bucket: aws.String(bucket), Key: aws.String(key),
 				}).Return(&s3.HeadObjectOutput{ContentLength: aws.Int64(int64(len(content)))}, nil)
@@ -393,13 +419,19 @@ func TestS3_GetWithRetries(t *testing.T) {
 				m.EXPECT().GetObject(gomock.Any(), &s3.GetObjectInput{
 					Bucket: aws.String(bucket), Key: aws.String(key), Range: aws.String("bytes=0-11"),
 				}).Return(&s3.GetObjectOutput{
-					Body: io.NopCloser(io.LimitReader(strings.NewReader(content), 6)),
+					Body: io.NopCloser(reader),
 				}, nil)
 
 				m.EXPECT().GetObject(gomock.Any(), &s3.GetObjectInput{
-					Bucket: aws.String(bucket), Key: aws.String(key), Range: aws.String("bytes=6-11"),
+					Bucket: aws.String(bucket), Key: aws.String(key), Range: aws.String("bytes=2-11"),
 				}).Return(&s3.GetObjectOutput{
-					Body: io.NopCloser(strings.NewReader(content[6:])),
+					Body: io.NopCloser(reader),
+				}, nil)
+
+				m.EXPECT().GetObject(gomock.Any(), &s3.GetObjectInput{
+					Bucket: aws.String(bucket), Key: aws.String(key), Range: aws.String("bytes=4-11"),
+				}).Return(&s3.GetObjectOutput{
+					Body: io.NopCloser(reader),
 				}, nil)
 			},
 			expectedSize: int64(len(content)),

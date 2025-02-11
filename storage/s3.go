@@ -168,11 +168,11 @@ func (s *S3) GetWithRetries(ctx context.Context, path string, writer io.Writer) 
 			Range:  aws.String(rangeHeader),
 		})
 		if err != nil {
+			log.WithError(err).Info("Get Object request error, retrying...")
 			if attempt >= s.retryPolicy.Attempts {
-				return -1, errors.Wrap(err, "get object after retries")
+				return -1, errors.Wrap(err, "get object")
 			}
 			time.Sleep(s.retryPolicy.WaitDuration)
-			log.Infof("Get Object request error: %v, retrying", err)
 			attempt++
 			continue
 		}
@@ -180,10 +180,18 @@ func (s *S3) GetWithRetries(ctx context.Context, path string, writer io.Writer) 
 
 		// Stream object data to response, tracking bytes written
 		bytesWritten, err := io.Copy(writer, resp.Body)
-		if err != nil || bytesWritten < offsetSize {
+		offset += bytesWritten
+		if errors.Is(err, io.ErrUnexpectedEOF) {
 			// Handle partial writes and retry
-			offset += bytesWritten
-			log.Infof("Streaming error: %v. Retrying from offset %d...", err, offset)
+			log.WithError(err).Infof("Streaming error: read %v != %v, retrying...", bytesWritten, offsetSize)
+			continue
+		} else if err != nil {
+			log.WithError(err).Info("Get Object body reading error, retrying...")
+			if attempt >= s.retryPolicy.Attempts {
+				return -1, errors.Wrap(err, "get object body reading")
+			}
+			time.Sleep(s.retryPolicy.WaitDuration)
+			attempt++
 			continue
 		}
 
