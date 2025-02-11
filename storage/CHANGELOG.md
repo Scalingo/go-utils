@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.5.0
+
 * build(deps): bump github.com/Scalingo/go-utils/logger to v1.4.0
 * build(deps): bump github.com/aws/aws-sdk-go-v2 to v1.36.0
 * build(deps): github.com/aws/aws-sdk-go-v2/credentials to v1.17.57
