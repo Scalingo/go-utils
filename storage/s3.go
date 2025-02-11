@@ -138,7 +138,7 @@ func (s *S3) Get(ctx context.Context, path string) (io.ReadCloser, error) {
 // writer. It returns the number of bytes written to the writer.
 //
 // It implements a retry mechanism to handle if connection is closed before
-// the end of the download.
+// the end of the download or if all data couldn't be read.
 func (s *S3) GetWithRetries(ctx context.Context, path string, writer io.Writer) (int64, error) {
 	path = fullPath(path)
 	log := logger.Get(ctx)
