@@ -5,7 +5,6 @@ import (
 	stderrors "errors"
 	"fmt"
 	"io"
-	"net/url"
 	"strings"
 	"time"
 
@@ -383,15 +382,8 @@ func fullPath(path string) string {
 type customS3EndpointResolver struct{ cfg S3Config }
 
 func (r customS3EndpointResolver) ResolveEndpoint(ctx context.Context, params s3.EndpointParameters) (smithyendpoints.Endpoint, error) {
-	if r.cfg.Endpoint == "" {
-		return s3.NewDefaultEndpointResolverV2().ResolveEndpoint(ctx, params)
+	if r.cfg.Endpoint != "" {
+		params.Endpoint = aws.String("https://" + r.cfg.Endpoint)
 	}
-
-	uri, err := url.Parse("https://" + r.cfg.Endpoint)
-	if err != nil {
-		return smithyendpoints.Endpoint{}, errors.Wrapf(ctx, err, "invalid endpoint URI")
-	}
-	return smithyendpoints.Endpoint{
-		URI: *uri,
-	}, nil
+	return s3.NewDefaultEndpointResolverV2().ResolveEndpoint(ctx, params)
 }
