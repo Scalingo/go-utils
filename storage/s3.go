@@ -5,6 +5,7 @@ import (
 	stderrors "errors"
 	"fmt"
 	"io"
+	"net/url"
 	"strings"
 	"time"
 
@@ -13,8 +14,9 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/smithy-go"
-	"github.com/pkg/errors"
+	smithyendpoints "github.com/aws/smithy-go/endpoints"
 
+	"github.com/Scalingo/go-utils/errors/v2"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/go-utils/storage/types"
 )
@@ -86,7 +88,7 @@ func WithUploadConcurrency(concurrency int) S3Opt {
 
 func NewS3(cfg S3Config, opts ...S3Opt) *S3 {
 	s3config := s3Config(cfg)
-	s3client := s3.NewFromConfig(s3config)
+	s3client := s3.NewFromConfig(s3config, s3.WithEndpointResolverV2(customS3EndpointResolver{cfg}))
 	s3 := &S3{
 		cfg:      cfg,
 		s3client: s3client,
@@ -129,7 +131,7 @@ func (s *S3) Get(ctx context.Context, path string) (io.ReadCloser, error) {
 
 	out, err := s.s3client.GetObject(ctx, input)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to get S3 object %v", path)
+		return nil, errors.Wrapf(ctx, err, "fail to get S3 object %v", path)
 	}
 	return out.Body, nil
 }
@@ -146,7 +148,7 @@ func (s *S3) GetWithRetries(ctx context.Context, path string, writer io.Writer) 
 
 	size, err := s.Size(ctx, path)
 	if err != nil {
-		return -1, errors.Wrapf(err, "get size of S3 object %v", path)
+		return -1, errors.Wrapf(ctx, err, "get size of S3 object %v", path)
 	}
 
 	var (
@@ -170,7 +172,7 @@ func (s *S3) GetWithRetries(ctx context.Context, path string, writer io.Writer) 
 		if err != nil {
 			log.WithError(err).Info("Get Object request error, retrying...")
 			if attempt >= s.retryPolicy.Attempts {
-				return -1, errors.Wrap(err, "get object")
+				return -1, errors.Wrap(ctx, err, "get object")
 			}
 			time.Sleep(s.retryPolicy.WaitDuration)
 			attempt++
@@ -188,7 +190,7 @@ func (s *S3) GetWithRetries(ctx context.Context, path string, writer io.Writer) 
 		} else if err != nil {
 			log.WithError(err).Info("Get Object body reading error, retrying...")
 			if attempt >= s.retryPolicy.Attempts {
-				return -1, errors.Wrap(err, "get object body reading")
+				return -1, errors.Wrap(ctx, err, "get object body reading")
 			}
 			time.Sleep(s.retryPolicy.WaitDuration)
 			attempt++
@@ -209,7 +211,7 @@ func (s *S3) Upload(ctx context.Context, file io.Reader, path string) error {
 	}
 	_, err := s.s3uploader.Upload(ctx, input)
 	if err != nil {
-		return errors.Wrapf(err, "fail to upload file to S3 %v", path)
+		return errors.Wrapf(ctx, err, "fail to upload file to S3 %v", path)
 	}
 
 	return nil
@@ -235,7 +237,7 @@ func (s *S3) Size(ctx context.Context, path string) (int64, error) {
 	})
 
 	if err != nil {
-		return -1, errors.Wrapf(err, "fail to HEAD S3 object '%v'", path)
+		return -1, errors.Wrapf(ctx, err, "fail to HEAD S3 object '%v'", path)
 	}
 	return res, nil
 }
@@ -251,7 +253,7 @@ func (s *S3) Delete(ctx context.Context, path string) error {
 				return ObjectNotFound{Path: path}
 			}
 		}
-		return errors.Wrapf(err, "fail to delete S3 object %v", path)
+		return errors.Wrapf(ctx, err, "fail to delete S3 object %v", path)
 	}
 
 	return nil
@@ -279,7 +281,7 @@ func (s *S3) Info(ctx context.Context, path string) (types.Info, error) {
 				return types.Info{}, ObjectNotFound{Path: path}
 			}
 		}
-		return types.Info{}, errors.Wrapf(err, "fail to HEAD S3 object '%v'", path)
+		return types.Info{}, errors.Wrapf(ctx, err, "fail to HEAD S3 object '%v'", path)
 	}
 
 	info := types.Info{
@@ -306,12 +308,12 @@ func (s *S3) Move(ctx context.Context, srcPath, dstPath string) error {
 		CopySource: &srcPathWithBucket,
 	})
 	if err != nil {
-		return errors.Wrapf(err, "fail to copy S3 object '%v' to '%v'", srcPathWithBucket, dstPath)
+		return errors.Wrapf(ctx, err, "fail to copy S3 object '%v' to '%v'", srcPathWithBucket, dstPath)
 	}
 
 	err = s.Delete(ctx, srcPath)
 	if err != nil {
-		return errors.Wrapf(err, "fail to delete the old object '%v' on S3", srcPath)
+		return errors.Wrapf(ctx, err, "fail to delete the old object '%v' on S3", srcPath)
 	}
 	return nil
 }
@@ -325,7 +327,7 @@ func (s *S3) List(ctx context.Context, prefix string, opts types.ListOpts) ([]st
 		MaxKeys: &opts.MaxKeys,
 	})
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to list S3 objects")
+		return nil, errors.Wrapf(ctx, err, "fail to list S3 objects")
 	}
 
 	strObjects := make([]string, aws.ToInt32(objects.KeyCount))
@@ -365,16 +367,10 @@ func (s *S3) retryWrapper(ctx context.Context, method BackendMethod, fun func(ct
 func s3Config(cfg S3Config) aws.Config {
 	credentials := credentials.NewStaticCredentialsProvider(cfg.AK, cfg.SK, "")
 	config := aws.Config{
-		Region:      cfg.Region,
-		Credentials: credentials,
-	}
-	if cfg.Endpoint != "" {
-		config.EndpointResolverWithOptions = aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
-			return aws.Endpoint{
-				URL:           "https://" + cfg.Endpoint,
-				SigningRegion: cfg.Region,
-			}, nil
-		})
+		Region:                     cfg.Region,
+		Credentials:                credentials,
+		RequestChecksumCalculation: aws.RequestChecksumCalculationWhenRequired,
+		ResponseChecksumValidation: aws.ResponseChecksumValidationWhenRequired,
 	}
 
 	return config
@@ -382,4 +378,20 @@ func s3Config(cfg S3Config) aws.Config {
 
 func fullPath(path string) string {
 	return strings.TrimLeft("/"+path, "/")
+}
+
+type customS3EndpointResolver struct{ cfg S3Config }
+
+func (r customS3EndpointResolver) ResolveEndpoint(ctx context.Context, params s3.EndpointParameters) (smithyendpoints.Endpoint, error) {
+	if r.cfg.Endpoint == "" {
+		return s3.NewDefaultEndpointResolverV2().ResolveEndpoint(ctx, params)
+	}
+
+	uri, err := url.Parse("https://" + r.cfg.Endpoint)
+	if err != nil {
+		return smithyendpoints.Endpoint{}, errors.Wrapf(ctx, err, "invalid endpoint URI")
+	}
+	return smithyendpoints.Endpoint{
+		URI: *uri,
+	}, nil
 }
