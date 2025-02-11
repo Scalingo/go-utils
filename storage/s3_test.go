@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"strings"
 	"testing"
 	"time"
 
@@ -354,6 +356,95 @@ func TestS3_Move(t *testing.T) {
 				return
 			}
 			require.NoError(t, err)
+		})
+	}
+}
+
+func TestS3_GetWithRetries(t *testing.T) {
+	bucket := "my-bucket"
+	key := "my-key"
+	content := "file content"
+
+	tests := map[string]struct {
+		expectS3Client func(*testing.T, *storagemock.MockS3Client)
+		expectedError  string
+		expectedSize   int64
+	}{
+		"it should download the object successfully": {
+			expectS3Client: func(t *testing.T, m *storagemock.MockS3Client) {
+				m.EXPECT().HeadObject(gomock.Any(), &s3.HeadObjectInput{
+					Bucket: aws.String(bucket), Key: aws.String(key),
+				}).Return(&s3.HeadObjectOutput{ContentLength: aws.Int64(int64(len(content)))}, nil)
+
+				m.EXPECT().GetObject(gomock.Any(), &s3.GetObjectInput{
+					Bucket: aws.String(bucket), Key: aws.String(key), Range: aws.String("bytes=0-11"),
+				}).Return(&s3.GetObjectOutput{
+					Body: io.NopCloser(strings.NewReader(content)),
+				}, nil)
+			},
+			expectedSize: int64(len(content)),
+		},
+		"it should retry if the connection is closed before the end of the download": {
+			expectS3Client: func(t *testing.T, m *storagemock.MockS3Client) {
+				m.EXPECT().HeadObject(gomock.Any(), &s3.HeadObjectInput{
+					Bucket: aws.String(bucket), Key: aws.String(key),
+				}).Return(&s3.HeadObjectOutput{ContentLength: aws.Int64(int64(len(content)))}, nil)
+
+				m.EXPECT().GetObject(gomock.Any(), &s3.GetObjectInput{
+					Bucket: aws.String(bucket), Key: aws.String(key), Range: aws.String("bytes=0-11"),
+				}).Return(&s3.GetObjectOutput{
+					Body: io.NopCloser(io.LimitReader(strings.NewReader(content), 6)),
+				}, nil)
+
+				m.EXPECT().GetObject(gomock.Any(), &s3.GetObjectInput{
+					Bucket: aws.String(bucket), Key: aws.String(key), Range: aws.String("bytes=6-11"),
+				}).Return(&s3.GetObjectOutput{
+					Body: io.NopCloser(strings.NewReader(content[6:])),
+				}, nil)
+			},
+			expectedSize: int64(len(content)),
+		},
+		"it should fail if the max amount of retries is reached": {
+			expectS3Client: func(t *testing.T, m *storagemock.MockS3Client) {
+				m.EXPECT().HeadObject(gomock.Any(), &s3.HeadObjectInput{
+					Bucket: aws.String(bucket), Key: aws.String(key),
+				}).Return(&s3.HeadObjectOutput{ContentLength: aws.Int64(int64(len(content)))}, nil)
+
+				m.EXPECT().GetObject(gomock.Any(), &s3.GetObjectInput{
+					Bucket: aws.String(bucket), Key: aws.String(key), Range: aws.String("bytes=0-11"),
+				}).Return(nil, errors.New("connection closed")).Times(3)
+			},
+			expectedError: "connection closed",
+		},
+	}
+
+	for msg, test := range tests {
+		t.Run(msg, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			s3Client := storagemock.NewMockS3Client(ctrl)
+			test.expectS3Client(t, s3Client)
+
+			storage := &S3{
+				cfg:      S3Config{Bucket: bucket},
+				s3client: s3Client,
+				retryPolicy: RetryPolicy{
+					Attempts:     3,
+					WaitDuration: 50 * time.Millisecond,
+				},
+			}
+
+			writer := &strings.Builder{}
+			size, err := storage.GetWithRetries(context.Background(), key, writer)
+			if test.expectedError != "" {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), test.expectedError)
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, test.expectedSize, size)
+			assert.Equal(t, content, writer.String())
 		})
 	}
 }

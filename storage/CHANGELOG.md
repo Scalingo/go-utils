@@ -2,6 +2,12 @@
 
 ## To be Released
 
+## v1.4.0
+
+* feat(s3): Add method `GetWithRetries` taking a writer as argument and which
+  will handle gracefully if a `GetObject` sent to the object storage is failing
+  and has to be retried.
+
 ## v1.3.3
 
 * build(deps): bump github.com/aws/aws-sdk-go-v2/feature/s3/manager from 1.11.37 to 1.11.46
