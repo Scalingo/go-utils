@@ -62,29 +62,29 @@ type S3 struct {
 	partSize          int64
 }
 
-type s3Opt func(s3 *S3)
+type S3Opt func(s3 *S3)
 
 // WithRetryPolicy is an option to constructor NewS3 to add a Retry Policy
 // impacting GET operations
-func WithRetryPolicy(policy RetryPolicy) s3Opt {
-	return s3Opt(func(s3 *S3) {
+func WithRetryPolicy(policy RetryPolicy) S3Opt {
+	return S3Opt(func(s3 *S3) {
 		s3.retryPolicy = policy
 	})
 }
 
-func WithPartSize(size int64) s3Opt {
-	return s3Opt(func(s3 *S3) {
+func WithPartSize(size int64) S3Opt {
+	return S3Opt(func(s3 *S3) {
 		s3.partSize = size
 	})
 }
 
-func WithUploadConcurrency(concurrency int) s3Opt {
-	return s3Opt(func(s3 *S3) {
+func WithUploadConcurrency(concurrency int) S3Opt {
+	return S3Opt(func(s3 *S3) {
 		s3.uploadConcurrency = concurrency
 	})
 }
 
-func NewS3(cfg S3Config, opts ...s3Opt) *S3 {
+func NewS3(cfg S3Config, opts ...S3Opt) *S3 {
 	s3config := s3Config(cfg)
 	s3client := s3.NewFromConfig(s3config)
 	s3 := &S3{
@@ -126,11 +126,78 @@ func (s *S3) Get(ctx context.Context, path string) (io.ReadCloser, error) {
 		Bucket: &s.cfg.Bucket,
 		Key:    &path,
 	}
+
 	out, err := s.s3client.GetObject(ctx, input)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to get S3 object %v", path)
 	}
 	return out.Body, nil
+}
+
+// GetWithRetries function downloads the object from S3 and writes it to the
+// writer. It returns the number of bytes written to the writer.
+//
+// It implements a retry mechanism to handle if connection is closed before
+// the end of the download or if all data couldn't be read.
+func (s *S3) GetWithRetries(ctx context.Context, path string, writer io.Writer) (int64, error) {
+	path = fullPath(path)
+	log := logger.Get(ctx)
+	log.WithField("path", path).Info("Get object with retries")
+
+	size, err := s.Size(ctx, path)
+	if err != nil {
+		return -1, errors.Wrapf(err, "get size of S3 object %v", path)
+	}
+
+	var (
+		offset  int64
+		attempt = 1
+	)
+
+	for {
+		// Log if we are resuming a download
+		if offset != 0 {
+			log.Infof("Downloading from offset %d...", offset)
+		}
+
+		offsetSize := size - offset
+		rangeHeader := fmt.Sprintf("bytes=%d-%d", offset, size-1)
+		resp, err := s.s3client.GetObject(ctx, &s3.GetObjectInput{
+			Bucket: &s.cfg.Bucket,
+			Key:    &path,
+			Range:  aws.String(rangeHeader),
+		})
+		if err != nil {
+			log.WithError(err).Info("Get Object request error, retrying...")
+			if attempt >= s.retryPolicy.Attempts {
+				return -1, errors.Wrap(err, "get object")
+			}
+			time.Sleep(s.retryPolicy.WaitDuration)
+			attempt++
+			continue
+		}
+		defer resp.Body.Close()
+
+		// Stream object data to response, tracking bytes written
+		bytesWritten, err := io.Copy(writer, resp.Body)
+		offset += bytesWritten
+		if errors.Is(err, io.ErrUnexpectedEOF) {
+			// Handle partial writes and retry
+			log.WithError(err).Infof("Streaming error: read %v != %v, retrying...", bytesWritten, offsetSize)
+			continue
+		} else if err != nil {
+			log.WithError(err).Info("Get Object body reading error, retrying...")
+			if attempt >= s.retryPolicy.Attempts {
+				return -1, errors.Wrap(err, "get object body reading")
+			}
+			time.Sleep(s.retryPolicy.WaitDuration)
+			attempt++
+			continue
+		}
+
+		break
+	}
+	return size, nil
 }
 
 func (s *S3) Upload(ctx context.Context, file io.Reader, path string) error {
