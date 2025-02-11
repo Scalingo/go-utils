@@ -4,9 +4,7 @@ import (
 	sdkmetric "go.opentelemetry.io/otel/metric"
 )
 
-type Meter interface {
-	GetOriginalMeter() sdkmetric.Meter
-}
+type Meter interface{}
 
 type meter struct {
 	name     string
@@ -18,8 +16,4 @@ func GetMeter(name string) Meter {
 		name:     name,
 		sdkMeter: globalProviders.meterProvider.Meter(name),
 	}
-}
-
-func (m *meter) GetOriginalMeter() sdkmetric.Meter {
-	return m.sdkMeter
 }
