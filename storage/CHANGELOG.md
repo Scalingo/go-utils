@@ -2,6 +2,16 @@
 
 ## To be Released
 
+* build(deps): bump github.com/Scalingo/go-utils/logger to v1.4.0
+* build(deps): bump github.com/aws/aws-sdk-go-v2 to v1.36.0
+* build(deps): github.com/aws/aws-sdk-go-v2/credentials to v1.17.57
+* build(deps): github.com/aws/aws-sdk-go-v2/feature/s3/manager to v1.17.57
+* build(deps): github.com/aws/aws-sdk-go-v2/service/s3 to v1.75.2
+* build(deps): github.com/aws/smithy-go to v1.22.2
+* feat(errors): Use github.com/Scalingo/go-utils/errors/v2
+* feat(s3): Stop using deprecated API to access customer S3 endpoint
+* feat(s3): Set default checksum behavior for request and response to "when_required"
+
 ## v1.4.0
 
 * feat(s3): Add method `GetWithRetries` taking a writer as argument and which
