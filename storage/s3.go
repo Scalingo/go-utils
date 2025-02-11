@@ -151,7 +151,7 @@ func (s *S3) GetWithRetries(ctx context.Context, path string, writer io.Writer) 
 
 	var (
 		offset  int64
-		attempt int = 1
+		attempt = 1
 	)
 
 	for {
