@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* build(deps): rollback github.com/aws/aws-sdk-go-v2 to v1.32.0
+
 ## v1.5.0
 
 * build(deps): bump github.com/Scalingo/go-utils/logger to v1.4.0
