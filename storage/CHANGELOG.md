@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.5.1
+
 * build(deps): rollback github.com/aws/aws-sdk-go-v2 to v1.32.0
 
 ## v1.5.0
