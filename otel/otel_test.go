@@ -6,7 +6,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	otelsdk "go.opentelemetry.io/otel"
 )
 
 func TestInit(t *testing.T) {
@@ -51,14 +50,15 @@ func TestInit(t *testing.T) {
 			if test.expectError != "" {
 				require.Error(t, err)
 				assert.Contains(t, err.Error(), test.expectError)
+
+				require.Nil(t, shutdown)
 			} else {
 				require.NoError(t, err)
+				require.NotNil(t, shutdown)
 
 				t.Cleanup(func() {
 					require.NoError(t, shutdown(ctx))
 				})
-
-				require.NotNil(t, otelsdk.GetMeterProvider())
 			}
 		})
 	}
