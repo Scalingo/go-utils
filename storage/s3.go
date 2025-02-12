@@ -368,8 +368,6 @@ func s3Config(cfg S3Config) aws.Config {
 	config := aws.Config{
 		Region:                     cfg.Region,
 		Credentials:                credentials,
-		RequestChecksumCalculation: aws.RequestChecksumCalculationWhenRequired,
-		ResponseChecksumValidation: aws.ResponseChecksumValidationWhenRequired,
 	}
 
 	return config
