@@ -2,7 +2,6 @@ package otel
 
 import (
 	"context"
-	"sync"
 	"time"
 
 	"github.com/kelseyhightower/envconfig"
@@ -25,57 +24,22 @@ type Config struct {
 	CollectionInterval   time.Duration `default:"10s" split_words:"true"`
 }
 
-// Providers encapsulates OpenTelemetry providers and utilities
-type Providers struct {
-	meterProvider *sdkmetric.MeterProvider
-	config        Config
-}
-
-var (
-	globalProviders *Providers
-
-	// once ensures that initialization happens only once.
-	globalOnce sync.Once
-)
-
-// Initializes the Providers as a singleton.
-func New(ctx context.Context) error {
-	var err error
-	globalOnce.Do(func() {
-		// Get Otel configuration from environment
-		var cfg Config
-		err = envconfig.Process("OTEL", &cfg)
-		if err != nil {
-			return
-		}
-		globalProviders, err = setupProviders(ctx, cfg)
-	})
-	return err
-}
-
-func setupProviders(ctx context.Context, cfg Config) (*Providers, error) {
-	// Set up meter provider.
-	meterProvider, err := newMeterProvider(ctx, cfg)
+func Init(ctx context.Context) (func(context.Context) error, error) {
+	// Get Otel configuration from environment
+	var cfg Config
+	err := envconfig.Process("OTEL", &cfg)
 	if err != nil {
-		return nil, errors.Wrap(ctx, err, "create meter provider")
+		return nil, errors.Wrap(ctx, err, "load configuration")
 	}
 
-	otelsdk.SetMeterProvider(meterProvider)
-
-	return &Providers{
-		meterProvider: meterProvider,
-		config:        cfg,
-	}, nil
-}
-
-func newMeterProvider(ctx context.Context, cfg Config) (*sdkmetric.MeterProvider, error) {
 	if cfg.ServiceName == "" {
-		return nil, errors.New(ctx, "ServiceName is required")
+		return nil, errors.New(ctx, "service name is required")
 	}
 	metricsExporter, err := newMetricsExporter(ctx, cfg)
 	if err != nil {
 		return nil, errors.Wrap(ctx, err, "load exporter")
 	}
+
 	metricsReader := sdkmetric.NewPeriodicReader(metricsExporter, sdkmetric.WithInterval(cfg.CollectionInterval))
 
 	res, err := resource.Merge(
@@ -90,12 +54,20 @@ func newMeterProvider(ctx context.Context, cfg Config) (*sdkmetric.MeterProvider
 	}
 
 	// Initialize MeterProvider
-	provider := sdkmetric.NewMeterProvider(
+	meterProvider := sdkmetric.NewMeterProvider(
 		sdkmetric.WithReader(metricsReader),
 		sdkmetric.WithResource(res),
 	)
 
-	return provider, nil
+	// Set the MeterProvider in the OTEL SDK global in order to access it globally
+	otelsdk.SetMeterProvider(meterProvider)
+
+	return func(ctx context.Context) error {
+		if meterProvider != nil {
+			return meterProvider.Shutdown(ctx)
+		}
+		return nil
+	}, nil
 }
 
 func newMetricsExporter(ctx context.Context, cfg Config) (sdkmetric.Exporter, error) {
@@ -103,7 +75,7 @@ func newMetricsExporter(ctx context.Context, cfg Config) (sdkmetric.Exporter, er
 		return stdoutmetric.New(stdoutmetric.WithPrettyPrint())
 	}
 	if cfg.ExporterOtlpEndpoint == "" {
-		return nil, errors.New(ctx, "OTLP endpoint is required")
+		return nil, errors.New(ctx, "otlp endpoint is required")
 	}
 	switch cfg.ExporterType {
 	case "http":
@@ -113,15 +85,4 @@ func newMetricsExporter(ctx context.Context, cfg Config) (sdkmetric.Exporter, er
 	default:
 		return nil, errors.New(ctx, "invalid exporter type")
 	}
-}
-
-// Gracefully shuts down the providers
-func Shutdown(ctx context.Context) error {
-	if globalProviders.meterProvider != nil {
-		err := globalProviders.meterProvider.Shutdown(ctx)
-		if err != nil {
-			return errors.Wrap(ctx, err, "shutdown meter provider")
-		}
-	}
-	return nil
 }
