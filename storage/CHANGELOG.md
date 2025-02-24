@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat(s3): Pass the retry options to the AWS SDK on top of our custom retrier.
+
 ## v1.5.1
 
 * build(deps): rollback github.com/aws/aws-sdk-go-v2 to v1.32.0

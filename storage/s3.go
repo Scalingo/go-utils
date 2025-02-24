@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/aws/retry"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -86,11 +87,8 @@ func WithUploadConcurrency(concurrency int) S3Opt {
 }
 
 func NewS3(cfg S3Config, opts ...S3Opt) *S3 {
-	s3config := s3Config(cfg)
-	s3client := s3.NewFromConfig(s3config, s3.WithEndpointResolverV2(customS3EndpointResolver{cfg}))
-	s3 := &S3{
-		cfg:      cfg,
-		s3client: s3client,
+	backend := &S3{
+		cfg: cfg,
 		retryPolicy: RetryPolicy{
 			WaitDuration: time.Second,
 			Attempts:     3,
@@ -100,22 +98,26 @@ func NewS3(cfg S3Config, opts ...S3Opt) *S3 {
 		},
 	}
 	for _, opt := range opts {
-		opt(s3)
+		opt(backend)
 	}
 
+	s3config := s3Config(backend)
+	s3client := s3.NewFromConfig(s3config, s3.WithEndpointResolverV2(customS3EndpointResolver{cfg}))
+	backend.s3client = s3client
+
 	partSize := DefaultPartSize
-	if s3.partSize != 0 {
-		partSize = s3.partSize
+	if backend.partSize != 0 {
+		partSize = backend.partSize
 	}
 	concurrency := DefaultUploadConcurrency
-	if s3.uploadConcurrency != 0 {
-		concurrency = s3.uploadConcurrency
+	if backend.uploadConcurrency != 0 {
+		concurrency = backend.uploadConcurrency
 	}
-	s3.s3uploader = manager.NewUploader(s3client, func(u *manager.Uploader) {
+	backend.s3uploader = manager.NewUploader(s3client, func(u *manager.Uploader) {
 		u.PartSize = partSize
 		u.Concurrency = concurrency
 	})
-	return s3
+	return backend
 }
 
 func (s *S3) Get(ctx context.Context, path string) (io.ReadCloser, error) {
@@ -363,11 +365,17 @@ func (s *S3) retryWrapper(ctx context.Context, method BackendMethod, fun func(ct
 	return err
 }
 
-func s3Config(cfg S3Config) aws.Config {
-	credentials := credentials.NewStaticCredentialsProvider(cfg.AK, cfg.SK, "")
+func s3Config(backend *S3) aws.Config {
+	credentials := credentials.NewStaticCredentialsProvider(backend.cfg.AK, backend.cfg.SK, "")
 	config := aws.Config{
-		Region:                     cfg.Region,
-		Credentials:                credentials,
+		Region:      backend.cfg.Region,
+		Credentials: credentials,
+	}
+
+	config.Retryer = func() aws.Retryer {
+		retrier := retry.AddWithMaxAttempts(retry.NewStandard(), backend.retryPolicy.Attempts)
+		retrier = retry.AddWithMaxBackoffDelay(retrier, backend.retryPolicy.WaitDuration)
+		return retrier
 	}
 
 	return config
