@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.6.0
+
 * feat(s3): Pass the retry options to the AWS SDK on top of our custom retrier.
 
 ## v1.5.1
