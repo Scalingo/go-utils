@@ -1,0 +1,22 @@
+{
+  "go.opentelemetry.io/otel/metric.Float64Counter": "FORCE_REGENERATE",
+  "go.opentelemetry.io/otel/metric.Float64Gauge": "FORCE_REGENERATE",
+  "go.opentelemetry.io/otel/metric.Float64Histogram": "FORCE_REGENERATE",
+  "go.opentelemetry.io/otel/metric.Float64ObservableCounter": "FORCE_REGENERATE",
+  "go.opentelemetry.io/otel/metric.Float64ObservableGauge": "FORCE_REGENERATE",
+  "go.opentelemetry.io/otel/metric.Float64ObservableUpDownCounter": "FORCE_REGENERATE",
+  "go.opentelemetry.io/otel/metric.Float64Observer": "FORCE_REGENERATE",
+  "go.opentelemetry.io/otel/metric.Float64UpDownCounter": "FORCE_REGENERATE",
+  "go.opentelemetry.io/otel/metric.Int64Counter": "FORCE_REGENERATE",
+  "go.opentelemetry.io/otel/metric.Int64Gauge": "FORCE_REGENERATE",
+  "go.opentelemetry.io/otel/metric.Int64Histogram": "FORCE_REGENERATE",
+  "go.opentelemetry.io/otel/metric.Int64ObservableCounter": "FORCE_REGENERATE",
+  "go.opentelemetry.io/otel/metric.Int64ObservableGauge": "FORCE_REGENERATE",
+  "go.opentelemetry.io/otel/metric.Int64ObservableUpDownCounter": "FORCE_REGENERATE",
+  "go.opentelemetry.io/otel/metric.Int64Observer": "FORCE_REGENERATE",
+  "go.opentelemetry.io/otel/metric.Int64UpDownCounter": "FORCE_REGENERATE",
+  "go.opentelemetry.io/otel/metric.Meter": "FORCE_REGENERATE",
+  "go.opentelemetry.io/otel/metric.MeterProvider": "FORCE_REGENERATE",
+  "go.opentelemetry.io/otel/metric.Observer": "FORCE_REGENERATE",
+  "go.opentelemetry.io/otel/metric.Registration": "FORCE_REGENERATE"
+}
