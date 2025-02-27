@@ -14,6 +14,8 @@ import (
 
 // MockFloat64Histogram is a mock of Float64Histogram interface.
 type MockFloat64Histogram struct {
+	metric.Float64Histogram
+
 	ctrl     *gomock.Controller
 	recorder *MockFloat64HistogramMockRecorder
 }

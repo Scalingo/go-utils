@@ -13,6 +13,8 @@ import (
 
 // MockObserver is a mock of Observer interface.
 type MockObserver struct {
+	metric.Observer
+
 	ctrl     *gomock.Controller
 	recorder *MockObserverMockRecorder
 }

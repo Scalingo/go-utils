@@ -14,6 +14,8 @@ import (
 
 // MockFloat64Counter is a mock of Float64Counter interface.
 type MockFloat64Counter struct {
+	metric.Float64Counter
+
 	ctrl     *gomock.Controller
 	recorder *MockFloat64CounterMockRecorder
 }

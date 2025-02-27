@@ -13,6 +13,8 @@ import (
 
 // MockFloat64Observer is a mock of Float64Observer interface.
 type MockFloat64Observer struct {
+	metric.Float64Observer
+
 	ctrl     *gomock.Controller
 	recorder *MockFloat64ObserverMockRecorder
 }

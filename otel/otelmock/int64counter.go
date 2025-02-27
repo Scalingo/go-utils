@@ -14,6 +14,8 @@ import (
 
 // MockInt64Counter is a mock of Int64Counter interface.
 type MockInt64Counter struct {
+	metric.Int64Counter
+
 	ctrl     *gomock.Controller
 	recorder *MockInt64CounterMockRecorder
 }

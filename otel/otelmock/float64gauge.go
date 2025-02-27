@@ -14,6 +14,8 @@ import (
 
 // MockFloat64Gauge is a mock of Float64Gauge interface.
 type MockFloat64Gauge struct {
+	metric.Float64Gauge
+
 	ctrl     *gomock.Controller
 	recorder *MockFloat64GaugeMockRecorder
 }

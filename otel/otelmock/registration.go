@@ -8,10 +8,13 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	"go.opentelemetry.io/otel/metric"
 )
 
 // MockRegistration is a mock of Registration interface.
 type MockRegistration struct {
+	metric.Registration
+
 	ctrl     *gomock.Controller
 	recorder *MockRegistrationMockRecorder
 }

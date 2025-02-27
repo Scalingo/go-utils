@@ -14,6 +14,8 @@ import (
 
 // MockInt64Histogram is a mock of Int64Histogram interface.
 type MockInt64Histogram struct {
+	metric.Int64Histogram
+
 	ctrl     *gomock.Controller
 	recorder *MockInt64HistogramMockRecorder
 }

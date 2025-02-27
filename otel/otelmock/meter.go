@@ -13,6 +13,8 @@ import (
 
 // MockMeter is a mock of Meter interface.
 type MockMeter struct {
+	metric.Meter
+
 	ctrl     *gomock.Controller
 	recorder *MockMeterMockRecorder
 }

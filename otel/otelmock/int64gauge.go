@@ -14,6 +14,8 @@ import (
 
 // MockInt64Gauge is a mock of Int64Gauge interface.
 type MockInt64Gauge struct {
+	metric.Int64Gauge
+
 	ctrl     *gomock.Controller
 	recorder *MockInt64GaugeMockRecorder
 }

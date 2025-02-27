@@ -8,10 +8,13 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	"go.opentelemetry.io/otel/metric"
 )
 
 // MockInt64ObservableUpDownCounter is a mock of Int64ObservableUpDownCounter interface.
 type MockInt64ObservableUpDownCounter struct {
+	metric.Int64ObservableUpDownCounter
+
 	ctrl     *gomock.Controller
 	recorder *MockInt64ObservableUpDownCounterMockRecorder
 }

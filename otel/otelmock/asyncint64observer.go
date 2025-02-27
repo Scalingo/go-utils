@@ -13,6 +13,8 @@ import (
 
 // MockInt64Observer is a mock of Int64Observer interface.
 type MockInt64Observer struct {
+	metric.Int64Observer
+
 	ctrl     *gomock.Controller
 	recorder *MockInt64ObserverMockRecorder
 }
