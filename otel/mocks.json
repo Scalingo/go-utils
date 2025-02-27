@@ -1,0 +1,125 @@
+{
+  "base_package": "github.com/Scalingo/go-utils/otel",
+  "mocks": [
+    {
+      "external": true,
+      "src_package": "go.opentelemetry.io/otel/metric",
+      "interface": "MeterProvider",
+      "mock_file": "otelmock/meter_provider.go"
+    },
+    {
+      "external": true,
+      "src_package": "go.opentelemetry.io/otel/metric",
+      "interface": "Meter",
+      "mock_file": "otelmock/meter.go"
+    },
+    {
+      "external": true,
+      "src_package": "go.opentelemetry.io/otel/metric",
+      "interface": "Int64Counter",
+      "mock_file": "otelmock/int64counter.go"
+    },
+    {
+      "external": true,
+      "src_package": "go.opentelemetry.io/otel/metric",
+      "interface": "Int64UpDownCounter",
+      "mock_file": "otelmock/int64updowncounter.go"
+    },
+    {
+      "external": true,
+      "src_package": "go.opentelemetry.io/otel/metric",
+      "interface": "Int64Histogram",
+      "mock_file": "otelmock/int64histogram.go"
+    },
+    {
+      "external": true,
+      "src_package": "go.opentelemetry.io/otel/metric",
+      "interface": "Int64Gauge",
+      "mock_file": "otelmock/int64gauge.go"
+    },
+    {
+      "external": true,
+      "src_package": "go.opentelemetry.io/otel/metric",
+      "interface": "Float64Counter",
+      "mock_file": "otelmock/float64counter.go"
+    },
+    {
+      "external": true,
+      "src_package": "go.opentelemetry.io/otel/metric",
+      "interface": "Float64UpDownCounter",
+      "mock_file": "otelmock/float64updowncounter.go"
+    },
+    {
+      "external": true,
+      "src_package": "go.opentelemetry.io/otel/metric",
+      "interface": "Float64Histogram",
+      "mock_file": "otelmock/float64histogram.go"
+    },
+    {
+      "external": true,
+      "src_package": "go.opentelemetry.io/otel/metric",
+      "interface": "Float64Gauge",
+      "mock_file": "otelmock/float64gauge.go"
+    },
+    {
+      "external": true,
+      "src_package": "go.opentelemetry.io/otel/metric",
+      "interface": "Observer",
+      "mock_file": "otelmock/observer.go"
+    },
+    {
+      "external": true,
+      "src_package": "go.opentelemetry.io/otel/metric",
+      "interface": "Int64Observer",
+      "mock_file": "otelmock/asyncint64observer.go"
+    },
+    {
+      "external": true,
+      "src_package": "go.opentelemetry.io/otel/metric",
+      "interface": "Int64ObservableCounter",
+      "mock_file": "otelmock/asyncint64counter.go"
+    },
+    {
+      "external": true,
+      "src_package": "go.opentelemetry.io/otel/metric",
+      "interface": "Int64ObservableUpDownCounter",
+      "mock_file": "otelmock/asyncint64updowncounter.go"
+    },
+    {
+      "external": true,
+      "src_package": "go.opentelemetry.io/otel/metric",
+      "interface": "Int64ObservableGauge",
+      "mock_file": "otelmock/asyncint64gauge.go"
+    },
+    {
+      "external": true,
+      "src_package": "go.opentelemetry.io/otel/metric",
+      "interface": "Float64Observer",
+      "mock_file": "otelmock/asyncfloat64observer.go"
+    },
+    {
+      "external": true,
+      "src_package": "go.opentelemetry.io/otel/metric",
+      "interface": "Float64ObservableCounter",
+      "mock_file": "otelmock/asyncfloat64counter.go"
+    },
+    {
+      "external": true,
+      "src_package": "go.opentelemetry.io/otel/metric",
+      "interface": "Float64ObservableUpDownCounter",
+      "mock_file": "otelmock/asyncfloat64updowncounter.go"
+    },
+    {
+      "external": true,
+      "src_package": "go.opentelemetry.io/otel/metric",
+      "interface": "Float64ObservableGauge",
+      "mock_file": "otelmock/asyncfloat64gauge.go"
+    },
+    {
+      "external": true,
+      "src_package": "go.opentelemetry.io/otel/metric",
+      "interface": "Registration",
+      "mock_file": "otelmock/registration.go"
+    }
+  ]
+}
