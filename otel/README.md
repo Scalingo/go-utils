@@ -4,99 +4,11 @@
 
 ### Collect a metric synchronously (with a counter instrument)
 
-```go
-package main
-
-import (
-    "context"
-	"fmt"
-
-	otelsdk "go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
-	sdkmetric "go.opentelemetry.io/otel/metric"
-
-    "github.com/Scalingo/go-utils/otel"
-)
-
-func main() {
-    ctx := context.Background()
-
-    // Initialize OpenTelemetry SDK
-    shutdown, err := otel.Init(ctx)
-    if err != nil {
-        fmt.Printf("init otel: %v\n", err)
-        return
-    }
-    // Handle collection of metrics properly when service shut down
-    defer shutdown(ctx)
-
-	// Create a meter
-	meter := otelsdk.Meter("deployment")
-
-	// Create an instrument, based on the meter previously created
-	deploymentCount, err := meter.Int64Counter("deployment_count", sdkmetric.WithDescription("Number of deployments"))
-	if err != nil {
-		fmt.Printf("instrument creation failed: %v\n", err)
-		return
-	}
-
-	// Create measurements on the instrument
-	deploymentCount.Add(ctx, 10, sdkmetric.WithAttributes(attribute.String("app_id", "caaaefb0-dcaa-4866-83d2-b581228169d8")))
-	deploymentCount.Add(ctx, 42, sdkmetric.WithAttributes(attribute.String("app_id", "caaaefb0-dcaa-4866-83d2-b581228169d8")))
-}
-```
+See the directory [docs/examples/int64-sync-counter](docs/examples/int64-sync-counter) for a complete example.
 
 ### Collect a metric asynchronously (with a gauge instrument)
 
-```go
-package main
-
-import (
-    "context"
-	"fmt"
-
-	otelsdk "go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
-	sdkmetric "go.opentelemetry.io/otel/metric"
-
-    "github.com/Scalingo/go-utils/otel"
-)
-
-func main() {
-	ctx := context.Background()
-
-	// Initialize OpenTelemetry SDK
-	shutdown, err := otel.Init(ctx)
-	if err != nil {
-		fmt.Printf("init otel: %v\n", err)
-		return
-	}
-	// Handle collection of metrics properly when service shut down
-	defer shutdown(ctx)
-
-	meter := otelsdk.Meter("database")
-
-	_, err = meter.Int64ObservableGauge(
-		"database_count",
-		sdkmetric.WithDescription("Number of databases"),
-		sdkmetric.WithInt64Callback(func(ctx context.Context, observer sdkmetric.Int64Observer) error {
-			var databaseCount int64
-			databaseCount = 42
-
-			observer.Observe(
-				databaseCount, sdkmetric.WithAttributes(
-					attribute.String("app_id", "caaaefb0-dcaa-4866-83d2-b581228169d8"),
-                ),
-            )
-
-			return nil
-		}),
-	)
-	if err != nil {
-		fmt.Printf("observable gauge creation failed: %v\n", err)
-	}
-}
-```
+See the directory [docs/examples/int64-async-gauge](docs/examples/int64-async-gauge) for a complete example.
 
 ## Development of this package
 
