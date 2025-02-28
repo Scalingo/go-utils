@@ -11,6 +11,6 @@ type MockMeterWrapper struct {
 }
 
 func (m *MockMeterWrapper) Int64Counter(name string, options ...metric.Int64CounterOption) (metric.Int64Counter, error) {
-	rawCounter, _ := m.meter.Int64Counter(name, options...)
-	return &MockInt64CounterWrapper{counter: rawCounter}, nil
+	rawCounter, err := m.meter.Int64Counter(name, options...)
+	return &MockInt64CounterWrapper{counter: rawCounter}, err
 }
