@@ -21,7 +21,7 @@ type Config struct {
 	Debug                bool          `default:"false"`
 	ExporterType         string        `default:"http" split_words:"true"`
 	ExporterOtlpEndpoint string        `default:"" split_words:"true"`
-	CollectionInterval   time.Duration `default:"10s" split_words:"true"`
+	MetricExportInterval time.Duration `default:"10s" split_words:"true"`
 }
 
 func Init(ctx context.Context) (func(context.Context) error, error) {
@@ -40,7 +40,10 @@ func Init(ctx context.Context) (func(context.Context) error, error) {
 		return nil, errors.Wrap(ctx, err, "load exporter")
 	}
 
-	metricsReader := sdkmetric.NewPeriodicReader(metricsExporter, sdkmetric.WithInterval(cfg.CollectionInterval))
+	metricsReader := sdkmetric.NewPeriodicReader(
+		metricsExporter,
+		sdkmetric.WithInterval(cfg.MetricExportInterval),
+	)
 
 	res, err := resource.Merge(
 		resource.Default(),
