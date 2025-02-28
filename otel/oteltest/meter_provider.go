@@ -14,6 +14,7 @@ type MockMeterProviderWrapper struct {
 	meterProvider *otelmock.MockMeterProvider
 }
 
+// InitMockMeterProvider initializes a mocked meter provider for testing
 func InitMockMeterProvider(ctrl *gomock.Controller) *otelmock.MockMeterProvider {
 	meterProvider := otelmock.NewMockMeterProvider(ctrl)
 
@@ -28,9 +29,5 @@ func InitMockMeterProvider(ctrl *gomock.Controller) *otelmock.MockMeterProvider 
 }
 
 func (m *MockMeterProviderWrapper) Meter(name string, options ...metric.MeterOption) metric.Meter {
-	rawMeter := m.meterProvider.Meter(name, options...)
-
-	return &MockMeterWrapper{
-		meter: rawMeter,
-	}
+	return m.meterProvider.Meter(name, options...)
 }
