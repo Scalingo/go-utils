@@ -39,6 +39,7 @@ func (m *MockInt64HistogramWrapper) Record(ctx context.Context, value int64, opt
 	m.histogram.Record(ctx, value, options...)
 }
 
+// MockInt64UpDownCounterWrapper is a wrapper around a metric.Int64UpDownCounter that allows for mocking.
 type MockInt64UpDownCounterWrapper struct {
 	metric.Int64UpDownCounter
 
