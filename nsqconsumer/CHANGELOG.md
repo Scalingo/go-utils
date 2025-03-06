@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.4.0
+
 * feat(disable-backoff): add option to completely disable backoff for a consumer
 
 ## v1.3.3
