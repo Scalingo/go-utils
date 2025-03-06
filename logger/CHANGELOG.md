@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat(logger): add close wrapper of rollbar plugin
+
 ## v1.4.0
 
 * feat(logger): add support for `log` tags
