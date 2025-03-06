@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.5.0
+
 * feat(logger): add close wrapper of rollbar plugin
 
 ## v1.4.0
