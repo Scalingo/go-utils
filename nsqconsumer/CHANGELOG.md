@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat(disable-backoff): add option to completely disable backoff for a consumer
+
 ## v1.3.3
 
 * refactor(consumer): match our current best practices around logging and errors

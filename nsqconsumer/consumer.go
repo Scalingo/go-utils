@@ -149,6 +149,7 @@ type nsqConsumer struct {
 	MaxInFlight      int
 	SkipLogSet       map[string]bool
 	PostponeProducer nsqproducer.Producer
+	DisableBackoff   bool
 	count            uint64
 	logger           logrus.FieldLogger
 	logLevel         LogLevel
@@ -167,6 +168,7 @@ type ConsumerOpts struct {
 	// How long can the consumer keep the message before the message is considered as 'Timed Out'
 	MsgTimeout     time.Duration
 	MessageHandler func(context.Context, *NsqMessageDeserialize) error
+	DisableBackoff bool
 }
 
 type Consumer interface {
@@ -316,12 +318,23 @@ func (c *nsqConsumer) nsqHandler(message *nsq.Message) (err error) {
 			errLogger = msgLogger
 		}
 
+		// Call this method so the caller won't do anything with the message, we
+		// have the control of the flow
+		message.DisableAutoResponse()
 		if noRetry {
 			errLogger.WithError(err).Error("Message handling error - noretry")
-			return nil
+			message.Finish()
+		} else {
+			errLogger.WithError(err).Error("Message handling error")
+			if c.DisableBackoff {
+				// Delay of -1 means the default algorithm will be used to compute the
+				// requeue delay (duration to wait before retrying the message)
+				message.RequeueWithoutBackoff(-1)
+			} else {
+				message.Requeue(-1)
+			}
 		}
-		errLogger.WithError(err).Error("Message handling error")
-		return err
+		return nil
 	}
 
 	if _, ok := c.SkipLogSet[msg.Type]; !ok {
