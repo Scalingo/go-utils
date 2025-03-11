@@ -19,6 +19,7 @@ import (
 type Config struct {
 	ServiceName          string        `required:"true" split_words:"true"`
 	Debug                bool          `default:"false"`
+	DebugPrettyPrint     bool          `default:"true" split_words:"true"`
 	ExporterType         string        `default:"http" split_words:"true"`
 	ExporterOtlpEndpoint string        `default:"" split_words:"true"`
 	MetricExportInterval time.Duration `default:"10s" split_words:"true"`
@@ -75,7 +76,10 @@ func Init(ctx context.Context) (func(context.Context) error, error) {
 
 func newMetricsExporter(ctx context.Context, cfg Config) (sdkmetric.Exporter, error) {
 	if cfg.Debug {
-		return stdoutmetric.New(stdoutmetric.WithPrettyPrint())
+		if cfg.DebugPrettyPrint {
+			return stdoutmetric.New(stdoutmetric.WithPrettyPrint())
+		}
+		return stdoutmetric.New()
 	}
 	if cfg.ExporterOtlpEndpoint == "" {
 		return nil, errors.New(ctx, "otlp endpoint is required")
