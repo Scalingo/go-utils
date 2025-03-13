@@ -149,7 +149,7 @@ type nsqConsumer struct {
 	MaxInFlight      int
 	SkipLogSet       map[string]bool
 	PostponeProducer nsqproducer.Producer
-	DisableBackoff   bool
+	disableBackoff   bool
 	count            uint64
 	logger           logrus.FieldLogger
 	logLevel         LogLevel
@@ -193,6 +193,7 @@ func New(opts ConsumerOpts) (Consumer, error) {
 		MaxInFlight:    opts.MaxInFlight,
 		SkipLogSet:     opts.SkipLogSet,
 		logLevel:       opts.LogLevel,
+		disableBackoff: opts.DisableBackoff,
 	}
 	if consumer.MaxInFlight == 0 {
 		consumer.MaxInFlight = opts.NsqConfig.MaxInFlight
@@ -326,7 +327,7 @@ func (c *nsqConsumer) nsqHandler(message *nsq.Message) (err error) {
 			message.Finish()
 		} else {
 			errLogger.WithError(err).Error("Message handling error")
-			if c.DisableBackoff {
+			if c.disableBackoff {
 				// Delay of -1 means the default algorithm will be used to compute the
 				// requeue delay (duration to wait before retrying the message)
 				message.RequeueWithoutBackoff(-1)

@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* fix(disable-backoff): fix configuration of consumer to correctly handle DisableBackoff argument
+
 ## v1.4.0
 
 * feat(disable-backoff): add option to completely disable backoff for a consumer
