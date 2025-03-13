@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.4.1
+
 * fix(disable-backoff): fix configuration of consumer to correctly handle DisableBackoff argument
 
 ## v1.4.0
