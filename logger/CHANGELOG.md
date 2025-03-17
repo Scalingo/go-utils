@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* fix(graceful): vulnerability defer mutex unlock
+
 ## v1.5.0
 
 * feat(logger): add close wrapper of rollbar plugin
