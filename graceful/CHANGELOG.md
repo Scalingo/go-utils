@@ -2,6 +2,8 @@
 
 ## To be released
 
+* fix: vulnerability defer mutex unlock
+
 ## v.1.2.0
 
 * feat: allow multiple http servers to be started with a single graceful service
