@@ -447,7 +447,6 @@ func (c *cmdAndOutput) stop() {
 	if c.pidFile != "" {
 		require.NoError(c.t, os.Remove(c.pidFile))
 	}
-
 }
 
 // isRunningAfter checks if the process is running after a certain duration
