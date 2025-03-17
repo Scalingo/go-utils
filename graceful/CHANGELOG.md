@@ -2,6 +2,8 @@
 
 ## To be released
 
+## v.1.2.1
+
 * fix: vulnerability defer mutex unlock
 
 ## v.1.2.0
