@@ -1,12 +1,13 @@
 module github.com/Scalingo/go-utils/cronsetup
 
 go 1.22
-toolchain go1.23.7
 
 require (
 	github.com/Scalingo/go-etcd-cron v1.3.3
 	github.com/Scalingo/go-utils/logger v1.4.0
+	github.com/gofrs/uuid/v5 v5.3.2
 	github.com/pkg/errors v0.9.1
+	github.com/sirupsen/logrus v1.9.3
 	go.etcd.io/etcd/client/v3 v3.5.18
 )
 
@@ -16,7 +17,6 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/iancoleman/strcase v0.3.0 // indirect
-	github.com/sirupsen/logrus v1.9.3 // indirect
 	go.etcd.io/etcd/api/v3 v3.5.18 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.18 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
