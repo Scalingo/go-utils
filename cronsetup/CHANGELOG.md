@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat(request_id) Inject `request_id` in context for each cron execution
+
 ## v1.1.4
 
 * Various dependencies updates
