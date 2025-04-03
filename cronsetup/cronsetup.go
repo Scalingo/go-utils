@@ -32,15 +32,19 @@ func Setup(ctx context.Context, opts SetupOpts) (func(), error) {
 
 	funcCtx := func(ctx context.Context, j etcdcron.Job) context.Context {
 		log := logger.Get(ctx)
-		requestID, err := uuid.NewV4()
-		if err != nil {
-			log.WithError(err).Error("generate UUID v4")
-		} else {
-			ctx = context.WithValue(ctx, "request_id", requestID.String())
+		requestID, ok := ctx.Value("request_id").(string)
+		if !ok {
+			requestUUID, err := uuid.NewV4()
+			if err != nil {
+				log.WithError(err).Error("generate UUID v4")
+			} else {
+				requestID = requestUUID.String()
+				ctx = context.WithValue(ctx, "request_id", requestID) // nolint:revive
+			}
 		}
 		ctx, _ = logger.WithFieldsToCtx(ctx, logrus.Fields{
 			"cron-job":   j.Name,
-			"request_id": requestID.String(),
+			"request_id": requestID,
 		})
 		return ctx
 	}
