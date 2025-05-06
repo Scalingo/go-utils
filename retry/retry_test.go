@@ -53,7 +53,7 @@ func TestRetrier(t *testing.T) {
 		assert.Error(t, err)
 	})
 
-	t.Run("It should cancel the retry if a RetryCancelError is retuned", func(t *testing.T) {
+	t.Run("It should cancel the retry if a RetryCancelError is returned", func(t *testing.T) {
 		retrier := New(WithWaitDuration(1 * time.Millisecond))
 		count := 0
 		err := retrier.Do(context.Background(), func(ctx context.Context) error {
@@ -180,5 +180,62 @@ func TestRetrier(t *testing.T) {
 		require.IsType(t, RetryError{}, err)
 		assert.EqualValues(t, err.(RetryError).Scope, MaxDurationScope)
 		assert.Equal(t, err.(RetryError).Err, context.DeadlineExceeded)
+	})
+
+	t.Run("With MaxDuration there is no max attempts", func(t *testing.T) {
+		retrier := New(
+			WithWaitDuration(10*time.Millisecond),
+			WithMaxDuration(500*time.Millisecond),
+		)
+		tries := 0
+
+		ctx := context.Background()
+		before := time.Now()
+		err := retrier.Do(ctx, func(ctx context.Context) error {
+			tries++
+			if tries == 10 {
+				return nil
+			}
+			return fmt.Errorf("Error attempt %v", tries)
+		})
+		assert.NoError(t, err)
+		assert.WithinDuration(t, time.Now(), before, 100*time.Millisecond)
+	})
+
+	t.Run("With MaxDuration and MaxAttempts", func(t *testing.T) {
+		retrier := New(
+			WithWaitDuration(10*time.Millisecond),
+			WithMaxAttempts(5),
+			WithMaxDuration(100*time.Millisecond),
+		)
+		ctx := context.Background()
+		before := time.Now()
+
+		t.Run("MaxAttempts expires first", func(t *testing.T) {
+			tries := 0
+
+			err := retrier.Do(ctx, func(ctx context.Context) error {
+				tries++
+				return fmt.Errorf("Error attempt %v", tries)
+			})
+			assert.Error(t, err)
+			assert.WithinDuration(t, time.Now(), before, 100*time.Millisecond)
+			assert.Equal(t, tries, 5)
+		})
+		t.Run("MaxDuration expires first", func(t *testing.T) {
+			tries := 0
+
+			err := retrier.Do(ctx, func(ctx context.Context) error {
+				tries++
+				time.Sleep(20 * time.Millisecond)
+				if tries == 10 {
+					return nil
+				}
+				return fmt.Errorf("Error attempt %v", tries)
+			})
+			assert.Error(t, err)
+			assert.WithinDuration(t, time.Now(), before, 200*time.Millisecond)
+			assert.Less(t, tries, 5)
+		})
 	})
 }
