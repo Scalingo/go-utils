@@ -1,11 +1,11 @@
 module github.com/Scalingo/go-utils/io
 
-go 1.20
+go 1.23.0
 
 require (
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/sys v0.30.0
+	golang.org/x/sys v0.33.0
 )
 
 require (
