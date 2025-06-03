@@ -1,6 +1,6 @@
 module github.com/Scalingo/go-utils/httpclient
 
-go 1.20
+go 1.24.3
 
 require (
 	github.com/gofrs/uuid/v5 v5.3.2
