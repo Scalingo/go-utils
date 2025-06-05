@@ -19,6 +19,7 @@ import (
 type Config struct {
 	ServiceName          string        `required:"true" split_words:"true"`
 	Debug                bool          `default:"false"`
+	SdkDisabled          bool          `default:"false" split_words:"true"`
 	DebugPrettyPrint     bool          `default:"true" split_words:"true"`
 	ExporterType         string        `default:"http" split_words:"true"`
 	ExporterOtlpEndpoint string        `default:"" split_words:"true"`
@@ -31,6 +32,12 @@ func Init(ctx context.Context) (func(context.Context) error, error) {
 	err := envconfig.Process("OTEL", &cfg)
 	if err != nil {
 		return nil, errors.Wrap(ctx, err, "load configuration")
+	}
+
+	if cfg.SdkDisabled {
+		return func(ctx context.Context) error {
+			return nil
+		}, nil
 	}
 
 	if cfg.ServiceName == "" {
