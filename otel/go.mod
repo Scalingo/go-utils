@@ -1,6 +1,6 @@
 module github.com/Scalingo/go-utils/otel
 
-go 1.23.4
+go 1.24.3
 
 require (
 	github.com/Scalingo/go-utils/errors/v2 v2.4.0

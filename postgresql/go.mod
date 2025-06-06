@@ -1,7 +1,6 @@
 module github.com/Scalingo/go-utils/postgresql
 
-go 1.22
-toolchain go1.24.1
+go 1.24.3
 
 require (
 	github.com/Scalingo/go-utils/errors/v2 v2.4.0

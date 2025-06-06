@@ -36,7 +36,7 @@ func TestNewClient(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.Name, func(t *testing.T) {
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				fmt.Fprintf(w, r.Header.Get("X-Request-ID"))
+				fmt.Fprint(w, r.Header.Get("X-Request-ID"))
 			}))
 			defer server.Close()
 

@@ -6,8 +6,6 @@ updates:
       - dependency-type: "all"
     schedule:
       interval: "monthly"
-    reviewers:
-      - "EtienneM"
     groups:
       dependencies:
         patterns:
@@ -19,8 +17,6 @@ updates:
       - dependency-type: "all"
     schedule:
       interval: "monthly"
-    reviewers:
-      - "EtienneM"
     groups:
       dependencies:
         patterns:
@@ -32,8 +28,6 @@ updates:
       - dependency-type: "all"
     schedule:
       interval: "monthly"
-    reviewers:
-      - "EtienneM"
     groups:
       dependencies:
         patterns:
@@ -45,8 +39,6 @@ updates:
       - dependency-type: "all"
     schedule:
       interval: "monthly"
-    reviewers:
-      - "EtienneM"
     groups:
       dependencies:
         patterns:
@@ -58,8 +50,6 @@ updates:
       - dependency-type: "all"
     schedule:
       interval: "monthly"
-    reviewers:
-      - "EtienneM"
     groups:
       dependencies:
         patterns:
@@ -71,8 +61,6 @@ updates:
       - dependency-type: "all"
     schedule:
       interval: "monthly"
-    reviewers:
-      - "EtienneM"
     groups:
       dependencies:
         patterns:
@@ -84,8 +72,6 @@ updates:
       - dependency-type: "all"
     schedule:
       interval: "monthly"
-    reviewers:
-      - "EtienneM"
     groups:
       dependencies:
         patterns:
@@ -97,8 +83,6 @@ updates:
       - dependency-type: "all"
     schedule:
       interval: "monthly"
-    reviewers:
-      - "EtienneM"
     groups:
       dependencies:
         patterns:
@@ -110,8 +94,6 @@ updates:
       - dependency-type: "all"
     schedule:
       interval: "monthly"
-    reviewers:
-      - "EtienneM"
     groups:
       dependencies:
         patterns:
@@ -123,8 +105,6 @@ updates:
       - dependency-type: "all"
     schedule:
       interval: "monthly"
-    reviewers:
-      - "EtienneM"
     groups:
       dependencies:
         patterns:
@@ -136,8 +116,6 @@ updates:
       - dependency-type: "all"
     schedule:
       interval: "monthly"
-    reviewers:
-      - "EtienneM"
     groups:
       dependencies:
         patterns:
@@ -149,8 +127,6 @@ updates:
       - dependency-type: "all"
     schedule:
       interval: "monthly"
-    reviewers:
-      - "EtienneM"
     groups:
       dependencies:
         patterns:
@@ -162,8 +138,6 @@ updates:
       - dependency-type: "all"
     schedule:
       interval: "monthly"
-    reviewers:
-      - "EtienneM"
     groups:
       dependencies:
         patterns:
@@ -175,8 +149,6 @@ updates:
       - dependency-type: "all"
     schedule:
       interval: "monthly"
-    reviewers:
-      - "EtienneM"
     groups:
       dependencies:
         patterns:
@@ -188,8 +160,6 @@ updates:
       - dependency-type: "all"
     schedule:
       interval: "monthly"
-    reviewers:
-      - "EtienneM"
     groups:
       dependencies:
         patterns:
@@ -201,8 +171,6 @@ updates:
       - dependency-type: "all"
     schedule:
       interval: "monthly"
-    reviewers:
-      - "EtienneM"
     groups:
       dependencies:
         patterns:
@@ -214,8 +182,6 @@ updates:
       - dependency-type: "all"
     schedule:
       interval: "monthly"
-    reviewers:
-      - "EtienneM"
     groups:
       dependencies:
         patterns:
@@ -227,8 +193,6 @@ updates:
       - dependency-type: "all"
     schedule:
       interval: "monthly"
-    reviewers:
-      - "EtienneM"
     groups:
       dependencies:
         patterns:
@@ -240,8 +204,6 @@ updates:
       - dependency-type: "all"
     schedule:
       interval: "monthly"
-    reviewers:
-      - "EtienneM"
     groups:
       dependencies:
         patterns:
@@ -253,8 +215,6 @@ updates:
       - dependency-type: "all"
     schedule:
       interval: "monthly"
-    reviewers:
-      - "EtienneM"
     groups:
       dependencies:
         patterns:
@@ -266,8 +226,6 @@ updates:
       - dependency-type: "all"
     schedule:
       interval: "monthly"
-    reviewers:
-      - "EtienneM"
     groups:
       dependencies:
         patterns:
@@ -277,5 +235,3 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
-    reviewers:
-      - "EtienneM"

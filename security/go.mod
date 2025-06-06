@@ -1,6 +1,6 @@
 module github.com/Scalingo/go-utils/security
 
-go 1.20
+go 1.24.3
 
 require (
 	github.com/Scalingo/go-utils/crypto v1.0.0
