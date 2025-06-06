@@ -1,4 +1,4 @@
-# Package `concurrency` v1.2.0
+# Package `concurrency` v1.3.0
 
 ## Parallel Worker
 
