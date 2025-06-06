@@ -1,5 +1,8 @@
 # CODEOWNERS for Scalingo/go-utils
 # This file defines who is responsible for code reviews in this repository
 
-# Global code owners - these users will be requested for review on all PRs
-* @EtienneM
+# Go dependency files - assign to EtienneM for Dependabot PRs
+*/go.sum @EtienneM
+
+# GitHub Actions workflows
+.github/workflows/* @EtienneM
