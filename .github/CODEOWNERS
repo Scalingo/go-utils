@@ -1,0 +1,5 @@
+# CODEOWNERS for Scalingo/go-utils
+# This file defines who is responsible for code reviews in this repository
+
+# Global code owners - these users will be requested for review on all PRs
+* @EtienneM
