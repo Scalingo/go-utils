@@ -2,6 +2,11 @@
 
 ## To be Released
 
+## v1.2.0
+
+* chore(go): upgrade to Go 1.24
+
+
 * build(deps): bump github.com/Scalingo/go-utils/logger from 1.1.1 to 1.2.0
 
 ## v1.1.1
