@@ -2,7 +2,7 @@
 # This file defines who is responsible for code reviews in this repository
 
 # Go dependency files - assign to EtienneM for Dependabot PRs
-*/go.sum @EtienneM
+**/go.sum @EtienneM
 
 # GitHub Actions workflows
 .github/workflows/* @EtienneM
