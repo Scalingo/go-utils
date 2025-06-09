@@ -1,4 +1,4 @@
-# Package `mongo` v1.4.0
+# Package `mongo` v1.7.0
 
 Useful tools around MongoDB.
 
