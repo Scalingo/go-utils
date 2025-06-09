@@ -2,6 +2,10 @@
 
 ## To be released
 
+## v0.3.0
+
+* chore(go): upgrade to Go 1.24
+
 ## v0.2.1
 
 - feat: Add `OTEL_SDK_DISABLED` env var to completely disable the OpenTelemetry SDK (default: false)
