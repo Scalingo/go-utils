@@ -1,1 +1,1 @@
-# Package `publicgen` v1.0.1
+# Package `publicgen` v1.1.0
