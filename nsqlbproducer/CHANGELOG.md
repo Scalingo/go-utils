@@ -2,6 +2,21 @@
 
 ## To be Released
 
+## v1.5.0
+
+* chore(go): upgrade to Go 1.24
+
+## v1.4.0
+
+* chore(go): upgrade to Go 1.24
+
+## v1.3.0
+
+* chore(go): upgrade to Go 1.24
+
+## v1.2.0
+
+* chore(go): upgrade to Go 1.24
 * build(deps): bump github.com/sirupsen/logrus from 1.8.1 to 1.9.0
 * build(deps): bump github.com/stretchr/testify from 1.8.0 to 1.8.1
 
