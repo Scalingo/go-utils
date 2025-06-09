@@ -1,6 +1,6 @@
 module github.com/Scalingo/go-utils/fs
 
-go 1.24.3
+go 1.24
 
 require github.com/spf13/afero v1.14.0
 
