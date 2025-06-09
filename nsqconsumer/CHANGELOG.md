@@ -2,6 +2,22 @@
 
 ## To be Released
 
+## v1.8.0
+
+* chore(go): upgrade to Go 1.24
+
+## v1.7.0
+
+* chore(go): upgrade to Go 1.24
+
+## v1.6.0
+
+* chore(go): upgrade to Go 1.24
+
+## v1.5.0
+
+* chore(go): upgrade to Go 1.24
+
 ## v1.4.1
 
 * fix(disable-backoff): fix configuration of consumer to correctly handle DisableBackoff argument
