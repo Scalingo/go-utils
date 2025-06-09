@@ -2,18 +2,6 @@
 
 ## To be Released
 
-## v1.6.0
-
-* chore(go): upgrade to Go 1.24
-
-## v1.5.0
-
-* chore(go): upgrade to Go 1.24
-
-## v1.4.0
-
-* chore(go): upgrade to Go 1.24
-
 ## v1.3.0
 
 * chore(go): upgrade to Go 1.24
