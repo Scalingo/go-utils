@@ -1,4 +1,4 @@
-# Package `io` v1.5.0
+# Package `io` v1.2.0
 
 This package aims at proposing a customizable `io.Copy` method. It introduces the `Copier` struct.
 
