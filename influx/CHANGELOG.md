@@ -2,6 +2,21 @@
 
 ## To be Released
 
+## v1.6.0
+
+* chore(go): upgrade to Go 1.24
+
+## v1.5.0
+
+* chore(go): upgrade to Go 1.24
+
+## v1.4.0
+
+* chore(go): upgrade to Go 1.24
+
+## v1.3.0
+
+* chore(go): upgrade to Go 1.24
 * build(deps): bump github.com/influxdata/influxdb from 1.9.7 to 1.11.0
 * build(deps): bump github.com/stretchr/testify from 1.8.0 to 1.8.1
 
