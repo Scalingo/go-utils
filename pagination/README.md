@@ -1,4 +1,4 @@
-## Package `pagination` v1.0.0
+## Package `pagination` v1.1.0
 
 This is a pagination library for Go.
 
