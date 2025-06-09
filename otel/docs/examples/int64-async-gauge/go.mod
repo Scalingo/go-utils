@@ -1,6 +1,6 @@
 module github.com/Scalingo/go-utils/docs/examples/int64-async-gauge
 
-go 1.24.3
+go 1.24
 
 require (
 	github.com/Scalingo/go-utils/otel v0.1.1-0.20250228111151-d9135ac81a90
