@@ -2,6 +2,22 @@
 
 ## To be Released
 
+## v1.10.0
+
+* chore(go): upgrade to Go 1.24
+
+## v1.9.0
+
+* chore(go): upgrade to Go 1.24
+
+## v1.8.0
+
+* chore(go): upgrade to Go 1.24
+
+## v1.7.0
+
+* chore(go): upgrade to Go 1.24
+
 ## v1.6.0
 
 * feat(s3): Pass the retry options to the AWS SDK on top of our custom retrier.
