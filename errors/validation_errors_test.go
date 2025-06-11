@@ -1,15 +1,17 @@
 package errors
 
 import (
+	"errors"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestValidationErrorsBuilder_Merge(t *testing.T) {
 	cases := map[string]struct {
 		Builder  *ValidationErrorsBuilder
-		Error    *ValidationErrors
+		Error    error
 		Expected *ValidationErrorsBuilder
 	}{
 		"merging nil is a no-op": {
@@ -26,7 +28,11 @@ func TestValidationErrorsBuilder_Merge(t *testing.T) {
 
 	for title, c := range cases {
 		t.Run(title, func(t *testing.T) {
-			require.Equal(t, c.Expected, c.Builder.Merge(c.Error))
+			var verr *ValidationErrors
+			require.True(t, errors.As(c.Error, &verr))
+
+			mergedError := c.Builder.Merge(verr)
+			assert.Equal(t, c.Expected, mergedError)
 		})
 	}
 }
@@ -34,7 +40,7 @@ func TestValidationErrorsBuilder_Merge(t *testing.T) {
 func TestValidationErrorsBuilder_MergeWithPrefix(t *testing.T) {
 	cases := map[string]struct {
 		Builder  *ValidationErrorsBuilder
-		Error    *ValidationErrors
+		Error    error
 		Expected *ValidationErrorsBuilder
 		Prefix   string
 	}{
@@ -59,7 +65,11 @@ func TestValidationErrorsBuilder_MergeWithPrefix(t *testing.T) {
 
 	for title, c := range cases {
 		t.Run(title, func(t *testing.T) {
-			require.Equal(t, c.Expected, c.Builder.MergeWithPrefix(c.Prefix, c.Error))
+			var verr *ValidationErrors
+			require.True(t, errors.As(c.Error, &verr))
+
+			mergedError := c.Builder.MergeWithPrefix(c.Prefix, verr)
+			require.Equal(t, c.Expected, mergedError)
 		})
 	}
 }
