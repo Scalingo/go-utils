@@ -33,11 +33,6 @@ func Newf(ctx context.Context, format string, args ...interface{}) error {
 	return Errorf(ctx, format, args...)
 }
 
-// Deprecated: Use `Wrap` or `Wrapf` instead of `Notef`. The library is able to unwrap mixed errors (wrapped with `errgo` or `github.com/pkg/errors`).
-func Notef(ctx context.Context, err error, format string, args ...interface{}) error {
-	return ErrCtx{ctx: ctx, err: errgo.Notef(err, format, args...)}
-}
-
 func Wrap(ctx context.Context, err error, message string) error {
 	return ErrCtx{ctx: ctx, err: errors.Wrap(err, message)}
 }

@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* refactor(errors): remove deprecated functions (BREAKING CHANGE)
+
 ## v2.5.0
 
 * chore(go): upgrade to Go 1.24
