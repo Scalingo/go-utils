@@ -2,6 +2,7 @@
 
 ## To be Released
 
+* fix(errors): `Build` returns `error` not `*ValidationErrors` (BREAKING CHANGE)
 * refactor(errors): remove deprecated functions (BREAKING CHANGE)
 
 ## v2.5.0

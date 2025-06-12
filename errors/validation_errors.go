@@ -26,6 +26,7 @@ func (v *ValidationErrors) Error() string {
 }
 
 // ValidationErrorsBuilder is used to provide a simple way to create a ValidationErrors struct. The typical usecase is:
+//
 //	func (m *MyModel) Validate(ctx context.Context) *ValidationErrors {
 //		validations := document.NewValidationErrorsBuilder()
 //
@@ -85,7 +86,7 @@ func (v *ValidationErrorsBuilder) MergeWithPrefix(prefix string, verr *Validatio
 }
 
 // Build will send a ValidationErrors struct if there is some errors or nil if no errors has been defined
-func (v *ValidationErrorsBuilder) Build() *ValidationErrors {
+func (v *ValidationErrorsBuilder) Build() error {
 	if len(v.errors) == 0 {
 		return nil
 	}
