@@ -88,8 +88,7 @@ func (v *ValidationErrorsBuilder) MergeWithPrefix(prefix string, verr *Validatio
 // Build will send a ValidationErrors struct if there is some errors or nil if no errors has been defined
 func (v *ValidationErrorsBuilder) Build() error {
 	if len(v.errors) == 0 {
-		var verr *ValidationErrors
-		return verr
+		return nil
 	}
 
 	return &ValidationErrors{

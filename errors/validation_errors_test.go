@@ -8,79 +8,102 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestValidationErrorsBuilder_Build(t *testing.T) {
+	t.Run("empty validation error is a nil error", func(t *testing.T) {
+		err := NewValidationErrorsBuilder().Build()
+		assert.NoError(t, err)
+	})
+
+	t.Run("Build must return a correct validation error", func(t *testing.T) {
+		err := NewValidationErrorsBuilder().Set("field", "invalid").Build()
+
+		var verr *ValidationErrors
+		ok := errors.As(err, &verr)
+		require.True(t, ok)
+
+		assert.EqualError(t, err, "field=invalid")
+	})
+}
+
 func TestValidationErrorsBuilder_Merge(t *testing.T) {
 	cases := map[string]struct {
-		Builder  *ValidationErrorsBuilder
-		Error    error
-		Expected *ValidationErrorsBuilder
+		validationErrorsBuilder *ValidationErrorsBuilder
+		validationErrorsToMerge error
+		expectedBuilder         *ValidationErrorsBuilder
 	}{
 		"merging nil is a no-op": {
-			Builder:  NewValidationErrorsBuilder().Set("field", "invalid"),
-			Error:    NewValidationErrorsBuilder().Build(),
-			Expected: NewValidationErrorsBuilder().Set("field", "invalid"),
+			validationErrorsBuilder: NewValidationErrorsBuilder().Set("field", "invalid"),
+			validationErrorsToMerge: NewValidationErrorsBuilder().Build(),
+			expectedBuilder:         NewValidationErrorsBuilder().Set("field", "invalid"),
 		},
 		"merging should add them to the builder": {
-			Builder:  NewValidationErrorsBuilder().Set("field", "invalid"),
-			Error:    NewValidationErrorsBuilder().Set("f1", "err").Set("f2", "err").Build(),
-			Expected: NewValidationErrorsBuilder().Set("field", "invalid").Set("f1", "err").Set("f2", "err"),
+			validationErrorsBuilder: NewValidationErrorsBuilder().Set("field", "invalid"),
+			validationErrorsToMerge: NewValidationErrorsBuilder().Set("f1", "err").Set("f2", "err").Build(),
+			expectedBuilder:         NewValidationErrorsBuilder().Set("field", "invalid").Set("f1", "err").Set("f2", "err"),
 		},
 	}
 
 	for title, c := range cases {
 		t.Run(title, func(t *testing.T) {
 			var verr *ValidationErrors
-			require.True(t, errors.As(c.Error, &verr))
+			if c.validationErrorsToMerge != nil {
+				ok := errors.As(c.validationErrorsToMerge, &verr)
+				require.True(t, ok)
+			}
 
-			mergedError := c.Builder.Merge(verr)
-			assert.Equal(t, c.Expected, mergedError)
+			mergedError := c.validationErrorsBuilder.Merge(verr)
+			assert.Equal(t, c.expectedBuilder, mergedError)
 		})
 	}
 }
 
 func TestValidationErrorsBuilder_MergeWithPrefix(t *testing.T) {
 	cases := map[string]struct {
-		Builder  *ValidationErrorsBuilder
-		Error    error
-		Expected *ValidationErrorsBuilder
-		Prefix   string
+		prefix                  string
+		validationErrorsBuilder *ValidationErrorsBuilder
+		validationErrorsToMerge error
+		expectedBuilder         *ValidationErrorsBuilder
 	}{
 		"merging nil is a no-op": {
-			Builder:  NewValidationErrorsBuilder().Set("field", "invalid"),
-			Error:    NewValidationErrorsBuilder().Build(),
-			Expected: NewValidationErrorsBuilder().Set("field", "invalid"),
+			validationErrorsBuilder: NewValidationErrorsBuilder().Set("field", "invalid"),
+			validationErrorsToMerge: NewValidationErrorsBuilder().Build(),
+			expectedBuilder:         NewValidationErrorsBuilder().Set("field", "invalid"),
 		},
 		"merging should add them to the builder with the prefix + '_'": {
-			Prefix:   "a",
-			Builder:  NewValidationErrorsBuilder().Set("field", "invalid"),
-			Error:    NewValidationErrorsBuilder().Set("f1", "err").Set("f2", "err").Build(),
-			Expected: NewValidationErrorsBuilder().Set("field", "invalid").Set("a_f1", "err").Set("a_f2", "err"),
+			prefix:                  "a",
+			validationErrorsBuilder: NewValidationErrorsBuilder().Set("field", "invalid"),
+			validationErrorsToMerge: NewValidationErrorsBuilder().Set("f1", "err").Set("f2", "err").Build(),
+			expectedBuilder:         NewValidationErrorsBuilder().Set("field", "invalid").Set("a_f1", "err").Set("a_f2", "err"),
 		},
 		"merging a fields should add them to the builder with the prefix without adding '_' if present": {
-			Prefix:   "a_",
-			Builder:  NewValidationErrorsBuilder().Set("field", "invalid"),
-			Error:    NewValidationErrorsBuilder().Set("f1", "err").Set("f2", "err").Build(),
-			Expected: NewValidationErrorsBuilder().Set("field", "invalid").Set("a_f1", "err").Set("a_f2", "err"),
+			prefix:                  "a_",
+			validationErrorsBuilder: NewValidationErrorsBuilder().Set("field", "invalid"),
+			validationErrorsToMerge: NewValidationErrorsBuilder().Set("f1", "err").Set("f2", "err").Build(),
+			expectedBuilder:         NewValidationErrorsBuilder().Set("field", "invalid").Set("a_f1", "err").Set("a_f2", "err"),
 		},
 	}
 
 	for title, c := range cases {
 		t.Run(title, func(t *testing.T) {
 			var verr *ValidationErrors
-			require.True(t, errors.As(c.Error, &verr))
+			if c.validationErrorsToMerge != nil {
+				ok := errors.As(c.validationErrorsToMerge, &verr)
+				require.True(t, ok)
+			}
 
-			mergedError := c.Builder.MergeWithPrefix(c.Prefix, verr)
-			require.Equal(t, c.Expected, mergedError)
+			mergedError := c.validationErrorsBuilder.MergeWithPrefix(c.prefix, verr)
+			require.Equal(t, c.expectedBuilder, mergedError)
 		})
 	}
 }
 
 func TestValidationErrors_Error(t *testing.T) {
 	cases := map[string]struct {
-		Errors         ValidationErrors
-		expectedErrors []string
+		validationErrors ValidationErrors
+		expectedErrors   []string
 	}{
 		"should return a string with one error in it": {
-			Errors: ValidationErrors{
+			validationErrors: ValidationErrors{
 				Errors: map[string][]string{
 					"name": {"invalid name"},
 				},
@@ -88,7 +111,7 @@ func TestValidationErrors_Error(t *testing.T) {
 			expectedErrors: []string{"name=invalid name"},
 		},
 		"should return a string with multiple errors in it with the same field name": {
-			Errors: ValidationErrors{
+			validationErrors: ValidationErrors{
 				Errors: map[string][]string{
 					"name": {"invalid name", "should contains alphanumeric characters"},
 				},
@@ -96,7 +119,7 @@ func TestValidationErrors_Error(t *testing.T) {
 			expectedErrors: []string{"name=invalid name", "should contains alphanumeric characters"},
 		},
 		"should return a string with multiple errors in it with multiple field name": {
-			Errors: ValidationErrors{
+			validationErrors: ValidationErrors{
 				Errors: map[string][]string{
 					"name": {"invalid name", "should contains alphanumeric characters"},
 					"type": {"invalid type", "type not exist"},
@@ -109,7 +132,7 @@ func TestValidationErrors_Error(t *testing.T) {
 	for title, c := range cases {
 		t.Run(title, func(t *testing.T) {
 			for _, expectedError := range c.expectedErrors {
-				require.Contains(t, c.Errors.Error(), expectedError)
+				require.Contains(t, c.validationErrors.Error(), expectedError)
 			}
 		})
 	}
