@@ -1,4 +1,4 @@
-# Package `difflib` v1.1.0
+# Package `difflib` v1.1.1
 
 Go-difflib is a partial port of
 [Python 3 difflib package](https://docs.python.org/3/library/difflib.html).
