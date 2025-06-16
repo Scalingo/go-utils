@@ -1,4 +1,4 @@
-# Package `fs` v1.1.0
+# Package `fs` v1.1.1
 
 [![Godoc Documentation](https://godoc.org/github.com/Scalingo/go-utils/fs?status.svg)](https://godoc.org/github.com/Scalingo/go-utils/fs)
 
