@@ -1,4 +1,4 @@
-# Package `tarball` v1.2.0
+# Package `tarball` v1.2.1
 
 [![Godoc Documentation](https://godoc.org/github.com/Scalingo/go-utils/tarball?status.svg)](https://godoc.org/github.com/Scalingo/go-utils/tarball)
 
