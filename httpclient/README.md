@@ -1,1 +1,1 @@
-# Package `httpclient` v1.2.0
+# Package `httpclient` v1.2.1

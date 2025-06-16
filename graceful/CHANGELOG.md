@@ -2,6 +2,10 @@
 
 ## To be released
 
+## v1.2.2
+
+* chore(go): corrective bump - Go version regression from 1.24.3 to 1.24
+
 ## v.1.2.1
 
 * fix: vulnerability defer mutex unlock
