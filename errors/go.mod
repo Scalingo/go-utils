@@ -1,4 +1,4 @@
-module github.com/Scalingo/go-utils/errors/v2
+module github.com/Scalingo/go-utils/errors/v3
 
 go 1.24
 
