@@ -2,12 +2,14 @@
 
 ## To be Released
 
-## v2.5.1
-
-* chore(go): corrective bump - Go version regression from 1.24.3 to 1.24
+## v3.0.0
 
 * fix(errors): `Build` returns `error` not `*ValidationErrors` (BREAKING CHANGE)
 * refactor(errors): remove deprecated functions (BREAKING CHANGE)
+
+## v2.5.1
+
+* chore(go): corrective bump - Go version regression from 1.24.3 to 1.24
 
 ## v2.5.0
 
