@@ -1,10 +1,10 @@
 module github.com/Scalingo/go-utils/graceful
 
-go 1.24
+go 1.24.3
 
 require (
-	github.com/Scalingo/go-utils/errors/v2 v2.4.0
-	github.com/Scalingo/go-utils/logger v1.5.0
+	github.com/Scalingo/go-utils/errors/v2 v2.5.1
+	github.com/Scalingo/go-utils/logger v1.9.0
 	github.com/cloudflare/tableflip v1.2.3
 	github.com/stretchr/testify v1.10.0
 )
