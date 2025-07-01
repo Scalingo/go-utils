@@ -1,9 +1,9 @@
-github.com/Scalingo/go-utils/fs v1.0.2 h1:UL+QPKaQ6ucPPf6WIsOhVbNb1X4dG8LJwbCRSZOvBss=
-github.com/Scalingo/go-utils/fs v1.0.2/go.mod h1:dT6XHTdJB9uAd/zVsThnYIyHjubwdX15Mguz9cuegyA=
-github.com/Scalingo/go-utils/io v1.1.1 h1:zFcoyKo4exJsUwwhUSnVk0VwhkZrR6xPKlsuXqlZM1I=
-github.com/Scalingo/go-utils/io v1.1.1/go.mod h1:x5DpQaOaPJ0Nmkm5wRt6XpWc+8ZlulskW0oIirVTf3A=
-github.com/Scalingo/go-utils/logger v1.5.0 h1:S96Pt6o1iWtieVglEFcZ0lLhIqd2aB92EKughbgceAM=
-github.com/Scalingo/go-utils/logger v1.5.0/go.mod h1:LGUJp6jttQ4vD+OWrxJKU2PEfAQ5lcrFJa/J3Q+kc64=
+github.com/Scalingo/go-utils/fs v1.1.1 h1:wgeUw6rQw6QFGxKy/skZ14FGbS1j26lDUIWKckbcZ3Q=
+github.com/Scalingo/go-utils/fs v1.1.1/go.mod h1:FFWKvrBnjUH3GLQJmDj7uD1lasWJtvhBVLy7mzxxgpg=
+github.com/Scalingo/go-utils/io v1.2.1 h1:oBCCotLWhKmlrUSaRFqkmdi5dP8Flw64HVwsfq7IqAM=
+github.com/Scalingo/go-utils/io v1.2.1/go.mod h1:2Ob8fqtoT6KgxHeB/DIP/L6HOGFY//B91tRN6D0XZC4=
+github.com/Scalingo/go-utils/logger v1.9.0 h1:djr3YaA7LourAjsZmkgQebtMHQLnHwJz8M1vj9+/8R4=
+github.com/Scalingo/go-utils/logger v1.9.0/go.mod h1:2wzJAC2aOGzpEtKs+PcWhecSe/wVJua8wguDajbk0j0=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -11,8 +11,6 @@ github.com/frankban/quicktest v1.2.2 h1:xfmOhhoH5fGPgbEAlhLpJH9p0z/0Qizio9osmvn9
 github.com/frankban/quicktest v1.2.2/go.mod h1:Qh/WofXFeiAFII1aEBu529AtJo6Zg2VHscnEsbBnJ20=
 github.com/google/go-cmp v0.2.1-0.20190312032427-6f77996f0c42 h1:q3pnF5JFBNRz8sRD+IRj7Y6DMyYGTNqnZ9axTbSfoNI=
 github.com/google/go-cmp v0.2.1-0.20190312032427-6f77996f0c42/go.mod h1:8QqcDgzrUqlUb/G2PQTWiueGozuR1884gddMywk6iLU=
-github.com/guillermo/go.procmeminfo v0.0.0-20131127224636-be4355a9fb0e h1:/6/OurM62Ddm8CR8PveE0a+ql2mL+ycAhOwd563kpdg=
-github.com/guillermo/go.procmeminfo v0.0.0-20131127224636-be4355a9fb0e/go.mod h1:TQrLAmkOSnZ4g1eFORtCfTEbFuVZD0Zm55vdnrilBaw=
 github.com/kr/pretty v0.1.0 h1:L/CwN0zerZDmRFUapSPitk6f+Q3+0za1rQkzVuMiMFI=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
