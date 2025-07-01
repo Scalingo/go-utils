@@ -1,11 +1,11 @@
 module github.com/Scalingo/go-utils/tarball
 
-go 1.24
+go 1.24.3
 
 require (
-	github.com/Scalingo/go-utils/fs v1.0.2
-	github.com/Scalingo/go-utils/io v1.1.1
-	github.com/Scalingo/go-utils/logger v1.5.0
+	github.com/Scalingo/go-utils/fs v1.1.1
+	github.com/Scalingo/go-utils/io v1.2.1
+	github.com/Scalingo/go-utils/logger v1.9.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/afero v1.14.0
 	github.com/stretchr/testify v1.10.0
