@@ -1,5 +1,5 @@
-github.com/Scalingo/go-utils/logger v1.5.0 h1:S96Pt6o1iWtieVglEFcZ0lLhIqd2aB92EKughbgceAM=
-github.com/Scalingo/go-utils/logger v1.5.0/go.mod h1:LGUJp6jttQ4vD+OWrxJKU2PEfAQ5lcrFJa/J3Q+kc64=
+github.com/Scalingo/go-utils/logger v1.9.0 h1:djr3YaA7LourAjsZmkgQebtMHQLnHwJz8M1vj9+/8R4=
+github.com/Scalingo/go-utils/logger v1.9.0/go.mod h1:2wzJAC2aOGzpEtKs+PcWhecSe/wVJua8wguDajbk0j0=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
