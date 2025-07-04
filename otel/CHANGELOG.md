@@ -2,6 +2,8 @@
 
 ## To be released
 
+feat: Add missing resource attributes: `service_instance_id` and `host_name`
+
 ## v0.3.1
 
 * chore(go): corrective bump - Go version regression from 1.24.3 to 1.24

@@ -4,6 +4,7 @@ go 1.24
 
 require (
 	github.com/Scalingo/go-utils/errors/v2 v2.4.0
+	github.com/gofrs/uuid/v5 v5.3.2
 	github.com/golang/mock v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/stretchr/testify v1.10.0
