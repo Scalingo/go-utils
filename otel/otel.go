@@ -2,8 +2,10 @@ package otel
 
 import (
 	"context"
+	"os"
 	"time"
 
+	"github.com/gofrs/uuid/v5"
 	"github.com/kelseyhightower/envconfig"
 	otelsdk "go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
@@ -18,6 +20,8 @@ import (
 
 type Config struct {
 	ServiceName          string        `required:"true" split_words:"true"`
+	ServiceInstanceId    string        `default:"" split_words:"true"`
+	HostName             string        `default:"" split_words:"true"`
 	Debug                bool          `default:"false"`
 	SdkDisabled          bool          `default:"false" split_words:"true"`
 	DebugPrettyPrint     bool          `default:"true" split_words:"true"`
@@ -43,6 +47,17 @@ func Init(ctx context.Context) (func(context.Context) error, error) {
 	if cfg.ServiceName == "" {
 		return nil, errors.New(ctx, "service name is required")
 	}
+
+	serviceInstanceID := cfg.ServiceInstanceId
+	if serviceInstanceID == "" {
+		serviceInstanceID = setServiceInstanceID()
+	}
+
+	hostName := cfg.HostName
+	if hostName == "" {
+		hostName = setHostname()
+	}
+
 	metricsExporter, err := newMetricsExporter(ctx, cfg)
 	if err != nil {
 		return nil, errors.Wrap(ctx, err, "load exporter")
@@ -57,7 +72,9 @@ func Init(ctx context.Context) (func(context.Context) error, error) {
 		resource.Default(),
 		resource.NewWithAttributes(
 			semconv.SchemaURL,
-			semconv.ServiceNameKey.String(cfg.ServiceName),
+			semconv.ServiceName(cfg.ServiceName),
+			semconv.ServiceInstanceID(serviceInstanceID),
+			semconv.HostName(hostName),
 		),
 	)
 	if err != nil {
@@ -99,4 +116,27 @@ func newMetricsExporter(ctx context.Context, cfg Config) (sdkmetric.Exporter, er
 	default:
 		return nil, errors.New(ctx, "invalid exporter type")
 	}
+}
+
+func setHostname() string {
+	hostName, err := os.Hostname()
+	if err != nil {
+		return "unknown"
+	}
+	return hostName
+}
+
+func setServiceInstanceID() string {
+	// To have "web-1" and other containers reported when is a Scalingo app
+	containerInstance, isScalingoApp := os.LookupEnv("CONTAINER")
+	if isScalingoApp {
+		return containerInstance
+	}
+
+	// Otherwise generate a unique UUIDv4
+	serviceInstanceID, err := uuid.NewV4()
+	if err != nil {
+		return "unknown"
+	}
+	return serviceInstanceID.String()
 }
