@@ -1,7 +1,7 @@
 github.com/Scalingo/go-utils/errors/v2 v2.5.1 h1:1tfJW6/ZxTgrRmFTlKQCOtArQquOW0/XdZQzx8wMHoM=
 github.com/Scalingo/go-utils/errors/v2 v2.5.1/go.mod h1:SbR1JuMtfAl+gpM7ahUW/c3Jm5MMzMAwJBk1pEHkVd8=
-github.com/Scalingo/go-utils/logger v1.9.0 h1:djr3YaA7LourAjsZmkgQebtMHQLnHwJz8M1vj9+/8R4=
-github.com/Scalingo/go-utils/logger v1.9.0/go.mod h1:2wzJAC2aOGzpEtKs+PcWhecSe/wVJua8wguDajbk0j0=
+github.com/Scalingo/go-utils/logger v1.6.1 h1:vnehqPhuLHdrarHxeA/4NKy43UhA80aMKzEljMQMG8E=
+github.com/Scalingo/go-utils/logger v1.6.1/go.mod h1:O+r4jyS6/TVcGgqvvUoruNAhtSI5OtUzsJjZpQvgcnM=
 github.com/cloudflare/tableflip v1.2.3 h1:8I+B99QnnEWPHOY3fWipwVKxS70LGgUsslG7CSfmHMw=
 github.com/cloudflare/tableflip v1.2.3/go.mod h1:P4gRehmV6Z2bY5ao5ml9Pd8u6kuEnlB37pUFMmv7j2E=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

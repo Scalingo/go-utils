@@ -2,8 +2,8 @@ github.com/Scalingo/go-utils/env v1.2.1 h1:myWfa0C8UtCi0pRPHFnIgZgeTt2dlJg8YfvCA
 github.com/Scalingo/go-utils/env v1.2.1/go.mod h1:FjTfQmlmT0QPZ/KqxhpYLKsz10UPD6r5Iab9GigzHPk=
 github.com/Scalingo/go-utils/errors/v2 v2.5.1 h1:1tfJW6/ZxTgrRmFTlKQCOtArQquOW0/XdZQzx8wMHoM=
 github.com/Scalingo/go-utils/errors/v2 v2.5.1/go.mod h1:SbR1JuMtfAl+gpM7ahUW/c3Jm5MMzMAwJBk1pEHkVd8=
-github.com/Scalingo/go-utils/logger v1.9.0 h1:djr3YaA7LourAjsZmkgQebtMHQLnHwJz8M1vj9+/8R4=
-github.com/Scalingo/go-utils/logger v1.9.0/go.mod h1:2wzJAC2aOGzpEtKs+PcWhecSe/wVJua8wguDajbk0j0=
+github.com/Scalingo/go-utils/logger v1.6.1 h1:vnehqPhuLHdrarHxeA/4NKy43UhA80aMKzEljMQMG8E=
+github.com/Scalingo/go-utils/logger v1.6.1/go.mod h1:O+r4jyS6/TVcGgqvvUoruNAhtSI5OtUzsJjZpQvgcnM=
 github.com/Scalingo/go-utils/nsqproducer v1.3.1 h1:QATdUoOWxX8vdphl0jIwPx98wzA1GXtrZteGMOymSzo=
 github.com/Scalingo/go-utils/nsqproducer v1.3.1/go.mod h1:keOO4hg+RoumpQr+veBLtjEfoP+ujYvu0i12rHF8GTI=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

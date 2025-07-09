@@ -2,8 +2,8 @@ github.com/Scalingo/go-utils/fs v1.1.1 h1:wgeUw6rQw6QFGxKy/skZ14FGbS1j26lDUIWKck
 github.com/Scalingo/go-utils/fs v1.1.1/go.mod h1:FFWKvrBnjUH3GLQJmDj7uD1lasWJtvhBVLy7mzxxgpg=
 github.com/Scalingo/go-utils/io v1.2.1 h1:oBCCotLWhKmlrUSaRFqkmdi5dP8Flw64HVwsfq7IqAM=
 github.com/Scalingo/go-utils/io v1.2.1/go.mod h1:2Ob8fqtoT6KgxHeB/DIP/L6HOGFY//B91tRN6D0XZC4=
-github.com/Scalingo/go-utils/logger v1.9.0 h1:djr3YaA7LourAjsZmkgQebtMHQLnHwJz8M1vj9+/8R4=
-github.com/Scalingo/go-utils/logger v1.9.0/go.mod h1:2wzJAC2aOGzpEtKs+PcWhecSe/wVJua8wguDajbk0j0=
+github.com/Scalingo/go-utils/logger v1.6.1 h1:vnehqPhuLHdrarHxeA/4NKy43UhA80aMKzEljMQMG8E=
+github.com/Scalingo/go-utils/logger v1.6.1/go.mod h1:O+r4jyS6/TVcGgqvvUoruNAhtSI5OtUzsJjZpQvgcnM=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
