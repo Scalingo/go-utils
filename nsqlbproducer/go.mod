@@ -14,7 +14,7 @@ require (
 )
 
 require (
-	github.com/Scalingo/go-utils/logger v1.9.0 // indirect
+	github.com/Scalingo/go-utils/logger v1.6.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gofrs/uuid/v5 v5.3.2 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
