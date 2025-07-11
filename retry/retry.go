@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"math"
 	"time"
+
+	"github.com/sirupsen/logrus"
+
+	"github.com/Scalingo/go-utils/logger"
 )
 
 type RetryErrorScope string
@@ -84,6 +88,16 @@ func WithErrorCallback(c ErrorCallback) RetryerOptsFunc {
 	return func(r *Retryer) {
 		r.errorCallbacks = append(r.errorCallbacks, c)
 	}
+}
+
+func WithLoggingOnAttemptError(severity logrus.Level) RetryerOptsFunc {
+	return WithErrorCallback(func(ctx context.Context, err error, currentAttempt, maxAttempts int) {
+		log := logger.Get(ctx).WithFields(logrus.Fields{
+			"current_attempt": currentAttempt,
+			"max_attempts":    maxAttempts,
+		})
+		log.WithError(err).Log(severity, "attempt failed")
+	})
 }
 
 func New(opts ...RetryerOptsFunc) Retryer {

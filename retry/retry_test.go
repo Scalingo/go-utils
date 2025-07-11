@@ -7,8 +7,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/Scalingo/go-utils/logger"
 )
 
 func TestRetrier(t *testing.T) {
@@ -180,5 +184,24 @@ func TestRetrier(t *testing.T) {
 		require.IsType(t, RetryError{}, err)
 		assert.EqualValues(t, err.(RetryError).Scope, MaxDurationScope)
 		assert.Equal(t, err.(RetryError).Err, context.DeadlineExceeded)
+	})
+
+	t.Run("If logging on attempt error is set, it should log the error", func(t *testing.T) {
+		log, hook := test.NewNullLogger()
+		ctx := logger.ToCtx(t.Context(), log)
+
+		retrier := New(
+			WithMaxAttempts(2),
+			WithWaitDuration(10*time.Millisecond),
+			WithLoggingOnAttemptError(logrus.ErrorLevel),
+		)
+
+		retrier.Do(ctx, func(ctx context.Context) error {
+			return errors.New("TestError")
+		})
+
+		assert.Len(t, hook.Entries, 2)
+		assert.Contains(t, hook.Entries[0].Message, "attempt failed")
+		assert.Equal(t, logrus.ErrorLevel, hook.Entries[0].Level)
 	})
 }
