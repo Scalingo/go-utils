@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat(logging): Add `WithLoggingOnAttemptError` option allowing to log errors before the last attempt
+
 ## v1.2.1
 
 * chore(go): corrective bump - Go version regression from 1.24.3 to 1.24
