@@ -2,7 +2,9 @@
 
 ## To be released
 
-feat: Add missing resource attributes: `service_instance_id` and `host_name`
+## v0.4.0
+
+feat: Add missing resource attributes: `service_instance_id` and `host_name` based on OTEL specs
 
 ## v0.3.1
 
