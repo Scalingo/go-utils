@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.2.2
+
 * feat(logging): Add `WithLoggingOnAttemptError` option allowing to log errors before the last attempt
 
 ## v1.2.1
