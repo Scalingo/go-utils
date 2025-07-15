@@ -201,7 +201,7 @@ func TestRetrier(t *testing.T) {
 		})
 
 		assert.Len(t, hook.Entries, 2)
-		assert.Contains(t, hook.Entries[0].Message, "attempt failed")
+		assert.Contains(t, "attempt failed", hook.Entries[0].Message)
 		assert.Equal(t, logrus.ErrorLevel, hook.Entries[0].Level)
 	})
 }
