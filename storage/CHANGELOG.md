@@ -2,6 +2,10 @@
 
 ## To be Released
 
+## v1.7.2
+
+* build(deps): rollback github.com/aws/aws-sdk-go-v2 to v1.32.8
+
 ## v1.7.1
 
 * chore(go): corrective bump - Go version regression from 1.24.3 to 1.24
