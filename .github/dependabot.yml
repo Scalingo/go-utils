@@ -278,6 +278,7 @@ updates:
     # https://github.com/Scalingo/go-utils/issues/1231
     ignore:
       - dependency-name: "github.com/aws/aws-sdk-go-v2"
+      - dependency-name: "github.com/aws/aws-sdk-go-v2/*"
 
 
   - package-ecosystem: "gomod"
