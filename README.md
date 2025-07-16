@@ -12,6 +12,11 @@ This repository is hosting modules, each of these modules are independant, they 
 * `CHANGELOG.md`
 * Versioning through git tags. (Example for `etcd` → tag will look like `etcd/v1.0.0`)
 
+## Adding a New Module
+
+- Follow the defined structure above
+- Add the module on the dependabot config located in `.github` directory
+
 ## Release a New Version of a Module
 
 Bump new version number in:
