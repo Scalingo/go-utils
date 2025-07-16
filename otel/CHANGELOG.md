@@ -2,6 +2,8 @@
 
 ## To be released
 
+## v0.5.0
+
 * fix: Update OpenTelemetry packages from `v1.34.0` to `v1.37.0` and update `semconv` from `v1.26.0` to `v1.34.0`
 
 ## v0.4.0
