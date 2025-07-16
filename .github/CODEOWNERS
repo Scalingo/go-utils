@@ -5,4 +5,4 @@
 */go.sum @EtienneM
 
 # GitHub Actions workflows
-.github/workflows/* @EtienneM
+.github/* @EtienneM
