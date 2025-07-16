@@ -42,3 +42,13 @@ type MockInt64Gauge struct {
 ```
 
 This is actually a missing feature of `gomock` that is not yet implemented, see [this issue](https://github.com/uber-go/mock/issues/64).
+
+## Updating this package
+
+> [!IMPORTANT]
+> The version of `go.opentelemetry.io` packages should always match the `semconv` version (schema url) that was imported in the `otel.go` file.
+
+Otherwise this error will be generated when initializing the package:
+```plaintext
+fail to init otel sdk: create resource: conflicting Schema URL: https://opentelemetry.io/schemas/1.34.0 and https://opentelemetry.io/schemas/1.26.0
+```
