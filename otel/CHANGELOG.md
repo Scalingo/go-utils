@@ -2,9 +2,11 @@
 
 ## To be released
 
+* fix: Update OpenTelemetry packages to v1.37.0 and fix semconv schema url issue
+
 ## v0.4.0
 
-feat: Add missing resource attributes: `service_instance_id` and `host_name` based on OTEL specs
+* feat: Add missing resource attributes: `service_instance_id` and `host_name` based on OTEL specs
 
 ## v0.3.1
 
