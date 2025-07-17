@@ -1,5 +1,5 @@
-github.com/Scalingo/go-utils/crypto v1.0.0 h1:aczJ3fXjdgL4Y0qIGJR4xAqNXorID5pjx3eH4k40dt8=
-github.com/Scalingo/go-utils/crypto v1.0.0/go.mod h1:v7rhBLfCqVGWs7fn5M5Vr3anxIxufI3Lwu/5ThV8P6M=
+github.com/Scalingo/go-utils/crypto v1.1.1 h1:+F4JqC/8Lu8b1MDJwdQjT19yzLhShWPk+K93cUv7KVg=
+github.com/Scalingo/go-utils/crypto v1.1.1/go.mod h1:29dsjRaXxNI6tUG2ZbNWs4A5pqmwCAztdgfudGQDuhY=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/golang/mock v1.6.0 h1:ErTB+efbowRARo13NNdxyJji2egdxLGQhRaY+DUumQc=
