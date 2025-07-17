@@ -18,3 +18,5 @@ require (
 	gopkg.in/errgo.v1 v1.0.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+retract v1.9.0 // Had accidentally been released rather than a lower version (1.6.0). Hence we retract it and release a new version 1.9.1.
