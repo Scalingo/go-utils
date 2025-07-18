@@ -2,6 +2,8 @@ module github.com/Scalingo/go-utils/logger
 
 go 1.24
 
+retract v1.9.0 // Had accidentally been released rather than a lower version (1.6.0). Hence we retract it and release a new version 1.9.1.
+
 require (
 	github.com/Scalingo/logrus-rollbar v1.4.2
 	github.com/pkg/errors v0.9.1
@@ -18,5 +20,3 @@ require (
 	gopkg.in/errgo.v1 v1.0.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-retract v1.9.0 // Had accidentally been released rather than a lower version (1.6.0). Hence we retract it and release a new version 1.9.1.

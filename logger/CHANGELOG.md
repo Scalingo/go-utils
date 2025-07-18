@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.9.1
+
 * chore: retract version 1.9.0. It had accidentally been released rather than a lower version (1.6.0). Hence we retract it and release a new version 1.9.1.
 
 ## v1.6.1
