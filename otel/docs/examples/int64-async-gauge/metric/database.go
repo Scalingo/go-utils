@@ -19,7 +19,10 @@ func RegisterDatabaseAsyncGauge() bool {
 			var databaseCount int64
 			databaseCount = 42
 
-			observer.Observe(databaseCount, sdkmetric.WithAttributes(attribute.String("env", "prod")))
+			databaseID := "aefa7436-8440-4a60-a188-305052e4c683"
+
+			// Attribute like Heroku: https://opentelemetry.io/docs/specs/semconv/registry/attributes/heroku/#heroku-attributes
+			observer.Observe(databaseCount, sdkmetric.WithAttributes(attribute.String("scalingo.database.id", databaseID)))
 
 			return nil
 		}),

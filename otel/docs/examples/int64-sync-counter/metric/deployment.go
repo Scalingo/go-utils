@@ -25,8 +25,11 @@ func WriteDeploymentMetric() bool {
 	}
 	fmt.Println("Int64Counter() was called")
 
-	deploymentCount.Add(ctx, 10, sdkmetric.WithAttributes(attribute.String("env", "prod")))
-	deploymentCount.Add(ctx, 42, sdkmetric.WithAttributes(attribute.String("env", "staging")))
+	appID := "3c8b0ca8-98b5-4fd3-a7d5-68ad974badb4"
+
+	// Attribute like Heroku: https://opentelemetry.io/docs/specs/semconv/registry/attributes/heroku/#heroku-attributes
+	deploymentCount.Add(ctx, 10, sdkmetric.WithAttributes(attribute.String("scalingo.app.id", appID)))
+	deploymentCount.Add(ctx, 42, sdkmetric.WithAttributes(attribute.String("scalingo.app.id", appID)))
 
 	return true
 }
