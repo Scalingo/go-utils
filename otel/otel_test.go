@@ -27,6 +27,12 @@ func TestInit(t *testing.T) {
 			},
 		},
 		{
+			name:        "initialization with SDK disabled should skip init",
+			env: map[string]string{
+				"OTEL_SDK_DISABLED": "true",
+			},
+		},
+		{
 			name: "minimal initialization",
 			env: map[string]string{
 				"OTEL_SERVICE_NAME": "test",
@@ -52,14 +58,15 @@ func TestInit(t *testing.T) {
 				assert.Contains(t, err.Error(), test.expectError)
 
 				require.Nil(t, shutdown)
-			} else {
-				require.NoError(t, err)
-				require.NotNil(t, shutdown)
-
-				t.Cleanup(func() {
-					require.NoError(t, shutdown(ctx))
-				})
+				return
 			}
+
+			require.NoError(t, err)
+			require.NotNil(t, shutdown)
+
+			t.Cleanup(func() {
+				require.NoError(t, shutdown(ctx))
+			})
 		})
 	}
 }

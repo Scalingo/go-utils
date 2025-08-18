@@ -34,17 +34,19 @@ type Config struct {
 }
 
 func Init(ctx context.Context) (func(context.Context) error, error) {
+	// If SDK is disabled through env, exit earlier without any error
+	isSDKDisabled := os.Getenv("OTEL_SDK_DISABLED")
+	if isSDKDisabled == "true" {
+		return func(ctx context.Context) error {
+			return nil
+		}, nil
+	}
+
 	// Get OTEL configuration from environment
 	var cfg Config
 	err := envconfig.Process("OTEL", &cfg)
 	if err != nil {
 		return nil, errors.Wrap(ctx, err, "load configuration")
-	}
-
-	if cfg.SdkDisabled {
-		return func(ctx context.Context) error {
-			return nil
-		}, nil
 	}
 
 	if cfg.ServiceName == "" {
