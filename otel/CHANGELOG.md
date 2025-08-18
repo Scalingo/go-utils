@@ -2,6 +2,7 @@
 
 ## To be released
 
+* feat: Switch Exporter Type to gRPC by default, instead of HTTP
 * fix: Enforce TLS connections, use allowlisted ciphers and TLS v1.2 at least in production/staging environments
 
 ## v0.5.0
