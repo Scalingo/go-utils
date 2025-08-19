@@ -28,7 +28,7 @@ type Config struct {
 	Debug                bool          `default:"false"`
 	SdkDisabled          bool          `default:"false" split_words:"true"`
 	DebugPrettyPrint     bool          `default:"true" split_words:"true"`
-	ExporterType         string        `default:"http" split_words:"true"`
+	ExporterType         string        `default:"grpc" split_words:"true"`
 	ExporterOtlpEndpoint string        `default:"" split_words:"true"`
 	MetricExportInterval time.Duration `default:"10s" split_words:"true"`
 }
