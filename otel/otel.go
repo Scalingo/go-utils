@@ -51,7 +51,10 @@ func Init(ctx context.Context) func(context.Context) error {
 	cfg, err := initConfiguration(ctx)
 	if err != nil {
 		log.WithError(err).Error("OpenTelemetry SDK configuration error")
-		return nil
+
+		return func(ctx context.Context) error {
+			return nil
+		}
 	}
 
 	serviceInstanceID := cfg.ServiceInstanceId
@@ -67,7 +70,10 @@ func Init(ctx context.Context) func(context.Context) error {
 	metricsExporter, err := newMetricsExporter(ctx, cfg)
 	if err != nil {
 		log.WithError(err).Error("OpenTelemetry SDK metrics exporter error")
-		return nil
+
+		return func(ctx context.Context) error {
+			return nil
+		}
 	}
 
 	metricsReader := sdkmetric.NewPeriodicReader(
@@ -86,7 +92,9 @@ func Init(ctx context.Context) func(context.Context) error {
 	)
 	if err != nil {
 		log.WithError(err).Error("OpenTelemetry SDK resource creation error")
-		return nil
+		return func(ctx context.Context) error {
+			return nil
+		}
 	}
 
 	// Initialize MeterProvider
