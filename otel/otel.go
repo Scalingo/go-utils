@@ -19,6 +19,7 @@ import (
 	"google.golang.org/grpc/credentials"
 
 	"github.com/Scalingo/go-utils/errors/v2"
+	"github.com/Scalingo/go-utils/logger"
 )
 
 type Config struct {
@@ -34,9 +35,13 @@ type Config struct {
 }
 
 func Init(ctx context.Context) (func(context.Context) error, error) {
+	log := logger.Get(ctx)
+
 	// If SDK is disabled through env, exit earlier without any error
 	isSDKDisabled := os.Getenv("OTEL_SDK_DISABLED")
 	if isSDKDisabled == "true" {
+		log.Info(ctx, "OpenTelemetry SDK is disabled, skipping initialization")
+
 		return func(ctx context.Context) error {
 			return nil
 		}, nil
@@ -95,8 +100,11 @@ func Init(ctx context.Context) (func(context.Context) error, error) {
 	// Set the MeterProvider in the OTEL SDK global in order to access it globally
 	otelsdk.SetMeterProvider(meterProvider)
 
+	log.Info(ctx, "OpenTelemetry SDK is properly initialized")
+
 	return func(ctx context.Context) error {
 		if meterProvider != nil {
+			log.Info(ctx, "OpenTelemetry SDK shutdown")
 			return meterProvider.Shutdown(ctx)
 		}
 		return nil
