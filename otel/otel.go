@@ -34,28 +34,24 @@ type Config struct {
 	MetricExportInterval time.Duration `default:"10s" split_words:"true"`
 }
 
-func Init(ctx context.Context) (func(context.Context) error, error) {
+func Init(ctx context.Context) func(context.Context) error {
 	log := logger.Get(ctx)
 
 	// If SDK is disabled through env, exit earlier without any error
 	isSDKDisabled := os.Getenv("OTEL_SDK_DISABLED")
 	if isSDKDisabled == "true" {
-		log.Info(ctx, "OpenTelemetry SDK is disabled, skipping initialization")
+		log.Info("OpenTelemetry SDK is disabled, skipping initialization")
 
 		return func(ctx context.Context) error {
 			return nil
-		}, nil
+		}
 	}
 
 	// Get OTEL configuration from environment
-	var cfg Config
-	err := envconfig.Process("OTEL", &cfg)
+	cfg, err := initConfiguration(ctx)
 	if err != nil {
-		return nil, errors.Wrap(ctx, err, "load configuration")
-	}
-
-	if cfg.ServiceName == "" {
-		return nil, errors.New(ctx, "service name is required")
+		log.WithError(err).Error("OpenTelemetry SDK configuration error")
+		return nil
 	}
 
 	serviceInstanceID := cfg.ServiceInstanceId
@@ -70,7 +66,8 @@ func Init(ctx context.Context) (func(context.Context) error, error) {
 
 	metricsExporter, err := newMetricsExporter(ctx, cfg)
 	if err != nil {
-		return nil, errors.Wrap(ctx, err, "load exporter")
+		log.WithError(err).Error("OpenTelemetry SDK metrics exporter error")
+		return nil
 	}
 
 	metricsReader := sdkmetric.NewPeriodicReader(
@@ -88,7 +85,8 @@ func Init(ctx context.Context) (func(context.Context) error, error) {
 		),
 	)
 	if err != nil {
-		return nil, errors.Wrap(ctx, err, "create resource")
+		log.WithError(err).Error("OpenTelemetry SDK resource creation error")
+		return nil
 	}
 
 	// Initialize MeterProvider
@@ -108,18 +106,31 @@ func Init(ctx context.Context) (func(context.Context) error, error) {
 			return meterProvider.Shutdown(ctx)
 		}
 		return nil
-	}, nil
+	}
 }
 
-func newMetricsExporter(ctx context.Context, cfg Config) (sdkmetric.Exporter, error) {
+func initConfiguration(ctx context.Context) (*Config, error) {
+	var cfg Config
+	err := envconfig.Process("OTEL", &cfg)
+	if err != nil {
+		return nil, errors.Wrap(ctx, err, "load configuration")
+	}
+
+	if cfg.ServiceName == "" {
+		return nil, errors.New(ctx, "service name is required")
+	}
+	if cfg.ExporterOtlpEndpoint == "" {
+		return nil, errors.New(ctx, "exporter OTLP endpoint is required")
+	}
+	return &cfg, nil
+}
+
+func newMetricsExporter(ctx context.Context, cfg *Config) (sdkmetric.Exporter, error) {
 	if cfg.Debug {
 		if cfg.DebugPrettyPrint {
 			return stdoutmetric.New(stdoutmetric.WithPrettyPrint())
 		}
 		return stdoutmetric.New()
-	}
-	if cfg.ExporterOtlpEndpoint == "" {
-		return nil, errors.New(ctx, "otlp endpoint is required")
 	}
 
 	tlsConfig := &tls.Config{
