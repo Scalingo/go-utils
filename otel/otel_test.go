@@ -2,7 +2,16 @@ package otel
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/pem"
+	"math/big"
+	"os"
+	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	otelsdk "go.opentelemetry.io/otel"
@@ -19,11 +28,15 @@ func TestInit(t *testing.T) {
 		{
 			name:              "initialization without service_name and exporter endpoint should skip init",
 			expectInitSkipped: true,
+			env: map[string]string{
+				"GO_ENV": "test",
+			},
 		},
 		{
 			name:              "initialization without exporter endpoint should skip init",
 			expectInitSkipped: true,
 			env: map[string]string{
+				"GO_ENV":            "test",
 				"OTEL_SERVICE_NAME": "test",
 			},
 		},
@@ -31,6 +44,7 @@ func TestInit(t *testing.T) {
 			name:              "initialization with SDK disabled should skip init",
 			expectInitSkipped: true,
 			env: map[string]string{
+				"GO_ENV":            "test",
 				"OTEL_SDK_DISABLED": "true",
 			},
 		},
@@ -39,6 +53,7 @@ func TestInit(t *testing.T) {
 			// expected error in the case of the unit test, due to endpoint that doesn't respond
 			expectShutdownError: "failed to upload metrics: exporter export timeout",
 			env: map[string]string{
+				"GO_ENV":                      "test",
 				"OTEL_SERVICE_NAME":           "test",
 				"OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317",
 				// OTEL_EXPORTER_OTLP_METRICS_TIMEOUT is set to avoid to wait 10 seconds in the test
@@ -80,4 +95,158 @@ func TestInit(t *testing.T) {
 			})
 		})
 	}
+}
+
+func TestSetTLSConfig(t *testing.T) {
+	dir := t.TempDir()
+
+	// Generate valid CA + client certs for success case
+	caPath, clientCertPath, clientKeyPath := generateTestCerts(t, dir)
+
+	tests := []struct {
+		name          string
+		cfg           Config
+		expectErr     string
+		expectSuccess bool
+	}{
+		{
+			name: "missing CA path",
+			cfg: Config{
+				ExporterOtlpCertificate:       "",
+				ExporterOtlpClientCertificate: clientCertPath,
+				ExporterOtlpClientKey:         clientKeyPath,
+			},
+			expectErr: "CA certificate must be set",
+		},
+		{
+			name: "missing client cert and key",
+			cfg: Config{
+				ExporterOtlpCertificate:       caPath,
+				ExporterOtlpClientCertificate: "",
+				ExporterOtlpClientKey:         "",
+			},
+			expectErr: "client certificate and client key must be set",
+		},
+		{
+			name: "unreadable CA file",
+			cfg: Config{
+				ExporterOtlpCertificate:       filepath.Join(dir, "does-not-exist.pem"),
+				ExporterOtlpClientCertificate: clientCertPath,
+				ExporterOtlpClientKey:         clientKeyPath,
+			},
+			expectErr: "read CA file",
+		},
+		{
+			name: "invalid CA PEM",
+			cfg: Config{
+				ExporterOtlpCertificate:       writeFile(t, dir, "bad-ca.pem", []byte("not a pem")),
+				ExporterOtlpClientCertificate: clientCertPath,
+				ExporterOtlpClientKey:         clientKeyPath,
+			},
+			expectErr: "append CA PEM to cert pool",
+		},
+		{
+			name: "invalid client key pair",
+			cfg: Config{
+				ExporterOtlpCertificate:       caPath,
+				ExporterOtlpClientCertificate: writeFile(t, dir, "bad-client.crt", []byte("nope")),
+				ExporterOtlpClientKey:         writeFile(t, dir, "bad-client.key", []byte("nope")),
+			},
+			expectErr: "load client key pair",
+		},
+		{
+			name: "success with valid CA and client certs",
+			cfg: Config{
+				ExporterOtlpCertificate:       caPath,
+				ExporterOtlpClientCertificate: clientCertPath,
+				ExporterOtlpClientKey:         clientKeyPath,
+			},
+			expectSuccess: true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctx := context.Background()
+			tlsCfg, err := setTLSConfig(ctx, &test.cfg)
+
+			if test.expectErr != "" {
+				require.ErrorContains(t, err, test.expectErr)
+				require.Nil(t, tlsCfg)
+				return
+			}
+
+			require.NoError(t, err)
+			require.NotNil(t, tlsCfg)
+			require.Len(t, tlsCfg.Certificates, 1)
+		})
+	}
+}
+
+// --- helpers ---
+
+// generateTestCerts creates a CA certificate and a client certificate signed by that CA.
+// It writes files to dir and returns paths: (caPEMPath, clientCertPath, clientKeyPath).
+func generateTestCerts(t *testing.T, dir string) (string, string, string) {
+	t.Helper()
+
+	// CA key & cert
+	caKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	require.NoError(t, err)
+
+	caTpl := &x509.Certificate{
+		SerialNumber:          bigSerial(t),
+		Subject:               pkix.Name{CommonName: "test-ca"},
+		NotBefore:             time.Now().Add(-time.Hour),
+		NotAfter:              time.Now().Add(24 * time.Hour),
+		KeyUsage:              x509.KeyUsageCertSign | x509.KeyUsageCRLSign,
+		BasicConstraintsValid: true,
+		IsCA:                  true,
+		MaxPathLenZero:        true,
+	}
+	caDER, err := x509.CreateCertificate(rand.Reader, caTpl, caTpl, &caKey.PublicKey, caKey)
+	require.NoError(t, err)
+
+	caPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: caDER})
+	caPEMPath := filepath.Join(dir, "ca.pem")
+	require.NoError(t, os.WriteFile(caPEMPath, caPEM, 0o600))
+
+	// Client key & cert signed by CA
+	clientKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	require.NoError(t, err)
+
+	clientTpl := &x509.Certificate{
+		SerialNumber: bigSerial(t),
+		Subject:      pkix.Name{CommonName: "test-client"},
+		NotBefore:    time.Now().Add(-time.Hour),
+		NotAfter:     time.Now().Add(24 * time.Hour),
+		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
+		KeyUsage:     x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
+	}
+	caCert, err := x509.ParseCertificate(caDER)
+	require.NoError(t, err)
+	clientDER, err := x509.CreateCertificate(rand.Reader, clientTpl, caCert, &clientKey.PublicKey, caKey)
+	require.NoError(t, err)
+
+	clientCertPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: clientDER})
+	clientKeyPEM := pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(clientKey)})
+
+	clientCertPath := filepath.Join(dir, "client.crt")
+	clientKeyPath := filepath.Join(dir, "client.key")
+	require.NoError(t, os.WriteFile(clientCertPath, clientCertPEM, 0o600))
+	require.NoError(t, os.WriteFile(clientKeyPath, clientKeyPEM, 0o600))
+
+	return caPEMPath, clientCertPath, clientKeyPath
+}
+
+func bigSerial(t *testing.T) *big.Int {
+	t.Helper()
+	return big.NewInt(time.Now().UnixNano())
+}
+
+func writeFile(t *testing.T, dir, name string, content []byte) string {
+	t.Helper()
+	path := filepath.Join(dir, name)
+	require.NoError(t, os.WriteFile(path, content, 0o600))
+	return path
 }
