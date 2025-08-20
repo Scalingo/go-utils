@@ -3,6 +3,7 @@ package otel
 import (
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"os"
 	"time"
 
@@ -23,14 +24,25 @@ import (
 )
 
 type Config struct {
-	ServiceName          string        `required:"true" split_words:"true"`
-	ServiceInstanceId    string        `default:"" split_words:"true"`
-	HostName             string        `default:"" split_words:"true"`
-	Debug                bool          `default:"false"`
-	SdkDisabled          bool          `default:"false" split_words:"true"`
-	DebugPrettyPrint     bool          `default:"true" split_words:"true"`
-	ExporterType         string        `default:"grpc" split_words:"true"`
-	ExporterOtlpEndpoint string        `default:"" split_words:"true"`
+	ServiceInstanceId string `default:"" split_words:"true"`
+	HostName          string `default:"" split_words:"true"`
+	Debug             bool   `default:"false"`
+	DebugPrettyPrint  bool   `default:"true" split_words:"true"`
+	ExporterType      string `default:"grpc" split_words:"true"`
+
+	// OpenTelemetry official env vars
+	// https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#general-sdk-configuration
+	ServiceName string `required:"true" split_words:"true"`
+	SdkDisabled bool   `default:"false" split_words:"true"`
+
+	// https://opentelemetry.io/docs/languages/sdk-configuration/otlp-exporter/#otel_exporter_otlp_endpoint
+	// https://opentelemetry.io/docs/specs/otel/protocol/exporter/#configuration-options
+	ExporterOtlpEndpoint          string `default:"" split_words:"true"`
+	ExporterOtlpCertificate       string `default:"" split_words:"true"` // CA Certificate
+	ExporterOtlpClientKey         string `default:"" split_words:"true"`
+	ExporterOtlpClientCertificate string `default:"" split_words:"true"`
+
+	// https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#periodic-exporting-metricreader
 	MetricExportInterval time.Duration `default:"10s" split_words:"true"`
 }
 
@@ -141,20 +153,6 @@ func newMetricsExporter(ctx context.Context, cfg *Config) (sdkmetric.Exporter, e
 		return stdoutmetric.New()
 	}
 
-	tlsConfig := &tls.Config{
-		InsecureSkipVerify: false,
-		MinVersion:         tls.VersionTLS12,
-		CipherSuites: []uint16{
-			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-			tls.TLS_AES_128_GCM_SHA256,
-			tls.TLS_AES_256_GCM_SHA384,
-			tls.TLS_CHACHA20_POLY1305_SHA256,
-		},
-	}
-
 	environment := os.Getenv("GO_ENV")
 
 	// Enforce TLS for production and staging environments.
@@ -162,6 +160,15 @@ func newMetricsExporter(ctx context.Context, cfg *Config) (sdkmetric.Exporter, e
 	var enforceTLSByDefault = true
 	if environment == "development" || environment == "test" {
 		enforceTLSByDefault = false
+	}
+
+	var tlsConfig *tls.Config
+	var err error
+	if enforceTLSByDefault {
+		tlsConfig, err = setTLSConfig(ctx, cfg)
+		if err != nil {
+			return nil, errors.Wrap(ctx, err, "set TLS configuration")
+		}
 	}
 
 	switch cfg.ExporterType {
@@ -187,6 +194,58 @@ func newMetricsExporter(ctx context.Context, cfg *Config) (sdkmetric.Exporter, e
 	default:
 		return nil, errors.New(ctx, "invalid exporter type")
 	}
+}
+
+func setTLSConfig(ctx context.Context, cfg *Config) (*tls.Config, error) {
+	caPath := cfg.ExporterOtlpCertificate
+	clientCertPath := cfg.ExporterOtlpClientCertificate
+	clientKeyPath := cfg.ExporterOtlpClientKey
+
+	if caPath == "" {
+		return nil, errors.New(ctx, "CA certificate must be set")
+	}
+	if clientCertPath == "" || clientKeyPath == "" {
+		return nil, errors.New(ctx, "client certificate and client key must be set")
+	}
+
+	// Load system CA pool by default then failover to a new pool if it fails
+	certPool, err := x509.SystemCertPool()
+	if err != nil || certPool == nil {
+		certPool = x509.NewCertPool()
+	}
+
+	// Read the CA certificate from the specified path given in the env var
+	caPEM, err := os.ReadFile(caPath)
+	if err != nil {
+		return nil, errors.Wrap(ctx, err, "read CA file")
+	}
+
+	// Append the CA certificate from env var to the pool
+	if !certPool.AppendCertsFromPEM(caPEM) {
+		return nil, errors.New(ctx, "append CA PEM to cert pool")
+	}
+
+	// Load the client certificate and key from env vars
+	cert, err := tls.LoadX509KeyPair(clientCertPath, clientKeyPath)
+	if err != nil {
+		return nil, errors.Wrap(ctx, err, "load client key pair")
+	}
+
+	return &tls.Config{
+		RootCAs:            certPool,
+		Certificates:       []tls.Certificate{cert},
+		InsecureSkipVerify: false,
+		MinVersion:         tls.VersionTLS12,
+		CipherSuites: []uint16{
+			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_AES_128_GCM_SHA256,
+			tls.TLS_AES_256_GCM_SHA384,
+			tls.TLS_CHACHA20_POLY1305_SHA256,
+		},
+	}, nil
 }
 
 func setHostname() string {
