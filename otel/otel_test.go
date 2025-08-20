@@ -70,11 +70,13 @@ func TestInit(t *testing.T) {
 			}
 
 			t.Cleanup(func() {
+				err := shutdown()
+
 				if test.expectShutdownError != "" {
-					require.Error(t, shutdown(ctx), test.expectShutdownError)
+					require.Error(t, err, test.expectShutdownError)
 					return
 				}
-				require.NoError(t, shutdown(ctx))
+				require.NoError(t, err)
 			})
 		})
 	}
