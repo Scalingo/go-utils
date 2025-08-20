@@ -34,7 +34,7 @@ type Config struct {
 	MetricExportInterval time.Duration `default:"10s" split_words:"true"`
 }
 
-func Init(ctx context.Context) func(context.Context) error {
+func Init(ctx context.Context) func() error {
 	log := logger.Get(ctx)
 
 	// If SDK is disabled through env, exit earlier without any error
@@ -42,7 +42,7 @@ func Init(ctx context.Context) func(context.Context) error {
 	if isSDKDisabled == "true" {
 		log.Info("OpenTelemetry SDK is disabled, skipping initialization")
 
-		return func(ctx context.Context) error {
+		return func() error {
 			return nil
 		}
 	}
@@ -52,7 +52,7 @@ func Init(ctx context.Context) func(context.Context) error {
 	if err != nil {
 		log.WithError(err).Error("OpenTelemetry SDK configuration error")
 
-		return func(ctx context.Context) error {
+		return func() error {
 			return nil
 		}
 	}
@@ -71,7 +71,7 @@ func Init(ctx context.Context) func(context.Context) error {
 	if err != nil {
 		log.WithError(err).Error("OpenTelemetry SDK metrics exporter error")
 
-		return func(ctx context.Context) error {
+		return func() error {
 			return nil
 		}
 	}
@@ -92,7 +92,7 @@ func Init(ctx context.Context) func(context.Context) error {
 	)
 	if err != nil {
 		log.WithError(err).Error("OpenTelemetry SDK resource creation error")
-		return func(ctx context.Context) error {
+		return func() error {
 			return nil
 		}
 	}
@@ -108,7 +108,7 @@ func Init(ctx context.Context) func(context.Context) error {
 
 	log.Info(ctx, "OpenTelemetry SDK is properly initialized")
 
-	return func(ctx context.Context) error {
+	return func() error {
 		if meterProvider != nil {
 			log.Info(ctx, "OpenTelemetry SDK shutdown")
 			return meterProvider.Shutdown(ctx)
