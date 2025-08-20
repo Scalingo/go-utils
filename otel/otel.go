@@ -106,11 +106,11 @@ func Init(ctx context.Context) func() error {
 	// Set the MeterProvider in the OTEL SDK global in order to access it globally
 	otelsdk.SetMeterProvider(meterProvider)
 
-	log.Info(ctx, "OpenTelemetry SDK is properly initialized")
+	log.Info("OpenTelemetry SDK is properly initialized")
 
 	return func() error {
 		if meterProvider != nil {
-			log.Info(ctx, "OpenTelemetry SDK shutdown")
+			log.Info("OpenTelemetry SDK shutdown")
 			return meterProvider.Shutdown(ctx)
 		}
 		return nil
