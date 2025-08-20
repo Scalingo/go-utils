@@ -50,7 +50,7 @@ func Init(ctx context.Context) func() error {
 	// Get OTEL configuration from environment
 	cfg, err := initConfiguration(ctx)
 	if err != nil {
-		log.WithError(err).Error("OpenTelemetry SDK configuration error")
+		log.WithError(err).Error("OpenTelemetry configuration error during SDK initialization")
 
 		return func() error {
 			return nil
