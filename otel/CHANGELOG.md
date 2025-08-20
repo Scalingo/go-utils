@@ -2,6 +2,8 @@
 
 ## To be released
 
+## v0.6.0
+
 * feat: Switch Exporter Type to gRPC by default, instead of HTTP
 * fix: Enforce TLS connections, use allowlisted ciphers and TLS v1.2 at least in production/staging environments
 * fix: Return early if SDK is disabled, don't try to load configuration
