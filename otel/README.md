@@ -1,4 +1,4 @@
-# Package `otel` v0.6.0
+# Package `otel` v0.6.1
 
 ## Usage
 
