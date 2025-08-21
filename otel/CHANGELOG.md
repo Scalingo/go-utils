@@ -2,6 +2,8 @@
 
 ## To be released
 
+* build: Bump github.com/Scalingo/go-utils/errors from v2.5.1 to v3.0.0
+
 ## v0.6.1
 
 * fix: Correctly load TLS certificates again from env vars since it broke in v0.6.0
