@@ -2,6 +2,8 @@
 
 ## To be released
 
+## v0.6.1
+
 * fix: Correctly load TLS certificates again from env vars since it broke in v0.6.0
 
 ## v0.6.0
