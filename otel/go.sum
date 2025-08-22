@@ -1,5 +1,5 @@
-github.com/Scalingo/go-utils/errors/v2 v2.5.1 h1:1tfJW6/ZxTgrRmFTlKQCOtArQquOW0/XdZQzx8wMHoM=
-github.com/Scalingo/go-utils/errors/v2 v2.5.1/go.mod h1:SbR1JuMtfAl+gpM7ahUW/c3Jm5MMzMAwJBk1pEHkVd8=
+github.com/Scalingo/go-utils/errors/v3 v3.0.0 h1:ss54AOJDR8LU3tjSA1Gf320ikY0WkgGsm7reeGYt7p0=
+github.com/Scalingo/go-utils/errors/v3 v3.0.0/go.mod h1:+yY6dLBGI7N7gv7FHDO2iq0nYjkD3U4j7riko/a/y6Q=
 github.com/Scalingo/go-utils/logger v1.9.1 h1:AjVCdWcIAQXzrrFdLTJVBhrAqMX27mSgXcUK53PSKQs=
 github.com/Scalingo/go-utils/logger v1.9.1/go.mod h1:A6oLYDkLaYaTAx1JJBBASYEwyEpayCfeAsnAdK0+TQw=
 github.com/cenkalti/backoff/v5 v5.0.3 h1:ZN+IMa753KfX5hd8vVaMixjnqRZ3y8CuJKRKj1xcsSM=
