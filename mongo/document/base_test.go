@@ -4,10 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"gopkg.in/mgo.v2/bson"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gopkg.in/mgo.v2/bson"
 )
 
 const DocsCollection = "docs"
