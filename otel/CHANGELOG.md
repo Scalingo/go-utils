@@ -2,6 +2,8 @@
 
 ## To be released
 
+## v0.6.2
+
 * build: Bump github.com/Scalingo/go-utils/errors from v2.5.1 to v3.0.0
 
 ## v0.6.1
