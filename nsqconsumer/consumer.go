@@ -311,7 +311,6 @@ func (c *nsqConsumer) nsqHandler(message *nsq.Message) (err error) {
 				errLogger = logger.Get(handlerErr.Ctx())
 			case Error:
 				noRetry = handlerErr.noRetry
-				unwrapErr = handlerErr.error
 			}
 			unwrapErr = errors.UnwrapError(unwrapErr)
 		}
