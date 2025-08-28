@@ -1,7 +1,7 @@
 github.com/Scalingo/go-utils/env v1.2.1 h1:myWfa0C8UtCi0pRPHFnIgZgeTt2dlJg8YfvCAE7HEtk=
 github.com/Scalingo/go-utils/env v1.2.1/go.mod h1:FjTfQmlmT0QPZ/KqxhpYLKsz10UPD6r5Iab9GigzHPk=
-github.com/Scalingo/go-utils/errors/v2 v2.5.1 h1:1tfJW6/ZxTgrRmFTlKQCOtArQquOW0/XdZQzx8wMHoM=
-github.com/Scalingo/go-utils/errors/v2 v2.5.1/go.mod h1:SbR1JuMtfAl+gpM7ahUW/c3Jm5MMzMAwJBk1pEHkVd8=
+github.com/Scalingo/go-utils/errors/v3 v3.1.0 h1:bdN7izOe+vf21e28VgBPnBVDQ7b/B/b/8l2uj4f1CCQ=
+github.com/Scalingo/go-utils/errors/v3 v3.1.0/go.mod h1:+yY6dLBGI7N7gv7FHDO2iq0nYjkD3U4j7riko/a/y6Q=
 github.com/Scalingo/go-utils/logger v1.9.1 h1:AjVCdWcIAQXzrrFdLTJVBhrAqMX27mSgXcUK53PSKQs=
 github.com/Scalingo/go-utils/logger v1.9.1/go.mod h1:A6oLYDkLaYaTAx1JJBBASYEwyEpayCfeAsnAdK0+TQw=
 github.com/Scalingo/go-utils/nsqproducer v1.3.1 h1:QATdUoOWxX8vdphl0jIwPx98wzA1GXtrZteGMOymSzo=
@@ -38,8 +38,8 @@ github.com/stretchr/testify v1.10.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf
 github.com/stvp/rollbar v0.5.1 h1:qvyWbd0RNL5V27MBumqCXlcU7ohmHeEtKX+Czc8oeuw=
 github.com/stvp/rollbar v0.5.1/go.mod h1:/fyFC854GgkbHRz/rSsiYc6h84o0G5hxBezoQqRK7Ho=
 golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
-golang.org/x/sys v0.34.0 h1:H5Y5sJ2L2JRdyv7ROF1he/lPdvFsd0mJHFw2ThKHxLA=
-golang.org/x/sys v0.34.0/go.mod h1:BJP2sWEmIv4KK5OTEluFJCKSidICx8ciO85XgH3Ak8k=
+golang.org/x/sys v0.35.0 h1:vz1N37gP5bs89s7He8XuIYXpyY0+QlsKmzipCbUtyxI=
+golang.org/x/sys v0.35.0/go.mod h1:BJP2sWEmIv4KK5OTEluFJCKSidICx8ciO85XgH3Ak8k=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/errgo.v1 v1.0.1 h1:oQFRXzZ7CkBGdm1XZm/EbQYaYNNEElNBOd09M6cqNso=
 gopkg.in/errgo.v1 v1.0.1/go.mod h1:3NjfXwocQRYAPTq4/fzX+CwUhPRcR/azYRhj8G+LqMo=

@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* fix(nsqconsumer.Error) stop unwrap two times when errors containing a nsqconsumer.Error type.
+
 ## v1.5.1
 
 * chore(go): corrective bump - Go version regression from 1.24.3 to 1.24

@@ -14,7 +14,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stvp/rollbar"
 
-	"github.com/Scalingo/go-utils/errors/v2"
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/go-utils/nsqproducer"
 )
@@ -311,7 +311,6 @@ func (c *nsqConsumer) nsqHandler(message *nsq.Message) (err error) {
 				errLogger = logger.Get(handlerErr.Ctx())
 			case Error:
 				noRetry = handlerErr.noRetry
-				unwrapErr = handlerErr.error
 			}
 			unwrapErr = errors.UnwrapError(unwrapErr)
 		}
