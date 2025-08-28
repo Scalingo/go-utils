@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* fix(nsqconsumer/errors) make unwrap compatible with all go-utils/errors versions
+
 ## v1.5.2
 
 * fix(nsqconsumer.Error) stop unwrap two times when errors containing a nsqconsumer.Error type.
