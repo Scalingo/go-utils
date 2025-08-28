@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.5.3
+
 * fix(nsqconsumer/errors) make unwrap compatible with all go-utils/errors versions
 
 ## v1.5.2

@@ -1,1 +1,1 @@
-# Package `nsqconsumer` v1.5.2
+# Package `nsqconsumer` v1.5.3
