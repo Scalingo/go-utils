@@ -120,6 +120,18 @@ func Test_Is(t *testing.T) {
 	})
 }
 
+type customErrorWithUnwrap struct {
+	error error
+}
+
+func (err *customErrorWithUnwrap) Error() string {
+	return "custom error " + err.error.Error()
+}
+
+func (err *customErrorWithUnwrap) Unwrap() error {
+	return err.error
+}
+
 func Test_UnwrapError(t *testing.T) {
 	t.Run("given an error stack with errgo.Mask", func(t *testing.T) {
 		var err error
@@ -152,6 +164,50 @@ func Test_UnwrapError(t *testing.T) {
 		}
 
 		assert.Equal(t, "test=biniou", lastErr.Error())
+	})
+
+	t.Run("given an error implementing the Unwrap() interface must return the wrapped error", func(t *testing.T) {
+		var err error
+		err = (&ValidationErrors{
+			Errors: map[string][]string{
+				"test": {"biniou"},
+			},
+		})
+		err = &customErrorWithUnwrap{
+			error: err,
+		}
+
+		assert.Equal(t, "test=biniou", UnwrapError(err).Error())
+		assert.IsType(t, &ValidationErrors{}, UnwrapError(err))
+		assert.ErrorContains(t, err, "custom error test=biniou")
+	})
+
+	t.Run("given an error stack with a custom error including Unwrap() interface, it returns the deepest wrapped error", func(t *testing.T) {
+		var err error
+		err = (&ValidationErrors{
+			Errors: map[string][]string{
+				"test": {"biniou"},
+			},
+		})
+		err = &customErrorWithUnwrap{
+			error: err,
+		}
+		err = errors.Wrap(err, "pouet")
+		err = errgo.Notef(err, "pouet")
+		err = Wrap(t.Context(), err, "pouet")
+		err = Wrapf(t.Context(), err, "pouet")
+		err = errgo.Mask(err, errgo.Any)
+		err = &customErrorWithUnwrap{
+			error: err,
+		}
+		err = errors.Wrap(err, "pouet")
+
+		var lastErr error
+		for unwrappedErr := err; unwrappedErr != nil; unwrappedErr = UnwrapError(unwrappedErr) {
+			lastErr = unwrappedErr
+		}
+		assert.Equal(t, "test=biniou", lastErr.Error())
+		assert.IsType(t, &ValidationErrors{}, lastErr)
 	})
 
 	t.Run("given a nil error", func(t *testing.T) {
