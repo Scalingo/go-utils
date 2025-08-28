@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.5.2
+
 * fix(nsqconsumer.Error) stop unwrap two times when errors containing a nsqconsumer.Error type.
 
 ## v1.5.1
