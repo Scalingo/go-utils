@@ -307,7 +307,7 @@ func (c *nsqConsumer) nsqHandler(message *nsq.Message) (err error) {
 		unwrapErr := err
 		for unwrapErr != nil {
 			switch handlerErr := unwrapErr.(type) {
-			case errors.ErrCtx:
+			case (interface{ Ctx() context.Context }):
 				errLogger = logger.Get(handlerErr.Ctx())
 			case Error:
 				noRetry = handlerErr.noRetry
