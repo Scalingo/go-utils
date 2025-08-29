@@ -1,0 +1,141 @@
+name: Tests and Linters Scalingo go-utils Packages
+
+on: [push]
+
+jobs:
+  detect-modules:
+    name: Detect the Go modules declared in go-utils
+    runs-on: ubuntu-22.04
+    outputs:
+      modules: ${{ steps.set-modules.outputs.modules }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # We need to define the fetch-depth to 0 so that we can get the commit ID of the master branch
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          check-latest: true
+      - id: set-modules
+        run: |
+          echo -n "modules=" > $GITHUB_OUTPUT
+          for m in ./*/*go.mod; do
+            pushd $(dirname "$m") > /dev/null
+            module_path="$(go list -m -json | jq --slurp '.' | jq --compact-output --raw-output '.[].Dir')"
+            echo $module_path
+            popd > /dev/null
+          done | jq --raw-input --slurp 'split("\n")' | jq --compact-output 'map(select(length > 0))' >> $GITHUB_OUTPUT
+
+  linter-pull-request:
+    needs: detect-modules
+    name: golangci-lint on a PR or from a tag
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        modules: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
+    if: github.ref != 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # We need to define the fetch-depth to 0 so that we can get the commit ID of the master branch
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          check-latest: true
+      - name: Get golangci-lint configuration file
+        run: wget --output-document=$(pwd)/.golangci.yml https://sc-devtools.s3.eu-west-1.amazonaws.com/golang-ci/golangci.yml
+      - name: Get master branch commit ID
+        id: new-from-rev
+        run: echo "NEW_FROM_REV=$( git show-branch --merge-base FETCH_HEAD )" >> "$GITHUB_OUTPUT"
+      - name: "Execute golangci-lint on a pull request"
+        uses: golangci/golangci-lint-action@v8
+        with:
+          working-directory: ${{ matrix.modules }}
+          # The `only-new-issues` flag is not working (https://github.com/golangci/golangci-lint-action/issues/531).
+          # We rather decided to use the suggestion from the FAQ (https://golangci-lint.run/welcome/faq/#how-to-integrate-golangci-lint-into-large-project-with-thousands-of-issues) and use `--new-from-rev`
+          # only-new-issues: false
+          args: "--config=$(pwd)/../.golangci.yml --new-from-rev=${{ steps.new-from-rev.outputs.NEW_FROM_REV }} --modules-download-mode=mod"
+
+  linter-master:
+    needs: detect-modules
+    name: golangci-lint on the master branch
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        modules: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # We need to define the fetch-depth to 0 so that we can get the commit ID of the master branch
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          check-latest: true
+      - name: Get golangci-lint configuration file
+        run: wget --output-document=$(pwd)/.golangci.yml https://sc-devtools.s3.eu-west-1.amazonaws.com/golang-ci/golangci.yml
+      - name: "Execute golangci-lint on a pull request"
+        uses: golangci/golangci-lint-action@v8
+        with:
+          working-directory: ${{ matrix.modules }}
+          args: "--config=$(pwd)/../.golangci.yml --new-from-rev=HEAD~1 --modules-download-mode=mod"
+
+  tests:
+    needs: detect-modules
+    name: Unit Tests
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        modules: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
+    services:
+      mongodb:
+        image: mongo:4.0.3
+        env:
+          MONGO_INITDB_ROOT_USERNAME: admin
+          MONGO_INITDB_ROOT_PASSWORD: admin
+          MONGO_INITDB_DATABASE: mydb
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "echo \"db.runCommand({ ping: 1 }).ok\" | mongo"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          check-latest: true
+      # For some reasons I failed to understand, the admin user we created failed to connect to the MongoDB. Hence we install MongoDB Shell and create a user that is later used by the tests execution.
+      - name: Install MongoDB Shell
+        # `matrix.modules` contains something like `/home/runner/work/go-utils/go-utils/mongo`.
+        if: endsWith(matrix.modules, '/mongo')
+        # We need to install a MongoDB Shell v2.5.0. This is the last version which uses the Node.js driver v6.15.0, latest version which supports MongoDB 4.0.
+        run: |
+          sudo apt-get install gnupg
+          wget -qO- https://www.mongodb.org/static/pgp/server-7.0.asc | sudo tee /etc/apt/trusted.gpg.d/server-7.0.asc
+          echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+          sudo apt-get update
+          sudo apt-get install --yes mongodb-mongosh=2.5.0
+          mongosh --version
+      - name: Create a User for Tests Execution
+        if: endsWith(matrix.modules, '/mongo')
+        run: |
+          mongosh --host localhost:27017 -u admin -p admin --authenticationDatabase admin <<EOF
+            db.runCommand({ ping: 1 });
+            db = db.getSiblingDB('mydb');
+            db.createUser({
+              user: 'mgouser',
+              pwd: 'mgopassword',
+              roles: [{ role: 'readWrite', db: 'mydb' }]
+            });
+          EOF
+      - name: Execute the Tests
+        working-directory: ${{ matrix.modules }}
+        run: go test -v -race ./...
+        env:
+          MONGO_URL: "mongodb://mgouser:mgopassword@localhost:27017/mydb?connect=direct"
