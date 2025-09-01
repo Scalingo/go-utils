@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat(errctx) RootCtxOrFallback is now compatible with different versions of errors package.
+
 ## v.3.1.0
 
 * feat(UnwrapError) `UnwrapError` now unwraps errors which implement an `Unwrap()` method.
