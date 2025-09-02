@@ -2,6 +2,8 @@
 
 ## To be released
 
+* fix: Switch resource to schemaless to avoid schema/semconv mismatch issues
+
 ## v0.6.2
 
 * build: Bump github.com/Scalingo/go-utils/errors from v2.5.1 to v3.0.0

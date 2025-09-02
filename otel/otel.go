@@ -95,10 +95,11 @@ func Init(ctx context.Context) func() error {
 
 	res, err := resource.Merge(
 		resource.Default(),
-		resource.NewWithAttributes(
-			semconv.SchemaURL,
+		resource.NewSchemaless(
+			// https://opentelemetry.io/docs/specs/semconv/resource/#service
 			semconv.ServiceName(cfg.ServiceName),
 			semconv.ServiceInstanceID(serviceInstanceID),
+			// https://opentelemetry.io/docs/specs/semconv/resource/host/
 			semconv.HostName(hostName),
 		),
 	)
