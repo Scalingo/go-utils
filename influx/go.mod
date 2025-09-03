@@ -3,9 +3,9 @@ module github.com/Scalingo/go-utils/influx
 go 1.24
 
 require (
-	github.com/influxdata/influxdb v1.12.1
+	github.com/influxdata/influxdb v1.12.2
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.1
 )
 
 require (
