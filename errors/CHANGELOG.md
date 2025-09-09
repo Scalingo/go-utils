@@ -2,6 +2,27 @@
 
 ## To be Released
 
+## v.3.1.1
+
+* feat(errctx) RootCtxOrFallback is now compatible with different versions of errors package.
+
+## v.3.1.0
+
+* feat(UnwrapError) `UnwrapError` now unwraps errors which implement an `Unwrap()` method.
+
+## v3.0.0
+
+* fix(errors): `Build` returns `error` not `*ValidationErrors` (BREAKING CHANGE)
+* refactor(errors): remove deprecated functions (BREAKING CHANGE)
+
+## v2.5.1
+
+* chore(go): corrective bump - Go version regression from 1.24.3 to 1.24
+
+## v2.5.0
+
+* chore(go): upgrade to Go 1.24
+
 ## v2.4.0
 
 * docs(errors): deprecate use of `errgo` in `ErrCtx`

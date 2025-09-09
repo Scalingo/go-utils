@@ -2,6 +2,22 @@
 
 ## To be Released
 
+## v1.5.3
+
+* fix(nsqconsumer/errors) make unwrap compatible with all go-utils/errors versions
+
+## v1.5.2
+
+* fix(nsqconsumer.Error) stop unwrap two times when errors containing a nsqconsumer.Error type.
+
+## v1.5.1
+
+* chore(go): corrective bump - Go version regression from 1.24.3 to 1.24
+
+## v1.5.0
+
+* chore(go): upgrade to Go 1.24
+
 ## v1.4.1
 
 * fix(disable-backoff): fix configuration of consumer to correctly handle DisableBackoff argument

@@ -1,10 +1,10 @@
-module github.com/Scalingo/go-utils/errors/v2
+module github.com/Scalingo/go-utils/errors/v3
 
-go 1.20
+go 1.24
 
 require (
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.1
 	gopkg.in/errgo.v1 v1.0.1
 )
 

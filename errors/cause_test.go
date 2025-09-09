@@ -71,26 +71,6 @@ func Test_As(t *testing.T) {
 		assert.True(t, As(err, &expectedErrorType))
 		assert.False(t, As(err, &unexpectedErrorType))
 	})
-
-	t.Run("given an error stack with Notef from ErrCtx", func(t *testing.T) {
-		var err error
-		err = (&ValidationErrors{})
-		err = Notef(context.Background(), err, "biniou")
-
-		assert.True(t, As(err, &expectedErrorType))
-		assert.False(t, As(err, &unexpectedErrorType))
-	})
-
-	t.Run("given an error in the middle of the stack stack with Notef from ErrCtx", func(t *testing.T) {
-		var err error
-		err = io.EOF
-		err = &customError{WrappedError: err, CustomValue: "value"}
-		err = Notef(context.Background(), err, "biniou")
-
-		var expectedErrorType *customError
-		assert.True(t, As(err, &expectedErrorType))
-		assert.False(t, As(err, &unexpectedErrorType))
-	})
 }
 
 func Test_Is(t *testing.T) {
@@ -131,7 +111,8 @@ func Test_Is(t *testing.T) {
 
 	t.Run("given an error stack with mixed types", func(t *testing.T) {
 		expectedError := io.EOF
-		err := Notef(context.Background(), expectedError, "pouet")
+
+		err := Wrapf(t.Context(), io.EOF, "pouet")
 		err = errgo.Notef(err, "pouet")
 		err = errors.Wrap(err, "pouet")
 
@@ -139,135 +120,16 @@ func Test_Is(t *testing.T) {
 	})
 }
 
-func Test_IsRootCause(t *testing.T) {
-	t.Run("given an error stack with errgo.Notef", func(t *testing.T) {
-		var err error
-		err = (&ValidationErrors{})
-		err = errgo.Notef(err, "biniou")
-
-		assert.True(t, IsRootCause(err, &ValidationErrors{}))
-		assert.False(t, IsRootCause(err, ValidationErrors{}))
-	})
-
-	t.Run("given an error stack with errors.Wrap", func(t *testing.T) {
-		var err error
-		err = (&ValidationErrors{})
-		err = errors.Wrap(err, "biniou")
-
-		assert.True(t, IsRootCause(err, &ValidationErrors{}))
-		assert.False(t, IsRootCause(err, ValidationErrors{}))
-	})
-
-	t.Run("given an error stack with errors.Wrapf", func(t *testing.T) {
-		var err error
-		err = (&ValidationErrors{})
-		err = errors.Wrapf(err, "biniou")
-
-		assert.True(t, IsRootCause(err, &ValidationErrors{}))
-		assert.False(t, IsRootCause(err, ValidationErrors{}))
-	})
-
-	t.Run("given an error stack with Wrap from ErrCtx", func(t *testing.T) {
-		var err error
-		err = (&ValidationErrors{})
-		err = Wrap(context.Background(), err, "biniou")
-
-		assert.True(t, IsRootCause(err, &ValidationErrors{}))
-		assert.False(t, IsRootCause(err, ValidationErrors{}))
-	})
-
-	t.Run("given an error stack with Wrapf from ErrCtx", func(t *testing.T) {
-		var err error
-		err = (&ValidationErrors{})
-		err = Wrapf(context.Background(), err, "biniou")
-
-		assert.True(t, IsRootCause(err, &ValidationErrors{}))
-		assert.False(t, IsRootCause(err, ValidationErrors{}))
-	})
-
-	t.Run("given an error stack with Notef from ErrCtx", func(t *testing.T) {
-		var err error
-		err = (&ValidationErrors{})
-		err = Notef(context.Background(), err, "biniou")
-
-		assert.True(t, IsRootCause(err, &ValidationErrors{}))
-		assert.False(t, IsRootCause(err, ValidationErrors{}))
-	})
-
+type customErrorWithUnwrap struct {
+	error error
 }
 
-func Test_RootCause(t *testing.T) {
-	t.Run("given an error stack with errgo.Mask", func(t *testing.T) {
-		var err error
-		err = (&ValidationErrors{
-			Errors: map[string][]string{
-				"test": {"biniou"},
-			},
-		})
-		err = errgo.Mask(err, errgo.Any)
+func (err *customErrorWithUnwrap) Error() string {
+	return "custom error " + err.error.Error()
+}
 
-		assert.Equal(t, "test=biniou", RootCause(err).Error())
-	})
-
-	t.Run("given an error stack with errgo.Notef", func(t *testing.T) {
-		var err error
-		err = (&ValidationErrors{
-			Errors: map[string][]string{
-				"test": {"biniou"},
-			},
-		})
-		err = errgo.Notef(err, "pouet")
-
-		assert.Equal(t, "test=biniou", RootCause(err).Error())
-	})
-
-	t.Run("given an error stack with errors.Wrap", func(t *testing.T) {
-		var err error
-		err = (&ValidationErrors{
-			Errors: map[string][]string{
-				"test": {"biniou"},
-			},
-		})
-		err = errors.Wrap(err, "pouet")
-
-		assert.Equal(t, "test=biniou", RootCause(err).Error())
-	})
-
-	t.Run("given an error stack with Wrap from ErrCtx", func(t *testing.T) {
-		var err error
-		err = (&ValidationErrors{
-			Errors: map[string][]string{
-				"test": {"biniou"},
-			},
-		})
-		err = Wrap(context.Background(), err, "pouet")
-
-		assert.Equal(t, "test=biniou", RootCause(err).Error())
-	})
-
-	t.Run("given an error stack with Wrapf from ErrCtx", func(t *testing.T) {
-		var err error
-		err = (&ValidationErrors{
-			Errors: map[string][]string{
-				"test": {"biniou"},
-			},
-		})
-		err = Wrapf(context.Background(), err, "pouet")
-
-		assert.Equal(t, "test=biniou", RootCause(err).Error())
-	})
-
-	t.Run("given an error stack with Notef from ErrCtx", func(t *testing.T) {
-		var err error
-		err = (&ValidationErrors{
-			Errors: map[string][]string{
-				"test": {"biniou"},
-			},
-		})
-		err = Notef(context.Background(), err, "pouet")
-
-		assert.Equal(t, "test=biniou", RootCause(err).Error())
-	})
+func (err *customErrorWithUnwrap) Unwrap() error {
+	return err.error
 }
 
 func Test_UnwrapError(t *testing.T) {
@@ -304,18 +166,51 @@ func Test_UnwrapError(t *testing.T) {
 		assert.Equal(t, "test=biniou", lastErr.Error())
 	})
 
-	t.Run("given an error stack with Notef from ErrCtx", func(t *testing.T) {
+	t.Run("given an error implementing the Unwrap() interface must return the wrapped error", func(t *testing.T) {
 		var err error
 		err = (&ValidationErrors{
 			Errors: map[string][]string{
 				"test": {"biniou"},
 			},
 		})
-		err = Notef(context.Background(), err, "pouet")
+		err = &customErrorWithUnwrap{
+			error: err,
+		}
 
-		assert.Equal(t, "pouet: test=biniou", UnwrapError(err).Error())
+		assert.Equal(t, "test=biniou", UnwrapError(err).Error())
+		assert.IsType(t, &ValidationErrors{}, UnwrapError(err))
+		assert.ErrorContains(t, err, "custom error test=biniou")
 	})
-	t.Run("given an error nil", func(t *testing.T) {
+
+	t.Run("given an error stack with a custom error including Unwrap() interface, it returns the deepest wrapped error", func(t *testing.T) {
+		var err error
+		err = (&ValidationErrors{
+			Errors: map[string][]string{
+				"test": {"biniou"},
+			},
+		})
+		err = &customErrorWithUnwrap{
+			error: err,
+		}
+		err = errors.Wrap(err, "pouet")
+		err = errgo.Notef(err, "pouet")
+		err = Wrap(t.Context(), err, "pouet")
+		err = Wrapf(t.Context(), err, "pouet")
+		err = errgo.Mask(err, errgo.Any)
+		err = &customErrorWithUnwrap{
+			error: err,
+		}
+		err = errors.Wrap(err, "pouet")
+
+		var lastErr error
+		for unwrappedErr := err; unwrappedErr != nil; unwrappedErr = UnwrapError(unwrappedErr) {
+			lastErr = unwrappedErr
+		}
+		assert.Equal(t, "test=biniou", lastErr.Error())
+		assert.IsType(t, &ValidationErrors{}, lastErr)
+	})
+
+	t.Run("given a nil error", func(t *testing.T) {
 		var err error
 		assert.Nil(t, UnwrapError(err))
 	})

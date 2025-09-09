@@ -2,6 +2,16 @@
 
 ## To be Released
 
+## v1.2.1
+
+* chore(go): corrective bump - Go version regression from 1.24.3 to 1.24
+
+## v1.2.0
+
+* chore(go): upgrade to Go 1.24
+
+## v1.1.2
+
 * build(deps): bump github.com/spf13/afero from 1.8.2 to 1.9.3
 * build(deps): bump github.com/Scalingo/go-utils/logger from 1.1.0 to 1.2.0
 * build(deps): bump github.com/Scalingo/go-utils/fs from 1.0.0 to 1.0.2

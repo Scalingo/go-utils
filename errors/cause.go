@@ -2,7 +2,6 @@ package errors
 
 import (
 	"errors"
-	"reflect"
 
 	"gopkg.in/errgo.v1"
 )
@@ -37,36 +36,8 @@ func As(receivedErr error, expectedType any) bool {
 	return false
 }
 
-// RootCause returns the cause of an errors stack, whatever the method they used
-// to be stacked: either errgo.Notef or errors.Wrapf.
-//
-// Deprecated: Use `Is(err, expectedErr)` instead of `if RootCause(err) == expectedErr` to match go standard libraries practices
-func RootCause(err error) error {
-	errCause := errorCause(err)
-	if errCause == nil {
-		errCause = errgoRoot(err)
-	}
-	return errCause
-}
-
-// IsRootCause return true if the cause of the given error is the same type as
-// mytype.
-// This function takes the cause of an error if the errors stack has been
-// wrapped with errors.Wrapf or errgo.Notef or errgo.NoteMask or errgo.Mask.
-//
-// Example:
-//
-//	errors.IsRootCause(err, &ValidationErrors{})
-//
-// Deprecated: Use `As(err, mytype)` instead to match go standard libraries practices
-func IsRootCause(err error, mytype interface{}) bool {
-	t := reflect.TypeOf(mytype)
-	errCause := errorCause(err)
-	errRoot := errgoRoot(err)
-	return reflect.TypeOf(errCause) == t || reflect.TypeOf(errRoot) == t
-}
-
-// UnwrapError tries to unwrap `err`. It unwraps any causer type, errgo and ErrCtx errors.
+// UnwrapError tries to unwrap `err`. It unwraps any causer type, errgo and errors
+// implementing Unwrap() method.
 // It returns nil if no err found. This provide the possibility to loop on UnwrapError
 // by checking the return value.
 // E.g.:
@@ -79,13 +50,12 @@ func UnwrapError(err error) error {
 		return nil
 	}
 
-	type causer interface {
-		Cause() error
-	}
-
-	// if err is type of `ErrCtx` unwrap it by getting errCtx.err
-	if ctxerr, ok := err.(ErrCtx); ok {
-		return ctxerr.err
+	// This also match errCtx from this package.
+	u, ok := err.(interface {
+		Unwrap() error
+	})
+	if ok {
+		return u.Unwrap()
 	}
 
 	// Check if the err is type of `*errgo.Err` to be able to call `Underlying()`
@@ -96,8 +66,12 @@ func UnwrapError(err error) error {
 		return errgoErr.Underlying()
 	}
 
-	if cause, ok := err.(causer); ok {
-		return cause.Cause()
+	c, ok := err.(interface {
+		Cause() error
+	})
+	if ok {
+		return c.Cause()
 	}
+
 	return nil
 }

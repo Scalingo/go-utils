@@ -2,15 +2,23 @@
 
 ## To be Released
 
-## 1.4.0
+## v1.5.1
+
+* chore(go): corrective bump - Go version regression from 1.24.3 to 1.24
+
+## v1.5.0
+
+* chore(go): upgrade to Go 1.24
+
+## v1.4.0
 
 * feat(mongo/document/validation): Add distinction between internal and validation errors, introduce `ValidateWithInternalError` method which will be used in priority.
 * feat(pagination): Add `QueryFunc` parameter to be able to customize the query builder and user `WhereUnsopedQuery` for instance
 
-## 1.3.2
+## v1.3.2
 
-feat(pagination): replace BadRequestError by the one from go-handlers to return HTTP 400.
-feat(pagination): return HTTP 200 when the page is empty instead of BadRequestError
+* feat(pagination): replace BadRequestError by the one from go-handlers to return HTTP 400.
+* feat(pagination): return HTTP 200 when the page is empty instead of BadRequestError
 
 ## v1.3.1
 

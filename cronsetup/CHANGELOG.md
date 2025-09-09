@@ -4,6 +4,14 @@
 
 * feat(request_id) Inject `request_id` in context for each cron execution
 
+## v1.2.1
+
+* chore(go): corrective bump - Go version regression from 1.24.3 to 1.24
+
+## v1.2.0
+
+* chore(go): upgrade to Go 1.24
+
 ## v1.1.4
 
 * Various dependencies updates
