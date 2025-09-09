@@ -1,7 +1,6 @@
 package otel
 
 import (
-	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -64,7 +63,7 @@ func TestInit(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			ctx := context.Background()
+			ctx := t.Context()
 
 			initialMeterProvider := otelsdk.GetMeterProvider()
 
@@ -167,7 +166,7 @@ func TestSetTLSConfig(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			ctx := context.Background()
+			ctx := t.Context()
 			tlsCfg, err := setTLSConfig(ctx, &test.cfg)
 
 			if test.expectErr != "" {
