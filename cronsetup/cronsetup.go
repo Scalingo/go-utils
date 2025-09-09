@@ -39,7 +39,7 @@ func Setup(ctx context.Context, opts SetupOpts) (func(), error) {
 				log.WithError(err).Error("Error generating UUID v4")
 			} else {
 				requestID = requestUUID.String()
-				ctx = context.WithValue(ctx, "request_id", requestID) // nolint:revive
+				ctx = context.WithValue(ctx, "request_id", requestID) // nolint:revive,staticcheck
 			}
 		}
 		ctx, _ = logger.WithFieldsToCtx(ctx, logrus.Fields{
