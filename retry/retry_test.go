@@ -39,7 +39,7 @@ func TestRetrier(t *testing.T) {
 			}
 			return fmt.Errorf("Error attempt %v", tries)
 		})
-		duration := time.Now().Sub(before)
+		duration := time.Since(before)
 
 		assert.NoError(t, err)
 		assert.Equal(t, tries, 2)
@@ -54,7 +54,7 @@ func TestRetrier(t *testing.T) {
 			return errors.New("nop")
 		})
 
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("It should cancel the retry if a RetryCancelError is retuned", func(t *testing.T) {
@@ -65,7 +65,7 @@ func TestRetrier(t *testing.T) {
 			return NewRetryCancelError(errors.New("nop"))
 		})
 
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, count, 1)
 	})
 
@@ -82,7 +82,7 @@ func TestRetrier(t *testing.T) {
 			return fmt.Errorf("Error attempt %v", tries)
 		})
 
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, tries, 1)
 	})
 
@@ -96,7 +96,7 @@ func TestRetrier(t *testing.T) {
 			return errors.New("retry test error")
 		})
 
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.WithinDuration(t, time.Now(), before, 100*time.Millisecond)
 		require.IsType(t, RetryError{}, err)
 		assert.EqualValues(t, err.(RetryError).Scope, ContextScope)
@@ -115,7 +115,7 @@ func TestRetrier(t *testing.T) {
 			return errors.New("max duration error")
 		})
 
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.WithinDuration(t, time.Now(), before, 100*time.Millisecond)
 		require.IsType(t, RetryError{}, err)
 		assert.EqualValues(t, err.(RetryError).Scope, MaxDurationScope)
@@ -140,7 +140,7 @@ func TestRetrier(t *testing.T) {
 		err := retrier.Do(context.Background(), func(ctx context.Context) error {
 			return errors.New("TestError")
 		})
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, callbackCalls, 1)
 	})
 
@@ -159,7 +159,7 @@ func TestRetrier(t *testing.T) {
 			return errors.New("test")
 		})
 
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.WithinDuration(t, time.Now(), before, 100*time.Millisecond)
 		require.IsType(t, RetryError{}, err)
 		assert.EqualValues(t, err.(RetryError).Scope, ContextScope)
@@ -179,7 +179,7 @@ func TestRetrier(t *testing.T) {
 			return errors.New("test")
 		})
 
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.WithinDuration(t, time.Now(), before, 100*time.Millisecond)
 		require.IsType(t, RetryError{}, err)
 		assert.EqualValues(t, err.(RetryError).Scope, MaxDurationScope)
@@ -196,9 +196,10 @@ func TestRetrier(t *testing.T) {
 			WithLoggingOnAttemptError(logrus.ErrorLevel),
 		)
 
-		retrier.Do(ctx, func(ctx context.Context) error {
+		err := retrier.Do(ctx, func(_ context.Context) error {
 			return errors.New("TestError")
 		})
+		require.Error(t, err)
 
 		assert.Len(t, hook.Entries, 2)
 		assert.Contains(t, "attempt failed", hook.Entries[0].Message)

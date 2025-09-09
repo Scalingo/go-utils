@@ -24,7 +24,7 @@ import (
 )
 
 type Config struct {
-	ServiceInstanceId string `default:"" split_words:"true"`
+	ServiceInstanceId string `default:"" split_words:"true"` // nolint:revive
 	HostName          string `default:"" split_words:"true"`
 	Debug             bool   `default:"false"`
 	DebugPrettyPrint  bool   `default:"true" split_words:"true"`

@@ -2,13 +2,16 @@ package cronsetup
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	etcdclient "go.etcd.io/etcd/client/v3"
+
+	"github.com/Scalingo/go-utils/errors/v3"
 
 	etcdcron "github.com/Scalingo/go-etcd-cron"
 	"github.com/Scalingo/go-utils/logger"
+
+	"github.com/gofrs/uuid/v5"
 )
 
 type SetupOpts struct {
@@ -19,19 +22,31 @@ type SetupOpts struct {
 func Setup(ctx context.Context, opts SetupOpts) (func(), error) {
 	etcdConfig, err := opts.EtcdConfig()
 	if err != nil {
-		return nil, fmt.Errorf("fail to get etcd v3 config: %v", err)
+		return nil, errors.Wrap(ctx, err, "get etcdv3 config")
 	}
 
 	etcdMutexBuilder, err := etcdcron.NewEtcdMutexBuilder(etcdConfig)
 	if err != nil {
-		return nil, fmt.Errorf("fail to get etcd mutex builder: %v", err)
+		return nil, errors.Wrap(ctx, err, "get etcd mutex builder")
 	}
 
 	funcCtx := func(ctx context.Context, j etcdcron.Job) context.Context {
 		log := logger.Get(ctx)
-		log = log.WithField("cron-job", j.Name)
-		log.Debug("Running cron job")
-		return logger.ToCtx(ctx, log)
+		requestID, ok := ctx.Value("request_id").(string)
+		if !ok {
+			requestUUID, err := uuid.NewV4()
+			if err != nil {
+				log.WithError(err).Error("Error generating UUID v4")
+			} else {
+				requestID = requestUUID.String()
+				ctx = context.WithValue(ctx, "request_id", requestID) // nolint:revive,staticcheck
+			}
+		}
+		ctx, _ = logger.WithFieldsToCtx(ctx, logrus.Fields{
+			"cron-job":   j.Name,
+			"request_id": requestID,
+		})
+		return ctx
 	}
 
 	errorHandler := func(ctx context.Context, j etcdcron.Job, err error) {
@@ -46,13 +61,13 @@ func Setup(ctx context.Context, opts SetupOpts) (func(), error) {
 		etcdcron.WithFuncCtx(funcCtx),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("fail to create etcd cron: %v", err)
+		return nil, errors.Wrap(ctx, err, "create etcd cron")
 	}
 
 	for _, job := range opts.Jobs {
 		err := c.AddJob(job)
 		if err != nil {
-			return nil, errors.Wrap(err, "fail to add the cron job")
+			return nil, errors.Wrap(ctx, err, "add the cron job")
 		}
 	}
 
