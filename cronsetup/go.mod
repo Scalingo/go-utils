@@ -1,6 +1,8 @@
 module github.com/Scalingo/go-utils/cronsetup
 
-go 1.24
+go 1.24.0
+
+toolchain go1.24.4
 
 require (
 	github.com/Scalingo/go-etcd-cron v1.3.3
