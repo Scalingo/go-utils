@@ -2,6 +2,17 @@
 
 ## To be released
 
+## v0.7.0
+
+* build(deps): Update dependencies
+  * github.com/Scalingo/go-utils/errors/v3 from `3.0.0` to `3.1.0`
+  * go.opentelemetry.io/otel/* from `1.37.0` to `1.38.0`
+  * google.golang.org/grpc from `1.74.2` to `1.75.0`
+  * github.com/grpc-ecosystem/grpc-gateway/v2 from `2.27.1` to `2.27.2`
+  * golang.org/x/net from `0.42.0` to `0.43.0`
+  * golang.org/x/sys from `0.34.0` to `0.35.0`
+  * golang.org/x/text from `0.27.0` to `0.28.0`
+  * google.golang.org/protobuf from `1.36.6` to `1.36.8`
 * fix: Switch resource to schemaless to avoid schema/semconv mismatch issues
 
 ## v0.6.2
