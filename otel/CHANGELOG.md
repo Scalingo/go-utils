@@ -2,8 +2,10 @@
 
 ## To be released
 
-* Add function options to Init() method in order to inject global attributes
-* Add WithServiceVersionAttribute helper
+## v0.8.0
+
+* feat: Add function options to Init() method in order to inject global attributes
+* feat: Add WithServiceVersionAttribute helper
 
 ## v0.7.0
 
