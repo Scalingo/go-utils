@@ -72,8 +72,8 @@ func TestInit(t *testing.T) {
 				WithServiceVersionAttribute("v1.0.0"),
 				func(opts *initDefaultOptions) {
 					require.Len(t, opts.defaultAttributes, 4)
-					assert.Equal(t, opts.defaultAttributes[3].Key, semconv.ServiceVersionKey)
-					assert.Equal(t, opts.defaultAttributes[3].Value, "v1.0.0")
+					assert.Equal(t, semconv.ServiceVersionKey, opts.defaultAttributes[3].Key)
+					assert.Equal(t, "v1.0.0", opts.defaultAttributes[3].Value)
 				},
 			},
 		},
