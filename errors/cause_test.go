@@ -8,6 +8,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	errgo "gopkg.in/errgo.v1"
 )
 
@@ -178,7 +179,8 @@ func Test_UnwrapError(t *testing.T) {
 		}
 
 		assert.Equal(t, "test=biniou", UnwrapError(err).Error())
-		assert.IsType(t, &ValidationErrors{}, UnwrapError(err))
+		verr := &ValidationErrors{}
+		require.ErrorAs(t, UnwrapError(err), &verr)
 		assert.ErrorContains(t, err, "custom error test=biniou")
 	})
 
@@ -207,7 +209,8 @@ func Test_UnwrapError(t *testing.T) {
 			lastErr = unwrappedErr
 		}
 		assert.Equal(t, "test=biniou", lastErr.Error())
-		assert.IsType(t, &ValidationErrors{}, lastErr)
+		verr := &ValidationErrors{}
+		require.ErrorAs(t, lastErr, &verr)
 	})
 
 	t.Run("given a nil error", func(t *testing.T) {
