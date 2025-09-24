@@ -61,6 +61,7 @@ func WithDefaultAttributes(attrs ...attribute.KeyValue) InitOpt {
 
 func WithServiceVersionAttribute(version string) InitOpt {
 	return func(o *initDefaultOptions) {
+		// https://opentelemetry.io/docs/specs/semconv/resource/#service
 		o.defaultAttributes = append(o.defaultAttributes, semconv.ServiceVersionKey.String(version))
 	}
 }
@@ -100,8 +101,10 @@ func Init(ctx context.Context, opts ...InitOpt) func() error {
 
 	defaultOptions := &initDefaultOptions{
 		defaultAttributes: []attribute.KeyValue{
+			// https://opentelemetry.io/docs/specs/semconv/resource/#service
 			semconv.ServiceName(cfg.ServiceName),
 			semconv.ServiceInstanceID(serviceInstanceID),
+			// https://opentelemetry.io/docs/specs/semconv/resource/host/
 			semconv.HostName(hostName),
 		},
 	}
