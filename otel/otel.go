@@ -10,12 +10,13 @@ import (
 	"github.com/gofrs/uuid/v5"
 	"github.com/kelseyhightower/envconfig"
 	otelsdk "go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
 	"go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
-	semconv "go.opentelemetry.io/otel/semconv/v1.34.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
@@ -46,7 +47,25 @@ type Config struct {
 	MetricExportInterval time.Duration `default:"10s" split_words:"true"`
 }
 
-func Init(ctx context.Context) func() error {
+type initDefaultOptions struct {
+	defaultAttributes []attribute.KeyValue
+}
+
+type InitOpt func(defaultAptions *initDefaultOptions)
+
+func WithDefaultAttributes(attrs ...attribute.KeyValue) InitOpt {
+	return func(o *initDefaultOptions) {
+		o.defaultAttributes = append(o.defaultAttributes, attrs...)
+	}
+}
+
+func WithServiceVersionAttribute(version string) InitOpt {
+	return func(o *initDefaultOptions) {
+		o.defaultAttributes = append(o.defaultAttributes, semconv.ServiceVersionKey.String(version))
+	}
+}
+
+func Init(ctx context.Context, opts ...InitOpt) func() error {
 	log := logger.Get(ctx)
 
 	// If SDK is disabled through env, exit earlier without any error
@@ -79,6 +98,18 @@ func Init(ctx context.Context) func() error {
 		hostName = setHostname()
 	}
 
+	defaultOptions := &initDefaultOptions{
+		defaultAttributes: []attribute.KeyValue{
+			semconv.ServiceName(cfg.ServiceName),
+			semconv.ServiceInstanceID(serviceInstanceID),
+			semconv.HostName(hostName),
+		},
+	}
+
+	for _, opt := range opts {
+		opt(defaultOptions)
+	}
+
 	metricsExporter, err := newMetricsExporter(ctx, cfg)
 	if err != nil {
 		log.WithError(err).Error("OpenTelemetry SDK metrics exporter error")
@@ -95,12 +126,9 @@ func Init(ctx context.Context) func() error {
 
 	res, err := resource.Merge(
 		resource.Default(),
-		resource.NewSchemaless(
-			// https://opentelemetry.io/docs/specs/semconv/resource/#service
-			semconv.ServiceName(cfg.ServiceName),
-			semconv.ServiceInstanceID(serviceInstanceID),
-			// https://opentelemetry.io/docs/specs/semconv/resource/host/
-			semconv.HostName(hostName),
+		resource.NewWithAttributes(
+			semconv.SchemaURL,
+			defaultOptions.defaultAttributes...,
 		),
 	)
 	if err != nil {

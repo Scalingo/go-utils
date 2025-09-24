@@ -12,17 +12,29 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	otelsdk "go.opentelemetry.io/otel"
+	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 )
 
 func TestInit(t *testing.T) {
+	minimalValidEnv := map[string]string{
+		"GO_ENV":                      "test",
+		"OTEL_SERVICE_NAME":           "test",
+		"OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317",
+		// OTEL_EXPORTER_OTLP_METRICS_TIMEOUT is set to avoid to wait 10 seconds in the test
+		"OTEL_EXPORTER_OTLP_METRICS_TIMEOUT": "1", // 1 millisecond
+	}
+	defaultShutdownError := "failed to upload metrics: exporter export timeout"
+
 	tests := []struct {
 		name                string
 		reinit              bool
 		env                 map[string]string
 		expectInitSkipped   bool
 		expectShutdownError string
+		opts                []InitOpt
 	}{
 		{
 			name:              "initialization without service_name and exporter endpoint should skip init",
@@ -50,13 +62,19 @@ func TestInit(t *testing.T) {
 		{
 			name: "minimal initialization",
 			// expected error in the case of the unit test, due to endpoint that doesn't respond
-			expectShutdownError: "failed to upload metrics: exporter export timeout",
-			env: map[string]string{
-				"GO_ENV":                      "test",
-				"OTEL_SERVICE_NAME":           "test",
-				"OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317",
-				// OTEL_EXPORTER_OTLP_METRICS_TIMEOUT is set to avoid to wait 10 seconds in the test
-				"OTEL_EXPORTER_OTLP_METRICS_TIMEOUT": "1", // 1 millisecond
+			expectShutdownError: defaultShutdownError,
+			env:                 minimalValidEnv,
+		}, {
+			name:                "with additional global attributes",
+			expectShutdownError: defaultShutdownError,
+			env:                 minimalValidEnv,
+			opts: []InitOpt{
+				WithServiceVersionAttribute("v1.0.0"),
+				func(opts *initDefaultOptions) {
+					require.Len(t, opts.defaultAttributes, 4)
+					assert.Equal(t, opts.defaultAttributes[3].Key, semconv.ServiceVersionKey)
+					assert.Equal(t, opts.defaultAttributes[3].Value, "v1.0.0")
+				},
 			},
 		},
 	}
@@ -80,7 +98,8 @@ func TestInit(t *testing.T) {
 				// Should be the same object as before initialization
 				require.Same(t, initialMeterProvider, otelsdk.GetMeterProvider())
 			} else {
-				require.NotSame(t, initialMeterProvider, otelsdk.GetMeterProvider())
+				meterProvider := otelsdk.GetMeterProvider()
+				require.NotSame(t, initialMeterProvider, meterProvider)
 			}
 
 			t.Cleanup(func() {
