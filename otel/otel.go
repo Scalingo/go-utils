@@ -126,8 +126,7 @@ func Init(ctx context.Context, opts ...InitOpt) func() error {
 
 	res, err := resource.Merge(
 		resource.Default(),
-		resource.NewWithAttributes(
-			semconv.SchemaURL,
+		resource.NewSchemaless(
 			defaultOptions.defaultAttributes...,
 		),
 	)
