@@ -1,6 +1,6 @@
 module github.com/Scalingo/go-utils/mongo
 
-go 1.24
+go 1.24.0
 
 require (
 	github.com/Scalingo/go-handlers v1.9.1
@@ -22,7 +22,7 @@ require (
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/urfave/negroni/v3 v3.1.1 // indirect
-	golang.org/x/sys v0.35.0 // indirect
+	golang.org/x/sys v0.36.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200902074654-038fdea0a05b // indirect
 	gopkg.in/errgo.v1 v1.0.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
