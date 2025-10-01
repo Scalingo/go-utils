@@ -1,6 +1,6 @@
 module github.com/Scalingo/go-utils/nsqproducer
 
-go 1.24
+go 1.24.0
 
 require (
 	github.com/Scalingo/go-utils/env v1.2.1
@@ -15,7 +15,7 @@ require (
 
 require (
 	github.com/golang/snappy v1.0.0 // indirect
-	golang.org/x/sys v0.35.0 // indirect
+	golang.org/x/sys v0.36.0 // indirect
 )
 
 // In Dev you can uncomment the following line to use the local packages
