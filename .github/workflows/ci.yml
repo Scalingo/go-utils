@@ -9,7 +9,7 @@ jobs:
     outputs:
       modules: ${{ steps.set-modules.outputs.modules }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           # We need to define the fetch-depth to 0 so that we can get the commit ID of the master branch
           fetch-depth: 0
@@ -36,7 +36,7 @@ jobs:
         modules: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
     if: github.ref != 'refs/heads/master'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           # We need to define the fetch-depth to 0 so that we can get the commit ID of the master branch
           fetch-depth: 0
@@ -67,7 +67,7 @@ jobs:
         modules: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
     if: github.ref == 'refs/heads/master'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           # We need to define the fetch-depth to 0 so that we can get the commit ID of the master branch
           fetch-depth: 0
@@ -105,7 +105,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-go@v5
         with:
           go-version: stable
