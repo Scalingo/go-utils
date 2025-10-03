@@ -2,6 +2,8 @@ module github.com/Scalingo/go-utils/tarball
 
 go 1.24.0
 
+toolchain go1.24.4
+
 require (
 	github.com/Scalingo/go-utils/fs v1.1.1
 	github.com/Scalingo/go-utils/io v1.2.1
