@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"context"
 	"regexp"
 	"testing"
 
@@ -13,7 +12,10 @@ import (
 func TestDefault(t *testing.T) {
 	logger := Default()
 	assert.NotNil(t, logger)
-	assert.Equal(t, logrus.InfoLevel, logger.(*logrus.Logger).Level)
+
+	log, ok := logger.(*logrus.Logger)
+	assert.True(t, ok)
+	assert.Equal(t, logrus.InfoLevel, log.Level)
 }
 
 func TestWithLogLevel(t *testing.T) {
@@ -24,7 +26,9 @@ func TestWithLogLevel(t *testing.T) {
 	logger := Default(opt)
 
 	// Then
-	assert.Equal(t, logrus.DebugLevel, logger.(*logrus.Logger).Level)
+	log, ok := logger.(*logrus.Logger)
+	assert.True(t, ok)
+	assert.Equal(t, logrus.DebugLevel, log.Level)
 }
 
 func TestWithLogFormatter(t *testing.T) {
@@ -35,7 +39,9 @@ func TestWithLogFormatter(t *testing.T) {
 	logger := Default(opt)
 
 	// Then
-	assert.IsType(t, &logrus.JSONFormatter{}, logger.(*logrus.Logger).Formatter)
+	log, ok := logger.(*logrus.Logger)
+	assert.True(t, ok)
+	assert.IsType(t, &logrus.JSONFormatter{}, log.Formatter)
 }
 
 type TestHook struct {
@@ -102,7 +108,9 @@ func TestWithRedactedFields(t *testing.T) {
 		}).Info("test")
 
 		// Then
-		assert.IsType(t, &RedactingFormatter{}, logger.(*logrus.Logger).Formatter)
+		log, ok := logger.(*logrus.Logger)
+		assert.True(t, ok)
+		assert.IsType(t, &RedactingFormatter{}, log.Formatter)
 		require.Len(t, hook.lastEntry.Data, 2)
 		require.Equal(t, "test", hook.lastEntry.Message)
 		assert.Equal(t, "secret", hook.lastEntry.Data["password"])
@@ -124,7 +132,9 @@ func TestWithRedactedFields(t *testing.T) {
 		}).Info("test")
 
 		// Then
-		assert.IsType(t, &RedactingFormatter{}, logger.(*logrus.Logger).Formatter)
+		log, ok := logger.(*logrus.Logger)
+		assert.True(t, ok)
+		assert.IsType(t, &RedactingFormatter{}, log.Formatter)
 		require.Len(t, hook.lastEntry.Data, 2)
 		require.Equal(t, "test", hook.lastEntry.Message)
 		assert.Equal(t, "secret", hook.lastEntry.Data["password"])
@@ -149,7 +159,9 @@ func TestWithRedactedFields(t *testing.T) {
 		}).Info("test")
 
 		// Then
-		assert.IsType(t, &RedactingFormatter{}, logger.(*logrus.Logger).Formatter)
+		log, ok := logger.(*logrus.Logger)
+		assert.True(t, ok)
+		assert.IsType(t, &RedactingFormatter{}, log.Formatter)
 		require.Len(t, hook.lastEntry.Data, 2)
 		require.Equal(t, "test", hook.lastEntry.Message)
 		assert.Equal(t, "[REDACTED]", hook.lastEntry.Data["password"])
@@ -175,7 +187,9 @@ func TestWithRedactedFields(t *testing.T) {
 		}).Info("test")
 
 		// Then
-		assert.IsType(t, &RedactingFormatter{}, logger.(*logrus.Logger).Formatter)
+		log, ok := logger.(*logrus.Logger)
+		assert.True(t, ok)
+		assert.IsType(t, &RedactingFormatter{}, log.Formatter)
 		require.Len(t, hook.lastEntry.Data, 2)
 		require.Equal(t, "test", hook.lastEntry.Message)
 		assert.Equal(t, "/apps/66b24069fb0de6002981dd79/logs?timestamp=1727183062&[REDACTED]&stream=true", hook.lastEntry.Data["path"])
@@ -203,7 +217,9 @@ func TestWithRedactedFields(t *testing.T) {
 		}).Info("test")
 
 		// Then
-		assert.IsType(t, &RedactingFormatter{}, logger.(*logrus.Logger).Formatter)
+		log, ok := logger.(*logrus.Logger)
+		assert.True(t, ok)
+		assert.IsType(t, &RedactingFormatter{}, log.Formatter)
 		require.Len(t, hook.lastEntry.Data, 2)
 		require.Equal(t, "test", hook.lastEntry.Message)
 		assert.Equal(t, "/apps/66b24069fb0de6002981dd79/logs?timestamp=1727183062&token=[HIDDEN]&stream=true", hook.lastEntry.Data["path"])
@@ -218,14 +234,14 @@ func TestNewContextWithLogger(t *testing.T) {
 }
 
 func TestAddLoggerToContext(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	ctx = AddLoggerToContext(ctx)
 	logger := ctx.Value(loggerContextKey)
 	assert.NotNil(t, logger)
 }
 
 func TestGet(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	ctx = AddLoggerToContext(ctx)
 	logger := Get(ctx)
 	assert.NotNil(t, logger)
@@ -234,23 +250,29 @@ func TestGet(t *testing.T) {
 }
 
 func TestWithFieldToCtx(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	_, logger := WithFieldToCtx(ctx, "key", "value")
 	assert.NotNil(t, logger)
-	assert.Equal(t, "value", logger.(*logrus.Entry).Data["key"])
+
+	entry, ok := logger.(*logrus.Entry)
+	assert.True(t, ok)
+	assert.Equal(t, "value", entry.Data["key"])
 }
 
 func TestWithFieldsToCtx(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	fields := logrus.Fields{"key1": "value1", "key2": "value2"}
 	_, logger := WithFieldsToCtx(ctx, fields)
 	assert.NotNil(t, logger)
-	assert.Equal(t, "value1", logger.(*logrus.Entry).Data["key1"])
-	assert.Equal(t, "value2", logger.(*logrus.Entry).Data["key2"])
+
+	entry, ok := logger.(*logrus.Entry)
+	assert.True(t, ok)
+	assert.Equal(t, "value1", entry.Data["key1"])
+	assert.Equal(t, "value2", entry.Data["key2"])
 }
 
 func TestToCtx(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	logger := logrus.New()
 	ctx = ToCtx(ctx, logger)
 	assert.Equal(t, logger, ctx.Value(loggerContextKey))
