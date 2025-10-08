@@ -10,7 +10,8 @@ import (
 type structWithTags struct {
 	Field1 string `log:"field1"`
 	Field2 string `log:"field2"`
-	Field3 string
+	Field3 string `log:"field3,omitempty"`
+	Field4 string
 }
 
 type structWithTagsAndLoggable struct {
@@ -60,8 +61,9 @@ func TestFieldsFor(t *testing.T) {
 		// Given a struct with tags
 		s := structWithTags{
 			Field1: "value1",
-			Field2: "value2",
+			Field2: "",
 			Field3: "value3",
+			Field4: "value4",
 		}
 
 		// When we try to add it to a logger
@@ -70,7 +72,27 @@ func TestFieldsFor(t *testing.T) {
 		// Then it should be added as separate fields
 		assert.Equal(t, logrus.Fields{
 			"prefix_field1": "value1",
-			"prefix_field2": "value2",
+			"prefix_field2": "",
+			"prefix_field3": "value3",
+		}, fields)
+	})
+
+	t.Run("when the struct has some tags and an omitempty option", func(t *testing.T) {
+		// Given a struct with tags
+		s := structWithTags{
+			Field1: "value1",
+			Field2: "",
+			Field3: "",
+			Field4: "value4",
+		}
+
+		// When we try to add it to a logger
+		fields := FieldsFor("prefix", s)
+
+		// Then it should be added as separate fields
+		assert.Equal(t, logrus.Fields{
+			"prefix_field1": "value1",
+			"prefix_field2": "",
 		}, fields)
 	})
 
@@ -78,8 +100,9 @@ func TestFieldsFor(t *testing.T) {
 		// Given a pointer to a struct with tags
 		s := &structWithTags{
 			Field1: "value1",
-			Field2: "value2",
+			Field2: "",
 			Field3: "value3",
+			Field4: "value4",
 		}
 
 		// When we try to add it to a logger
@@ -88,7 +111,8 @@ func TestFieldsFor(t *testing.T) {
 		// Then it should be added as separate fields
 		assert.Equal(t, logrus.Fields{
 			"prefix_field1": "value1",
-			"prefix_field2": "value2",
+			"prefix_field2": "",
+			"prefix_field3": "value3",
 		}, fields)
 	})
 
