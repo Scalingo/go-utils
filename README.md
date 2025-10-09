@@ -34,7 +34,7 @@ git switch --create release/${module}/${version}
 git add ${module}/CHANGELOG.md ${module}/README.md
 git commit --message="[${module}] Bump v${version}"
 git push --set-upstream origin release/${module}/${version}
-gh pr create --reviewer=EtienneM --title "$(git log -1 --pretty=%B)"
+gh pr create --reviewer=Scalingo/team-ist --title "$(git log -1 --pretty=%B)"
 ```
 
 Once the pull request merged, you can tag the new release.

@@ -2,6 +2,8 @@
 
 ## To be released
 
+## v1.1.2
+
 * feat(pagination): add `log` tag to `Request` and `Meta`
 
 ## v1.1.1
