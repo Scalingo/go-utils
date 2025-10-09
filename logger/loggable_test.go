@@ -7,11 +7,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const zeroValue = "this is zero"
+
+type zeroable string
+
+func (z zeroable) IsZero() bool {
+	return z == zeroValue
+}
+
 type structWithTags struct {
-	Field1 string `log:"field1"`
-	Field2 string `log:"field2"`
-	Field3 string `log:"field3,omitempty"`
-	Field4 string
+	Field1                 string   `log:"field1"`
+	Field2                 string   `log:"field2"`
+	Field3Omitempty        string   `log:"field3,omitempty"`
+	Field4OmitzeroString   string   `log:"field4,omitzero"`
+	Field5OmitzeroZeroable zeroable `log:"field5,omitzero"`
+	Field6                 string
 }
 
 type structWithTagsAndLoggable struct {
@@ -60,10 +70,12 @@ func TestFieldsFor(t *testing.T) {
 	t.Run("when the struct has some tags", func(t *testing.T) {
 		// Given a struct with tags
 		s := structWithTags{
-			Field1: "value1",
-			Field2: "",
-			Field3: "value3",
-			Field4: "value4",
+			Field1:                 "value1",
+			Field2:                 "",
+			Field3Omitempty:        "value3",
+			Field4OmitzeroString:   "value4",
+			Field5OmitzeroZeroable: "value5",
+			Field6:                 "value6",
 		}
 
 		// When we try to add it to a logger
@@ -74,16 +86,65 @@ func TestFieldsFor(t *testing.T) {
 			"prefix_field1": "value1",
 			"prefix_field2": "",
 			"prefix_field3": "value3",
+			"prefix_field4": "value4",
+			"prefix_field5": zeroable("value5"),
 		}, fields)
 	})
 
-	t.Run("when the struct has some tags and an omitempty option", func(t *testing.T) {
+	t.Run("when the struct has some tags and an omitempty field with an empty value", func(t *testing.T) {
 		// Given a struct with tags
 		s := structWithTags{
-			Field1: "value1",
-			Field2: "",
-			Field3: "",
-			Field4: "value4",
+			Field1:                 "value1",
+			Field2:                 "",
+			Field3Omitempty:        "",
+			Field4OmitzeroString:   "value4",
+			Field5OmitzeroZeroable: "value5",
+			Field6:                 "value6",
+		}
+
+		// When we try to add it to a logger
+		fields := FieldsFor("prefix", s)
+
+		// Then it should be added as separate fields
+		assert.Equal(t, logrus.Fields{
+			"prefix_field1": "value1",
+			"prefix_field2": "",
+			"prefix_field4": "value4",
+			"prefix_field5": zeroable("value5"),
+		}, fields)
+	})
+
+	t.Run("when the struct has some tags and an omitzero field with an empty value", func(t *testing.T) {
+		// Given a struct with tags
+		s := structWithTags{
+			Field1:                 "value1",
+			Field2:                 "",
+			Field3Omitempty:        "",
+			Field4OmitzeroString:   "",
+			Field5OmitzeroZeroable: "",
+			Field6:                 "value6",
+		}
+
+		// When we try to add it to a logger
+		fields := FieldsFor("prefix", s)
+
+		// Then it should be added as separate fields
+		assert.Equal(t, logrus.Fields{
+			"prefix_field1": "value1",
+			"prefix_field2": "",
+			"prefix_field5": zeroable(""),
+		}, fields)
+	})
+
+	t.Run("when the struct has some tags and an omitzero field with a zero value", func(t *testing.T) {
+		// Given a struct with tags
+		s := structWithTags{
+			Field1:                 "value1",
+			Field2:                 "",
+			Field3Omitempty:        "",
+			Field4OmitzeroString:   "",
+			Field5OmitzeroZeroable: zeroValue,
+			Field6:                 "value6",
 		}
 
 		// When we try to add it to a logger
@@ -99,10 +160,12 @@ func TestFieldsFor(t *testing.T) {
 	t.Run("when we get a pointer to a struct with some tags", func(t *testing.T) {
 		// Given a pointer to a struct with tags
 		s := &structWithTags{
-			Field1: "value1",
-			Field2: "",
-			Field3: "value3",
-			Field4: "value4",
+			Field1:                 "value1",
+			Field2:                 "",
+			Field3Omitempty:        "value3",
+			Field4OmitzeroString:   "value4",
+			Field5OmitzeroZeroable: "value5",
+			Field6:                 "value6",
 		}
 
 		// When we try to add it to a logger
@@ -113,6 +176,8 @@ func TestFieldsFor(t *testing.T) {
 			"prefix_field1": "value1",
 			"prefix_field2": "",
 			"prefix_field3": "value3",
+			"prefix_field4": "value4",
+			"prefix_field5": zeroable("value5"),
 		}, fields)
 	})
 

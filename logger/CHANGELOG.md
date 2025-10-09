@@ -3,6 +3,7 @@
 ## To be Released
 
 * feat(logger): add support for the `omitempty` tag option
+* feat(logger): add support for the `omitzero` tag option
 
 ## v1.9.1
 
