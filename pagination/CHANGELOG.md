@@ -2,6 +2,8 @@
 
 ## To be released
 
+* feat(pagination): add `log` tag to `Request` and `Meta`
+
 ## v1.1.1
 
 * chore(go): corrective bump - Go version regression from 1.24.3 to 1.24
