@@ -104,34 +104,34 @@ func (s byTime) Less(i, j int) bool {
 	return s[i].Next.Before(s[j].Next)
 }
 
-type CronOpt func(cron *Cron)
+type Opt func(cron *Cron)
 
-func WithEtcdErrorsHandler(f func(context.Context, Job, error)) CronOpt {
-	return CronOpt(func(cron *Cron) {
+func WithEtcdErrorsHandler(f func(context.Context, Job, error)) Opt {
+	return Opt(func(cron *Cron) {
 		cron.etcdErrorsHandler = f
 	})
 }
 
-func WithErrorsHandler(f func(context.Context, Job, error)) CronOpt {
-	return CronOpt(func(cron *Cron) {
+func WithErrorsHandler(f func(context.Context, Job, error)) Opt {
+	return Opt(func(cron *Cron) {
 		cron.errorsHandler = f
 	})
 }
 
-func WithEtcdMutexBuilder(b EtcdMutexBuilder) CronOpt {
-	return CronOpt(func(cron *Cron) {
+func WithEtcdMutexBuilder(b EtcdMutexBuilder) Opt {
+	return Opt(func(cron *Cron) {
 		cron.etcdclient = b
 	})
 }
 
-func WithFuncCtx(f func(context.Context, Job) context.Context) CronOpt {
-	return CronOpt(func(cron *Cron) {
+func WithFuncCtx(f func(context.Context, Job) context.Context) Opt {
+	return Opt(func(cron *Cron) {
 		cron.funcCtx = f
 	})
 }
 
 // New returns a new Cron job runner.
-func New(opts ...CronOpt) (*Cron, error) {
+func New(opts ...Opt) (*Cron, error) {
 	cron := &Cron{
 		entries:  nil,
 		add:      make(chan *Entry),
