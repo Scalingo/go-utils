@@ -141,17 +141,17 @@ func mustParseInt(expr string) uint {
 	return uint(num)
 }
 
-// getBits sets all bits in the range [min, max], modulo the given step size.
-func getBits(min, max, step uint) uint64 {
+// getBits sets all bits in the range [minVal, maxVal], modulo the given step size.
+func getBits(minVal, maxVal, step uint) uint64 {
 	var bits uint64
 
 	// If step is 1, use shifts.
 	if step == 1 {
-		return ^(math.MaxUint64 << (max + 1)) & (math.MaxUint64 << min)
+		return ^(math.MaxUint64 << (maxVal + 1)) & (math.MaxUint64 << minVal)
 	}
 
 	// Else, use a simple loop.
-	for i := min; i <= max; i += step {
+	for i := minVal; i <= maxVal; i += step {
 		bits |= 1 << i
 	}
 	return bits
