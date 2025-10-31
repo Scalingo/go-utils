@@ -11,8 +11,9 @@ import (
 	"time"
 
 	"github.com/iancoleman/strcase"
-	"github.com/pkg/errors"
 	etcdv3 "go.etcd.io/etcd/client/v3"
+
+	"github.com/Scalingo/go-utils/errors/v3"
 )
 
 const (
@@ -255,7 +256,7 @@ func (c *Cron) run(ctx context.Context) {
 
 					m, err := c.etcdclient.NewMutex(fmt.Sprintf("etcd_cron/%s/%d", e.Job.canonicalName(), effective.Unix()))
 					if err != nil {
-						go c.etcdErrorsHandler(ctx, e.Job, errors.Wrapf(err, "fail to create etcd mutex for job '%v'", e.Job.Name))
+						go c.etcdErrorsHandler(ctx, e.Job, errors.Wrapf(ctx, err, "fail to create etcd mutex for job '%v'", e.Job.Name))
 						return
 					}
 					lockCtx, cancel := context.WithTimeout(ctx, time.Second)
@@ -265,7 +266,7 @@ func (c *Cron) run(ctx context.Context) {
 					if err == context.DeadlineExceeded {
 						return
 					} else if err != nil {
-						go c.etcdErrorsHandler(ctx, e.Job, errors.Wrapf(err, "fail to lock mutex '%v'", m.Key()))
+						go c.etcdErrorsHandler(ctx, e.Job, errors.Wrapf(ctx, err, "fail to lock mutex '%v'", m.Key()))
 						return
 					}
 

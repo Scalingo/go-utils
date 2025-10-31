@@ -2,6 +2,8 @@
 
 ## To Be Released
 
+* refactor(cron): replace `github.com/pkg/errors` with `github.com/Scalingo/go-utils/errors/v3`
+
 ## v1.4.0 - Oct. 14 2025
 
 * build(go): use go 1.24
