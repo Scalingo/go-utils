@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/iancoleman/strcase"
 	etcdv3 "go.etcd.io/etcd/client/v3"
 
 	"github.com/Scalingo/go-utils/errors/v3"
@@ -54,12 +53,58 @@ var (
 )
 
 func (j Job) canonicalName() string {
-	return strcase.ToSnake(
-		nonAlphaNumerical.ReplaceAllString(
-			strings.ToLower(j.Name),
-			"_",
-		),
+	jobNameLowerCase := strings.ToLower(j.Name)
+	// Replace non alphanumeric characters with '_'
+	jobNameWithoutSpecialCharacters := nonAlphaNumerical.ReplaceAllString(
+		jobNameLowerCase, "_",
 	)
+	return toSnakeCase(jobNameWithoutSpecialCharacters)
+}
+
+func toSnakeCase(s string) string {
+	delimiter := byte('_')
+	s = strings.TrimSpace(s)
+	n := strings.Builder{}
+	n.Grow(len(s) + 2) // nominal 2 bytes of extra space for inserted delimiters
+	for i, v := range []byte(s) {
+		vIsCap := v >= 'A' && v <= 'Z'
+		vIsLow := v >= 'a' && v <= 'z'
+		if vIsCap {
+			v += 'a'
+			v -= 'A'
+		}
+
+		// treat acronyms as words, eg for JSONData -> JSON is a whole word
+		//nolint:nestif
+		if i+1 < len(s) {
+			next := s[i+1]
+			vIsNum := v >= '0' && v <= '9'
+			nextIsCap := next >= 'A' && next <= 'Z'
+			nextIsLow := next >= 'a' && next <= 'z'
+			nextIsNum := next >= '0' && next <= '9'
+			// add underscore if next letter case type is changed
+			if (vIsCap && (nextIsLow || nextIsNum)) || (vIsLow && (nextIsCap || nextIsNum)) || (vIsNum && (nextIsCap || nextIsLow)) {
+				if vIsCap && nextIsLow {
+					if prevIsCap := i > 0 && s[i-1] >= 'A' && s[i-1] <= 'Z'; prevIsCap {
+						n.WriteByte(delimiter)
+					}
+				}
+				n.WriteByte(v)
+				if vIsLow || vIsNum || nextIsNum {
+					n.WriteByte(delimiter)
+				}
+				continue
+			}
+		}
+
+		if v == ' ' || v == '_' || v == '-' || v == '.' {
+			n.WriteByte(delimiter)
+		} else {
+			n.WriteByte(v)
+		}
+	}
+
+	return n.String()
 }
 
 // The Schedule describes a job's duty cycle.
