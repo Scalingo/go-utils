@@ -3,8 +3,8 @@ module github.com/go-utils/cron
 go 1.24.0
 
 require (
+	github.com/Scalingo/go-utils/errors/v3 v3.1.1
 	github.com/iancoleman/strcase v0.3.0
-	github.com/pkg/errors v0.9.1
 	go.etcd.io/etcd/client/v3 v3.6.5
 )
 
@@ -14,6 +14,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.3 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	go.etcd.io/etcd/api/v3 v3.6.5 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.6.5 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
@@ -25,4 +26,5 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251007200510-49b9836ed3ff // indirect
 	google.golang.org/grpc v1.76.0 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
+	gopkg.in/errgo.v1 v1.0.1 // indirect
 )
