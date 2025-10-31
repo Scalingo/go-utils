@@ -19,7 +19,7 @@ c, _ := etcdcron.NewEtcdMutexBuilder(clientv3.Config{
   Endpoints: []string{"etcd-host1:2379", "etcd-host2:2379"},
 })
 cron, _ := etcdcron.New(WithEtcdMutexBuilder(c))
-cron.AddJob(Job{
+_ = cron.AddJob(Job{
   Name: "job0",
   Rhythm: "*/2 * * * * *",
   Func: func(ctx context.Context) error {
@@ -44,7 +44,7 @@ cron, _ := etcdcron.New(
   WithEtcdErrorsHandler(etcdErrorsHandler),
 )
 
-cron.AddJob(Job{
+_ = cron.AddJob(Job{
   Name: "job0",
   Rhythm: "*/2 * * * * *",
   Func: func(ctx context.Context) error {

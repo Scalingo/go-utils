@@ -16,7 +16,7 @@ func main() {
 	if err != nil {
 		log.Fatal("fail to create etcd-cron", err)
 	}
-	cron.AddJob(etcdcron.Job{
+	err = cron.AddJob(etcdcron.Job{
 		Name:   "test",
 		Rhythm: "*/4 * * * * *",
 		Func: func(ctx context.Context) error {
@@ -24,7 +24,11 @@ func main() {
 			return errors.New("Horrible Error")
 		},
 	})
-	cron.AddJob(etcdcron.Job{
+	if err != nil {
+		log.Fatal("Fail to add the cron job", err)
+	}
+
+	err = cron.AddJob(etcdcron.Job{
 		Name:   "test-v2",
 		Rhythm: "*/10 * * * * *",
 		Func: func(ctx context.Context) error {
@@ -32,6 +36,10 @@ func main() {
 			return nil
 		},
 	})
+	if err != nil {
+		log.Fatal("Fail to add the cron job", err)
+	}
+
 	cron.Start(context.Background())
 	time.Sleep(100 * time.Second)
 	cron.Stop()
