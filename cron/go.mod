@@ -4,7 +4,6 @@ go 1.24.0
 
 require (
 	github.com/Scalingo/go-utils/errors/v3 v3.1.1
-	github.com/iancoleman/strcase v0.3.0
 	go.etcd.io/etcd/client/v3 v3.6.5
 )
 
