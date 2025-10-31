@@ -152,12 +152,12 @@ func New(opts ...CronOpt) (*Cron, error) {
 		cron.etcdclient = etcdClient
 	}
 	if cron.etcdErrorsHandler == nil {
-		cron.etcdErrorsHandler = func(ctx context.Context, j Job, err error) {
+		cron.etcdErrorsHandler = func(_ context.Context, j Job, err error) {
 			log.Printf("[etcd-cron] etcd error when handling '%v' job: %v", j.Name, err)
 		}
 	}
 	if cron.errorsHandler == nil {
-		cron.errorsHandler = func(ctx context.Context, j Job, err error) {
+		cron.errorsHandler = func(_ context.Context, j Job, err error) {
 			log.Printf("[etcd-cron] error when handling '%v' job: %v", j.Name, err)
 		}
 	}

@@ -42,7 +42,7 @@ func TestStopCausesJobsToNotRun(t *testing.T) {
 	err = cron.AddJob(Job{
 		Name:   "test-stop",
 		Rhythm: "* * * * * ?",
-		Func: func(ctx context.Context) error {
+		Func: func(_ context.Context) error {
 			wg.Done()
 			return nil
 		},

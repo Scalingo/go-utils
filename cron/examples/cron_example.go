@@ -19,7 +19,7 @@ func main() {
 	err = cron.AddJob(etcdcron.Job{
 		Name:   "test",
 		Rhythm: "*/4 * * * * *",
-		Func: func(ctx context.Context) error {
+		Func: func(_ context.Context) error {
 			// Use default logging of etcd-cron
 			return errors.New("Horrible Error")
 		},
@@ -31,7 +31,7 @@ func main() {
 	err = cron.AddJob(etcdcron.Job{
 		Name:   "test-v2",
 		Rhythm: "*/10 * * * * *",
-		Func: func(ctx context.Context) error {
+		Func: func(_ context.Context) error {
 			log.Println("Every 10 seconds from", os.Getpid())
 			return nil
 		},
