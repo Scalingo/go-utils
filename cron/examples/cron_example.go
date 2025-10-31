@@ -21,7 +21,7 @@ func main() {
 		Rhythm: "*/4 * * * * *",
 		Func: func(_ context.Context) error {
 			// Use default logging of etcd-cron
-			return errors.New("Horrible Error")
+			return errors.New("horrible error")
 		},
 	})
 	if err != nil {
