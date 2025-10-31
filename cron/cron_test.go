@@ -143,10 +143,8 @@ func TestSnapshotEntries(t *testing.T) {
 	defer cron.Stop()
 
 	// Cron should fire in 2 seconds. After 1 second, call Entries.
-	select {
-	case <-time.After(oneSecondPlusEpsilon):
-		cron.Entries()
-	}
+	<-time.After(oneSecondPlusEpsilon)
+	cron.Entries()
 
 	// Even though Entries was called, the cron should fire at the 2 second mark.
 	select {
