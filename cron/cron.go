@@ -61,6 +61,11 @@ func (j Job) canonicalName() string {
 	return toSnakeCase(jobNameWithoutSpecialCharacters)
 }
 
+// toSnakeCase converts the string s to a snake case:
+//   - all spaces are replaced with a _
+//   - non-alphanumeric characters are replaced with a _
+//
+// Credits goes to https://github.com/iancoleman/strcase under the MIT license for this code.
 func toSnakeCase(s string) string {
 	delimiter := byte('_')
 	s = strings.TrimSpace(s)
