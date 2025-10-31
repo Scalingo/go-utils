@@ -19,7 +19,7 @@ func TestNoEntries(t *testing.T) {
 	if err != nil {
 		t.Fatal("unexpected error")
 	}
-	cron.Start(context.Background())
+	cron.Start(t.Context())
 
 	select {
 	case <-time.After(ONE_SECOND):
@@ -37,7 +37,7 @@ func TestStopCausesJobsToNotRun(t *testing.T) {
 	if err != nil {
 		t.Fatal("unexpected error")
 	}
-	cron.Start(context.Background())
+	cron.Start(t.Context())
 	cron.Stop()
 	cron.AddJob(Job{
 		Name:   "test-stop",
@@ -70,7 +70,7 @@ func TestAddBeforeRunning(t *testing.T) {
 		Rhythm: "* * * * * ?",
 		Func:   func(context.Context) error { wg.Done(); return nil },
 	})
-	cron.Start(context.Background())
+	cron.Start(t.Context())
 	defer cron.Stop()
 
 	// Give cron 2 seconds to run our job (which is always activated).
@@ -90,7 +90,7 @@ func TestAddWhileRunning(t *testing.T) {
 	if err != nil {
 		t.Fatal("unexpected error")
 	}
-	cron.Start(context.Background())
+	cron.Start(t.Context())
 	defer cron.Stop()
 
 	cron.AddJob(Job{
@@ -126,7 +126,7 @@ func TestSnapshotEntries(t *testing.T) {
 			return nil
 		},
 	})
-	cron.Start(context.Background())
+	cron.Start(t.Context())
 	defer cron.Stop()
 
 	// Cron should fire in 2 seconds. After 1 second, call Entries.
@@ -176,7 +176,7 @@ func TestMultipleEntries(t *testing.T) {
 		Func:   func(context.Context) error { wg.Done(); return nil },
 	})
 
-	cron.Start(context.Background())
+	cron.Start(t.Context())
 	defer cron.Stop()
 
 	select {
@@ -211,7 +211,7 @@ func TestRunningJobTwice(t *testing.T) {
 		Func:   func(context.Context) error { wg.Done(); return nil },
 	})
 
-	cron.Start(context.Background())
+	cron.Start(t.Context())
 	defer cron.Stop()
 
 	select {
@@ -249,7 +249,7 @@ func TestRunningMultipleSchedules(t *testing.T) {
 	cron.Schedule(Every(time.Second), Job{Name: "test-mschedule-5", Func: func(context.Context) error { wg.Done(); return nil }})
 	cron.Schedule(Every(time.Hour), Job{Name: "test-mschedule-6", Func: func(context.Context) error { return nil }})
 
-	cron.Start(context.Background())
+	cron.Start(t.Context())
 	defer cron.Stop()
 
 	select {
@@ -281,7 +281,7 @@ func TestLocalTimezone(t *testing.T) {
 		},
 	})
 
-	cron.Start(context.Background())
+	cron.Start(t.Context())
 	defer cron.Stop()
 
 	select {
@@ -330,7 +330,7 @@ func TestJob(t *testing.T) {
 		Func: func(context.Context) error { wg.Done(); return nil },
 	})
 
-	cron.Start(context.Background())
+	cron.Start(t.Context())
 	defer cron.Stop()
 
 	select {
@@ -384,8 +384,8 @@ func TestCron_Parallel(t *testing.T) {
 	cron1.AddJob(job)
 	cron2.AddJob(job)
 
-	cron1.Start(context.Background())
-	cron2.Start(context.Background())
+	cron1.Start(t.Context())
+	cron2.Start(t.Context())
 
 	select {
 	case <-time.After(time.Duration(2) * ONE_SECOND):
