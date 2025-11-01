@@ -3,7 +3,7 @@ module github.com/Scalingo/go-utils/httpclient
 go 1.24
 
 require (
-	github.com/gofrs/uuid/v5 v5.3.2
+	github.com/gofrs/uuid/v5 v5.4.0
 	github.com/stretchr/testify v1.11.1
 )
 
