@@ -1,8 +1,5 @@
 # Various Go Utils and Helpers
 
-[ ![Travis Status for
-Scalingo/go-utils](https://travis-ci.com/Scalingo/go-utils.svg?branch=master)](https://travis-ci.com/github/Scalingo/go-utils)
-
 ## Structure of This Repository
 
 This repository is hosting modules, each of these modules are independant, they should all have their own:

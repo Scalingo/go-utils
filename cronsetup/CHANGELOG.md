@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.4.0
+
 * feat(cronsetup): add option to provide etcd client
 * refactor(cronsetup): replace `github.com/Scalingo/go-etcd-cron` with `cronsetup/internal/cron`
 

@@ -1,4 +1,4 @@
-# Package `cronsetup` v1.3.0
+# Package `cronsetup` v1.4.0
 
 The `cronsetup` package eases the configuration of distributed cron jobs backed by etcd.
 
