@@ -6,34 +6,23 @@ import (
 	"os"
 	"time"
 
-	etcdv3 "go.etcd.io/etcd/client/v3"
-
 	"github.com/Scalingo/go-utils/cronsetup"
 	"github.com/Scalingo/go-utils/logger"
-)
-
-const (
-	defaultEtcdEndpoint = "127.0.0.1:2379"
 )
 
 func main() {
 	log := logger.Default()
 	ctx := logger.ToCtx(context.Background(), log)
 
-	log.Info("Starting cronsetup example")
+	log.Info("Starting cronsetup local mode example")
 
 	cancel, err := cronsetup.Setup(ctx, cronsetup.SetupOpts{
-		EtcdConfig: func() (etcdv3.Config, error) {
-			return etcdv3.Config{
-				Endpoints: []string{defaultEtcdEndpoint},
-			}, nil
-		},
 		Jobs: []cronsetup.Job{
 			{
 				Name:   "test",
 				Rhythm: "*/4 * * * * *",
 				Func: func(_ context.Context) error {
-					// Use default logging of etcd-cron
+					// Use default logging of cronsetup
 					return errors.New("horrible error in cron job \"test\"")
 				},
 			},

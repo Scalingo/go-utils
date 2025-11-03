@@ -30,25 +30,32 @@ type SetupOpts struct {
 func Setup(ctx context.Context, opts SetupOpts) (func(), error) {
 	log := logger.Get(ctx)
 
-	if opts.EtcdClient == nil && opts.EtcdConfig == nil {
-		return nil, errors.New(ctx, "one of etcd client or config must be set")
-	} else if opts.EtcdClient != nil && opts.EtcdConfig != nil {
+	if opts.EtcdClient != nil && opts.EtcdConfig != nil {
 		return nil, errors.New(ctx, "both etcd client and config cannot be set")
 	}
 
-	etcdMutexBuilder, err := createEtcdMutextBuilderFromOpts(ctx, opts)
-	if err != nil {
-		return nil, errors.Wrap(ctx, err, "create the etcd mutex builder")
-	}
-
-	c, err := cron.New(
-		cron.WithEtcdMutexBuilder(etcdMutexBuilder),
+	cronOpts := []cron.Opt{
 		cron.WithFuncCtx(funcCtx),
 		cron.WithErrorsHandler(errorHandler),
 		cron.WithEtcdErrorsHandler(errorHandler),
-	)
+	}
+
+	if opts.EtcdClient == nil && opts.EtcdConfig == nil {
+		ctx, log = logger.WithFieldToCtx(ctx, "mode", "local")
+	} else {
+		ctx, log = logger.WithFieldToCtx(ctx, "mode", "distributed")
+
+		etcdMutexBuilder, err := createEtcdMutextBuilderFromOpts(ctx, opts)
+		if err != nil {
+			return nil, errors.Wrap(ctx, err, "create the etcd mutex builder")
+		}
+
+		cronOpts = append(cronOpts, cron.WithEtcdMutexBuilder(etcdMutexBuilder))
+	}
+
+	c, err := cron.New(cronOpts...)
 	if err != nil {
-		return nil, errors.Wrap(ctx, err, "create etcd cron")
+		return nil, errors.Wrap(ctx, err, "create cron job runner")
 	}
 
 	for _, job := range opts.Jobs {
@@ -58,11 +65,11 @@ func Setup(ctx context.Context, opts SetupOpts) (func(), error) {
 		}
 	}
 
-	log.Info("Starting etcd-cron")
+	log.Info("Starting cron goroutine")
 
 	c.Start(ctx)
 	return func() {
-		log.Info("Stopping etcd-cron")
+		log.Info("Stopping cron goroutine")
 		c.Stop()
 	}, nil
 }

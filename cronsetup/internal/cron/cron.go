@@ -3,20 +3,14 @@ package cron
 import (
 	"context"
 	"fmt"
-	"log"
 	"regexp"
 	"runtime/debug"
 	"sort"
 	"strings"
 	"time"
 
-	etcdv3 "go.etcd.io/etcd/client/v3"
-
 	"github.com/Scalingo/go-utils/errors/v3"
-)
-
-const (
-	defaultEtcdEndpoint = "127.0.0.1:2379"
+	"github.com/Scalingo/go-utils/logger"
 )
 
 // Cron keeps track of any number of entries, invoking the associated func as
@@ -31,7 +25,7 @@ type Cron struct {
 	errorsHandler     func(context.Context, Job, error)
 	funcCtx           func(context.Context, Job) context.Context
 	running           bool
-	etcdclient        EtcdMutexBuilder
+	etcdMutextBuilder EtcdMutexBuilder
 }
 
 // Job contains 3 mandatory options to define a job
@@ -157,31 +151,37 @@ func (s byTime) Less(i, j int) bool {
 
 type Opt func(cron *Cron)
 
+// WithEtcdErrorsHandler updates the default etcd error handler. It is called when an error occurs while interacting with etcd.
+// The default handler outputs a log line on stdout.
 func WithEtcdErrorsHandler(f func(context.Context, Job, error)) Opt {
 	return Opt(func(cron *Cron) {
 		cron.etcdErrorsHandler = f
 	})
 }
 
+// WithErrorsHandler updates the default error handler. It is called when an error occurs while executing a cron job.
+// The default handler outputs a log line on stdout.
 func WithErrorsHandler(f func(context.Context, Job, error)) Opt {
 	return Opt(func(cron *Cron) {
 		cron.errorsHandler = f
 	})
 }
 
-func WithEtcdMutexBuilder(b EtcdMutexBuilder) Opt {
+// WithEtcdMutexBuilder sets an etcd client to pose mutex. Setting such a client enables the distributed mode.
+func WithEtcdMutexBuilder(etcdMutexBuilder EtcdMutexBuilder) Opt {
 	return Opt(func(cron *Cron) {
-		cron.etcdclient = b
+		cron.etcdMutextBuilder = etcdMutexBuilder
 	})
 }
 
+// WithFuncCtx is a callback executed at the beginning of the execution of each entry. It only returns a context.
 func WithFuncCtx(f func(context.Context, Job) context.Context) Opt {
 	return Opt(func(cron *Cron) {
 		cron.funcCtx = f
 	})
 }
 
-// New returns a new Cron job runner.
+// New returns a new cron job runner.
 func New(opts ...Opt) (*Cron, error) {
 	cron := &Cron{
 		entries:  nil,
@@ -193,25 +193,21 @@ func New(opts ...Opt) (*Cron, error) {
 	for _, opt := range opts {
 		opt(cron)
 	}
-	if cron.etcdclient == nil {
-		etcdClient, err := NewEtcdMutexBuilder(etcdv3.Config{
-			Endpoints: []string{defaultEtcdEndpoint},
-		})
-		if err != nil {
-			return nil, err
-		}
-		cron.etcdclient = etcdClient
-	}
+
 	if cron.etcdErrorsHandler == nil {
-		cron.etcdErrorsHandler = func(_ context.Context, j Job, err error) {
-			log.Printf("[etcd-cron] etcd error when handling '%v' job: %v", j.Name, err)
+		cron.etcdErrorsHandler = func(ctx context.Context, j Job, err error) {
+			_, log := logger.WithFieldToCtx(ctx, "job_name", j.Name)
+			log.WithError(err).Infof("[cron] etcd error when handling '%v' job: %v", j.Name, err)
 		}
 	}
+
 	if cron.errorsHandler == nil {
-		cron.errorsHandler = func(_ context.Context, j Job, err error) {
-			log.Printf("[etcd-cron] error when handling '%v' job: %v", j.Name, err)
+		cron.errorsHandler = func(ctx context.Context, j Job, err error) {
+			_, log := logger.WithFieldToCtx(ctx, "job_name", j.Name)
+			log.WithError(err).Infof("[cron] error when handling '%v' job: %v", j.Name, err)
 		}
 	}
+
 	return cron, nil
 }
 
@@ -255,7 +251,7 @@ func (c *Cron) Start(ctx context.Context) {
 	go c.run(ctx)
 }
 
-// Run the scheduler.. this is private just due to the need to synchronize
+// Run the scheduler. This is private just due to the need to synchronize
 // access to the 'running' state variable.
 func (c *Cron) run(ctx context.Context) {
 	// Figure out the next activation times for each entry.
@@ -287,45 +283,7 @@ func (c *Cron) run(ctx context.Context) {
 				e.Prev = e.Next
 				e.Next = e.Schedule.Next(effective)
 
-				go func(ctx context.Context, e *Entry) {
-					defer func() {
-						r := recover()
-						if r != nil {
-							err, ok := r.(error)
-							if !ok {
-								err = fmt.Errorf("%v", r)
-							}
-							err = fmt.Errorf("panic: %v, stacktrace: %s", err, string(debug.Stack()))
-							go c.errorsHandler(ctx, e.Job, err)
-						}
-					}()
-
-					if c.funcCtx != nil {
-						ctx = c.funcCtx(ctx, e.Job)
-					}
-
-					m, err := c.etcdclient.NewMutex(fmt.Sprintf("etcd_cron/%s/%d", e.Job.canonicalName(), effective.Unix()))
-					if err != nil {
-						go c.etcdErrorsHandler(ctx, e.Job, errors.Wrapf(ctx, err, "fail to create etcd mutex for job '%v'", e.Job.Name))
-						return
-					}
-					lockCtx, cancel := context.WithTimeout(ctx, time.Second)
-					defer cancel()
-
-					err = m.Lock(lockCtx)
-					if err == context.DeadlineExceeded {
-						return
-					} else if err != nil {
-						go c.etcdErrorsHandler(ctx, e.Job, errors.Wrapf(ctx, err, "fail to lock mutex '%v'", m.Key()))
-						return
-					}
-
-					err = e.Job.Run(ctx)
-					if err != nil {
-						go c.errorsHandler(ctx, e.Job, err)
-						return
-					}
-				}(ctx, e)
+				go c.runEntry(ctx, effective, e)
 			}
 			continue
 
@@ -363,4 +321,55 @@ func (c *Cron) entrySnapshot() []*Entry {
 		})
 	}
 	return entries
+}
+
+func (c *Cron) runEntry(ctx context.Context, effective time.Time, e *Entry) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			err, ok := r.(error)
+			if !ok {
+				err = fmt.Errorf("%v", r)
+			}
+			err = fmt.Errorf("panic: %v, stacktrace: %s", err, string(debug.Stack()))
+			go c.errorsHandler(ctx, e.Job, err)
+		}
+	}()
+
+	if c.funcCtx != nil {
+		ctx = c.funcCtx(ctx, e.Job)
+	}
+
+	if c.etcdMutextBuilder == nil {
+		// In the local mode, we execute the job anyway with no need of any mutex
+		err := e.Job.Run(ctx)
+		if err != nil {
+			go c.errorsHandler(ctx, e.Job, err)
+		}
+
+		return
+	}
+
+	// In the distributed mode, we need to set a distributed mutex to ensure the job is only executed once.
+	m, err := c.etcdMutextBuilder.NewMutex(fmt.Sprintf("etcd_cron/%s/%d", e.Job.canonicalName(), effective.Unix()))
+	if err != nil {
+		go c.etcdErrorsHandler(ctx, e.Job, errors.Wrapf(ctx, err, "create etcd mutex for job '%v'", e.Job.Name))
+		return
+	}
+	lockCtx, cancel := context.WithTimeout(ctx, time.Second)
+	defer cancel()
+
+	err = m.Lock(lockCtx)
+	if err == context.DeadlineExceeded {
+		return
+	} else if err != nil {
+		go c.etcdErrorsHandler(ctx, e.Job, errors.Wrapf(ctx, err, "lock mutex '%v'", m.Key()))
+		return
+	}
+
+	err = e.Job.Run(ctx)
+	if err != nil {
+		go c.errorsHandler(ctx, e.Job, err)
+		return
+	}
 }
