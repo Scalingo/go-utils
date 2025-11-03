@@ -3,34 +3,36 @@ package cronsetup
 import (
 	"context"
 
+	"github.com/gofrs/uuid/v5"
 	"github.com/sirupsen/logrus"
 	etcdclient "go.etcd.io/etcd/client/v3"
 
+	"github.com/Scalingo/go-utils/cronsetup/internal/cron"
 	"github.com/Scalingo/go-utils/errors/v3"
-
-	etcdcron "github.com/Scalingo/go-etcd-cron"
 	"github.com/Scalingo/go-utils/logger"
-
-	"github.com/gofrs/uuid/v5"
 )
+
+type Job = cron.Job
 
 type SetupOpts struct {
 	EtcdConfig func() (etcdclient.Config, error)
-	Jobs       []etcdcron.Job
+	Jobs       []Job
 }
 
 func Setup(ctx context.Context, opts SetupOpts) (func(), error) {
+	log := logger.Get(ctx)
+
 	etcdConfig, err := opts.EtcdConfig()
 	if err != nil {
 		return nil, errors.Wrap(ctx, err, "get etcdv3 config")
 	}
 
-	etcdMutexBuilder, err := etcdcron.NewEtcdMutexBuilder(etcdConfig)
+	etcdMutexBuilder, err := cron.NewEtcdMutexBuilder(etcdConfig)
 	if err != nil {
 		return nil, errors.Wrap(ctx, err, "get etcd mutex builder")
 	}
 
-	funcCtx := func(ctx context.Context, j etcdcron.Job) context.Context {
+	funcCtx := func(ctx context.Context, j cron.Job) context.Context {
 		log := logger.Get(ctx)
 		requestID, ok := ctx.Value("request_id").(string)
 		if !ok {
@@ -49,16 +51,16 @@ func Setup(ctx context.Context, opts SetupOpts) (func(), error) {
 		return ctx
 	}
 
-	errorHandler := func(ctx context.Context, j etcdcron.Job, err error) {
-		log := logger.Get(ctx)
+	errorHandler := func(ctx context.Context, j cron.Job, err error) {
+		log := logger.Get(ctx).WithField("job_name", j.Name)
 		log.WithError(err).Error("Error when running cron job")
 	}
 
-	c, err := etcdcron.New(
-		etcdcron.WithEtcdErrorsHandler(errorHandler),
-		etcdcron.WithErrorsHandler(errorHandler),
-		etcdcron.WithEtcdMutexBuilder(etcdMutexBuilder),
-		etcdcron.WithFuncCtx(funcCtx),
+	c, err := cron.New(
+		cron.WithEtcdErrorsHandler(errorHandler),
+		cron.WithErrorsHandler(errorHandler),
+		cron.WithEtcdMutexBuilder(etcdMutexBuilder),
+		cron.WithFuncCtx(funcCtx),
 	)
 	if err != nil {
 		return nil, errors.Wrap(ctx, err, "create etcd cron")
@@ -71,7 +73,6 @@ func Setup(ctx context.Context, opts SetupOpts) (func(), error) {
 		}
 	}
 
-	log := logger.Get(ctx)
 	log.Info("Starting etcd-cron")
 
 	c.Start(ctx)
