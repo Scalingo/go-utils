@@ -5,62 +5,47 @@ import (
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/sirupsen/logrus"
-	etcdclient "go.etcd.io/etcd/client/v3"
+	etcdv3 "go.etcd.io/etcd/client/v3"
 
 	"github.com/Scalingo/go-utils/cronsetup/internal/cron"
 	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/logger"
 )
 
+// Job represents a cron job. It contains 3 *mandatory* options to define a job.
 type Job = cron.Job
 
+// SetupOpts are the options to setup new cron jobs. One of EtcdClient or EtcdConfig must be provided.
 type SetupOpts struct {
-	EtcdConfig func() (etcdclient.Config, error)
-	Jobs       []Job
+	// EtcdClient is the etcd client to use to set mutexes
+	EtcdClient *etcdv3.Client
+	// EtcdConfig is the configuration to use in order to create and etcd client to set mutexes
+	EtcdConfig func() (etcdv3.Config, error)
+	// List of jobs to execute
+	Jobs []Job
 }
 
+// Setup configures a new etcd cron and starts it. The caller has the responsibility to call the returned function to stop the cron jobs.
+// All errors returned by a cron job or by etcd are logged using the logger in the context.
 func Setup(ctx context.Context, opts SetupOpts) (func(), error) {
 	log := logger.Get(ctx)
 
-	etcdConfig, err := opts.EtcdConfig()
+	if opts.EtcdClient == nil && opts.EtcdConfig == nil {
+		return nil, errors.New(ctx, "one of etcd client or config must be set")
+	} else if opts.EtcdClient != nil && opts.EtcdConfig != nil {
+		return nil, errors.New(ctx, "both etcd client and config cannot be set")
+	}
+
+	etcdMutexBuilder, err := createEtcdMutextBuilderFromOpts(ctx, opts)
 	if err != nil {
-		return nil, errors.Wrap(ctx, err, "get etcdv3 config")
-	}
-
-	etcdMutexBuilder, err := cron.NewEtcdMutexBuilder(etcdConfig)
-	if err != nil {
-		return nil, errors.Wrap(ctx, err, "get etcd mutex builder")
-	}
-
-	funcCtx := func(ctx context.Context, j cron.Job) context.Context {
-		log := logger.Get(ctx)
-		requestID, ok := ctx.Value("request_id").(string)
-		if !ok {
-			requestUUID, err := uuid.NewV4()
-			if err != nil {
-				log.WithError(err).Error("Error generating UUID v4")
-			} else {
-				requestID = requestUUID.String()
-				ctx = context.WithValue(ctx, "request_id", requestID) // nolint:revive,staticcheck
-			}
-		}
-		ctx, _ = logger.WithFieldsToCtx(ctx, logrus.Fields{
-			"cron-job":   j.Name,
-			"request_id": requestID,
-		})
-		return ctx
-	}
-
-	errorHandler := func(ctx context.Context, j cron.Job, err error) {
-		log := logger.Get(ctx).WithField("job_name", j.Name)
-		log.WithError(err).Error("Error when running cron job")
+		return nil, errors.Wrap(ctx, err, "create the etcd mutex builder")
 	}
 
 	c, err := cron.New(
-		cron.WithEtcdErrorsHandler(errorHandler),
-		cron.WithErrorsHandler(errorHandler),
 		cron.WithEtcdMutexBuilder(etcdMutexBuilder),
 		cron.WithFuncCtx(funcCtx),
+		cron.WithErrorsHandler(errorHandler),
+		cron.WithEtcdErrorsHandler(errorHandler),
 	)
 	if err != nil {
 		return nil, errors.Wrap(ctx, err, "create etcd cron")
@@ -80,4 +65,52 @@ func Setup(ctx context.Context, opts SetupOpts) (func(), error) {
 		log.Info("Stopping etcd-cron")
 		c.Stop()
 	}, nil
+}
+
+func createEtcdMutextBuilderFromOpts(ctx context.Context, opts SetupOpts) (cron.EtcdMutexBuilder, error) {
+	if opts.EtcdClient != nil {
+		etcdMutexBuilder, err := cron.NewEtcdMutexBuilderFromClient(opts.EtcdClient)
+		if err != nil {
+			return nil, errors.Wrap(ctx, err, "create etcd mutex builder from client")
+		}
+		return etcdMutexBuilder, nil
+	}
+
+	etcdConfig, err := opts.EtcdConfig()
+	if err != nil {
+		return nil, errors.Wrap(ctx, err, "get etcd config")
+	}
+
+	etcdMutexBuilder, err := cron.NewEtcdMutexBuilder(etcdConfig)
+	if err != nil {
+		return nil, errors.Wrap(ctx, err, "create etcd mutex builder from config")
+	}
+
+	return etcdMutexBuilder, nil
+}
+
+func funcCtx(ctx context.Context, j cron.Job) context.Context {
+	log := logger.Get(ctx)
+	requestID, ok := ctx.Value("request_id").(string)
+	if !ok {
+		requestUUID, err := uuid.NewV4()
+		if err != nil {
+			log.WithError(err).Error("Error generating UUID v4")
+		} else {
+			requestID = requestUUID.String()
+			//nolint:revive,staticcheck // The "request_id" should not be of type string (https://pkg.go.dev/context#WithValue).
+			// I don't know what would be the impact of using another type for such a field that is used in various repositories. Hence I'm disabling the linters.
+			ctx = context.WithValue(ctx, "request_id", requestID)
+		}
+	}
+	ctx, _ = logger.WithFieldsToCtx(ctx, logrus.Fields{
+		"job_name":   j.Name,
+		"request_id": requestID,
+	})
+	return ctx
+}
+
+func errorHandler(ctx context.Context, _ cron.Job, err error) {
+	log := logger.Get(ctx)
+	log.WithError(err).Error("Error when running cron job")
 }
