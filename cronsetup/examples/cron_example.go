@@ -6,10 +6,14 @@ import (
 	"os"
 	"time"
 
-	"go.etcd.io/etcd/clientv3"
+	etcdv3 "go.etcd.io/etcd/client/v3"
 
 	"github.com/Scalingo/go-utils/cronsetup"
 	"github.com/Scalingo/go-utils/logger"
+)
+
+const (
+	defaultEtcdEndpoint = "127.0.0.1:2379"
 )
 
 func main() {
@@ -19,32 +23,36 @@ func main() {
 	log.Info("Starting cronsetup example")
 
 	cancel, err := cronsetup.Setup(ctx, cronsetup.SetupOpts{
-		EtcdConfig: func() (clientv3.Config, error) {
-			return *cfg.EtcdConfig, nil
+		EtcdConfig: func() (etcdv3.Config, error) {
+			return etcdv3.Config{
+				Endpoints: []string{defaultEtcdEndpoint},
+			}, nil
 		},
 		Jobs: []cronsetup.Job{
-			cronsetup.Job{
+			{
 				Name:   "test",
 				Rhythm: "*/4 * * * * *",
 				Func: func(_ context.Context) error {
 					// Use default logging of etcd-cron
-					return errors.New("horrible error")
+					return errors.New("horrible error in cron job \"test\"")
 				},
 			},
-			cronsetup.Job{
+			{
 				Name:   "test-v2",
 				Rhythm: "*/10 * * * * *",
-				Func: func(_ context.Context) error {
-					log.Println("Every 10 seconds from", os.Getpid())
+				Func: func(ctx context.Context) error {
+					log := logger.Get(ctx)
+					log.Info("[test-v2] Every 10 seconds from ", os.Getpid())
 					return nil
 				},
 			},
 		},
 	})
 	if err != nil {
-		return panic(err)
+		panic(err)
 	}
 	defer cancel()
 
+	// Stop the example in 100 seconds
 	time.Sleep(100 * time.Second)
 }

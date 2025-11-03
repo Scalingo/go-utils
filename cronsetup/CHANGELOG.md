@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* refactor(cronsetup): replace `github.com/Scalingo/go-etcd-cron` with `cronsetup/internal/cron`
+
 ## v1.3.0
 
 * feat(request_id) Inject `request_id` in context for each cron execution
