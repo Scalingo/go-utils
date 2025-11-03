@@ -1,6 +1,6 @@
 module github.com/Scalingo/go-utils/nsqlbproducer
 
-go 1.24
+go 1.24.0
 
 require (
 	github.com/Scalingo/go-utils/env v1.2.1
@@ -14,12 +14,12 @@ require (
 )
 
 require (
-	github.com/Scalingo/go-utils/logger v1.9.1 // indirect
+	github.com/Scalingo/go-utils/logger v1.11.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/gofrs/uuid/v5 v5.3.2 // indirect
+	github.com/gofrs/uuid/v5 v5.4.0 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	golang.org/x/sys v0.35.0 // indirect
+	golang.org/x/sys v0.36.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
