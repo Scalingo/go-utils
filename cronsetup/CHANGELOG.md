@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.5.0
+
 * feat(cronsetup): add local mode
 
 ## v1.4.0
