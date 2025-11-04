@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat(cronsetup): add local mode
+
 ## v1.4.0
 
 * feat(cronsetup): add option to provide etcd client

@@ -1,21 +1,28 @@
 # Package `cronsetup` v1.4.0
 
-The `cronsetup` package eases the configuration of distributed cron jobs backed by etcd.
+The `cronsetup` package eases the configuration and the execution of cron jobs on Go services. It has two modes: a distributed one (backed by etcd), and a local one.
 
-## Goal
+## Goals
 
-This package aims at implementing a distributed and fault tolerant cron in order to:
+### Distributed Mode
+
+The goal of the distributed mode is to implement a distributed and fault tolerant cron in order to:
 
 * Run an identical process on several hosts
 * Each of these process instantiate a cron with the same rules
 * Ensure only one of these processes executes an iteration of a job
 
+### Local Mode
+
+The goal of the local mode is to implement a classical cron: it executes each job on all hosts executing the cron task.
+
 ## Examples
 
-Examples are available in the `examples` package. One can execute it with:
+Examples are available in the `examples` package. One can execute them with:
 
 ```sh
-go run ./examples
+go run ./examples/distributed
+go run ./examples/local
 ```
 
-It requires a etcd to be running at `127.0.0.1:2379`.
+The distributed example requires a etcd to be running at `127.0.0.1:2379`.
