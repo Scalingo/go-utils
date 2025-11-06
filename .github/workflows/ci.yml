@@ -100,10 +100,6 @@ jobs:
           - 2379:2379
       mongodb:
         image: mongo:4.0.3
-        env:
-          MONGO_INITDB_ROOT_USERNAME: admin
-          MONGO_INITDB_ROOT_PASSWORD: admin
-          MONGO_INITDB_DATABASE: mydb
         ports:
           - 27017:27017
         options: >-
@@ -117,32 +113,8 @@ jobs:
         with:
           go-version: stable
           check-latest: true
-      # For some reasons I failed to understand, the admin user we created failed to connect to the MongoDB. Hence we install MongoDB Shell and create a user that is later used by the tests execution.
-      - name: Install MongoDB Shell
-        # `matrix.modules` contains something like `/home/runner/work/go-utils/go-utils/mongo`.
-        if: endsWith(matrix.modules, '/mongo')
-        # We need to install a MongoDB Shell v2.5.0. This is the last version which uses the Node.js driver v6.15.0, latest version which supports MongoDB 4.0.
-        run: |
-          sudo apt-get install gnupg
-          wget -qO- https://www.mongodb.org/static/pgp/server-7.0.asc | sudo tee /etc/apt/trusted.gpg.d/server-7.0.asc
-          echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
-          sudo apt-get update
-          sudo apt-get install --yes mongodb-mongosh=2.5.0
-          mongosh --version
-      - name: Create a User for Tests Execution
-        if: endsWith(matrix.modules, '/mongo')
-        run: |
-          mongosh --host localhost:27017 -u admin -p admin --authenticationDatabase admin <<EOF
-            db.runCommand({ ping: 1 });
-            db = db.getSiblingDB('mydb');
-            db.createUser({
-              user: 'mgouser',
-              pwd: 'mgopassword',
-              roles: [{ role: 'readWrite', db: 'mydb' }]
-            });
-          EOF
+      - name: Import test environment variables
+        run: test -f .env.test && cat .env.test >> "$GITHUB_ENV" || true
       - name: Execute the Tests
         working-directory: ${{ matrix.modules }}
         run: go test -v -race ./...
-        env:
-          MONGO_URL: "mongodb://mgouser:mgopassword@localhost:27017/mydb?connect=direct"
