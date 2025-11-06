@@ -5,7 +5,7 @@ on: [push]
 jobs:
   detect-modules:
     name: Detect the Go modules declared in go-utils
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       modules: ${{ steps.set-modules.outputs.modules }}
     steps:
@@ -30,7 +30,7 @@ jobs:
   linter-pull-request:
     needs: detect-modules
     name: golangci-lint on a PR or from a tag
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         modules: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
@@ -61,7 +61,7 @@ jobs:
   linter-master:
     needs: detect-modules
     name: golangci-lint on the master branch
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         modules: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
@@ -86,7 +86,7 @@ jobs:
   tests:
     needs: detect-modules
     name: Unit Tests
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         modules: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
