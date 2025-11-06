@@ -1,7 +1,7 @@
 module github.com/Scalingo/go-utils/fs
 
-go 1.24
+go 1.24.0
 
-require github.com/spf13/afero v1.14.0
+require github.com/spf13/afero v1.15.0
 
-require golang.org/x/text v0.28.0 // indirect
+require golang.org/x/text v0.30.0 // indirect

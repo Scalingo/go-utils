@@ -2,6 +2,15 @@
 
 ## To be Released
 
+## v1.5.0
+
+* feat(cronsetup): add local mode
+
+## v1.4.0
+
+* feat(cronsetup): add option to provide etcd client
+* refactor(cronsetup): replace `github.com/Scalingo/go-etcd-cron` with `cronsetup/internal/cron`
+
 ## v1.3.0
 
 * feat(request_id) Inject `request_id` in context for each cron execution

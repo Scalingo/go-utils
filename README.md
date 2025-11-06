@@ -1,8 +1,5 @@
 # Various Go Utils and Helpers
 
-[ ![Travis Status for
-Scalingo/go-utils](https://travis-ci.com/Scalingo/go-utils.svg?branch=master)](https://travis-ci.com/github/Scalingo/go-utils)
-
 ## Structure of This Repository
 
 This repository is hosting modules, each of these modules are independant, they should all have their own:
@@ -34,7 +31,7 @@ git switch --create release/${module}/${version}
 git add ${module}/CHANGELOG.md ${module}/README.md
 git commit --message="[${module}] Bump v${version}"
 git push --set-upstream origin release/${module}/${version}
-gh pr create --reviewer=EtienneM --title "$(git log -1 --pretty=%B)"
+gh pr create --reviewer=Scalingo/team-ist --title "$(git log -1 --pretty=%B)"
 ```
 
 Once the pull request merged, you can tag the new release.
