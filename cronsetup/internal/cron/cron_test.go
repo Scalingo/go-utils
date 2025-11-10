@@ -353,8 +353,9 @@ func TestLocalTimezone(t *testing.T) {
 	wg.Add(1)
 
 	now := time.Now().Local()
+	future := now.Add(1 * time.Second)
 	spec := fmt.Sprintf("%d %d %d %d %d ?",
-		now.Second()+1, now.Minute(), now.Hour(), now.Day(), now.Month())
+		future.Second(), future.Minute(), future.Hour(), future.Day(), future.Month())
 
 	cron, err := New()
 	if err != nil {
