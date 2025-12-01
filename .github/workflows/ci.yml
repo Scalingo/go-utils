@@ -1,6 +1,9 @@
 name: Tests and Linters Scalingo go-utils Packages
 
-on: [push]
+on:
+  pull_request:
+  push:
+    branches: [main, master, prod]
 
 jobs:
   detect-modules:
@@ -27,61 +30,18 @@ jobs:
             popd > /dev/null
           done | jq --raw-input --slurp 'split("\n")' | jq --compact-output 'map(select(length > 0))' >> $GITHUB_OUTPUT
 
-  linter-pull-request:
+  linter:
     needs: detect-modules
-    name: golangci-lint on a PR or from a tag
+    name: Linter on a PR
+    if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-24.04
     strategy:
       matrix:
         modules: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
-    if: github.ref != 'refs/heads/master'
     steps:
-      - uses: actions/checkout@v5
-        with:
-          # We need to define the fetch-depth to 0 so that we can get the commit ID of the master branch
-          fetch-depth: 0
-      - uses: actions/setup-go@v6
-        with:
-          go-version: stable
-          check-latest: true
-      - name: Get golangci-lint configuration file
-        run: wget --output-document=$(pwd)/.golangci.yml https://sc-devtools.s3.eu-west-1.amazonaws.com/golang-ci/golangci.yml
-      - name: Get master branch commit ID
-        id: new-from-rev
-        run: echo "NEW_FROM_REV=$( git show-branch --merge-base FETCH_HEAD )" >> "$GITHUB_OUTPUT"
-      - name: "Execute golangci-lint on a pull request"
-        uses: golangci/golangci-lint-action@v9
+      - uses: Scalingo/actions/go-linter@main
         with:
           working-directory: ${{ matrix.modules }}
-          # The `only-new-issues` flag is not working (https://github.com/golangci/golangci-lint-action/issues/531).
-          # We rather decided to use the suggestion from the FAQ (https://golangci-lint.run/welcome/faq/#how-to-integrate-golangci-lint-into-large-project-with-thousands-of-issues) and use `--new-from-rev`
-          # only-new-issues: false
-          args: "--config=$(pwd)/../.golangci.yml --new-from-rev=${{ steps.new-from-rev.outputs.NEW_FROM_REV }} --modules-download-mode=mod"
-
-  linter-master:
-    needs: detect-modules
-    name: golangci-lint on the master branch
-    runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        modules: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
-    if: github.ref == 'refs/heads/master'
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          # We need to define the fetch-depth to 0 so that we can get the commit ID of the master branch
-          fetch-depth: 0
-      - uses: actions/setup-go@v6
-        with:
-          go-version: stable
-          check-latest: true
-      - name: Get golangci-lint configuration file
-        run: wget --output-document=$(pwd)/.golangci.yml https://sc-devtools.s3.eu-west-1.amazonaws.com/golang-ci/golangci.yml
-      - name: "Execute golangci-lint on a pull request"
-        uses: golangci/golangci-lint-action@v9
-        with:
-          working-directory: ${{ matrix.modules }}
-          args: "--config=$(pwd)/../.golangci.yml --new-from-rev=HEAD~1 --modules-download-mode=mod"
 
   tests:
     needs: detect-modules
@@ -90,31 +50,9 @@ jobs:
     strategy:
       matrix:
         modules: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
-    services:
-      etcd:
-        image: quay.io/coreos/etcd:v3.5.17
-        env:
-          ETCD_ADVERTISE_CLIENT_URLS: http://0.0.0.0:2379
-          ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
-        ports:
-          - 2379:2379
-      mongodb:
-        image: mongo:4.0.3
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd "echo \"db.runCommand({ ping: 1 }).ok\" | mongo"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-go@v6
+      - uses: Scalingo/actions/go-tests@main
         with:
-          go-version: stable
-          check-latest: true
-      - name: Import test environment variables
-        run: test -f .env.test && cat .env.test >> "$GITHUB_ENV" || true
-      - name: Execute the Tests
-        working-directory: ${{ matrix.modules }}
-        run: go test -v -race ./...
+          working-directory: ${{ matrix.modules }}
+          # Only the 'mongo' module requires a MongoDB for its unit tests
+          mongodb: ${{ endsWith(matrix.modules, '/mongo') }}
