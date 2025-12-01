@@ -50,7 +50,7 @@ jobs:
         id: new-from-rev
         run: echo "NEW_FROM_REV=$( git show-branch --merge-base FETCH_HEAD )" >> "$GITHUB_OUTPUT"
       - name: "Execute golangci-lint on a pull request"
-        uses: golangci/golangci-lint-action@v8
+        uses: golangci/golangci-lint-action@v9
         with:
           working-directory: ${{ matrix.modules }}
           # The `only-new-issues` flag is not working (https://github.com/golangci/golangci-lint-action/issues/531).
@@ -78,7 +78,7 @@ jobs:
       - name: Get golangci-lint configuration file
         run: wget --output-document=$(pwd)/.golangci.yml https://sc-devtools.s3.eu-west-1.amazonaws.com/golang-ci/golangci.yml
       - name: "Execute golangci-lint on a pull request"
-        uses: golangci/golangci-lint-action@v8
+        uses: golangci/golangci-lint-action@v9
         with:
           working-directory: ${{ matrix.modules }}
           args: "--config=$(pwd)/../.golangci.yml --new-from-rev=HEAD~1 --modules-download-mode=mod"
