@@ -1,7 +1,7 @@
 github.com/Scalingo/errgo-rollbar v0.2.1 h1:S2hz3FcjiSEB8yoQS2A0WzUY2Cq6tvD2IHzB4xlW4bA=
 github.com/Scalingo/errgo-rollbar v0.2.1/go.mod h1:C2wzmHChrL2NqZDhDIIWemnJtBJh5nvAbw396uVR6Kc=
-github.com/Scalingo/logrus-rollbar v1.4.2 h1:j4eeX7eYvy8zQTW2MBX4hQuqDFphDGS3MIw7cuwriKY=
-github.com/Scalingo/logrus-rollbar v1.4.2/go.mod h1:s2D8E3H1/E9/OXjYFc4ydePNwsDDRRwSRBQVLY5nypY=
+github.com/Scalingo/logrus-rollbar v1.4.3 h1:Eyrkqa9A68DQ0oJYtX7eQ9YYumdiGqslqlDqk93rfiY=
+github.com/Scalingo/logrus-rollbar v1.4.3/go.mod h1:69jQeOXZ7hetcs1yURed76IGl/OPrfkKd0Rh5z8dUJc=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -29,8 +29,8 @@ github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
 golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
-golang.org/x/sys v0.38.0 h1:3yZWxaJjBmCWXqhN1qh02AkOnCQ1poK6oF+a7xWL6Gc=
-golang.org/x/sys v0.38.0/go.mod h1:OgkHotnGiDImocRcuBABYBEXf8A9a87e/uXjp9XT3ks=
+golang.org/x/sys v0.39.0 h1:CvCKL8MeisomCi6qNZ+wbb0DN9E5AATixKsvNtMoMFk=
+golang.org/x/sys v0.39.0/go.mod h1:OgkHotnGiDImocRcuBABYBEXf8A9a87e/uXjp9XT3ks=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/errgo.v1 v1.0.1 h1:oQFRXzZ7CkBGdm1XZm/EbQYaYNNEElNBOd09M6cqNso=
