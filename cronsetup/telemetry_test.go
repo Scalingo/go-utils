@@ -34,7 +34,7 @@ func TestNewTelemetryCreatesInstruments(t *testing.T) {
 		Float64Histogram("scalingo.etcd_cron.runs_duration_milliseconds", gomock.Any()).
 		Return(otelmock.NewMockFloat64Histogram(ctrl), nil)
 
-	telemetry, err := newTelemetry(context.Background())
+	telemetry, err := newTelemetry(t.Context())
 	require.NoError(t, err)
 	require.NotNil(t, telemetry)
 }
@@ -128,9 +128,9 @@ func TestTelemetryWrapJobRecordsMetrics(t *testing.T) {
 
 			wrapped := telemetry.wrapJob(job)
 			if test.expectError {
-				require.Error(t, wrapped.Func(context.Background()))
+				require.Error(t, wrapped.Func(t.Context()))
 			} else {
-				require.NoError(t, wrapped.Func(context.Background()))
+				require.NoError(t, wrapped.Func(t.Context()))
 			}
 		})
 	}
