@@ -2,6 +2,7 @@
 
 ## To be Released
 
+<<<<<<< HEAD
 ## v1.5.0
 
 * feat(cronsetup): add local mode
@@ -10,6 +11,9 @@
 
 * feat(cronsetup): add option to provide etcd client
 * refactor(cronsetup): replace `github.com/Scalingo/go-etcd-cron` with `cronsetup/internal/cron`
+=======
+* feat(opentelemetry) Add ability to instrument execution of cron job through OpenTelemetry
+>>>>>>> 18c1e6f (feat(opentelemetry) Add ability to instrument execution of cron job through OpenTelemetry)
 
 ## v1.3.0
 

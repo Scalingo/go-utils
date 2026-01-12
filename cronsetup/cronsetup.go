@@ -23,6 +23,8 @@ type SetupOpts struct {
 	EtcdConfig func() (etcdv3.Config, error)
 	// List of jobs to execute
 	Jobs []Job
+	// Telemetry indicates whether OpenTelemetry instrumentation should be enabled
+	Telemetry bool
 }
 
 // Setup configures a new etcd cron and starts it. The caller has the responsibility to call the returned function to stop the cron jobs.
@@ -58,7 +60,19 @@ func Setup(ctx context.Context, opts SetupOpts) (func(), error) {
 		return nil, errors.Wrap(ctx, err, "create cron job runner")
 	}
 
+	var telemetry *telemetry
+	if opts.Telemetry {
+		telemetry, err = newTelemetry(ctx)
+		if err != nil {
+			return nil, errors.Wrap(ctx, err, "init telemetry")
+		}
+	}
+
 	for _, job := range opts.Jobs {
+		if telemetry != nil {
+			job = telemetry.wrapJob(job)
+		}
+
 		err := c.AddJob(job)
 		if err != nil {
 			return nil, errors.Wrap(ctx, err, "add the cron job")
