@@ -26,3 +26,12 @@ go run ./examples/local
 ```
 
 The distributed example requires a etcd to be running at `127.0.0.1:2379`.
+
+## Telemetry
+
+Telemetry can be enabled by setting `SetupOpts.Telemetry` to `true`. It records the number of runs, the number of runs with errors, and the duration of each job execution (in milliseconds). All metrics use the `scalingo.etcd_cron.job_name` attribute with the job name as value.
+
+Metrics:
+- `scalingo.etcd_cron.runs_total`: number of runs
+- `scalingo.etcd_cron.run_errors_total`: number of runs with error
+- `scalingo.etcd_cron.runs_duration_milliseconds`: execution time of a job in milliseconds
