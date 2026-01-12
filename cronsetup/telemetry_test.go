@@ -11,7 +11,6 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
 
-	etcdcron "github.com/Scalingo/go-etcd-cron"
 	otelmock "github.com/Scalingo/go-utils/otel/otelmock"
 	oteltest "github.com/Scalingo/go-utils/otel/oteltest"
 )
@@ -93,7 +92,7 @@ func TestTelemetryWrapJobRecordsMetrics(t *testing.T) {
 				runsDuration:     runsDuration,
 			}
 
-			job := etcdcron.Job{
+			job := Job{
 				Name: test.jobName,
 				Func: test.jobFunc,
 			}

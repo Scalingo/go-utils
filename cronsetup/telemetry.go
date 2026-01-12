@@ -8,9 +8,8 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
 
+	"github.com/Scalingo/go-utils/cronsetup/internal/cron"
 	"github.com/Scalingo/go-utils/errors/v3"
-
-	etcdcron "github.com/Scalingo/go-etcd-cron"
 )
 
 type telemetry struct {
@@ -57,7 +56,7 @@ func newTelemetry(ctx context.Context) (*telemetry, error) {
 	}, nil
 }
 
-func (t *telemetry) wrapJob(job etcdcron.Job) etcdcron.Job {
+func (t *telemetry) wrapJob(job cron.Job) cron.Job {
 	jobAttributes := metric.WithAttributes(attribute.String(jobNameAttributeKey, job.Name))
 	originalFunc := job.Func
 
