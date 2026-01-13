@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/gofrs/uuid/v5"
@@ -22,12 +21,10 @@ type Producer interface {
 }
 
 type NsqProducer struct {
-	producer         *nsq.Producer
-	config           *nsq.Config
-	skipLogSet       map[string]bool
-	telemetry        *telemetry
-	telemetryOnce    sync.Once
-	withoutTelemetry bool
+	producer   *nsq.Producer
+	config     *nsq.Config
+	skipLogSet map[string]bool
+	telemetry  *telemetry
 }
 
 type ProducerOpts struct {
@@ -73,11 +70,10 @@ func New(opts ProducerOpts) (*NsqProducer, error) {
 	}
 
 	return &NsqProducer{
-		producer:         client,
-		config:           opts.NsqConfig,
-		skipLogSet:       opts.SkipLogSet,
-		withoutTelemetry: opts.WithoutTelemetry,
-		telemetry:        telemetry,
+		producer:   client,
+		config:     opts.NsqConfig,
+		skipLogSet: opts.SkipLogSet,
+		telemetry:  telemetry,
 	}, nil
 }
 

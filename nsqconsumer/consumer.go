@@ -154,7 +154,7 @@ type nsqConsumer struct {
 	logger           logrus.FieldLogger
 	logLevel         LogLevel
 	telemetry        *telemetry
-	withoutTelemetry bool
+	withTelemetry    bool
 }
 
 type ConsumerOpts struct {
@@ -189,16 +189,16 @@ func New(opts ConsumerOpts) (Consumer, error) {
 	}
 
 	consumer := &nsqConsumer{
-		NsqConfig:        opts.NsqConfig,
-		NsqLookupdURLs:   opts.NsqLookupdURLs,
-		Topic:            opts.Topic,
-		Channel:          opts.Channel,
-		MessageHandler:   opts.MessageHandler,
-		MaxInFlight:      opts.MaxInFlight,
-		SkipLogSet:       opts.SkipLogSet,
-		logLevel:         opts.LogLevel,
-		disableBackoff:   opts.DisableBackoff,
-		withoutTelemetry: opts.WithoutTelemetry,
+		NsqConfig:      opts.NsqConfig,
+		NsqLookupdURLs: opts.NsqLookupdURLs,
+		Topic:          opts.Topic,
+		Channel:        opts.Channel,
+		MessageHandler: opts.MessageHandler,
+		MaxInFlight:    opts.MaxInFlight,
+		SkipLogSet:     opts.SkipLogSet,
+		logLevel:       opts.LogLevel,
+		disableBackoff: opts.DisableBackoff,
+		withTelemetry:  !opts.WithoutTelemetry,
 	}
 	if consumer.MaxInFlight == 0 {
 		consumer.MaxInFlight = opts.NsqConfig.MaxInFlight
@@ -223,7 +223,7 @@ func (c *nsqConsumer) Start(ctx context.Context) func() {
 		"channel": c.Channel,
 	})
 	c.logger.Info("Starting consumer")
-	if !c.withoutTelemetry {
+	if c.withTelemetry {
 		telemetry, err := newTelemetry(ctx)
 		if err != nil {
 			c.logger.WithError(err).Error("Fail to init telemetry")
