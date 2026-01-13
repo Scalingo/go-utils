@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat(opentelemetry): add NSQ consumer instrumentation
+
 ## v1.5.3
 
 * fix(nsqconsumer/errors) make unwrap compatible with all go-utils/errors versions

@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat(opentelemetry): add NSQ producer instrumentation
+
 ## v1.3.1
 
 * chore(go): corrective bump - Go version regression from 1.24.3 to 1.24

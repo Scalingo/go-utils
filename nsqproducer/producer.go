@@ -24,6 +24,7 @@ type NsqProducer struct {
 	producer   *nsq.Producer
 	config     *nsq.Config
 	skipLogSet map[string]bool
+	telemetry  *telemetry
 }
 
 type ProducerOpts struct {
@@ -31,6 +32,8 @@ type ProducerOpts struct {
 	Port       string
 	NsqConfig  *nsq.Config
 	SkipLogSet map[string]bool
+	// WithoutTelemetry indicates whether OpenTelemetry instrumentation should be disabled
+	WithoutTelemetry bool
 }
 
 type WithLoggableFields interface {
@@ -58,7 +61,20 @@ func New(opts ProducerOpts) (*NsqProducer, error) {
 		opts.SkipLogSet = map[string]bool{}
 	}
 
-	return &NsqProducer{producer: client, config: opts.NsqConfig, skipLogSet: opts.SkipLogSet}, nil
+	var telemetry *telemetry
+	if !opts.WithoutTelemetry {
+		telemetry, err = newTelemetry()
+		if err != nil {
+			return nil, fmt.Errorf("init-nsq: cannot initialize telemetry: %v", err)
+		}
+	}
+
+	return &NsqProducer{
+		producer:   client,
+		config:     opts.NsqConfig,
+		skipLogSet: opts.SkipLogSet,
+		telemetry:  telemetry,
+	}, nil
 }
 
 func (p *NsqProducer) Stop() {
@@ -70,20 +86,39 @@ func (p *NsqProducer) Ping() error {
 }
 
 func (p *NsqProducer) Publish(ctx context.Context, topic string, message NsqMessageSerialize) error {
+	startedAt := time.Now()
+	messageType := message.Type
+	if messageType == "" {
+		messageType = unknownMessageType
+	}
+	publishType := publishTypeImmediate
+	var telemetryErr error
+	defer func() {
+		if p.telemetry != nil {
+			p.telemetry.record(ctx, startedAt, topic, messageType, publishType, telemetryErr)
+		}
+	}()
+
 	var err error
 	message.RequestID, err = p.requestID(ctx)
 	if err != nil {
-		return errgo.Notef(err, "fail to get requestID")
+		err = errgo.Notef(err, "fail to get requestID")
+		telemetryErr = err
+		return err
 	}
 
 	body, err := json.Marshal(message)
 	if err != nil {
-		return errgo.Mask(err, errgo.Any)
+		err = errgo.Mask(err, errgo.Any)
+		telemetryErr = err
+		return err
 	}
 
 	err = p.producer.Publish(topic, body)
 	if err != nil {
-		return errgo.Mask(err, errgo.Any)
+		err = errgo.Mask(err, errgo.Any)
+		telemetryErr = err
+		return err
 	}
 
 	p.log(ctx, message, logrus.Fields{})
@@ -92,20 +127,39 @@ func (p *NsqProducer) Publish(ctx context.Context, topic string, message NsqMess
 }
 
 func (p *NsqProducer) DeferredPublish(ctx context.Context, topic string, delay int64, message NsqMessageSerialize) error {
+	startedAt := time.Now()
+	messageType := message.Type
+	if messageType == "" {
+		messageType = unknownMessageType
+	}
+	publishType := publishTypeDeferred
+	var telemetryErr error
+	defer func() {
+		if p.telemetry != nil {
+			p.telemetry.record(ctx, startedAt, topic, messageType, publishType, telemetryErr)
+		}
+	}()
+
 	var err error
 	message.RequestID, err = p.requestID(ctx)
 	if err != nil {
-		return errgo.Notef(err, "fail to get requestID")
+		err = errgo.Notef(err, "fail to get requestID")
+		telemetryErr = err
+		return err
 	}
 
 	body, err := json.Marshal(message)
 	if err != nil {
-		return errgo.Mask(err, errgo.Any)
+		err = errgo.Mask(err, errgo.Any)
+		telemetryErr = err
+		return err
 	}
 
 	err = p.producer.DeferredPublish(topic, time.Duration(delay)*time.Second, body)
 	if err != nil {
-		return errgo.Mask(err, errgo.Any)
+		err = errgo.Mask(err, errgo.Any)
+		telemetryErr = err
+		return err
 	}
 
 	p.log(ctx, message, logrus.Fields{"message_delay": delay})

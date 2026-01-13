@@ -8,8 +8,9 @@ import (
 	context "context"
 	reflect "reflect"
 
-	nsqproducer "github.com/Scalingo/go-utils/nsqproducer"
 	gomock "github.com/golang/mock/gomock"
+
+	nsqproducer "github.com/Scalingo/go-utils/nsqproducer"
 )
 
 // MockProducer is a mock of Producer interface.
