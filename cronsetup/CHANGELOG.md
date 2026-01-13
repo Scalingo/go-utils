@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.6.0
+
 * feat(opentelemetry) Add ability to instrument execution of cron job through OpenTelemetry
 
 ## v1.5.0

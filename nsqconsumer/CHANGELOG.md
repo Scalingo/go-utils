@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.6.0
+
 * feat(opentelemetry): add NSQ consumer instrumentation
 
 ## v1.5.3
