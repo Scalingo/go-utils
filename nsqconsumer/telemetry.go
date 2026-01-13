@@ -28,6 +28,7 @@ const (
 	topicAttributeKey       = "scalingo.nsq.topic"
 	channelAttributeKey     = "scalingo.nsq.channel"
 	messageTypeAttributeKey = "scalingo.nsq.message_type"
+	unknownMessageType      = "unknown"
 )
 
 func newTelemetry(ctx context.Context) (*telemetry, error) {
@@ -67,7 +68,7 @@ func newTelemetry(ctx context.Context) (*telemetry, error) {
 
 func (t *telemetry) record(ctx context.Context, startedAt time.Time, topic, channel, messageType string, err error) {
 	if messageType == "" {
-		messageType = "unknown"
+		messageType = unknownMessageType
 	}
 	attrs := metric.WithAttributes(
 		attribute.String(topicAttributeKey, topic),

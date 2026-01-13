@@ -20,6 +20,7 @@ const (
 	publishCountMetricName       = "scalingo.nsq_producer.publish.count"
 	publishErrorsMetricName      = "scalingo.nsq_producer.publish.errors"
 	publishDurationMetricName    = "scalingo.nsq_producer.publish.duration"
+	unknownMessageType           = "unknown"
 )
 
 const (
@@ -70,7 +71,7 @@ func newTelemetry() (*telemetry, error) {
 
 func (t *telemetry) record(ctx context.Context, startedAt time.Time, topic, messageType, publishType string, err error) {
 	if messageType == "" {
-		messageType = "unknown"
+		messageType = unknownMessageType
 	}
 	attrs := metric.WithAttributes(
 		attribute.String(topicAttributeKey, topic),

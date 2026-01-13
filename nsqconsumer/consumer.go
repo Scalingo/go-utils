@@ -261,7 +261,7 @@ func (c *nsqConsumer) nsqHandler(message *nsq.Message) (err error) {
 	log := c.logger
 	startedAt := time.Now()
 
-	messageType := "unknown"
+	messageType := unknownMessageType
 	var telemetryErr error
 	defer func() {
 		if r := recover(); r != nil {

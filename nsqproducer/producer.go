@@ -93,7 +93,7 @@ func (p *NsqProducer) Publish(ctx context.Context, topic string, message NsqMess
 	startedAt := time.Now()
 	messageType := message.Type
 	if messageType == "" {
-		messageType = "unknown"
+		messageType = unknownMessageType
 	}
 	publishType := publishTypeImmediate
 	var telemetryErr error
@@ -134,7 +134,7 @@ func (p *NsqProducer) DeferredPublish(ctx context.Context, topic string, delay i
 	startedAt := time.Now()
 	messageType := message.Type
 	if messageType == "" {
-		messageType = "unknown"
+		messageType = unknownMessageType
 	}
 	publishType := publishTypeDeferred
 	var telemetryErr error
