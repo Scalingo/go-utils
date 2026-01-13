@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat(opentelemetry) Add ability to instrument execution of cron job through OpenTelemetry
+
 ## v1.5.0
 
 * feat(cronsetup): add local mode

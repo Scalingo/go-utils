@@ -26,3 +26,18 @@ go run ./examples/local
 ```
 
 The distributed example requires a etcd to be running at `127.0.0.1:2379`.
+
+## Telemetry
+
+Telemetry is enabled by default, and can be disabled with `WithoutTelemetry` set
+to true in initialization option.
+
+It records the number of runs, the number of runs with errors, and the duration
+of each job execution (in seconds). All metrics use the
+`scalingo.etcd_cron.job_name` attribute with the job name as value.
+
+Metrics:
+
+- `scalingo.etcd_cron.run.count`: number of runs
+- `scalingo.etcd_cron.run.errors`: number of runs with error
+- `scalingo.etcd_cron.run.duration`: execution time of a job in seconds
