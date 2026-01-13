@@ -12,15 +12,11 @@ import (
 )
 
 type telemetry struct {
-	messagesCounter      metric.Int64Counter
-	messageErrorsCounter metric.Int64Counter
-	messageDuration      metric.Float64Histogram
+	messageDuration metric.Float64Histogram
 }
 
 const (
 	telemetryInstrumentationName = "scalingo.nsq_consumer"
-	messageCountMetricName       = "scalingo.nsq_consumer.message.count"
-	messageErrorsMetricName      = "scalingo.nsq_consumer.message.errors"
 	messageDurationMetricName    = "scalingo.nsq_consumer.message.duration"
 )
 
@@ -28,27 +24,14 @@ const (
 	topicAttributeKey       = "scalingo.nsq.topic"
 	channelAttributeKey     = "scalingo.nsq.channel"
 	messageTypeAttributeKey = "scalingo.nsq.message_type"
+	statusAttributeKey      = "scalingo.nsq.status"
 	unknownMessageType      = "unknown"
+	statusSuccess           = "success"
+	statusError             = "error"
 )
 
 func newTelemetry(ctx context.Context) (*telemetry, error) {
 	meter := otelsdk.Meter(telemetryInstrumentationName)
-
-	messagesCounter, err := meter.Int64Counter(
-		messageCountMetricName,
-		metric.WithDescription("Number of NSQ messages handled"),
-	)
-	if err != nil {
-		return nil, errors.Wrap(ctx, err, "create messages counter")
-	}
-
-	messageErrorsCounter, err := meter.Int64Counter(
-		messageErrorsMetricName,
-		metric.WithDescription("Number of NSQ messages handled with errors"),
-	)
-	if err != nil {
-		return nil, errors.Wrap(ctx, err, "create message errors counter")
-	}
 
 	messageDuration, err := meter.Float64Histogram(
 		messageDurationMetricName,
@@ -60,9 +43,7 @@ func newTelemetry(ctx context.Context) (*telemetry, error) {
 	}
 
 	return &telemetry{
-		messagesCounter:      messagesCounter,
-		messageErrorsCounter: messageErrorsCounter,
-		messageDuration:      messageDuration,
+		messageDuration: messageDuration,
 	}, nil
 }
 
@@ -70,15 +51,16 @@ func (t *telemetry) record(ctx context.Context, startedAt time.Time, topic, chan
 	if messageType == "" {
 		messageType = unknownMessageType
 	}
+	status := statusSuccess
+	if err != nil {
+		status = statusError
+	}
 	attrs := metric.WithAttributes(
 		attribute.String(topicAttributeKey, topic),
 		attribute.String(channelAttributeKey, channel),
 		attribute.String(messageTypeAttributeKey, messageType),
+		attribute.String(statusAttributeKey, status),
 	)
 
-	t.messagesCounter.Add(ctx, 1, attrs)
-	if err != nil {
-		t.messageErrorsCounter.Add(ctx, 1, attrs)
-	}
 	t.messageDuration.Record(ctx, time.Since(startedAt).Seconds(), attrs)
 }

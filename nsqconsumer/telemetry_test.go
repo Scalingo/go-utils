@@ -25,12 +25,6 @@ func TestNewTelemetryCreatesInstruments(t *testing.T) {
 	meterProvider.EXPECT().Meter(telemetryInstrumentationName).Return(mockMeter)
 
 	mockMeter.EXPECT().
-		Int64Counter(messageCountMetricName, gomock.Any()).
-		Return(otelmock.NewMockInt64Counter(ctrl), nil)
-	mockMeter.EXPECT().
-		Int64Counter(messageErrorsMetricName, gomock.Any()).
-		Return(otelmock.NewMockInt64Counter(ctrl), nil)
-	mockMeter.EXPECT().
 		Float64Histogram(messageDurationMetricName, gomock.Any()).
 		Return(otelmock.NewMockFloat64Histogram(ctrl), nil)
 
@@ -43,30 +37,30 @@ func TestTelemetryRecordRecordsMetrics(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name                string
-		messageType         string
-		err                 error
-		expectErrCountCalls int
-		expectedType        string
+		name           string
+		messageType    string
+		err            error
+		expectedType   string
+		expectedStatus string
 	}{
 		{
-			name:                "success",
-			messageType:         "event",
-			expectErrCountCalls: 0,
-			expectedType:        "event",
+			name:           "success",
+			messageType:    "event",
+			expectedType:   "event",
+			expectedStatus: statusSuccess,
 		},
 		{
-			name:                "error",
-			messageType:         "event",
-			err:                 errors.New("boom"),
-			expectErrCountCalls: 1,
-			expectedType:        "event",
+			name:           "error",
+			messageType:    "event",
+			err:            errors.New("boom"),
+			expectedType:   "event",
+			expectedStatus: statusError,
 		},
 		{
-			name:                "unknown type",
-			messageType:         "",
-			expectErrCountCalls: 0,
-			expectedType:        "unknown",
+			name:           "unknown type",
+			messageType:    "",
+			expectedType:   "unknown",
+			expectedStatus: statusSuccess,
 		},
 	}
 
@@ -76,38 +70,21 @@ func TestTelemetryRecordRecordsMetrics(t *testing.T) {
 			t.Parallel()
 
 			ctrl := gomock.NewController(t)
-			messagesCounter := otelmock.NewMockInt64Counter(ctrl)
-			messageErrorsCounter := otelmock.NewMockInt64Counter(ctrl)
 			messageDuration := otelmock.NewMockFloat64Histogram(ctrl)
 
 			telemetry := &telemetry{
-				messagesCounter:      messagesCounter,
-				messageErrorsCounter: messageErrorsCounter,
-				messageDuration:      messageDuration,
+				messageDuration: messageDuration,
 			}
 
 			startedAt := time.Now().Add(-50 * time.Millisecond)
 			topic := "my-topic"
 			channel := "my-channel"
 
-			messagesCounter.EXPECT().
-				Add(gomock.Any(), int64(1), gomock.Any()).
-				Do(func(_ context.Context, _ int64, opts ...metric.AddOption) {
-					assertTelemetryAttributes(t, opts, topic, channel, test.expectedType)
-				})
-
-			messageErrorsCounter.EXPECT().
-				Add(gomock.Any(), int64(1), gomock.Any()).
-				Times(test.expectErrCountCalls).
-				Do(func(_ context.Context, _ int64, opts ...metric.AddOption) {
-					assertTelemetryAttributes(t, opts, topic, channel, test.expectedType)
-				})
-
 			messageDuration.EXPECT().
 				Record(gomock.Any(), gomock.Any(), gomock.Any()).
 				Do(func(_ context.Context, value float64, opts ...metric.RecordOption) {
 					require.GreaterOrEqual(t, value, 0.0)
-					assertTelemetryAttributesForRecord(t, opts, topic, channel, test.expectedType)
+					assertTelemetryAttributesForRecord(t, opts, topic, channel, test.expectedType, test.expectedStatus)
 				})
 
 			telemetry.record(t.Context(), startedAt, topic, channel, test.messageType, test.err)
@@ -115,18 +92,7 @@ func TestTelemetryRecordRecordsMetrics(t *testing.T) {
 	}
 }
 
-func assertTelemetryAttributes(t *testing.T, opts []metric.AddOption, topic, channel, messageType string) {
-	t.Helper()
-
-	config := metric.NewAddConfig(opts)
-	attrs := config.Attributes()
-
-	assertAttributeValue(t, &attrs, topicAttributeKey, topic)
-	assertAttributeValue(t, &attrs, channelAttributeKey, channel)
-	assertAttributeValue(t, &attrs, messageTypeAttributeKey, messageType)
-}
-
-func assertTelemetryAttributesForRecord(t *testing.T, opts []metric.RecordOption, topic, channel, messageType string) {
+func assertTelemetryAttributesForRecord(t *testing.T, opts []metric.RecordOption, topic, channel, messageType, status string) {
 	t.Helper()
 
 	config := metric.NewRecordConfig(opts)
@@ -135,6 +101,7 @@ func assertTelemetryAttributesForRecord(t *testing.T, opts []metric.RecordOption
 	assertAttributeValue(t, &attrs, topicAttributeKey, topic)
 	assertAttributeValue(t, &attrs, channelAttributeKey, channel)
 	assertAttributeValue(t, &attrs, messageTypeAttributeKey, messageType)
+	assertAttributeValue(t, &attrs, statusAttributeKey, status)
 }
 
 func assertAttributeValue(t *testing.T, attrs *attribute.Set, key, expected string) {

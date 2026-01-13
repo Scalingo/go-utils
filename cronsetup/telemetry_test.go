@@ -25,12 +25,6 @@ func TestNewTelemetryCreatesInstruments(t *testing.T) {
 	meterProvider.EXPECT().Meter("scalingo.etcd_cron").Return(mockMeter)
 
 	mockMeter.EXPECT().
-		Int64Counter("scalingo.etcd_cron.run.count", gomock.Any()).
-		Return(otelmock.NewMockInt64Counter(ctrl), nil)
-	mockMeter.EXPECT().
-		Int64Counter("scalingo.etcd_cron.run.errors", gomock.Any()).
-		Return(otelmock.NewMockInt64Counter(ctrl), nil)
-	mockMeter.EXPECT().
 		Float64Histogram("scalingo.etcd_cron.run.duration", gomock.Any()).
 		Return(otelmock.NewMockFloat64Histogram(ctrl), nil)
 
@@ -47,32 +41,32 @@ func TestTelemetryWrapJobRecordsMetrics(t *testing.T) {
 		jobName        string
 		jobFunc        func(context.Context) error
 		expectError    bool
-		expectErrCount int
 		minDurationSec float64
 		maxDurationSec float64
+		expectStatus   string
 	}{
 		{
-			name:           "success",
-			jobName:        "my job",
-			jobFunc:        func(context.Context) error { return nil },
-			expectError:    false,
-			expectErrCount: 0,
+			name:         "success",
+			jobName:      "my job",
+			jobFunc:      func(context.Context) error { return nil },
+			expectError:  false,
+			expectStatus: "success",
 		},
 		{
-			name:           "error",
-			jobName:        "failing job",
-			jobFunc:        func(context.Context) error { return errors.New("boom") },
-			expectError:    true,
-			expectErrCount: 1,
+			name:         "error",
+			jobName:      "failing job",
+			jobFunc:      func(context.Context) error { return errors.New("boom") },
+			expectError:  true,
+			expectStatus: "error",
 		},
 		{
 			name:           "duration around 100ms",
 			jobName:        "slow job",
 			jobFunc:        func(context.Context) error { time.Sleep(100 * time.Millisecond); return nil },
 			expectError:    false,
-			expectErrCount: 0,
 			minDurationSec: 0.08,
 			maxDurationSec: 0.12,
+			expectStatus:   "success",
 		},
 	}
 
@@ -82,37 +76,15 @@ func TestTelemetryWrapJobRecordsMetrics(t *testing.T) {
 			t.Parallel()
 
 			ctrl := gomock.NewController(t)
-			runsCounter := otelmock.NewMockInt64Counter(ctrl)
-			runErrorsCounter := otelmock.NewMockInt64Counter(ctrl)
 			runsDuration := otelmock.NewMockFloat64Histogram(ctrl)
 
 			telemetry := &telemetry{
-				runsCounter:      runsCounter,
-				runErrorsCounter: runErrorsCounter,
-				runsDuration:     runsDuration,
+				runsDuration: runsDuration,
 			}
 
 			job := Job{
 				Name: test.jobName,
 				Func: test.jobFunc,
-			}
-
-			runsCounter.EXPECT().
-				Add(gomock.Any(), int64(1), gomock.Any()).
-				Do(func(_ context.Context, _ int64, opts ...metric.AddOption) {
-					assertJobAttribute(t, opts, job.Name)
-				})
-
-			if test.expectErrCount == 0 {
-				runErrorsCounter.EXPECT().
-					Add(gomock.Any(), gomock.Any(), gomock.Any()).
-					Times(0)
-			} else {
-				runErrorsCounter.EXPECT().
-					Add(gomock.Any(), int64(test.expectErrCount), gomock.Any()).
-					Do(func(_ context.Context, _ int64, opts ...metric.AddOption) {
-						assertJobAttribute(t, opts, job.Name)
-					})
 			}
 
 			runsDuration.EXPECT().
@@ -123,7 +95,7 @@ func TestTelemetryWrapJobRecordsMetrics(t *testing.T) {
 						require.GreaterOrEqual(t, value, test.minDurationSec, "expected duration >= %.2fs", test.minDurationSec)
 						require.LessOrEqual(t, value, test.maxDurationSec, "expected duration <= %.2fs", test.maxDurationSec)
 					}
-					assertJobAttributeForRecord(t, opts, job.Name)
+					assertAttributesForRecord(t, opts, job.Name, test.expectStatus)
 				})
 
 			wrapped := telemetry.wrapJob(job)
@@ -136,17 +108,7 @@ func TestTelemetryWrapJobRecordsMetrics(t *testing.T) {
 	}
 }
 
-func assertJobAttribute(t *testing.T, opts []metric.AddOption, jobName string) {
-	t.Helper()
-
-	config := metric.NewAddConfig(opts)
-	attrs := config.Attributes()
-	value, ok := (&attrs).Value(attribute.Key(jobNameAttributeKey))
-	require.True(t, ok, "expected %q attribute to be set", jobNameAttributeKey)
-	require.Equal(t, jobName, value.AsString(), "expected %q attribute to be %q", jobNameAttributeKey, jobName)
-}
-
-func assertJobAttributeForRecord(t *testing.T, opts []metric.RecordOption, jobName string) {
+func assertAttributesForRecord(t *testing.T, opts []metric.RecordOption, jobName string, status string) {
 	t.Helper()
 
 	config := metric.NewRecordConfig(opts)
@@ -154,4 +116,8 @@ func assertJobAttributeForRecord(t *testing.T, opts []metric.RecordOption, jobNa
 	value, ok := (&attrs).Value(attribute.Key(jobNameAttributeKey))
 	require.True(t, ok, "expected %q attribute to be set", jobNameAttributeKey)
 	require.Equal(t, jobName, value.AsString(), "expected %q attribute to be %q", jobNameAttributeKey, jobName)
+
+	statusValue, ok := (&attrs).Value(attribute.Key(statusAttributeKey))
+	require.True(t, ok, "expected %q attribute to be set", statusAttributeKey)
+	require.Equal(t, status, statusValue.AsString(), "expected %q attribute to be %q", statusAttributeKey, status)
 }

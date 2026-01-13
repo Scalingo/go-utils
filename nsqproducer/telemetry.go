@@ -10,15 +10,11 @@ import (
 )
 
 type telemetry struct {
-	publishCounter       metric.Int64Counter
-	publishErrorsCounter metric.Int64Counter
-	publishDuration      metric.Float64Histogram
+	publishDuration metric.Float64Histogram
 }
 
 const (
 	telemetryInstrumentationName = "scalingo.nsq_producer"
-	publishCountMetricName       = "scalingo.nsq_producer.publish.count"
-	publishErrorsMetricName      = "scalingo.nsq_producer.publish.errors"
 	publishDurationMetricName    = "scalingo.nsq_producer.publish.duration"
 	unknownMessageType           = "unknown"
 )
@@ -27,6 +23,7 @@ const (
 	topicAttributeKey       = "scalingo.nsq.topic"
 	messageTypeAttributeKey = "scalingo.nsq.message_type"
 	publishTypeAttributeKey = "scalingo.nsq.publish_type"
+	statusAttributeKey      = "scalingo.nsq.status"
 )
 
 const (
@@ -36,22 +33,6 @@ const (
 
 func newTelemetry() (*telemetry, error) {
 	meter := otelsdk.Meter(telemetryInstrumentationName)
-
-	publishCounter, err := meter.Int64Counter(
-		publishCountMetricName,
-		metric.WithDescription("Number of NSQ messages published"),
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	publishErrorsCounter, err := meter.Int64Counter(
-		publishErrorsMetricName,
-		metric.WithDescription("Number of NSQ message publish errors"),
-	)
-	if err != nil {
-		return nil, err
-	}
 
 	publishDuration, err := meter.Float64Histogram(
 		publishDurationMetricName,
@@ -63,9 +44,7 @@ func newTelemetry() (*telemetry, error) {
 	}
 
 	return &telemetry{
-		publishCounter:       publishCounter,
-		publishErrorsCounter: publishErrorsCounter,
-		publishDuration:      publishDuration,
+		publishDuration: publishDuration,
 	}, nil
 }
 
@@ -73,15 +52,16 @@ func (t *telemetry) record(ctx context.Context, startedAt time.Time, topic, mess
 	if messageType == "" {
 		messageType = unknownMessageType
 	}
+	status := "success"
+	if err != nil {
+		status = "error"
+	}
 	attrs := metric.WithAttributes(
 		attribute.String(topicAttributeKey, topic),
 		attribute.String(messageTypeAttributeKey, messageType),
 		attribute.String(publishTypeAttributeKey, publishType),
+		attribute.String(statusAttributeKey, status),
 	)
 
-	t.publishCounter.Add(ctx, 1, attrs)
-	if err != nil {
-		t.publishErrorsCounter.Add(ctx, 1, attrs)
-	}
 	t.publishDuration.Record(ctx, time.Since(startedAt).Seconds(), attrs)
 }
