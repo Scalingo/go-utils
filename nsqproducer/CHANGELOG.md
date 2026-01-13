@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.4.0
+
 * feat(opentelemetry): add NSQ producer instrumentation
 
 ## v1.3.1
