@@ -153,6 +153,8 @@ type nsqConsumer struct {
 	count            uint64
 	logger           logrus.FieldLogger
 	logLevel         LogLevel
+	telemetry        *telemetry
+	withoutTelemetry bool
 }
 
 type ConsumerOpts struct {
@@ -169,6 +171,8 @@ type ConsumerOpts struct {
 	MsgTimeout     time.Duration
 	MessageHandler func(context.Context, *NsqMessageDeserialize) error
 	DisableBackoff bool
+	// WithoutTelemetry indicates whether OpenTelemetry instrumentation should be disabled
+	WithoutTelemetry bool
 }
 
 type Consumer interface {
@@ -185,15 +189,16 @@ func New(opts ConsumerOpts) (Consumer, error) {
 	}
 
 	consumer := &nsqConsumer{
-		NsqConfig:      opts.NsqConfig,
-		NsqLookupdURLs: opts.NsqLookupdURLs,
-		Topic:          opts.Topic,
-		Channel:        opts.Channel,
-		MessageHandler: opts.MessageHandler,
-		MaxInFlight:    opts.MaxInFlight,
-		SkipLogSet:     opts.SkipLogSet,
-		logLevel:       opts.LogLevel,
-		disableBackoff: opts.DisableBackoff,
+		NsqConfig:        opts.NsqConfig,
+		NsqLookupdURLs:   opts.NsqLookupdURLs,
+		Topic:            opts.Topic,
+		Channel:          opts.Channel,
+		MessageHandler:   opts.MessageHandler,
+		MaxInFlight:      opts.MaxInFlight,
+		SkipLogSet:       opts.SkipLogSet,
+		logLevel:         opts.LogLevel,
+		disableBackoff:   opts.DisableBackoff,
+		withoutTelemetry: opts.WithoutTelemetry,
 	}
 	if consumer.MaxInFlight == 0 {
 		consumer.MaxInFlight = opts.NsqConfig.MaxInFlight
@@ -218,6 +223,14 @@ func (c *nsqConsumer) Start(ctx context.Context) func() {
 		"channel": c.Channel,
 	})
 	c.logger.Info("Starting consumer")
+	if !c.withoutTelemetry {
+		telemetry, err := newTelemetry(ctx)
+		if err != nil {
+			c.logger.WithError(err).Error("Fail to init telemetry")
+		} else {
+			c.telemetry = telemetry
+		}
+	}
 
 	consumer, err := nsq.NewConsumer(c.Topic, c.Channel, c.NsqConfig)
 	if err != nil {
@@ -246,7 +259,10 @@ func (c *nsqConsumer) nsqHandler(message *nsq.Message) (err error) {
 	ctx := logger.ToCtx(context.Background(), c.logger)
 	// We create a new `log` variable because we are so used to call `log.Something` in our codebase
 	log := c.logger
+	startedAt := time.Now()
 
+	messageType := "unknown"
+	var telemetryErr error
 	defer func() {
 		if r := recover(); r != nil {
 			var errRecovered error
@@ -257,24 +273,33 @@ func (c *nsqConsumer) nsqHandler(message *nsq.Message) (err error) {
 				errRecovered = errors.Newf(ctx, "%v", value)
 			}
 			err = errors.Newf(ctx, "recover panic from nsq consumer: %+v", errRecovered)
+			telemetryErr = err
 			log.WithError(errRecovered).WithFields(logrus.Fields{
 				"stacktrace": string(debug.Stack()),
 			}).Error("Recover panic")
+		}
+		if c.telemetry != nil {
+			c.telemetry.record(ctx, startedAt, c.Topic, c.Channel, messageType, telemetryErr)
 		}
 	}()
 
 	if len(message.Body) == 0 {
 		err := errors.New(ctx, "body is blank, re-enqueued message")
+		telemetryErr = err
 		log.WithError(err).Error("Blank message")
 		return err
 	}
 	var msg NsqMessageDeserialize
 	err = json.Unmarshal(message.Body, &msg)
 	if err != nil {
+		telemetryErr = err
 		log.WithError(err).Error("Fail to unmarshal message")
 		return err
 	}
 	msg.NsqMsg = message
+	if msg.Type != "" {
+		messageType = msg.Type
+	}
 
 	// We want to create a new dedicated logger for the NSQ message handling.
 	// That way we distinguish between the logger during normal operation, and the error logger (named `errLogger`) found when unwrapping the error raised during message handling.
@@ -290,7 +315,11 @@ func (c *nsqConsumer) nsqHandler(message *nsq.Message) (err error) {
 		now := time.Now().Unix()
 		delay := msg.At - now
 		if delay > 0 {
-			return c.postponeMessage(ctx, msgLogger, msg, delay)
+			err = c.postponeMessage(ctx, msgLogger, msg, delay)
+			if err != nil {
+				telemetryErr = err
+			}
+			return err
 		}
 	}
 
@@ -301,6 +330,7 @@ func (c *nsqConsumer) nsqHandler(message *nsq.Message) (err error) {
 
 	err = c.MessageHandler(ctx, &msg)
 	if err != nil {
+		telemetryErr = err
 		var errLogger logrus.FieldLogger
 		noRetry := false
 
