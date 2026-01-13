@@ -25,7 +25,7 @@ func newTelemetry(ctx context.Context) (*telemetry, error) {
 	meter := otelsdk.Meter("scalingo.etcd_cron")
 
 	runsCounter, err := meter.Int64Counter(
-		"scalingo.etcd_cron.runs_total",
+		"scalingo.etcd_cron.run.count",
 		metric.WithDescription("Number of cron job runs"),
 	)
 	if err != nil {
@@ -33,7 +33,7 @@ func newTelemetry(ctx context.Context) (*telemetry, error) {
 	}
 
 	runErrorsCounter, err := meter.Int64Counter(
-		"scalingo.etcd_cron.run_errors_total",
+		"scalingo.etcd_cron.run.errors",
 		metric.WithDescription("Number of cron job runs with errors"),
 	)
 	if err != nil {
@@ -41,7 +41,7 @@ func newTelemetry(ctx context.Context) (*telemetry, error) {
 	}
 
 	runsDuration, err := meter.Float64Histogram(
-		"scalingo.etcd_cron.runs_duration_seconds",
+		"scalingo.etcd_cron.run.duration",
 		metric.WithDescription("Cron job execution duration in seconds"),
 		metric.WithUnit("s"),
 	)

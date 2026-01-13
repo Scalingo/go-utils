@@ -25,13 +25,13 @@ func TestNewTelemetryCreatesInstruments(t *testing.T) {
 	meterProvider.EXPECT().Meter("scalingo.etcd_cron").Return(mockMeter)
 
 	mockMeter.EXPECT().
-		Int64Counter("scalingo.etcd_cron.runs_total", gomock.Any()).
+		Int64Counter("scalingo.etcd_cron.run.count", gomock.Any()).
 		Return(otelmock.NewMockInt64Counter(ctrl), nil)
 	mockMeter.EXPECT().
-		Int64Counter("scalingo.etcd_cron.run_errors_total", gomock.Any()).
+		Int64Counter("scalingo.etcd_cron.run.errors", gomock.Any()).
 		Return(otelmock.NewMockInt64Counter(ctrl), nil)
 	mockMeter.EXPECT().
-		Float64Histogram("scalingo.etcd_cron.runs_duration_seconds", gomock.Any()).
+		Float64Histogram("scalingo.etcd_cron.run.duration", gomock.Any()).
 		Return(otelmock.NewMockFloat64Histogram(ctrl), nil)
 
 	telemetry, err := newTelemetry(t.Context())

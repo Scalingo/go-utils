@@ -38,6 +38,6 @@ of each job execution (in seconds). All metrics use the
 
 Metrics:
 
-- `scalingo.etcd_cron.runs_total`: number of runs
-- `scalingo.etcd_cron.run_errors_total`: number of runs with error
-- `scalingo.etcd_cron.runs_duration_seconds`: execution time of a job in seconds
+- `scalingo.etcd_cron.run.count`: number of runs
+- `scalingo.etcd_cron.run.errors`: number of runs with error
+- `scalingo.etcd_cron.run.duration`: execution time of a job in seconds
