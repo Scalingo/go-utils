@@ -31,7 +31,7 @@ func TestNewTelemetryCreatesInstruments(t *testing.T) {
 		Int64Counter("scalingo.etcd_cron.run_errors_total", gomock.Any()).
 		Return(otelmock.NewMockInt64Counter(ctrl), nil)
 	mockMeter.EXPECT().
-		Float64Histogram("scalingo.etcd_cron.runs_duration_milliseconds", gomock.Any()).
+		Float64Histogram("scalingo.etcd_cron.runs_duration_seconds", gomock.Any()).
 		Return(otelmock.NewMockFloat64Histogram(ctrl), nil)
 
 	telemetry, err := newTelemetry(t.Context())
@@ -48,8 +48,8 @@ func TestTelemetryWrapJobRecordsMetrics(t *testing.T) {
 		jobFunc        func(context.Context) error
 		expectError    bool
 		expectErrCount int
-		minDurationMs  float64
-		maxDurationMs  float64
+		minDurationSec float64
+		maxDurationSec float64
 	}{
 		{
 			name:           "success",
@@ -71,8 +71,8 @@ func TestTelemetryWrapJobRecordsMetrics(t *testing.T) {
 			jobFunc:        func(context.Context) error { time.Sleep(100 * time.Millisecond); return nil },
 			expectError:    false,
 			expectErrCount: 0,
-			minDurationMs:  80,
-			maxDurationMs:  120,
+			minDurationSec: 0.08,
+			maxDurationSec: 0.12,
 		},
 	}
 
@@ -119,9 +119,9 @@ func TestTelemetryWrapJobRecordsMetrics(t *testing.T) {
 				Record(gomock.Any(), gomock.Any(), gomock.Any()).
 				Do(func(_ context.Context, value float64, opts ...metric.RecordOption) {
 					require.GreaterOrEqual(t, value, 0.0, "expected non-negative duration")
-					if test.minDurationMs > 0 || test.maxDurationMs > 0 {
-						require.GreaterOrEqual(t, value, test.minDurationMs, "expected duration >= %.2fms", test.minDurationMs)
-						require.LessOrEqual(t, value, test.maxDurationMs, "expected duration <= %.2fms", test.maxDurationMs)
+					if test.minDurationSec > 0 || test.maxDurationSec > 0 {
+						require.GreaterOrEqual(t, value, test.minDurationSec, "expected duration >= %.2fs", test.minDurationSec)
+						require.LessOrEqual(t, value, test.maxDurationSec, "expected duration <= %.2fs", test.maxDurationSec)
 					}
 					assertJobAttributeForRecord(t, opts, job.Name)
 				})

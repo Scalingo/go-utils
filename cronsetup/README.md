@@ -33,10 +33,10 @@ Telemetry is enabled by default, and can be disabled with `WithoutTelemetry` set
 to true in initialization option.
 
 It records the number of runs, the number of runs with errors, and the duration
-of each job execution (in milliseconds). All metrics use the
+of each job execution (in seconds). All metrics use the
 `scalingo.etcd_cron.job_name` attribute with the job name as value.
 
 Metrics:
 - `scalingo.etcd_cron.runs_total`: number of runs
 - `scalingo.etcd_cron.run_errors_total`: number of runs with error
-- `scalingo.etcd_cron.runs_duration_milliseconds`: execution time of a job in milliseconds
+- `scalingo.etcd_cron.runs_duration_seconds`: execution time of a job in seconds

@@ -41,9 +41,9 @@ func newTelemetry(ctx context.Context) (*telemetry, error) {
 	}
 
 	runsDuration, err := meter.Float64Histogram(
-		"scalingo.etcd_cron.runs_duration_milliseconds",
-		metric.WithDescription("Cron job execution duration in milliseconds"),
-		metric.WithUnit("ms"),
+		"scalingo.etcd_cron.runs_duration_seconds",
+		metric.WithDescription("Cron job execution duration in seconds"),
+		metric.WithUnit("s"),
 	)
 	if err != nil {
 		return nil, errors.Wrap(ctx, err, "create runs duration histogram")
@@ -68,7 +68,7 @@ func (t *telemetry) wrapJob(job cron.Job) cron.Job {
 		if err != nil {
 			t.runErrorsCounter.Add(ctx, 1, jobAttributes)
 		}
-		t.runsDuration.Record(ctx, float64(time.Since(startedAt).Milliseconds()), jobAttributes)
+		t.runsDuration.Record(ctx, time.Since(startedAt).Seconds(), jobAttributes)
 
 		return err
 	}
