@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.3.0
+
 * feat(unwrap) Errors are now unwrappable by errors.Is/errors.As
 
 ## v1.2.2
