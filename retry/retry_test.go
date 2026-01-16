@@ -206,3 +206,25 @@ func TestRetrier(t *testing.T) {
 		assert.Equal(t, logrus.ErrorLevel, hook.Entries[0].Level)
 	})
 }
+
+func TestRetryErrorUnwrap(t *testing.T) {
+	t.Run("RetryError should unwrap to Err", func(t *testing.T) {
+		baseErr := errors.New("base error")
+		err := RetryError{
+			Scope:   ContextScope,
+			Err:     baseErr,
+			LastErr: errors.New("last error"),
+		}
+
+		require.ErrorIs(t, err, baseErr)
+		assert.Equal(t, baseErr, errors.Unwrap(err))
+	})
+
+	t.Run("RetryCancelError should unwrap to inner error", func(t *testing.T) {
+		baseErr := errors.New("cancel error")
+		err := NewRetryCancelError(baseErr)
+
+		require.ErrorIs(t, err, baseErr)
+		assert.Equal(t, baseErr, errors.Unwrap(err))
+	})
+}
