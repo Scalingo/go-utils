@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat(join-errors) Add Join() method wrapping stdlib, and make joined errors compatible to fetch the context, the context of the first error will be the one fetched
+
 ## v.3.1.1
 
 * feat(errctx) RootCtxOrFallback is now compatible with different versions of errors package.
