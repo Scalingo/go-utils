@@ -31,7 +31,7 @@ const (
 )
 
 func TestJoin_RootCtxFromFirstError(t *testing.T) {
-	t.Run("It should get the root context from the first errctx error when joining 2 errctx errors", func(t *testing.T) {
+	t.Run("It matches the root context from the first errctx error when joining 2 errctx errors", func(t *testing.T) {
 		// Given
 		ctx1 := context.WithValue(t.Context(), testKey1, "value1")
 		ctx1 = context.WithValue(ctx1, testKeyRoot, "first")
@@ -54,7 +54,7 @@ func TestJoin_RootCtxFromFirstError(t *testing.T) {
 		assert.Nil(t, rootCtx.Value(testKey2))
 	})
 
-	t.Run("It should get the root context from nested errctx errors in the first error when joining", func(t *testing.T) {
+	t.Run("It gets the root context from nested errctx errors in the first error when joining", func(t *testing.T) {
 		// Given
 		// First error with nested context
 		rootCtx1 := context.WithValue(t.Context(), testKeyRoot, "root_value")
@@ -82,7 +82,7 @@ func TestJoin_RootCtxFromFirstError(t *testing.T) {
 }
 
 func TestJoin_Is(t *testing.T) {
-	t.Run("It should match error value with Is when wrapped in ErrCtx and joined", func(t *testing.T) {
+	t.Run("It matches error value with Is when wrapped in ErrCtx and joined", func(t *testing.T) {
 		// Given
 		ctx1 := context.WithValue(t.Context(), testKey1, "value1")
 		err1 := Wrap(ctx1, ErrNotFound, "wrapped not found")
@@ -98,7 +98,7 @@ func TestJoin_Is(t *testing.T) {
 		assert.True(t, Is(joinedErr, ErrNotFound))
 	})
 
-	t.Run("It should match error value with Is when in second joined error", func(t *testing.T) {
+	t.Run("It matches error value with Is when in second joined error", func(t *testing.T) {
 		// Given
 		ctx1 := context.WithValue(t.Context(), testKey1, "value1")
 		err1 := New(ctx1, "first error")
@@ -114,7 +114,7 @@ func TestJoin_Is(t *testing.T) {
 		assert.True(t, Is(joinedErr, ErrNotFound))
 	})
 
-	t.Run("It should match multiple error values with Is when both are wrapped in ErrCtx and joined", func(t *testing.T) {
+	t.Run("It matches multiple error values with Is when both are wrapped in ErrCtx and joined", func(t *testing.T) {
 		// Given
 		ErrDatabase := errors.New("database error")
 		ErrNetwork := errors.New("network error")
@@ -136,7 +136,7 @@ func TestJoin_Is(t *testing.T) {
 }
 
 func TestJoin_As(t *testing.T) {
-	t.Run("It should match error value with As when wrapped in ErrCtx and joined", func(t *testing.T) {
+	t.Run("It matches error value with As when wrapped in ErrCtx and joined", func(t *testing.T) {
 		// Given
 		customErr := &CustomError{Code: 404, Message: "resource not found"}
 		ctx1 := context.WithValue(t.Context(), testKey1, "value1")
@@ -157,7 +157,7 @@ func TestJoin_As(t *testing.T) {
 		assert.Equal(t, "resource not found", target.Message)
 	})
 
-	t.Run("It should match error value with As when in second joined error", func(t *testing.T) {
+	t.Run("It matches error value with As when in second joined error", func(t *testing.T) {
 		// Given
 		ctx1 := context.WithValue(t.Context(), testKey1, "value1")
 		err1 := New(ctx1, "first error")
