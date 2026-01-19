@@ -2,7 +2,7 @@ package errors
 
 import (
 	"context"
-	stdErrors "errors"
+	"errors"
 	"fmt"
 	"testing"
 
@@ -20,7 +20,7 @@ func (e *CustomError) Error() string {
 	return fmt.Sprintf("error %d: %s", e.Code, e.Message)
 }
 
-var ErrNotFound = stdErrors.New("not found")
+var ErrNotFound = errors.New("not found")
 
 func TestJoin_RootCtxFromFirstError(t *testing.T) {
 	t.Run("It should get the root context from the first errctx error when joining 2 errctx errors", func(t *testing.T) {
@@ -108,8 +108,8 @@ func TestJoin_Is(t *testing.T) {
 
 	t.Run("It should match multiple error values with Is when both are wrapped in ErrCtx and joined", func(t *testing.T) {
 		// Given
-		ErrDatabase := stdErrors.New("database error")
-		ErrNetwork := stdErrors.New("network error")
+		ErrDatabase := errors.New("database error")
+		ErrNetwork := errors.New("network error")
 
 		ctx1 := context.WithValue(context.Background(), "key1", "value1")
 		err1 := Wrap(ctx1, ErrDatabase, "wrapped database error")
@@ -122,8 +122,8 @@ func TestJoin_Is(t *testing.T) {
 		require.NotNil(t, joinedErr)
 
 		// Then
-		assert.True(t, stdErrors.Is(joinedErr, ErrDatabase))
-		assert.True(t, stdErrors.Is(joinedErr, ErrNetwork))
+		assert.True(t, errors.Is(joinedErr, ErrDatabase))
+		assert.True(t, errors.Is(joinedErr, ErrNetwork))
 	})
 }
 
