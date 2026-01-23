@@ -2,7 +2,10 @@
 
 ## To be Released
 
-* feat(join-errors) Add Join() method wrapping stdlib, and make joined errors compatible to fetch the context, the context of the first error will be the one fetched
+## v3.2.0
+
+* feat(errors) Add `Join` wrapping `errors.Join` from standard library
+* feat(errctx) `RootCtxOrFallback` is now compatible with `Join(...error)` and returns context of the first error
 
 ## v.3.1.1
 
