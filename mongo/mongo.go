@@ -28,13 +28,15 @@ var (
 // The linter `contextcheck` may complain that this function does not take a context in argument. In such case, add the following comment before the line calling this function: "//nolint: contextcheck"
 func Session(log logrus.FieldLogger) *mgo.Session {
 	sessionOnce.Do(func() {
-		log = log.WithField("process", "mongo-init")
+		log := log.WithField("process", "mongo-init")
 		err := errors.New("")
 		for err != nil {
-			_session, err = BuildSession(logger.ToCtx(context.Background(), log), os.Getenv("MONGO_URL"))
+			ctx := logger.ToCtx(context.Background(), log)
+			_session, err = BuildSession(ctx, os.Getenv("MONGO_URL"))
 			if err != nil {
-				log.WithError(err).WithField("action", "wait 10sec").Info("init mongo: fail to create session")
-				time.Sleep(10 * time.Second)
+				retryDelay := 10 * time.Second
+				log.WithError(err).Errorf("Failed to create a MongoDB session, retry in %v", retryDelay)
+				time.Sleep(retryDelay)
 			}
 		}
 	})
