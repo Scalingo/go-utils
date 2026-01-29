@@ -2,6 +2,10 @@
 
 ## To be Released
 
+## v1.5.2
+
+* fix(mongo): log at error level if failed to connect to MongoDB
+
 ## v1.5.1
 
 * chore(go): corrective bump - Go version regression from 1.24.3 to 1.24
