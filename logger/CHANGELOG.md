@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat(logger): automatically call `Hex` on `ObjectId` values
+
 ## v1.11.0
 
 * feat(logger): add ability to set a output io.Writer instead of stdout: `WithOutput(io.Writer)`

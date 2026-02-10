@@ -5,6 +5,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/mgo.v2/bson"
 )
 
 const zeroValue = "this is zero"
@@ -22,6 +23,7 @@ type structWithTags struct {
 	Field4OmitzeroString   string   `log:"field4,omitzero"`
 	Field5OmitzeroZeroable zeroable `log:"field5,omitzero"`
 	Field6                 string
+	Field7                 bson.ObjectId `log:"field7,omitempty"`
 }
 
 type structWithTagsAndLoggable struct {
@@ -69,6 +71,7 @@ type structInStructWithoutTags struct {
 func TestFieldsFor(t *testing.T) {
 	t.Run("when the struct has some tags", func(t *testing.T) {
 		// Given a struct with tags
+		objectID := bson.NewObjectId()
 		s := structWithTags{
 			Field1:                 "value1",
 			Field2:                 "",
@@ -76,6 +79,7 @@ func TestFieldsFor(t *testing.T) {
 			Field4OmitzeroString:   "value4",
 			Field5OmitzeroZeroable: "value5",
 			Field6:                 "value6",
+			Field7:                 objectID,
 		}
 
 		// When we try to add it to a logger
@@ -88,6 +92,7 @@ func TestFieldsFor(t *testing.T) {
 			"prefix_field3": "value3",
 			"prefix_field4": "value4",
 			"prefix_field5": zeroable("value5"),
+			"prefix_field7": objectID.Hex(),
 		}, fields)
 	})
 
