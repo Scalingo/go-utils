@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.12.0
+
 * feat(logger): automatically call `Hex` on `ObjectId` values
 
 ## v1.11.0
