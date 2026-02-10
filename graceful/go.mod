@@ -3,7 +3,7 @@ module github.com/Scalingo/go-utils/graceful
 go 1.24.0
 
 require (
-	github.com/Scalingo/go-utils/errors/v2 v2.5.1
+	github.com/Scalingo/go-utils/errors/v3 v3.2.0
 	github.com/Scalingo/go-utils/logger v1.11.0
 	github.com/cloudflare/tableflip v1.2.3
 	github.com/stretchr/testify v1.11.1

@@ -3,7 +3,7 @@ module github.com/Scalingo/go-utils/postgresql
 go 1.24.0
 
 require (
-	github.com/Scalingo/go-utils/errors/v2 v2.5.1
+	github.com/Scalingo/go-utils/errors/v3 v3.2.0
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/pressly/goose/v3 v3.26.0
 )

@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* build(deps): update `github.com/Scalingo/go-utils/errors` from v2 to v3
+
 ## v1.5.2
 
 * fix(mongo): log at error level if failed to connect to MongoDB

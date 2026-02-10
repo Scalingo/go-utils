@@ -1,5 +1,5 @@
-github.com/Scalingo/go-utils/errors/v2 v2.5.1 h1:1tfJW6/ZxTgrRmFTlKQCOtArQquOW0/XdZQzx8wMHoM=
-github.com/Scalingo/go-utils/errors/v2 v2.5.1/go.mod h1:SbR1JuMtfAl+gpM7ahUW/c3Jm5MMzMAwJBk1pEHkVd8=
+github.com/Scalingo/go-utils/errors/v3 v3.2.0 h1:Ks+v2oRwv3VZfe+xVB+kpfmZouXHVCPHHtwL5W60prc=
+github.com/Scalingo/go-utils/errors/v3 v3.2.0/go.mod h1:jVVNoOdYFjuNkR/BeEZWNWJVvu4jmyLY4udlsQQyBss=
 github.com/Scalingo/go-utils/logger v1.11.0 h1:QUsGgZIv6LWUCyKKy06DuW67FLmzSmWPmnhD/3YlxeM=
 github.com/Scalingo/go-utils/logger v1.11.0/go.mod h1:Aui6aiU13vZ15EqMm6T2HxkvXFEU1czkfQyfNSyiH5Y=
 github.com/aws/aws-sdk-go-v2 v1.32.8 h1:cZV+NUS/eGxKXMtmyhtYPJ7Z4YLoI/V8bkTdRZfYhGo=

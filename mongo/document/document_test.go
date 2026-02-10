@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"gopkg.in/mgo.v2"
 
-	"github.com/Scalingo/go-utils/errors/v2"
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/go-utils/mongo"
 )
@@ -29,7 +29,12 @@ func (d *validatedDocument) Validate(_ context.Context) *errors.ValidationErrors
 	if !d.Valid {
 		verr.Set("valid", "must be true")
 	}
-	return verr.Build()
+	err, ok := verr.Build().(*errors.ValidationErrors)
+	if !ok && err != nil {
+		// If there is an error, it must have the type *errors.ValidationErrors
+		panic("invalid error type")
+	}
+	return err
 }
 
 func buildValidatedDocument(valid bool) *validatedDocument {

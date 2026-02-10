@@ -10,7 +10,7 @@ import (
 
 	"github.com/cloudflare/tableflip"
 
-	"github.com/Scalingo/go-utils/errors/v2"
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/logger"
 )
 
