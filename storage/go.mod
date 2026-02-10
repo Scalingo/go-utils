@@ -3,7 +3,7 @@ module github.com/Scalingo/go-utils/storage
 go 1.24.0
 
 require (
-	github.com/Scalingo/go-utils/errors/v2 v2.5.1
+	github.com/Scalingo/go-utils/errors/v3 v3.2.0
 	github.com/Scalingo/go-utils/logger v1.11.0
 	github.com/aws/aws-sdk-go-v2 v1.32.8
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.52

@@ -16,7 +16,7 @@ import (
 	"github.com/aws/smithy-go"
 	smithyendpoints "github.com/aws/smithy-go/endpoints"
 
-	"github.com/Scalingo/go-utils/errors/v2"
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/go-utils/storage/types"
 )

@@ -4,7 +4,7 @@ go 1.24.0
 
 require (
 	github.com/Scalingo/go-handlers v1.11.0
-	github.com/Scalingo/go-utils/errors/v2 v2.5.1
+	github.com/Scalingo/go-utils/errors/v3 v3.2.0
 	github.com/Scalingo/go-utils/logger v1.11.0
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.4
@@ -14,7 +14,7 @@ require (
 
 require (
 	github.com/Scalingo/go-utils/crypto v1.1.1 // indirect
-	github.com/Scalingo/go-utils/errors/v3 v3.2.0 // indirect
+	github.com/Scalingo/go-utils/errors/v2 v2.5.1 // indirect
 	github.com/Scalingo/go-utils/security v1.1.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect

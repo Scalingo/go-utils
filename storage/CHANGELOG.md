@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* build(deps): update `github.com/Scalingo/go-utils/errors` from v2 to v3
+
 ## v1.7.2
 
 * build(deps): rollback github.com/aws/aws-sdk-go-v2 to v1.32.8

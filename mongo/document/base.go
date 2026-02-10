@@ -6,7 +6,7 @@ import (
 
 	"gopkg.in/mgo.v2/bson"
 
-	"github.com/Scalingo/go-utils/errors/v2"
+	"github.com/Scalingo/go-utils/errors/v3"
 )
 
 type Base struct {
