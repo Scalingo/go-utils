@@ -5,10 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"github.com/sirupsen/logrus/hooks/test"
+	logrustest "github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -19,12 +20,12 @@ func TestRetrier(t *testing.T) {
 	t.Run("When the method works fine the first time", func(t *testing.T) {
 		retrier := New()
 		tries := 0
-		err := retrier.Do(context.Background(), func(ctx context.Context) error {
+		err := retrier.Do(t.Context(), func(ctx context.Context) error {
 			tries++
 			return nil
 		})
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, tries, 1)
 	})
 
@@ -32,7 +33,7 @@ func TestRetrier(t *testing.T) {
 		retrier := New(WithWaitDuration(100 * time.Millisecond))
 		tries := 0
 		before := time.Now()
-		err := retrier.Do(context.Background(), func(ctx context.Context) error {
+		err := retrier.Do(t.Context(), func(ctx context.Context) error {
 			tries++
 			if tries == 2 {
 				return nil
@@ -41,16 +42,44 @@ func TestRetrier(t *testing.T) {
 		})
 		duration := time.Since(before)
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, tries, 2)
 		if duration < 100*time.Millisecond {
 			t.Fatalf("Test should take at least 100ms, took %v", duration)
 		}
 	})
 
-	t.Run("When the method never returns", func(t *testing.T) {
+	t.Run("When the method works fine the third time and exponential backoff is enabled", func(t *testing.T) {
+		synctest.Test(t, func(t *testing.T) {
+			retrier := New(
+				WithWaitDuration(200*time.Millisecond),
+				WithExponentialBackoff(2),
+			)
+
+			tries := 0
+			before := time.Now()
+			err := retrier.Do(t.Context(), func(ctx context.Context) error {
+				tries++
+				if tries == 3 {
+					return nil
+				}
+				return fmt.Errorf("Error attempt %v", tries)
+			})
+			duration := time.Since(before)
+			synctest.Wait()
+
+			require.NoError(t, err)
+			assert.Equal(t, 3, tries)
+			expectedDuration := 600 * time.Millisecond
+			if duration < expectedDuration {
+				t.Fatalf("Test should take at least %v, took %v", expectedDuration, duration)
+			}
+		})
+	})
+
+	t.Run("When the method never succeeds", func(t *testing.T) {
 		retrier := New(WithWaitDuration(1 * time.Millisecond))
-		err := retrier.Do(context.Background(), func(ctx context.Context) error {
+		err := retrier.Do(t.Context(), func(ctx context.Context) error {
 			return errors.New("nop")
 		})
 
@@ -60,7 +89,7 @@ func TestRetrier(t *testing.T) {
 	t.Run("It should cancel the retry if a RetryCancelError is retuned", func(t *testing.T) {
 		retrier := New(WithWaitDuration(1 * time.Millisecond))
 		count := 0
-		err := retrier.Do(context.Background(), func(ctx context.Context) error {
+		err := retrier.Do(t.Context(), func(ctx context.Context) error {
 			count++
 			return NewRetryCancelError(errors.New("nop"))
 		})
@@ -72,7 +101,7 @@ func TestRetrier(t *testing.T) {
 	t.Run("When the context is canceled after the first try", func(t *testing.T) {
 		retrier := New(WithWaitDuration(1 * time.Millisecond))
 		tries := 0
-		ctx, cancel := context.WithCancel(context.Background())
+		ctx, cancel := context.WithCancel(t.Context())
 		err := retrier.Do(ctx, func(ctx context.Context) error {
 			tries++
 			if tries == 2 {
@@ -88,7 +117,7 @@ func TestRetrier(t *testing.T) {
 
 	t.Run("With timeout should ignore sleep", func(t *testing.T) {
 		retrier := New(WithWaitDuration(1 * time.Second))
-		ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+		ctx, cancel := context.WithTimeout(t.Context(), 50*time.Millisecond)
 		defer cancel()
 
 		before := time.Now()
@@ -111,7 +140,7 @@ func TestRetrier(t *testing.T) {
 		)
 
 		before := time.Now()
-		err := retrier.Do(context.Background(), func(ctx context.Context) error {
+		err := retrier.Do(t.Context(), func(ctx context.Context) error {
 			return errors.New("max duration error")
 		})
 
@@ -137,7 +166,7 @@ func TestRetrier(t *testing.T) {
 			}),
 		)
 
-		err := retrier.Do(context.Background(), func(ctx context.Context) error {
+		err := retrier.Do(t.Context(), func(ctx context.Context) error {
 			return errors.New("TestError")
 		})
 		require.Error(t, err)
@@ -151,7 +180,7 @@ func TestRetrier(t *testing.T) {
 			WithMaxDuration(500*time.Millisecond),
 		)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+		ctx, cancel := context.WithTimeout(t.Context(), 50*time.Millisecond)
 		defer cancel()
 
 		before := time.Now()
@@ -171,7 +200,7 @@ func TestRetrier(t *testing.T) {
 			WithMaxDuration(50*time.Millisecond),
 		)
 
-		ctx, cancel = context.WithTimeout(context.Background(), 500*time.Millisecond)
+		ctx, cancel = context.WithTimeout(t.Context(), 500*time.Millisecond)
 		defer cancel()
 
 		before = time.Now()
@@ -187,7 +216,7 @@ func TestRetrier(t *testing.T) {
 	})
 
 	t.Run("If logging on attempt error is set, it should log the error", func(t *testing.T) {
-		log, hook := test.NewNullLogger()
+		log, hook := logrustest.NewNullLogger()
 		ctx := logger.ToCtx(t.Context(), log)
 
 		retrier := New(
@@ -202,7 +231,7 @@ func TestRetrier(t *testing.T) {
 		require.Error(t, err)
 
 		assert.Len(t, hook.Entries, 2)
-		assert.Contains(t, "attempt failed", hook.Entries[0].Message)
+		assert.Contains(t, "Attempt failed", hook.Entries[0].Message)
 		assert.Equal(t, logrus.ErrorLevel, hook.Entries[0].Level)
 	})
 }
