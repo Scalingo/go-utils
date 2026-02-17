@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.4.0
+
 * feat(retry): add exponential backoff wait duration
 * refactor(retry): use `synctest.Test` for unit tests
 
