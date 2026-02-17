@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* refactor(cronsetup): rename `*MutextBuilder` to `*MutexBuilder`
+
 ## v1.6.0
 
 * feat(opentelemetry) Add ability to instrument execution of cron job through OpenTelemetry
