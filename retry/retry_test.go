@@ -2,7 +2,7 @@ package retry
 
 import (
 	"context"
-	stderrors "errors"
+	"errors"
 	"fmt"
 	"testing"
 	"testing/synctest"
@@ -87,7 +87,7 @@ func TestRetrier(t *testing.T) {
 		synctest.Test(t, func(t *testing.T) {
 			retrier := New(WithWaitDuration(1 * time.Millisecond))
 			err := retrier.Do(t.Context(), func(ctx context.Context) error {
-				return stderrors.New("nop")
+				return errors.New("nop")
 			})
 			synctest.Wait()
 
@@ -101,7 +101,7 @@ func TestRetrier(t *testing.T) {
 			count := 0
 			err := retrier.Do(t.Context(), func(ctx context.Context) error {
 				count++
-				return NewRetryCancelError(stderrors.New("nop"))
+				return NewRetryCancelError(errors.New("nop"))
 			})
 			synctest.Wait()
 
@@ -138,7 +138,7 @@ func TestRetrier(t *testing.T) {
 
 			before := time.Now()
 			err := retrier.Do(ctx, func(ctx context.Context) error {
-				return stderrors.New("retry test error")
+				return errors.New("retry test error")
 			})
 			synctest.Wait()
 
@@ -162,7 +162,7 @@ func TestRetrier(t *testing.T) {
 
 			before := time.Now()
 			err := retrier.Do(t.Context(), func(ctx context.Context) error {
-				return stderrors.New("max duration error")
+				return errors.New("max duration error")
 			})
 			synctest.Wait()
 
@@ -193,7 +193,7 @@ func TestRetrier(t *testing.T) {
 			)
 
 			err := retrier.Do(t.Context(), func(ctx context.Context) error {
-				return stderrors.New("TestError")
+				return errors.New("TestError")
 			})
 			synctest.Wait()
 
@@ -215,7 +215,7 @@ func TestRetrier(t *testing.T) {
 
 			before := time.Now()
 			err := retrier.Do(ctx, func(ctx context.Context) error {
-				return stderrors.New("test")
+				return errors.New("test")
 			})
 			synctest.Wait()
 
@@ -237,7 +237,7 @@ func TestRetrier(t *testing.T) {
 
 			before = time.Now()
 			err = retrier.Do(ctx, func(ctx context.Context) error {
-				return stderrors.New("test")
+				return errors.New("test")
 			})
 			synctest.Wait()
 
@@ -261,7 +261,7 @@ func TestRetrier(t *testing.T) {
 			)
 
 			err := retrier.Do(ctx, func(_ context.Context) error {
-				return stderrors.New("TestError")
+				return errors.New("TestError")
 			})
 			synctest.Wait()
 
@@ -275,22 +275,22 @@ func TestRetrier(t *testing.T) {
 
 func TestRetryErrorUnwrap(t *testing.T) {
 	t.Run("RetryError should unwrap to Err", func(t *testing.T) {
-		baseErr := stderrors.New("base error")
+		baseErr := errors.New("base error")
 		err := RetryError{
 			Scope:   ContextScope,
 			Err:     baseErr,
-			LastErr: stderrors.New("last error"),
+			LastErr: errors.New("last error"),
 		}
 
 		require.ErrorIs(t, err, baseErr)
-		assert.Equal(t, baseErr, stderrors.Unwrap(err))
+		assert.Equal(t, baseErr, errors.Unwrap(err))
 	})
 
 	t.Run("RetryCancelError should unwrap to inner error", func(t *testing.T) {
-		baseErr := stderrors.New("cancel error")
+		baseErr := errors.New("cancel error")
 		err := NewRetryCancelError(baseErr)
 
 		require.ErrorIs(t, err, baseErr)
-		assert.Equal(t, baseErr, stderrors.Unwrap(err))
+		assert.Equal(t, baseErr, errors.Unwrap(err))
 	})
 }
