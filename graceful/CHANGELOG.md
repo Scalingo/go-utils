@@ -3,6 +3,7 @@
 ## To be released
 
 * build(deps): update `github.com/Scalingo/go-utils/errors` from v2 to v3
+* feat(graceful): `context.Canceled` is not an error
 
 ## v1.3.1
 

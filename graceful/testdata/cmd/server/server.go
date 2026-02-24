@@ -74,7 +74,7 @@ func main() {
 		go func(i int) {
 			defer wg.Done()
 			addr := fmt.Sprintf(":%d", port)
-			log.Printf("Serving on :%s\n", addr)
+			log.Printf("Serving on %s\n", addr)
 			err := s.ListenAndServe(ctx, "tcp", addr, router)
 			if err != nil {
 				log.Println("I'm dead because of", err)
