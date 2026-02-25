@@ -256,7 +256,7 @@ func TestService_Restart(t *testing.T) {
 	errs := make(chan error, 100)
 	go func() {
 		defer close(errs)
-		for i := 0; i < 100; i++ {
+		for range 100 {
 			resp, err := http.Get("http://localhost:9000/?sleep=20")
 			errs <- err
 			if err == nil {

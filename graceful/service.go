@@ -197,7 +197,7 @@ func (s *Service) finalize(ctx context.Context) error {
 	// Wait for connections to drain.
 	errChan := make(chan error, len(s.httpServers))
 	for i, httpServer := range s.httpServers {
-		err = httpServer.Shutdown(ctx)
+		err := httpServer.Shutdown(ctx)
 		if err != nil {
 			errChan <- errors.Wrapf(ctx, err, "server shutdown %d", i)
 		}
@@ -280,7 +280,7 @@ func (s *Service) shutdown(ctx context.Context) error {
 		return shutdownErr
 	}
 
-	log.Info("Wait hijacked connections")
+	log.Info("Wait hijacked connections to finish")
 	err := s.waitHijackedConnections(ctx)
 	if err != nil {
 		return errors.Wrapf(ctx, err, "wait hijacked connections")
