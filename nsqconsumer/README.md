@@ -1,4 +1,4 @@
-# Package `nsqconsumer` v1.6.0
+# Package `nsqconsumer` v1.7.0
 
 ## Telemetry
 
