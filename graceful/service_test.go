@@ -49,7 +49,7 @@ func TestService_Shutdown_WithoutRequest(t *testing.T) {
 
 			// Check the output
 			output := isGraceful.getOutput()
-			require.Containsf(t, output, "Http server is stopped", "OUTPUT:\n%v", output)
+			require.Containsf(t, output, "HTTP server is stopped", "OUTPUT:\n%v", output)
 			require.Containsf(t, output, "No more connection running", "OUTPUT:\n%v", output)
 		})
 	}
@@ -96,7 +96,7 @@ func TestService_Shutdown_WithRequest(t *testing.T) {
 
 			// Check the output
 			output := isGraceful.getOutput()
-			require.Containsf(t, output, "Http server is stopped", "OUTPUT:\n%v", output)
+			require.Containsf(t, output, "HTTP server is stopped", "OUTPUT:\n%v", output)
 			require.Containsf(t, output, "No more connection running", "OUTPUT:\n%v", output)
 		})
 	}
@@ -127,7 +127,7 @@ func TestService_Shutdown_MultipleServers_WithoutRequest(t *testing.T) {
 
 			// Check the output
 			output := isGraceful.getOutput()
-			require.Containsf(t, output, "Http server is stopped", "OUTPUT:\n%v", output)
+			require.Containsf(t, output, "HTTP server is stopped", "OUTPUT:\n%v", output)
 			require.Containsf(t, output, "No more connection running", "OUTPUT:\n%v", output)
 		})
 	}
@@ -184,7 +184,7 @@ func TestService_Shutdown_MultipleServers_WithRequest(t *testing.T) {
 
 			// Check the output
 			output := isGraceful.getOutput()
-			require.Containsf(t, output, "Http server is stopped", "OUTPUT:\n%v", output)
+			require.Containsf(t, output, "HTTP server is stopped", "OUTPUT:\n%v", output)
 			require.Containsf(t, output, "No more connection running", "OUTPUT:\n%v", output)
 		})
 	}
@@ -230,7 +230,7 @@ func TestService_Shutdown_WithTimeout(t *testing.T) {
 
 			// Check the output
 			output := isGraceful.getOutput()
-			assert.Containsf(t, output, "I'm dead because of fail to shutdown service", "OUTPUT:\n%v", output)
+			assert.Containsf(t, output, "I'm dead because of shutdown service", "OUTPUT:\n%v", output)
 
 			// The request should be unexpectedly terminated
 			require.Error(t, err)
@@ -256,7 +256,7 @@ func TestService_Restart(t *testing.T) {
 	errs := make(chan error, 100)
 	go func() {
 		defer close(errs)
-		for i := 0; i < 100; i++ {
+		for range 100 {
 			resp, err := http.Get("http://localhost:9000/?sleep=20")
 			errs <- err
 			if err == nil {
@@ -287,7 +287,7 @@ func TestService_Restart(t *testing.T) {
 	// Check the output
 	output := isGraceful.getOutput()
 	require.Containsf(t, output, "Request graceful restart", "OUTPUT:\n%v", output)
-	require.Containsf(t, output, "Http server is stopped", "OUTPUT:\n%v", output)
+	require.Containsf(t, output, "HTTP server is stopped", "OUTPUT:\n%v", output)
 	require.Containsf(t, output, "No more connection running", "OUTPUT:\n%v", output)
 }
 
