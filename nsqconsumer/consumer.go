@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"runtime/debug"
+	"sync"
 	"time"
 
 	"github.com/nsqio/go-nsq"
@@ -141,20 +142,23 @@ func (msg *NsqMessageDeserialize) TouchUntilClosed() chan<- struct{} {
 }
 
 type nsqConsumer struct {
-	NsqConfig        *nsq.Config
-	NsqLookupdURLs   []string
-	Topic            string
-	Channel          string
-	MessageHandler   func(context.Context, *NsqMessageDeserialize) error
-	MaxInFlight      int
-	SkipLogSet       map[string]bool
-	PostponeProducer nsqproducer.Producer
-	disableBackoff   bool
-	count            uint64
-	logger           logrus.FieldLogger
-	logLevel         LogLevel
-	telemetry        *telemetry
-	withTelemetry    bool
+	NsqConfig            *nsq.Config
+	NsqLookupdURLs       []string
+	Topic                string
+	Channel              string
+	MessageHandler       func(context.Context, *NsqMessageDeserialize) error
+	MaxInFlight          int
+	SkipLogSet           map[string]bool
+	PostponeProducer     nsqproducer.Producer
+	disableBackoff       bool
+	count                uint64
+	logger               logrus.FieldLogger
+	logLevel             LogLevel
+	telemetry            *telemetry
+	withTelemetry        bool
+	gracefulStopDuration time.Duration
+	// Tracks in-flight message handlers so shutdown can wait for their completion.
+	wgOngoingMessages sync.WaitGroup
 }
 
 type ConsumerOpts struct {
@@ -173,10 +177,14 @@ type ConsumerOpts struct {
 	DisableBackoff bool
 	// WithoutTelemetry indicates whether OpenTelemetry instrumentation should be disabled
 	WithoutTelemetry bool
+	// GracefulStopDuration is the duration after the call to Stop before closing the connection to NSQd.
+	// Default is 1m.
+	GracefulStopDuration time.Duration
 }
 
 type Consumer interface {
 	Start(ctx context.Context) func()
+	Stop(ctx context.Context, consumer *nsq.Consumer)
 }
 
 func New(opts ConsumerOpts) (Consumer, error) {
@@ -188,17 +196,23 @@ func New(opts ConsumerOpts) (Consumer, error) {
 		opts.SkipLogSet = map[string]bool{}
 	}
 
+	if opts.GracefulStopDuration == 0 {
+		opts.GracefulStopDuration = 1 * time.Minute
+	}
+
 	consumer := &nsqConsumer{
-		NsqConfig:      opts.NsqConfig,
-		NsqLookupdURLs: opts.NsqLookupdURLs,
-		Topic:          opts.Topic,
-		Channel:        opts.Channel,
-		MessageHandler: opts.MessageHandler,
-		MaxInFlight:    opts.MaxInFlight,
-		SkipLogSet:     opts.SkipLogSet,
-		logLevel:       opts.LogLevel,
-		disableBackoff: opts.DisableBackoff,
-		withTelemetry:  !opts.WithoutTelemetry,
+		NsqConfig:            opts.NsqConfig,
+		NsqLookupdURLs:       opts.NsqLookupdURLs,
+		Topic:                opts.Topic,
+		Channel:              opts.Channel,
+		MessageHandler:       opts.MessageHandler,
+		MaxInFlight:          opts.MaxInFlight,
+		SkipLogSet:           opts.SkipLogSet,
+		logLevel:             opts.LogLevel,
+		disableBackoff:       opts.DisableBackoff,
+		withTelemetry:        !opts.WithoutTelemetry,
+		gracefulStopDuration: opts.GracefulStopDuration,
+		wgOngoingMessages:    sync.WaitGroup{},
 	}
 	if consumer.MaxInFlight == 0 {
 		consumer.MaxInFlight = opts.NsqConfig.MaxInFlight
@@ -249,13 +263,14 @@ func (c *nsqConsumer) Start(ctx context.Context) func() {
 	}
 
 	return func() {
-		consumer.Stop()
-		// block until stop process is complete
-		<-consumer.StopChan
+		c.Stop(ctx, consumer)
 	}
 }
 
 func (c *nsqConsumer) nsqHandler(message *nsq.Message) (err error) {
+	c.wgOngoingMessages.Add(1)
+	defer c.wgOngoingMessages.Done()
+
 	ctx := logger.ToCtx(context.Background(), c.logger)
 	// We create a new `log` variable because we are so used to call `log.Something` in our codebase
 	log := c.logger
@@ -391,4 +406,34 @@ func (c *nsqConsumer) postponeMessage(ctx context.Context, msgLogger logrus.Fiel
 	}
 
 	return c.PostponeProducer.DeferredPublish(ctx, c.Topic, delay, publishedMsg)
+}
+
+// Stop blocks new message intake, waits for in-flight handlers (up to gracefulStopDuration),
+// then stops the NSQ consumer and waits until the stop cycle is fully complete.
+//
+// We need to implement our own stop mechanism because (*nsq.Consumer).Stop times out after 30 seconds.
+// This is not enough time to finish processing long NSQ messages.
+func (c *nsqConsumer) Stop(ctx context.Context, consumer *nsq.Consumer) {
+	c.logger.Info("Stopping consumer")
+	// Stop receiving new messages
+	consumer.ChangeMaxInFlight(0)
+
+	waitDone := make(chan struct{})
+	go func() {
+		c.wgOngoingMessages.Wait()
+		close(waitDone)
+	}()
+
+	select {
+	case <-waitDone:
+		c.logger.Info("All in-flight NSQ messages have been processed")
+	case <-time.After(c.gracefulStopDuration):
+		c.logger.Info("Graceful stop timeout reached before all in-flight NSQ messages were processed")
+	}
+
+	// Asynchronously start the stop procedure.
+	consumer.Stop()
+
+	// Block until stop process is complete
+	<-consumer.StopChan
 }
