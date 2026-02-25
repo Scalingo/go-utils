@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat(nsqconsumer): add a `Stop` method to gracefully stop for the end of the message handling
+
 ## v1.6.0
 
 * feat(opentelemetry): add NSQ consumer instrumentation

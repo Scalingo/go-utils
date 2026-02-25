@@ -1,10 +1,10 @@
 module github.com/Scalingo/go-utils/nsqconsumer
 
-go 1.24.0
+go 1.25
 
 require (
 	github.com/Scalingo/go-utils/errors/v3 v3.2.0
-	github.com/Scalingo/go-utils/logger v1.11.0
+	github.com/Scalingo/go-utils/logger v1.12.0
 	github.com/Scalingo/go-utils/nsqproducer v1.4.0
 	github.com/Scalingo/go-utils/otel v0.8.0
 	github.com/golang/mock v1.6.0
@@ -28,8 +28,9 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/otel/trace v1.39.0 // indirect
-	golang.org/x/sys v0.40.0 // indirect
+	golang.org/x/sys v0.41.0 // indirect
 	gopkg.in/errgo.v1 v1.0.1 // indirect
+	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
