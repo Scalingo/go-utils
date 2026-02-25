@@ -410,7 +410,11 @@ func (c *nsqConsumer) postponeMessage(ctx context.Context, msgLogger logrus.Fiel
 
 // Stop blocks new message intake, waits for in-flight handlers (up to gracefulStopDuration),
 // then stops the NSQ consumer and waits until the stop cycle is fully complete.
+//
+// We need to implement our own stop mechanism because (*nsq.Consumer).Stop times out after 30 seconds.
+// This is not enough time to finish processing long NSQ messages.
 func (c *nsqConsumer) Stop(ctx context.Context, consumer *nsq.Consumer) {
+	c.logger.Info("Stopping consumer")
 	// Stop receiving new messages
 	consumer.ChangeMaxInFlight(0)
 
@@ -422,14 +426,12 @@ func (c *nsqConsumer) Stop(ctx context.Context, consumer *nsq.Consumer) {
 
 	select {
 	case <-waitDone:
-		c.logger.Warn("All messages processed, consumer.Stop")
+		c.logger.Info("All in-flight NSQ messages have been processed")
 	case <-time.After(c.gracefulStopDuration):
-		c.logger.WithField("graceful_stop_duration", c.gracefulStopDuration).Warn("Graceful stop timeout reached, consumer.Stop")
+		c.logger.Info("Graceful stop timeout reached before all in-flight NSQ messages were processed")
 	}
 
-	// After some times, start the stop procedure.
-	// This aims at ensuring that no more NSQ messages are being processed before proceeding.
-	// consumer.Stop times out after 30 seconds which may not be enough time to finish handling the ongoing messages.
+	// Asynchronously start the stop procedure.
 	consumer.Stop()
 
 	// Block until stop process is complete
