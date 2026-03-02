@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* chore(deps): bump github.com/Scalingo/logrus-rollbar from 1.4.3 to 1.4.4
+
 ## v1.12.0
 
 * feat(logger): automatically call `Hex` on `ObjectId` values

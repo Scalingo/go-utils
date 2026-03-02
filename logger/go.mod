@@ -5,7 +5,7 @@ go 1.25
 retract v1.9.0 // Had accidentally been released rather than a lower version (1.6.0). Hence we retract it and release a new version 1.9.1.
 
 require (
-	github.com/Scalingo/logrus-rollbar v1.4.3
+	github.com/Scalingo/logrus-rollbar v1.4.4
 	github.com/pkg/errors v0.9.1
 	github.com/rollbar/rollbar-go v1.4.8
 	github.com/sirupsen/logrus v1.9.4
