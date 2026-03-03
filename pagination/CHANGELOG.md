@@ -2,6 +2,8 @@
 
 ## To be released
 
+* feat(pagination): add `json` tag to `Request`
+
 ## v1.1.2
 
 * feat(pagination): add `log` tag to `Request` and `Meta`

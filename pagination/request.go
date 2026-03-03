@@ -3,8 +3,8 @@ package pagination
 const defaultPerPage = 20
 
 type Request struct {
-	Page    int `log:"page"`     // page requested (default 1)
-	PerPage int `log:"per_page"` // Number of items per page
+	Page    int `json:"page" log:"page"`         // page requested (default 1)
+	PerPage int `json:"per_page" log:"per_page"` // Number of items per page
 }
 
 func NewRequest(page, perPage int) Request {
