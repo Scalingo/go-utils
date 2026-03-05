@@ -3,6 +3,7 @@
 ## To be released
 
 * fix(graceful): race condition
+* test(graceful): improve tests execution speed
 
 ## v1.3.2
 

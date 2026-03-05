@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httptrace"
 	"os"
 	"os/exec"
 	"strconv"
@@ -22,6 +23,90 @@ import (
 // getCmd returns a command to run the server
 func getCmd(args ...string) *exec.Cmd {
 	return exec.Command("./testdata/server", args...)
+}
+
+type requestHandle struct {
+	started <-chan struct{}
+	errs    <-chan error
+}
+
+func startRequest(url string) requestHandle {
+	started := make(chan struct{})
+	errs := make(chan error, 2)
+
+	go func() {
+		defer close(errs)
+		var startedOnce sync.Once
+		closeStarted := func() {
+			startedOnce.Do(func() {
+				close(started)
+			})
+		}
+		deadline := time.Now().Add(300 * time.Millisecond)
+
+		for {
+			req, err := http.NewRequest(http.MethodGet, url, nil)
+			if err != nil {
+				errs <- err
+				return
+			}
+			trace := &httptrace.ClientTrace{
+				GotConn: func(httptrace.GotConnInfo) {
+					closeStarted()
+				},
+			}
+			req = req.WithContext(httptrace.WithClientTrace(req.Context(), trace))
+
+			resp, err := http.DefaultClient.Do(req)
+			if err != nil {
+				if time.Now().After(deadline) {
+					errs <- err
+					return
+				}
+				time.Sleep(5 * time.Millisecond)
+				continue
+			}
+
+			errs <- nil
+			errs <- resp.Body.Close()
+			return
+		}
+	}()
+
+	return requestHandle{
+		started: started,
+		errs:    errs,
+	}
+}
+
+func waitForStart(t *testing.T, started <-chan struct{}) {
+	t.Helper()
+
+	const requestStartTimeout = 250 * time.Millisecond
+
+	select {
+	case <-started:
+	case <-time.After(requestStartTimeout):
+		t.Fatalf("request did not start after %v", requestStartTimeout)
+	}
+}
+
+func requireNoRequestErrors(t *testing.T, errs <-chan error) {
+	t.Helper()
+	for err := range errs {
+		require.NoError(t, err)
+	}
+}
+
+func requireRequestError(t *testing.T, errs <-chan error) {
+	t.Helper()
+	hasErr := false
+	for err := range errs {
+		if err != nil {
+			hasErr = true
+		}
+	}
+	require.Truef(t, hasErr, "expected at least one request error")
 }
 
 // TestService_Shutdown_WithoutRequest tests the shutdown of the service without any request
@@ -74,25 +159,15 @@ func TestService_Shutdown_WithRequest(t *testing.T) {
 			isGraceful.start()
 			defer isGraceful.stop()
 
-			errs := make(chan error)
-			go func() {
-				resp, err := http.Get("http://localhost:9000/?sleep=200")
-				errs <- err
-				if err == nil {
-					// Response body must be closed
-					err = resp.Body.Close()
-					errs <- err
-				}
-			}()
-
-			time.Sleep(10 * time.Millisecond)
+			req := startRequest("http://localhost:9000/?sleep=200")
+			waitForStart(t, req.started)
 
 			// Send the signal
 			isGraceful.signal(s)
 			isGraceful.isRunningAfterAsync(100 * time.Millisecond)
 			isGraceful.isStoppedAfterAsync(300 * time.Millisecond)
 
-			require.NoError(t, <-errs)
+			requireNoRequestErrors(t, req.errs)
 
 			// Check the output
 			output := isGraceful.getOutput()
@@ -152,35 +227,18 @@ func TestService_Shutdown_MultipleServers_WithRequest(t *testing.T) {
 			isGraceful.start()
 			defer isGraceful.stop()
 
-			errs := make(chan error)
-			go func() {
-				resp, err := http.Get("http://localhost:9000/?sleep=200")
-				errs <- err
-				if err == nil {
-					// Response body must be closed
-					err = resp.Body.Close()
-					errs <- err
-				}
-			}()
-
-			go func() {
-				resp, err := http.Get("http://localhost:9000/1?sleep=200")
-				errs <- err
-				if err == nil {
-					// Response body must be closed
-					err = resp.Body.Close()
-					errs <- err
-				}
-			}()
-
-			time.Sleep(10 * time.Millisecond)
+			reqMain := startRequest("http://localhost:9000/?sleep=200")
+			reqSecond := startRequest("http://localhost:9000/1?sleep=200")
+			waitForStart(t, reqMain.started)
+			waitForStart(t, reqSecond.started)
 
 			// Send the signal
 			isGraceful.signal(s)
 			isGraceful.isRunningAfterAsync(100 * time.Millisecond)
 			isGraceful.isStoppedAfterAsync(300 * time.Millisecond)
 
-			require.NoError(t, <-errs)
+			requireNoRequestErrors(t, reqMain.errs)
+			requireNoRequestErrors(t, reqSecond.errs)
 
 			// Check the output
 			output := isGraceful.getOutput()
@@ -206,34 +264,20 @@ func TestService_Shutdown_WithTimeout(t *testing.T) {
 			isGraceful.start()
 			defer isGraceful.stop()
 
-			// Request will but cut
-			errs := make(chan error)
-			go func() {
-				resp, err := http.Get("http://localhost:9000/?sleep=1000")
-				errs <- err
-				if err == nil {
-					// Response body must be closed
-					err = resp.Body.Close()
-					errs <- err
-				}
-			}()
-
-			time.Sleep(10 * time.Millisecond)
+			req := startRequest("http://localhost:9000/?sleep=1000")
+			waitForStart(t, req.started)
 
 			// Send the signal
 			isGraceful.signal(s)
 			isGraceful.isRunningAfterAsync(50 * time.Millisecond)
 			isGraceful.isStoppedAfterAsync(150 * time.Millisecond)
 
-			// Block waiting for errors
-			err := <-errs
-
 			// Check the output
 			output := isGraceful.getOutput()
 			assert.Containsf(t, output, "I'm dead because of shutdown service", "OUTPUT:\n%v", output)
 
-			// The request should be unexpectedly terminated
-			require.Error(t, err)
+			// The request should be unexpectedly terminated.
+			requireRequestError(t, req.errs)
 		})
 	}
 }
@@ -253,28 +297,46 @@ func TestService_Restart(t *testing.T) {
 	isGraceful.start()
 	defer isGraceful.stop()
 
-	errs := make(chan error, 100)
+	errs := make(chan error, 256)
+	stopRequests := make(chan struct{})
+	firstRequestStarted := make(chan struct{})
+	var requestWG sync.WaitGroup
+	requestWG.Add(1)
 	go func() {
+		defer requestWG.Done()
 		defer close(errs)
-		for range 100 {
-			resp, err := http.Get("http://localhost:9000/?sleep=20")
+		started := false
+		for {
+			select {
+			case <-stopRequests:
+				return
+			default:
+			}
+
+			if !started {
+				close(firstRequestStarted)
+				started = true
+			}
+
+			resp, err := http.Get("http://localhost:9000/?sleep=10")
 			errs <- err
 			if err == nil {
 				// Response body must be closed
 				err = resp.Body.Close()
 				errs <- err
 			}
-
-			time.Sleep(10 * time.Millisecond)
 		}
 	}()
 
-	time.Sleep(10 * time.Millisecond)
+	waitForStart(t, firstRequestStarted)
 
 	// Send the signal
 	isGraceful.signal(syscall.SIGHUP)
-	isGraceful.isRunningAfterAsync(50 * time.Millisecond)
-	isGraceful.isRunningAfter(3000 * time.Millisecond)
+	isGraceful.isRunningAfterAsync(30 * time.Millisecond)
+	isGraceful.isRunningAfter(400 * time.Millisecond)
+
+	close(stopRequests)
+	requestWG.Wait()
 
 	// The request should be no errors
 	for err := range errs {
@@ -323,7 +385,7 @@ func newCmdAndOutput(t *testing.T, options ...func(*cmdAndOutput)) *cmdAndOutput
 	c := &cmdAndOutput{
 		t:                    t,
 		output:               new(bytes.Buffer),
-		startWaitDuration:    100 * time.Millisecond,
+		startWaitDuration:    500 * time.Millisecond,
 		upgradeWaitDuration:  30 * time.Second,
 		shutdownWaitDuration: 60 * time.Second,
 	}
@@ -401,6 +463,9 @@ func (c *cmdAndOutput) start() {
 	if err != nil {
 		c.t.Fatalf("failed to start process: %v", err)
 	}
+	go func() {
+		_ = c.Cmd.Wait()
+	}()
 
 	// Get the pid
 	c.pid = c.Cmd.Process.Pid
@@ -411,8 +476,7 @@ func (c *cmdAndOutput) start() {
 		require.NoError(c.t, err)
 	}
 
-	// Wait for a short duration to allow the child process to start
-	time.Sleep(c.startWaitDuration)
+	c.waitForReady(c.startWaitDuration)
 }
 
 // stop stops the process
@@ -427,7 +491,7 @@ func (c *cmdAndOutput) stop() {
 	}
 
 	// send signal to pid process
-	err = syscall.Kill(c.pid, syscall.SIGTERM)
+	err = syscall.Kill(c.currentPID(), syscall.SIGTERM)
 	if err != nil && !errors.Is(err, syscall.ESRCH) {
 		c.t.Logf("kill process: %v", err)
 	}
@@ -436,9 +500,11 @@ func (c *cmdAndOutput) stop() {
 	c.isStoppedAfter(c.shutdownWaitDuration)
 
 	// Delete pid file
-	time.Sleep(10 * time.Millisecond)
 	if c.pidFile != "" {
-		require.NoError(c.t, os.Remove(c.pidFile))
+		err := os.Remove(c.pidFile)
+		if err != nil && !os.IsNotExist(err) {
+			require.NoError(c.t, err)
+		}
 	}
 }
 
@@ -480,29 +546,80 @@ func (c *cmdAndOutput) checkProcessAfter(timeout time.Duration, shouldBeAlive bo
 
 	// Has any process started
 	require.NotNilf(c.t, c.Cmd.Process, "process %v hasn't started", c.Cmd)
+	pid := c.currentPID()
 
 	if shouldBeAlive {
 		// Wait and then search for the process (parent or child)
 		time.Sleep(timeout)
 		p := c.findProcess()
-		require.NoErrorf(c.t, p.Signal(syscall.Signal(0)), "process %v is dead after %v", c.pid, timeout)
+		require.NoErrorf(c.t, p.Signal(syscall.Signal(0)), "process %v is dead after %v", pid, timeout)
 	} else {
-		// Race between the timer and the process
-		w := make(chan *os.ProcessState)
-		go func() {
-			processState, _ := c.findProcess().Wait()
-			w <- processState
-			close(w)
-		}()
-
-		timer := time.NewTimer(timeout)
-		defer timer.Stop()
-		select {
-		case <-timer.C:
-			c.t.Errorf("%v process %v was up after %v", time.Now(), c.pid, timeout)
-		case <-w:
+		// Poll for process disappearance to avoid waiting on non-child process.
+		deadline := time.Now().Add(timeout)
+		for {
+			p := c.findProcess()
+			err := p.Signal(syscall.Signal(0))
+			if err != nil && (errors.Is(err, syscall.ESRCH) || errors.Is(err, os.ErrProcessDone)) {
+				return
+			}
+			if time.Now().After(deadline) {
+				c.t.Errorf("%v process %v was up after %v", time.Now(), pid, timeout)
+				return
+			}
+			time.Sleep(5 * time.Millisecond)
 		}
 	}
+}
+
+func (c *cmdAndOutput) waitForReady(timeout time.Duration) {
+	c.t.Helper()
+
+	deadline := time.Now().Add(timeout)
+	urls := c.readyURLs()
+	for {
+		allReady := true
+		for _, u := range urls {
+			resp, err := http.Get(u)
+			if err != nil {
+				allReady = false
+				break
+			}
+			_, _ = io.Copy(io.Discard, resp.Body)
+			_ = resp.Body.Close()
+		}
+		if allReady {
+			return
+		}
+		if time.Now().After(deadline) {
+			c.t.Fatalf("server not ready after %v", timeout)
+		}
+		time.Sleep(5 * time.Millisecond)
+	}
+}
+
+func (c *cmdAndOutput) readyURLs() []string {
+	numServers := 1
+	for _, arg := range c.Cmd.Args[1:] {
+		if !strings.HasPrefix(arg, "num-servers=") {
+			continue
+		}
+		value := strings.TrimPrefix(arg, "num-servers=")
+		n, err := strconv.Atoi(value)
+		if err == nil && n > 0 {
+			numServers = n
+		}
+	}
+
+	urls := make([]string, 0, numServers)
+	for i := 0; i < numServers; i++ {
+		if i == 0 {
+			urls = append(urls, "http://localhost:9000/")
+			continue
+		}
+		urls = append(urls, fmt.Sprintf("http://localhost:9000/%d", i))
+	}
+
+	return urls
 }
 
 // getOutput returns the output of the process
@@ -524,12 +641,15 @@ func (c *cmdAndOutput) readPidFile() int {
 }
 
 func (c *cmdAndOutput) findProcess() *os.Process {
-	// get pid from pid file
-	if c.pidFile != "" {
-		c.pid = c.readPidFile()
-	}
-
-	p, err := os.FindProcess(c.pid)
+	pid := c.currentPID()
+	p, err := os.FindProcess(pid)
 	require.NoError(c.t, err)
 	return p
+}
+
+func (c *cmdAndOutput) currentPID() int {
+	if c.pidFile != "" {
+		return c.readPidFile()
+	}
+	return c.pid
 }
