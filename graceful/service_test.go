@@ -340,13 +340,6 @@ func withCmd(cmd *exec.Cmd) func(*cmdAndOutput) {
 	}
 }
 
-// withStartWaitDuration sets the duration to wait for a child process to start
-func withStartWaitDuration(duration time.Duration) func(output *cmdAndOutput) {
-	return func(c *cmdAndOutput) {
-		c.startWaitDuration = duration
-	}
-}
-
 // withPidFile sets the pidFile field of the cmdAndOutput struct
 func withPidFile(pidFile string) func(*cmdAndOutput) {
 	return func(c *cmdAndOutput) {

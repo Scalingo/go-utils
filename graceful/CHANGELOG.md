@@ -2,6 +2,8 @@
 
 ## To be released
 
+* fix(graceful): race condition
+
 ## v1.3.2
 
 * build(deps): update `github.com/Scalingo/go-utils/errors` from v2 to v3
