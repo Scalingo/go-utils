@@ -3,6 +3,8 @@
 ## To be Released
 
 * build(gomock_generator): update `github.com/urfave/cli` from v1 to v3
+* build(deps): replace use of `github.com/pkg/errors` with `github.com/Scalingo/go-utils/errors/v3`
+* feat: replace `github.com/golang/mock/mockgen` with `go.uber.org/mock/mockgen`
 
 ## v1.4.1
 

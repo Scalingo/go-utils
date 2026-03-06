@@ -7,10 +7,10 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v3"
 
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/gomock_generator/gomockgenerator"
 	"github.com/Scalingo/go-utils/logger"
 )
@@ -67,7 +67,7 @@ VERSION:
 			return ctx, nil
 		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			err := validateBinaryDeps()
+			err := validateBinaryDeps(ctx)
 			if err != nil {
 				return err
 			}
@@ -86,14 +86,14 @@ VERSION:
 
 			rawFile, err := os.Open(cfgGeneration.MocksFilePath)
 			if err != nil {
-				return errors.Wrap(err, "fail to open the mocks file")
+				return errors.Wrap(ctx, err, "fail to open the mocks file")
 			}
 			defer rawFile.Close()
 
 			mocksConfiguration := gomockgenerator.MocksConfiguration{}
 			err = json.NewDecoder(rawFile).Decode(&mocksConfiguration)
 			if err != nil {
-				return errors.Wrap(err, "mocks file does not contain valid JSON")
+				return errors.Wrap(ctx, err, "mocks file does not contain valid JSON")
 			}
 
 			return gomockgenerator.GenerateMocks(ctx, cfgGeneration, mocksConfiguration)
@@ -107,7 +107,7 @@ VERSION:
 	}
 }
 
-func validateBinaryDeps() error {
+func validateBinaryDeps(ctx context.Context) error {
 	binaries := []struct {
 		Executable string
 		Package    string
@@ -118,7 +118,7 @@ func validateBinaryDeps() error {
 		},
 		{
 			Executable: "mockgen",
-			Package:    "github.com/golang/mock/mockgen",
+			Package:    "go.uber.org/mock/mockgen",
 		},
 	}
 	for _, binary := range binaries {
@@ -131,28 +131,28 @@ func validateBinaryDeps() error {
 				binary.Package,
 			)
 			cmd := exec.Command("go", "get", binary.Package)
-			err = cmd.Run()
+			err := cmd.Run()
 			if err != nil {
 				output, outputErr := cmd.CombinedOutput()
 				if outputErr != nil {
-					return errors.Wrapf(
+					return errors.Wrapf(ctx,
 						err,
-						"Fail to run 'go get %v', fail to get command output, error: \n\n%v\n",
+						"run 'go get %v', fail to get command output, error: \n\n%v\n",
 						binary.Package, outputErr,
 					)
 				} else {
-					return errors.Wrapf(
+					return errors.Wrapf(ctx,
 						err,
-						"Fail to run 'go get %v', output: \n\n%v\n",
+						"run 'go get %v', output: \n\n%v\n",
 						binary.Package, string(output),
 					)
 				}
 			}
 			_, err = exec.LookPath(binary.Executable)
 			if err != nil {
-				return errors.Wrapf(
+				return errors.Wrapf(ctx,
 					err,
-					"fail to find '%s' binary after installation, $GOPATH/bin probably not in path, update your shell (bash/zsh) configuration",
+					"find '%s' binary after installation, $GOPATH/bin probably not in path, update your shell (bash/zsh) configuration",
 					binary.Executable,
 				)
 			}

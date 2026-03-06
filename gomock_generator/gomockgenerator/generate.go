@@ -12,9 +12,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/logger"
 )
 
@@ -58,22 +58,22 @@ type MockConfiguration struct {
 // GenerateMocks generates the mocks given in arguments
 func GenerateMocks(ctx context.Context, gcfg GenerationConfiguration, mocksCfg MocksConfiguration) error {
 	if mocksCfg.BasePackage == "" {
-		panic(errors.New("BasePackage is mandatory"))
+		panic(errors.New(ctx, "BasePackage is mandatory"))
 	}
 	cwd, err := os.Getwd()
 	if err != nil {
-		return errors.Wrap(err, "fail to get current directory")
+		return errors.Wrap(ctx, err, "fail to get current directory")
 	}
 	if mocksCfg.BaseDirectory == "" {
 		mocksCfg.BaseDirectory = mocksCfg.BasePackage
 	}
 	err = os.Chdir(path.Join(os.Getenv("GOPATH"), "src", mocksCfg.BaseDirectory))
 	if err != nil {
-		return errors.Wrap(err, "fail to move to base package directory")
+		return errors.Wrap(ctx, err, "fail to move to base package directory")
 	}
 	defer os.Chdir(cwd)
-	log := logger.Get(ctx).WithField("nb_mocks", len(mocksCfg.Mocks))
-	ctx = logger.ToCtx(ctx, log)
+
+	ctx, log := logger.WithFieldToCtx(ctx, "nb_mocks", len(mocksCfg.Mocks))
 	log.WithFields(logrus.Fields{
 		"base_package": mocksCfg.BasePackage,
 	}).Infof("Generating %v mocks", len(mocksCfg.Mocks))
@@ -85,11 +85,11 @@ func GenerateMocks(ctx context.Context, gcfg GenerationConfiguration, mocksCfg M
 	if os.IsNotExist(err) {
 		log.Info("No cache signatures file, generates all mocks")
 	} else if err != nil {
-		return errors.Wrap(err, "fail to read the signatures cache file")
+		return errors.Wrap(ctx, err, "fail to read the signatures cache file")
 	} else {
 		err = json.Unmarshal(sigs, &mockSigs)
 		if err != nil {
-			return errors.Wrap(err, "fail to unmarshal the signatures cache file")
+			return errors.Wrap(ctx, err, "fail to unmarshal the signatures cache file")
 		}
 	}
 	newMockSigs := make(map[string]string, len(sigs))
@@ -119,11 +119,11 @@ func GenerateMocks(ctx context.Context, gcfg GenerationConfiguration, mocksCfg M
 
 	sigs, err = json.MarshalIndent(newMockSigs, "", "  ")
 	if err != nil {
-		return errors.Wrap(err, "fail to marshal the signatures cache file")
+		return errors.Wrap(ctx, err, "fail to marshal the signatures cache file")
 	}
 	err = os.WriteFile(mockSigsPath, sigs, 0644)
 	if err != nil {
-		return errors.Wrap(err, "fail to write the signatures cache file")
+		return errors.Wrap(ctx, err, "fail to write the signatures cache file")
 	}
 	return nil
 }
@@ -133,7 +133,7 @@ func generateMock(ctx context.Context, gcfg GenerationConfiguration, baseDirecto
 
 	if !mock.External {
 		if mock.SrcPackage == "" && mock.MockFile == "" {
-			return "", "", errors.New("SrcPackage or MockFile should be defined to know of guess the source page")
+			return "", "", errors.New(ctx, "SrcPackage or MockFile should be defined to know of guess the source page")
 		}
 
 		if mock.SrcPackage == "" {
@@ -200,7 +200,7 @@ func generateMock(ctx context.Context, gcfg GenerationConfiguration, baseDirecto
 	hashKey := fmt.Sprintf("%s.%s", mockSrcPath, mock.Interface)
 	hash, err := interfaceHash(mockSrcPath, mock.Interface)
 	if err != nil {
-		return "", "", errors.Wrapf(err, "fail to get interface hash of %v:%v", mock.SrcPackage, mock.Interface)
+		return "", "", errors.Wrapf(ctx, err, "fail to get interface hash of %v:%v", mock.SrcPackage, mock.Interface)
 	}
 	if _, err := os.Stat(mockPath); os.IsNotExist(err) {
 		hash = "NOFILE"
@@ -233,23 +233,23 @@ func generateMock(ctx context.Context, gcfg GenerationConfiguration, baseDirecto
 
 	stdout, err := g.StdoutPipe()
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to get stdout")
+		return "", "", errors.Wrap(ctx, err, "fail to get stdout")
 	}
 	stderr, err := g.StderrPipe()
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to get stderr")
+		return "", "", errors.Wrap(ctx, err, "fail to get stderr")
 	}
 	go io.Copy(os.Stdout, stdout)
 	go io.Copy(os.Stderr, stderr)
 
 	err = g.Start()
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to start")
+		return "", "", errors.Wrap(ctx, err, "fail to start")
 	}
 
 	err = g.Wait()
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to wait")
+		return "", "", errors.Wrap(ctx, err, "fail to wait")
 	}
 
 	log.Info("Done!")
