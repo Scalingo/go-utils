@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* build(gomock_generator): update `github.com/urfave/cli` from v1 to v3
+
 ## v1.4.1
 
 * chore(go): corrective bump - Go version regression from 1.24.3 to 1.24
