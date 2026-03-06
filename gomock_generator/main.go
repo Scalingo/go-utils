@@ -118,7 +118,7 @@ func validateBinaryDeps(ctx context.Context) error {
 		},
 		{
 			Executable: "mockgen",
-			Package:    "github.com/golang/mock/mockgen",
+			Package:    "go.uber.org/mock/mockgen",
 		},
 	}
 	for _, binary := range binaries {
@@ -131,19 +131,19 @@ func validateBinaryDeps(ctx context.Context) error {
 				binary.Package,
 			)
 			cmd := exec.Command("go", "get", binary.Package)
-			err = cmd.Run()
+			err := cmd.Run()
 			if err != nil {
 				output, outputErr := cmd.CombinedOutput()
 				if outputErr != nil {
 					return errors.Wrapf(ctx,
 						err,
-						"Fail to run 'go get %v', fail to get command output, error: \n\n%v\n",
+						"run 'go get %v', fail to get command output, error: \n\n%v\n",
 						binary.Package, outputErr,
 					)
 				} else {
 					return errors.Wrapf(ctx,
 						err,
-						"Fail to run 'go get %v', output: \n\n%v\n",
+						"run 'go get %v', output: \n\n%v\n",
 						binary.Package, string(output),
 					)
 				}
@@ -152,7 +152,7 @@ func validateBinaryDeps(ctx context.Context) error {
 			if err != nil {
 				return errors.Wrapf(ctx,
 					err,
-					"fail to find '%s' binary after installation, $GOPATH/bin probably not in path, update your shell (bash/zsh) configuration",
+					"find '%s' binary after installation, $GOPATH/bin probably not in path, update your shell (bash/zsh) configuration",
 					binary.Executable,
 				)
 			}

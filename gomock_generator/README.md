@@ -1,7 +1,7 @@
 # Package `gomock_generator` v1.4.1
 
 This tool aims at simplifying and accelerating the generation of mocks in Scalingo projects using
-[GoMock](https://github.com/golang/mock/).
+[GoMock](https://go.uber.org/mock).
 
 This tool can either be used as a CLI or as a Go library.
 
@@ -26,7 +26,7 @@ GLOBAL OPTIONS:
    --version, -v                  print the version
 
 VERSION:
-   1.3.1
+   1.4.1
 ```
 
 ## Go Library
@@ -44,5 +44,5 @@ go install
 
 ## Release a new version of gomock_generator
 
-Please update the variable named `version` in main.go and commit the change before executing the
+Please update the variable named `version` in `main.go` and commit the change before executing the
 release procedure located in [README.md](https://github.com/Scalingo/go-utils/blob/master/README.md).
