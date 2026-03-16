@@ -5,9 +5,9 @@ go 1.24.0
 require (
 	github.com/Scalingo/go-utils/logger v1.9.1
 	github.com/Scalingo/go-utils/otel v0.5.1-0.20250820091217-7ea09d18b2db
-	github.com/golang/mock v1.6.0
 	go.opentelemetry.io/otel v1.40.0
 	go.opentelemetry.io/otel/metric v1.40.0
+	go.uber.org/mock v0.6.0
 )
 
 require (
@@ -17,6 +17,7 @@ require (
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/gofrs/uuid/v5 v5.3.2 // indirect
+	github.com/golang/mock v1.6.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.1 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0 // indirect

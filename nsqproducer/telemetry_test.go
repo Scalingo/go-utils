@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
+	"go.uber.org/mock/gomock"
 
 	otelmock "github.com/Scalingo/go-utils/otel/otelmock"
 	oteltest "github.com/Scalingo/go-utils/otel/oteltest"

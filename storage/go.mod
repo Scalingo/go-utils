@@ -10,10 +10,10 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.49
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.72.3
 	github.com/aws/smithy-go v1.24.2
-	github.com/golang/mock v1.6.0
 	github.com/ncw/swift/v2 v2.0.5
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.11.1
+	go.uber.org/mock v0.6.0
 )
 
 require (

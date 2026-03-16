@@ -1,19 +1,19 @@
 module github.com/Scalingo/go-utils/nsqproducer
 
-go 1.25
+go 1.25.0
 
 require (
 	github.com/Scalingo/go-utils/env v1.2.1
 	github.com/Scalingo/go-utils/logger v1.12.0
 	github.com/Scalingo/go-utils/otel v0.8.0
 	github.com/gofrs/uuid/v5 v5.4.0
-	github.com/golang/mock v1.6.0
 	github.com/nsqio/go-nsq v1.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.4
 	github.com/stretchr/testify v1.11.1
 	go.opentelemetry.io/otel v1.40.0
 	go.opentelemetry.io/otel/metric v1.40.0
+	go.uber.org/mock v0.6.0
 	gopkg.in/errgo.v1 v1.0.1
 )
 
@@ -22,6 +22,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
+	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
@@ -33,4 +34,4 @@ require (
 
 // In Dev you can uncomment the following line to use the local packages
 // replace github.com/Scalingo/go-utils/logger => ../logger
-// replace github.com/Scalingo/go-utils/env => ../env
+replace github.com/Scalingo/go-utils/otel => ../otel

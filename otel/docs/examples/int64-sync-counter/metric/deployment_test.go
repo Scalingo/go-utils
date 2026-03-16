@@ -3,7 +3,7 @@ package metric
 import (
 	"testing"
 
-	"github.com/golang/mock/gomock"
+		"go.uber.org/mock/gomock"
 
 	"github.com/Scalingo/go-utils/otel/otelmock"
 	"github.com/Scalingo/go-utils/otel/oteltest"

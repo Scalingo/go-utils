@@ -6,7 +6,6 @@ require (
 	github.com/Scalingo/go-utils/errors/v3 v3.2.0
 	github.com/Scalingo/go-utils/logger v1.12.0
 	github.com/gofrs/uuid/v5 v5.4.0
-	github.com/golang/mock v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/stretchr/testify v1.11.1
 	go.opentelemetry.io/otel v1.40.0
@@ -16,6 +15,7 @@ require (
 	go.opentelemetry.io/otel/metric v1.40.0
 	go.opentelemetry.io/otel/sdk v1.40.0
 	go.opentelemetry.io/otel/sdk/metric v1.40.0
+	go.uber.org/mock v0.6.0
 	google.golang.org/grpc v1.79.1
 )
 
