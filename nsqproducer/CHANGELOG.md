@@ -2,6 +2,10 @@
 
 ## To be Released
 
+## v1.4.1
+
+* refactor: replace `github.com/golang/mock` with `go.uber.org/mock`
+
 ## v1.4.0
 
 * feat(opentelemetry): add NSQ producer instrumentation
