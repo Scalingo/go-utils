@@ -5,7 +5,7 @@ go 1.25.0
 require (
 	github.com/Scalingo/go-utils/env v1.2.1
 	github.com/Scalingo/go-utils/logger v1.12.0
-	github.com/Scalingo/go-utils/otel v0.8.0
+	github.com/Scalingo/go-utils/otel v0.8.1
 	github.com/gofrs/uuid/v5 v5.4.0
 	github.com/nsqio/go-nsq v1.1.0
 	github.com/pkg/errors v0.9.1
@@ -22,7 +22,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
-	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
@@ -34,4 +33,4 @@ require (
 
 // In Dev you can uncomment the following line to use the local packages
 // replace github.com/Scalingo/go-utils/logger => ../logger
-replace github.com/Scalingo/go-utils/otel => ../otel
+// replace github.com/Scalingo/go-utils/otel => ../otel
