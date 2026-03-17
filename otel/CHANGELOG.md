@@ -2,6 +2,10 @@
 
 ## To be released
 
+## v0.8.1
+
+* refactor: replace `github.com/golang/mock` with `go.uber.org/mock`
+
 ## v0.8.0
 
 * feat: Add function options to Init() method in order to inject global attributes
