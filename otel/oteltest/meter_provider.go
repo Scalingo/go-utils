@@ -1,9 +1,9 @@
 package oteltest
 
 import (
-	"github.com/golang/mock/gomock"
 	otelsdk "go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
+	"go.uber.org/mock/gomock"
 
 	"github.com/Scalingo/go-utils/otel/otelmock"
 )

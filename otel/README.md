@@ -14,6 +14,8 @@ See the directory [docs/examples/int64-async-gauge](docs/examples/int64-async-ga
 
 ### Generate mocks
 
+We first need to vendor the dependencies (`go mod vendor`) in order to generate the external dependencies mocks.
+
 Run the following command to generate mocks for the `otel` package inside the `otelmock` package:
 ```bash
 gomock_generator
