@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* refactor: replace `github.com/golang/mock` with `go.uber.org/mock`
+
 ## v1.2.1
 
 * chore(go): corrective bump - Go version regression from 1.24.3 to 1.24
