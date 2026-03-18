@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.2.2
+
 * refactor: replace `github.com/golang/mock` with `go.uber.org/mock`
 
 ## v1.2.1
