@@ -3,6 +3,7 @@
 ## To be Released
 
 * refactor(cronsetup): rename `*MutextBuilder` to `*MutexBuilder`
+* refactor: replace `github.com/golang/mock` with `go.uber.org/mock`
 
 ## v1.6.0
 

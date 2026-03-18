@@ -1,19 +1,19 @@
 module github.com/Scalingo/go-utils/nsqconsumer
 
-go 1.25
+go 1.25.0
 
 require (
 	github.com/Scalingo/go-utils/errors/v3 v3.2.0
 	github.com/Scalingo/go-utils/logger v1.12.0
 	github.com/Scalingo/go-utils/nsqproducer v1.4.0
-	github.com/Scalingo/go-utils/otel v0.8.0
-	github.com/golang/mock v1.6.0
+	github.com/Scalingo/go-utils/otel v0.8.1
 	github.com/nsqio/go-nsq v1.1.0
 	github.com/sirupsen/logrus v1.9.4
 	github.com/stretchr/testify v1.11.1
 	github.com/stvp/rollbar v0.5.1
 	go.opentelemetry.io/otel v1.40.0
 	go.opentelemetry.io/otel/metric v1.40.0
+	go.uber.org/mock v0.6.0
 )
 
 require (
