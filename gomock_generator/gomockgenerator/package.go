@@ -7,7 +7,6 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -31,10 +30,17 @@ func interfaceSignature(pkg, iName string) (string, error) {
 	if err != nil {
 		return "", errors.Wrap(err, "fail to get current working directory")
 	}
-	fullPath := path.Join(os.Getenv("GOPATH"), "src", pkg)
-	vendoredPkg := filepath.Join(cwd, "vendor", pkg)
-	if _, err := os.Stat(vendoredPkg); err == nil {
-		fullPath = vendoredPkg
+	fullPath := pkg
+	if !filepath.IsAbs(fullPath) {
+		localPkg := filepath.Join(cwd, fullPath)
+		vendoredPkg := filepath.Join(cwd, "vendor", fullPath)
+		if isDir(localPkg) {
+			fullPath = localPkg
+		} else if isDir(vendoredPkg) {
+			fullPath = vendoredPkg
+		} else {
+			fullPath = localPkg
+		}
 	}
 	fileSet := token.NewFileSet()
 	packages, err := parser.ParseDir(fileSet, fullPath, func(info os.FileInfo) bool {
@@ -130,4 +136,9 @@ func fieldToString(field ast.Expr) string {
 	}
 
 	return fmt.Sprintf("%v", field)
+}
+
+func isDir(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && info.IsDir()
 }

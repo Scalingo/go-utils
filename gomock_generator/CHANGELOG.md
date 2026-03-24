@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat(drop-gopath) Stop basing all generation on GOPATH which is not mandatory anymore
+
 ## v1.4.2
 
 * build(gomock_generator): update `github.com/urfave/cli` from v1 to v3

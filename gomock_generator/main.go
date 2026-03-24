@@ -23,7 +23,7 @@ func main() {
 
 	%s --concurrent-goroutine 8 --mocks-filename mymocks.json --signatures-filename sigs.json
 
-	Reads the mymocks.json file from the current directory and generates the mocks, 8 goroutines at a time. The signatures of the mocks are stored in sigs.json, in the folder designated by the base package written in mymocks.json.
+	Reads the mymocks.json file from the current directory and generates the mocks, 8 goroutines at a time. The signatures of the mocks are stored in sigs.json in the same directory as mymocks.json.
 
 	`, cli.RootCommandHelpTemplate, os.Args[0])
 
@@ -35,8 +35,8 @@ func main() {
 		Usage:     "Highly parallelized generator of gomock mocks",
 		Version:   version,
 		Flags: []cli.Flag{
-			&cli.StringFlag{Name: "mocks-filepath", Value: "./mocks.json", Usage: "Path to the JSON file containing the MockConfiguration. Location of this file is the base package.", Sources: cli.EnvVars("MOCKS_FILEPATH")},
-			&cli.StringFlag{Name: "signatures-filename", Value: "mocks_sig.json", Usage: "Filename of the signatures cache. Location of this file is the base package.", Sources: cli.EnvVars("SIGNATURES_FILENAME")},
+			&cli.StringFlag{Name: "mocks-filepath", Value: "./mocks.json", Usage: "Path to the JSON file containing the MockConfiguration. Its containing directory is the base package directory.", Sources: cli.EnvVars("MOCKS_FILEPATH")},
+			&cli.StringFlag{Name: "signatures-filename", Value: "mocks_sig.json", Usage: "Filename of the signatures cache, written in the base package directory.", Sources: cli.EnvVars("SIGNATURES_FILENAME")},
 			&cli.IntFlag{Name: "concurrent-goroutines", Value: 4, Usage: "Concurrent amount of goroutines to generate mock.", Sources: cli.EnvVars("CONCURRENT_GOROUTINES")},
 			&cli.BoolFlag{Name: "debug", Usage: "Activate debug logs"},
 		},
