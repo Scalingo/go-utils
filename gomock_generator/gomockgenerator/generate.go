@@ -20,9 +20,10 @@ import (
 
 // GenerationConfiguration lets you configure the generation of mocks for your project
 type GenerationConfiguration struct {
-	// MocksFilePath is the path to the JSON file containing the mock configuration.  Location of this file is the base package.
+	// MocksFilePath is the path to the JSON file containing the mock configuration.
+	// The directory containing this file is considered as the base package directory.
 	MocksFilePath string
-	// SignaturesFilename is the filename of the signatures cache. Location of this file is the base package.
+	// SignaturesFilename is the filename of the signatures cache, written in the base package directory.
 	SignaturesFilename string
 	// ConcurrentGoroutines specifies the concurrent amount of goroutines which can execute
 	ConcurrentGoroutines int
@@ -64,10 +65,16 @@ func GenerateMocks(ctx context.Context, gcfg GenerationConfiguration, mocksCfg M
 	if err != nil {
 		return errors.Wrap(ctx, err, "fail to get current directory")
 	}
-	if mocksCfg.BaseDirectory == "" {
-		mocksCfg.BaseDirectory = mocksCfg.BasePackage
+	absMocksFilePath, err := filepath.Abs(gcfg.MocksFilePath)
+	if err != nil {
+		return errors.Wrap(ctx, err, "fail to resolve absolute path of the mocks file")
 	}
-	err = os.Chdir(path.Join(os.Getenv("GOPATH"), "src", mocksCfg.BaseDirectory))
+	basePackageDirectory := filepath.Dir(absMocksFilePath)
+	if mocksCfg.BaseDirectory == "" {
+		mocksCfg.BaseDirectory = "."
+	}
+	packageRootDirectory := filepath.Join(basePackageDirectory, mocksCfg.BaseDirectory)
+	err = os.Chdir(packageRootDirectory)
 	if err != nil {
 		return errors.Wrap(ctx, err, "fail to move to base package directory")
 	}
@@ -75,11 +82,12 @@ func GenerateMocks(ctx context.Context, gcfg GenerationConfiguration, mocksCfg M
 
 	ctx, log := logger.WithFieldToCtx(ctx, "nb_mocks", len(mocksCfg.Mocks))
 	log.WithFields(logrus.Fields{
-		"base_package": mocksCfg.BasePackage,
+		"base_package":           mocksCfg.BasePackage,
+		"base_package_directory": packageRootDirectory,
 	}).Infof("Generating %v mocks", len(mocksCfg.Mocks))
 
 	var mockSigs map[string]string
-	mockSigsPath := path.Join(os.Getenv("GOPATH"), "src", mocksCfg.BaseDirectory, gcfg.SignaturesFilename)
+	mockSigsPath := filepath.Join(packageRootDirectory, gcfg.SignaturesFilename)
 
 	sigs, err := os.ReadFile(mockSigsPath)
 	if os.IsNotExist(err) {
@@ -105,7 +113,7 @@ func GenerateMocks(ctx context.Context, gcfg GenerationConfiguration, mocksCfg M
 				<-sem
 			}()
 			sem <- true
-			path, sig, err := generateMock(ctx, gcfg, mocksCfg.BaseDirectory, mocksCfg.BasePackage, mock, mockSigs)
+			path, sig, err := generateMock(ctx, gcfg, packageRootDirectory, mocksCfg.BasePackage, mock, mockSigs)
 			if err != nil {
 				log.Error(err)
 				return
@@ -128,7 +136,7 @@ func GenerateMocks(ctx context.Context, gcfg GenerationConfiguration, mocksCfg M
 	return nil
 }
 
-func generateMock(ctx context.Context, gcfg GenerationConfiguration, baseDirectory, basePackage string, mock MockConfiguration, sigs map[string]string) (string, string, error) {
+func generateMock(ctx context.Context, gcfg GenerationConfiguration, basePackageDirectory, basePackage string, mock MockConfiguration, sigs map[string]string) (string, string, error) {
 	log := logger.Get(ctx)
 
 	if !mock.External {
@@ -164,11 +172,12 @@ func generateMock(ctx context.Context, gcfg GenerationConfiguration, baseDirecto
 		mock.DstPackage = dst
 	}
 
+	localSrcPackage := mock.SrcPackage
 	if !mock.External {
-		mock.SrcPackage = path.Join(basePackage, mock.SrcPackage)
+		mock.SrcPackage = path.Join(basePackage, localSrcPackage)
 	}
 
-	mockPath := filepath.Join(os.Getenv("GOPATH"), "src", baseDirectory, mock.MockFile)
+	mockPath := filepath.Join(basePackageDirectory, mock.MockFile)
 	log = log.WithFields(logrus.Fields{
 		"mock_file":   mock.MockFile,
 		"interface":   mock.Interface,
@@ -195,10 +204,15 @@ func generateMock(ctx context.Context, gcfg GenerationConfiguration, baseDirecto
 		mock.DstPackage = filepath.Base(mock.SrcPackage)
 	}
 
-	mockSrcPath := strings.Replace(mock.SrcPackage, basePackage, baseDirectory, -1)
+	hashSourcePath := mock.SrcPackage
+	hashKeyPackage := mock.SrcPackage
+	if !mock.External {
+		hashSourcePath = filepath.Join(basePackageDirectory, localSrcPackage)
+		hashKeyPackage = localSrcPackage
+	}
 
-	hashKey := fmt.Sprintf("%s.%s", mockSrcPath, mock.Interface)
-	hash, err := interfaceHash(mockSrcPath, mock.Interface)
+	hashKey := fmt.Sprintf("%s.%s", hashKeyPackage, mock.Interface)
+	hash, err := interfaceHash(hashSourcePath, mock.Interface)
 	if err != nil {
 		return "", "", errors.Wrapf(ctx, err, "fail to get interface hash of %v:%v", mock.SrcPackage, mock.Interface)
 	}
@@ -224,7 +238,7 @@ func generateMock(ctx context.Context, gcfg GenerationConfiguration, baseDirecto
 
 	vendorDir := path.Join(basePackage, "vendor")
 	cmd := fmt.Sprintf(
-		"mockgen %s -destination %s %s -package %s %s %s && sed -i s,%s,, %s && goimports -w %s",
+		"mockgen -write_command_comment=false %s -destination %s %s -package %s %s %s && sed -i s,%s,, %s && goimports -w %s",
 		gomod, mockPath, selfPackage, mock.DstPackage, mock.SrcPackage, mock.Interface,
 		vendorDir, mockPath, mockPath,
 	)
