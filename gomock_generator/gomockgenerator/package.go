@@ -34,11 +34,12 @@ func interfaceSignature(pkg, iName string) (string, error) {
 	if !filepath.IsAbs(fullPath) {
 		localPkg := filepath.Join(cwd, fullPath)
 		vendoredPkg := filepath.Join(cwd, "vendor", fullPath)
-		if isDir(localPkg) {
+		switch {
+		case isDir(localPkg):
 			fullPath = localPkg
-		} else if isDir(vendoredPkg) {
+		case isDir(vendoredPkg):
 			fullPath = vendoredPkg
-		} else {
+		default:
 			fullPath = localPkg
 		}
 	}
