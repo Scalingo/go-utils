@@ -6,7 +6,6 @@ require (
 	github.com/Scalingo/go-handlers v1.11.0
 	github.com/Scalingo/go-utils/errors/v3 v3.2.0
 	github.com/Scalingo/go-utils/logger v1.12.0
-	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.4
 	github.com/stretchr/testify v1.11.1
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
@@ -23,6 +22,7 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/gofrs/uuid/v5 v5.4.0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/urfave/negroni/v3 v3.1.1 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
@@ -37,4 +37,4 @@ require (
 
 // Uncomment if you want to use the local version of these packages (for development purpose)
 // replace github.com/Scalingo/go-utils/logger => ../logger
-// replace github.com/Scalingo/go-utils/errors => ../errors
+// replace github.com/Scalingo/go-utils/errors/v3 => ../errors
