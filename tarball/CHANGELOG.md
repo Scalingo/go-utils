@@ -2,7 +2,7 @@
 
 ## To be Released
 
-* refactor(tarball): replace `errgo` with `github.com/Scalingo/go-utils/errors/v3` [BREAKING CHANGE]
+* refactor: only use `github.com/Scalingo/go-utils/errors/v3` for errors
 
 ## v1.2.1
 
