@@ -1,16 +1,17 @@
 package nsqproducer
 
 import (
+	"context"
 	"strconv"
 
 	nsq "github.com/nsqio/go-nsq"
-	"github.com/pkg/errors"
 
 	"github.com/Scalingo/go-utils/env"
+	"github.com/Scalingo/go-utils/errors/v3"
 )
 
-func FromEnv() (*NsqProducer, error) {
-	E := env.InitMapFromEnv(map[string]string{
+func FromEnv(ctx context.Context) (*NsqProducer, error) {
+	envMap := env.InitMapFromEnv(map[string]string{
 		"NSQD_TLS":        "false",
 		"NSQD_TLS_CACERT": "",
 		"NSQD_TLS_CERT":   "",
@@ -24,34 +25,49 @@ func FromEnv() (*NsqProducer, error) {
 		"NSQ_MAX_IN_FLIGHT": "20",
 	})
 
-	nsqConfig, err := NsqConfigFromEnv(E)
+	nsqConfig, err := NsqConfigFromEnv(ctx, envMap)
 	if err != nil {
 		return nil, err
 	}
 
 	return New(ProducerOpts{
-		Host: E["NSQD_HOST"],
-		Port: E["NSQD_PORT"],
+		Host: envMap["NSQD_HOST"],
+		Port: envMap["NSQD_PORT"],
 
 		NsqConfig: nsqConfig,
 	})
 }
 
-func NsqConfigFromEnv(E map[string]string) (*nsq.Config, error) {
+func NsqConfigFromEnv(ctx context.Context, envMap map[string]string) (*nsq.Config, error) {
 	nsqConfig := nsq.NewConfig()
-	if E["NSQD_TLS"] == "true" {
-		nsqConfig.Set("tls_v1", true)
-		nsqConfig.Set("tls_root_ca_file", E["NSQD_TLS_CACERT"])
-		nsqConfig.Set("tls_cert", E["NSQD_TLS_CERT"])
-		nsqConfig.Set("tls_key", E["NSQD_TLS_KEY"])
+	if envMap["NSQD_TLS"] == "true" {
+		err := nsqConfig.Set("tls_v1", true)
+		if err != nil {
+			return nil, errors.Wrap(ctx, err, "set tls_v1")
+		}
+		err = nsqConfig.Set("tls_root_ca_file", envMap["NSQD_TLS_CACERT"])
+		if err != nil {
+			return nil, errors.Wrap(ctx, err, "set tls_root_ca_file")
+		}
+		err = nsqConfig.Set("tls_cert", envMap["NSQD_TLS_CERT"])
+		if err != nil {
+			return nil, errors.Wrap(ctx, err, "set tls_cert")
+		}
+		err = nsqConfig.Set("tls_key", envMap["NSQD_TLS_KEY"])
+		if err != nil {
+			return nil, errors.Wrap(ctx, err, "set tls_key")
+		}
 	}
 
-	maxInFlight, err := strconv.Atoi(E["NSQ_MAX_IN_FLIGHT"])
+	maxInFlight, err := strconv.Atoi(envMap["NSQ_MAX_IN_FLIGHT"])
 	if err != nil {
-		return nil, errors.Wrapf(err, "invalid max in flight: %s", E["NSQ_MAX_IN_FLIGHT"])
+		return nil, errors.Wrapf(ctx, err, "invalid max in flight: %s", envMap["NSQ_MAX_IN_FLIGHT"])
 	}
 
-	nsqConfig.Set("max_in_flight", maxInFlight)
+	err = nsqConfig.Set("max_in_flight", maxInFlight)
+	if err != nil {
+		return nil, errors.Wrap(ctx, err, "set max_in_flight")
+	}
 
 	return nsqConfig, nil
 }
