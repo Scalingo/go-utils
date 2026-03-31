@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* refactor(security): replace `github.com/pkg/errors` with `github.com/Scalingo/go-utils/errors/v3`
+
 ## v1.1.2
 
 * refactor: replace `github.com/golang/mock` with `go.uber.org/mock`
