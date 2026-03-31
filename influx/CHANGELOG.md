@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* refactor: only use `github.com/Scalingo/go-utils/errors/v3` for errors [BREAKING CHANGE]
+
 ## v1.3.1
 
 * chore(go): corrective bump - Go version regression from 1.24.3 to 1.24
