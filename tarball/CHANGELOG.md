@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* refactor(tarball): replace `errgo` with `github.com/Scalingo/go-utils/errors/v3`
+
 ## v1.2.1
 
 * chore(go): corrective bump - Go version regression from 1.24.3 to 1.24
