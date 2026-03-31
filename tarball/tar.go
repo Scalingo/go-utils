@@ -2,10 +2,11 @@ package tarball
 
 import (
 	"archive/tar"
+	"context"
 	"io"
 	"time"
 
-	"gopkg.in/errgo.v1"
+	errorsv3 "github.com/Scalingo/go-utils/errors/v3"
 )
 
 type TarFileReader struct {
@@ -15,7 +16,7 @@ type TarFileReader struct {
 
 // Tar is a methods to write a tarball out of a map of TarFileReader, data can
 // then come from disk or memory.
-func Tar(writer io.Writer, files map[string]TarFileReader) error {
+func Tar(ctx context.Context, writer io.Writer, files map[string]TarFileReader) error {
 	tarWriter := tar.NewWriter(writer)
 	defer tarWriter.Close()
 
@@ -29,12 +30,12 @@ func Tar(writer io.Writer, files map[string]TarFileReader) error {
 		}
 		err := tarWriter.WriteHeader(h)
 		if err != nil {
-			return errgo.Notef(err, "fail to add %v to archive", path)
+			return errorsv3.Wrapf(ctx, err, "add %v to archive", path)
 		}
 
 		_, err = io.Copy(tarWriter, reader)
 		if err != nil {
-			return errgo.Notef(err, "fail to copy file content of %v to tar archive", path)
+			return errorsv3.Wrapf(ctx, err, "copy file content of %v to tar archive", path)
 		}
 	}
 	return nil

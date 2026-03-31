@@ -9,5 +9,5 @@ This package contains helper to manipulate tarball, compressed or not.
 ```
 tarball.Create(context.Context, string, io.Writer, CreateOpts) error
 tarball.Extract(context.Context, string, io.Reader, ExtractOpts)
-tarball.Tar(io.Writer, map[string]TarFileReader) error
+tarball.Tar(context.Context, io.Writer, map[string]TarFileReader) error
 ```
