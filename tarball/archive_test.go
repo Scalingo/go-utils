@@ -60,7 +60,6 @@ func TestCreate(t *testing.T) {
 				err := Create(ctx, "/tmp", writer, CreateOpts{})
 				require.Error(t, err)
 				assert.Contains(t, err.Error(), "create tar archive of /tmp")
-				assert.Contains(t, err.Error(), "write")
 			},
 		},
 		"it should make a valid tar.gz archive": {

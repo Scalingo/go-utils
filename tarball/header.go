@@ -22,8 +22,6 @@ const (
 )
 
 const (
-	blockSize = 512
-
 	// Types
 	TypeReg           = '0'    // regular file
 	TypeRegA          = '\x00' // regular file
@@ -44,7 +42,7 @@ const (
 // sysStat, if non-nil, populates h from system-dependent fields of fi.
 var sysStat func(fi os.FileInfo, h *tar.Header) error
 
-func FileInfoHeader(ctx context.Context, fi os.FileInfo, link string, fullpath string) (*tar.Header, error) {
+func fileInfoHeader(ctx context.Context, fi os.FileInfo, link string, fullpath string) (*tar.Header, error) {
 	if fi == nil {
 		return nil, errors.New(ctx, "tar: FileInfo is nil")
 	}

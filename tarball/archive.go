@@ -70,7 +70,7 @@ func Create(ctx context.Context, src string, dst io.Writer, opts CreateOpts) err
 			path = filepath.Join(filepath.Base(src), path)
 		}
 
-		header, err := FileInfoHeader(ctx, info, path, fullpath)
+		header, err := fileInfoHeader(ctx, info, path, fullpath)
 		if err != nil {
 			return err
 		}
@@ -174,11 +174,11 @@ func Extract(ctx context.Context, dst string, reader io.Reader, opts *ExtractOpt
 		case tar.TypeReg:
 			fd, err := fs.OpenFile(path, os.O_CREATE|os.O_WRONLY, header.FileInfo().Mode())
 			if err != nil {
-				return errors.Wrapf(ctx, err, "open extracted file %v", path)
+				return errors.Wrapf(ctx, err, "open extracted file")
 			}
 			_, err = copier.Copy(fd, tarReader)
 			if err != nil {
-				return errors.Wrapf(ctx, err, "copy extracted file content to %v", path)
+				return errors.Wrapf(ctx, err, "copy extracted file content")
 			}
 			fd.Close()
 			if archiveUserUID != 0 && archiveUserGID != 0 {
