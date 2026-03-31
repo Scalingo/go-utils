@@ -8,8 +8,9 @@ import (
 
 func Test_HMAC(t *testing.T) {
 	t.Parallel()
+	ctx := t.Context()
 
-	key, err := CreateKey(128)
+	key, err := CreateKey(ctx, 128)
 	require.NoError(t, err)
 	plaintext := "123-12-1234"
 	require.Equal(

@@ -1,16 +1,17 @@
 package crypto
 
 import (
+	"context"
 	"crypto/aes"
 	"crypto/cipher"
 
-	"github.com/pkg/errors"
+	"github.com/Scalingo/go-utils/errors/v3"
 )
 
 // Decrypt decrypts data with the given key.
-func Decrypt(key, cipherText []byte) ([]byte, error) {
+func Decrypt(ctx context.Context, key, cipherText []byte) ([]byte, error) {
 	if len(cipherText) < aes.BlockSize {
-		return nil, errors.Errorf("cannot decrypt string: `cipherText` is smaller than AES block size, block size: %v", aes.BlockSize)
+		return nil, errors.Errorf(ctx, "decrypt ciphertext: input is smaller than AES block size %d", aes.BlockSize)
 	}
 
 	iv := cipherText[:aes.BlockSize]

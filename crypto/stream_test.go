@@ -11,17 +11,18 @@ import (
 
 func Test_Stream_EncrypterDecrypter(t *testing.T) {
 	t.Parallel()
+	ctx := t.Context()
 
-	encKey, err := CreateKey(32)
+	encKey, err := CreateKey(ctx, 32)
 	require.NoError(t, err)
-	macKey, err := CreateKey(32)
+	macKey, err := CreateKey(ctx, 32)
 	require.NoError(t, err)
 	plaintext := "Eleven is the best person in all of Hawkins Indiana. Some more text"
 	pt := []byte(plaintext)
 
 	src := bytes.NewReader(pt)
 
-	se, err := NewStreamEncrypter(encKey, macKey, src)
+	se, err := NewStreamEncrypter(ctx, encKey, macKey, src)
 	require.NoError(t, err)
 	assert.NotNil(t, se)
 
@@ -29,7 +30,7 @@ func Test_Stream_EncrypterDecrypter(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotNil(t, encrypted)
 
-	sd, err := NewStreamDecrypter(encKey, macKey, se.Meta(), bytes.NewReader(encrypted))
+	sd, err := NewStreamDecrypter(ctx, encKey, macKey, se.Meta(), bytes.NewReader(encrypted))
 	require.NoError(t, err)
 	assert.NotNil(t, sd)
 
@@ -37,5 +38,5 @@ func Test_Stream_EncrypterDecrypter(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, plaintext, string(decrypted))
 
-	require.Nil(t, sd.Authenticate())
+	require.NoError(t, sd.Authenticate(ctx))
 }
