@@ -11,14 +11,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	errorsv3 "github.com/Scalingo/go-utils/errors/v3"
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/fs"
 )
 
 type failedWriter struct{}
 
 func (w failedWriter) Write([]byte) (int, error) {
-	return -1, errorsv3.New(context.Background(), "write")
+	return -1, errors.New(context.Background(), "write")
 }
 
 func testFs(t *testing.T) fs.Fs {

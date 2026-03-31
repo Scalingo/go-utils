@@ -6,7 +6,7 @@ import (
 	"io"
 	"time"
 
-	errorsv3 "github.com/Scalingo/go-utils/errors/v3"
+	"github.com/Scalingo/go-utils/errors/v3"
 )
 
 type TarFileReader struct {
@@ -30,12 +30,12 @@ func Tar(ctx context.Context, writer io.Writer, files map[string]TarFileReader) 
 		}
 		err := tarWriter.WriteHeader(h)
 		if err != nil {
-			return errorsv3.Wrapf(ctx, err, "add %v to archive", path)
+			return errors.Wrapf(ctx, err, "add %v to archive", path)
 		}
 
 		_, err = io.Copy(tarWriter, reader)
 		if err != nil {
-			return errorsv3.Wrapf(ctx, err, "copy file content of %v to tar archive", path)
+			return errors.Wrapf(ctx, err, "copy file content of %v to tar archive", path)
 		}
 	}
 	return nil

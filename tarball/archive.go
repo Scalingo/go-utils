@@ -13,7 +13,7 @@ import (
 
 	"github.com/spf13/afero"
 
-	errorsv3 "github.com/Scalingo/go-utils/errors/v3"
+	"github.com/Scalingo/go-utils/errors/v3"
 	fspkg "github.com/Scalingo/go-utils/fs"
 	iopkg "github.com/Scalingo/go-utils/io"
 	"github.com/Scalingo/go-utils/logger"
@@ -34,10 +34,10 @@ func Create(ctx context.Context, src string, dst io.Writer, opts CreateOpts) err
 	log.Debug("Create archive")
 
 	if src == "" {
-		return errorsv3.New(ctx, "src is empty")
+		return errors.New(ctx, "src is empty")
 	}
 	if dst == nil {
-		return errorsv3.New(ctx, "dst writer is nil")
+		return errors.New(ctx, "dst writer is nil")
 	}
 	if opts.CopyBufferSize == 0 {
 		// 512kB of read buffer when reading file (instead of 32kB default)
@@ -94,7 +94,7 @@ func Create(ctx context.Context, src string, dst io.Writer, opts CreateOpts) err
 	})
 
 	if err != nil {
-		return errorsv3.Wrapf(ctx, err, "create tar archive of %v", src)
+		return errors.Wrapf(ctx, err, "create tar archive of %v", src)
 	}
 	return nil
 }
@@ -134,7 +134,7 @@ func Extract(ctx context.Context, dst string, reader io.Reader, opts *ExtractOpt
 	if opts.User != "" {
 		u, err := user.Lookup(opts.User)
 		if err != nil {
-			return errorsv3.Wrapf(ctx, err, "get user %v", opts.User)
+			return errors.Wrapf(ctx, err, "get user %v", opts.User)
 		}
 		archiveUserUID, _ = strconv.Atoi(u.Uid)
 		archiveUserGID, _ = strconv.Atoi(u.Gid)
@@ -148,7 +148,7 @@ func Extract(ctx context.Context, dst string, reader io.Reader, opts *ExtractOpt
 
 	gzipReader, err := gzip.NewReader(reader)
 	if err != nil {
-		return errorsv3.Wrap(ctx, err, "read gzip stream")
+		return errors.Wrap(ctx, err, "read gzip stream")
 	}
 	defer gzipReader.Close()
 
@@ -159,7 +159,7 @@ func Extract(ctx context.Context, dst string, reader io.Reader, opts *ExtractOpt
 			break
 		}
 		if err != nil {
-			return errorsv3.Wrap(ctx, err, "read tar header")
+			return errors.Wrap(ctx, err, "read tar header")
 		}
 
 		path := dst + "/" + header.Name
@@ -174,11 +174,11 @@ func Extract(ctx context.Context, dst string, reader io.Reader, opts *ExtractOpt
 		case tar.TypeReg:
 			fd, err := fs.OpenFile(path, os.O_CREATE|os.O_WRONLY, header.FileInfo().Mode())
 			if err != nil {
-				return errorsv3.Wrapf(ctx, err, "open extracted file %v", path)
+				return errors.Wrapf(ctx, err, "open extracted file %v", path)
 			}
 			_, err = copier.Copy(fd, tarReader)
 			if err != nil {
-				return errorsv3.Wrapf(ctx, err, "copy extracted file content to %v", path)
+				return errors.Wrapf(ctx, err, "copy extracted file content to %v", path)
 			}
 			fd.Close()
 			if archiveUserUID != 0 && archiveUserGID != 0 {
@@ -189,7 +189,7 @@ func Extract(ctx context.Context, dst string, reader io.Reader, opts *ExtractOpt
 		case tar.TypeSymlink:
 			err := fs.Symlink(header.Linkname, path)
 			if err != nil {
-				return errorsv3.Wrapf(ctx, err, "create symlink %v -> %v", path, header.Linkname)
+				return errors.Wrapf(ctx, err, "create symlink %v -> %v", path, header.Linkname)
 			}
 		case tar.TypeLink:
 			fs.Link(path, dst+"/"+header.Linkname)

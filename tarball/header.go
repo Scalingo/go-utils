@@ -5,7 +5,7 @@ import (
 	"context"
 	"os"
 
-	errorsv3 "github.com/Scalingo/go-utils/errors/v3"
+	"github.com/Scalingo/go-utils/errors/v3"
 )
 
 const (
@@ -46,7 +46,7 @@ var sysStat func(fi os.FileInfo, h *tar.Header) error
 
 func FileInfoHeader(ctx context.Context, fi os.FileInfo, link string, fullpath string) (*tar.Header, error) {
 	if fi == nil {
-		return nil, errorsv3.New(ctx, "tar: FileInfo is nil")
+		return nil, errors.New(ctx, "tar: FileInfo is nil")
 	}
 	fm := fi.Mode()
 	h := &tar.Header{
@@ -68,7 +68,7 @@ func FileInfoHeader(ctx context.Context, fi os.FileInfo, link string, fullpath s
 		h.Mode |= c_ISLNK
 		target, err := os.Readlink(fullpath)
 		if err != nil {
-			return nil, errorsv3.Wrapf(ctx, err, "archive/tar: resolve symlink %v", fullpath)
+			return nil, errors.Wrapf(ctx, err, "archive/tar: resolve symlink %v", fullpath)
 		}
 		h.Linkname = target
 	case fm&os.ModeDevice != 0:
@@ -85,7 +85,7 @@ func FileInfoHeader(ctx context.Context, fi os.FileInfo, link string, fullpath s
 	case fm&os.ModeSocket != 0:
 		h.Mode |= c_ISSOCK
 	default:
-		return nil, errorsv3.Errorf(ctx, "archive/tar: unknown file mode %v", fm)
+		return nil, errors.Errorf(ctx, "archive/tar: unknown file mode %v", fm)
 	}
 	if fm&os.ModeSetuid != 0 {
 		h.Mode |= c_ISUID
