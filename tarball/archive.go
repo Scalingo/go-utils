@@ -70,7 +70,7 @@ func Create(ctx context.Context, src string, dst io.Writer, opts CreateOpts) err
 			path = filepath.Join(filepath.Base(src), path)
 		}
 
-		header, err := FileInfoHeader(info, path, fullpath)
+		header, err := FileInfoHeader(ctx, info, path, fullpath)
 		if err != nil {
 			return err
 		}
