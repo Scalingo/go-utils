@@ -3,7 +3,6 @@ package mongo
 import (
 	"context"
 	"crypto/tls"
-	"errors"
 	"net"
 	"net/url"
 	"os"
@@ -14,6 +13,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"gopkg.in/mgo.v2"
 
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/logger"
 )
 
@@ -29,9 +29,10 @@ var (
 func Session(log logrus.FieldLogger) *mgo.Session {
 	sessionOnce.Do(func() {
 		log := log.WithField("process", "mongo-init")
-		err := errors.New("")
+		ctx := logger.ToCtx(context.Background(), log)
+
+		err := errors.New(ctx, "")
 		for err != nil {
-			ctx := logger.ToCtx(context.Background(), log)
 			_session, err = BuildSession(ctx, os.Getenv("MONGO_URL"))
 			if err != nil {
 				retryDelay := 10 * time.Second
@@ -51,8 +52,9 @@ func BuildSession(ctx context.Context, rawURL string) (*mgo.Session, error) {
 
 	u, err := url.Parse(rawURL)
 	if err != nil {
-		return nil, errors.New("not a valid MONGO_URL")
+		return nil, errors.Wrap(ctx, err, "not a valid MONGO_URL")
 	}
+
 	withTLS := false
 	if u.Query().Get("ssl") == "true" {
 		withTLS = true
@@ -65,7 +67,7 @@ func BuildSession(ctx context.Context, rawURL string) (*mgo.Session, error) {
 	if queryTimeout != "" {
 		timeout, err = time.ParseDuration(queryTimeout)
 		if err != nil {
-			return nil, errors.New("invalid duration in timeout parameter")
+			return nil, errors.New(ctx, "invalid duration in timeout parameter")
 		}
 		rawURL = strings.Replace(rawURL, "?timeout="+queryTimeout, "?", 1)
 		rawURL = strings.Replace(rawURL, "&timeout="+queryTimeout, "", 1)
@@ -73,7 +75,7 @@ func BuildSession(ctx context.Context, rawURL string) (*mgo.Session, error) {
 
 	info, err := mgo.ParseURL(rawURL)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(ctx, err, "parse MongoDB connection URL")
 	}
 	info.Timeout = timeout
 	if withTLS {
@@ -88,7 +90,7 @@ func BuildSession(ctx context.Context, rawURL string) (*mgo.Session, error) {
 	log.WithField("mongodb_host", u.Host).Info("Initialize the MongoDB connection")
 	s, err := mgo.DialWithInfo(info)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(ctx, err, "connect to MongoDB")
 	}
 	return s, nil
 }

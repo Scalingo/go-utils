@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/pkg/errors"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/Scalingo/go-handlers"
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/mongo/document"
 )
 
@@ -48,7 +48,7 @@ type ServiceOpts struct {
 	MaxPerPage     int
 }
 
-func (s ServiceOpts) paramValidation(meta *Meta, collection string, opts *PaginateOpts) error {
+func (s ServiceOpts) paramValidation(ctx context.Context, meta *Meta, collection string, opts *PaginateOpts) error {
 	badRequestErr := handlers.NewBadRequestErrors()
 	pageErr := "Requested page"
 	perPageErr := "per_page"
@@ -57,11 +57,11 @@ func (s ServiceOpts) paramValidation(meta *Meta, collection string, opts *Pagina
 	if s.PerPageDefault > s.MaxPerPage ||
 		s.PerPageDefault <= 0 ||
 		s.MaxPerPage <= 0 {
-		return errors.New("invalid pagination service configuration: MaxPerPage > PerPageDefault > 0")
+		return errors.New(ctx, "invalid pagination service configuration: MaxPerPage > PerPageDefault > 0")
 	}
 	// Parameter validation
 	if collection == "" {
-		return errors.New("invalid pagination service configuration: collection must be set")
+		return errors.New(ctx, "invalid pagination service configuration: collection must be set")
 	}
 
 	// Default values assignation
@@ -122,14 +122,14 @@ func (s ServiceOpts) Paginate(ctx context.Context,
 
 	meta.TotalCount, err = query.Count()
 	if err != nil {
-		return meta, errors.Wrapf(err, "fail to count items for the collection %s", collection)
+		return meta, errors.Wrapf(ctx, err, "count items for collection %s", collection)
 	}
 
 	if meta.TotalCount == 0 {
 		return meta, nil
 	}
 
-	err = s.paramValidation(&meta, collection, &opts)
+	err = s.paramValidation(ctx, &meta, collection, &opts)
 	if err != nil {
 		return meta, err
 	}
@@ -152,7 +152,7 @@ func (s ServiceOpts) Paginate(ctx context.Context,
 	offset := (meta.CurrentPage - 1) * meta.perPageNum
 	err = query.Skip(offset).Sort(opts.SortOrder).Limit(meta.perPageNum).All(result)
 	if err != nil {
-		return meta, errors.Wrapf(err, "fail to query database for collection %s", collection)
+		return meta, errors.Wrapf(ctx, err, "query database for collection '%s'", collection)
 	}
 
 	return meta, nil

@@ -3,7 +3,6 @@ package document
 import (
 	"context"
 	stderrors "errors"
-	"fmt"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -212,7 +211,7 @@ func Where(ctx context.Context, collectionName string, query bson.M, data interf
 	defer session.Close()
 	err := mongoQuery.All(data)
 	if err != nil {
-		return fmt.Errorf("fail to query mongo %v: %v", query, err)
+		return errors.Wrapf(ctx, err, "query MongoDB with query '%v'", query)
 	}
 	return nil
 }
@@ -222,7 +221,7 @@ func WhereUnscoped(ctx context.Context, collectionName string, query bson.M, dat
 	defer session.Close()
 	err := mongoQuery.All(data)
 	if err != nil {
-		return fmt.Errorf("fail to query mongo %v: %v", query, err)
+		return errors.Wrapf(ctx, err, "query MongoDB with unscoped query '%v'", query)
 	}
 	return nil
 }
@@ -279,10 +278,10 @@ func WhereIterUnscoped(ctx context.Context, collectionName string, query bson.M,
 
 	err := fun(iter)
 	if err != nil {
-		return fmt.Errorf("error occurred during iteration over collection %v with query %v: %v", collectionName, query, err)
+		return errors.Wrapf(ctx, err, "iterate over collection '%v' with query '%v'", collectionName, query)
 	}
 	if iter.Err() != nil {
-		return fmt.Errorf("fail to iterate over collection %v with query %v: %v", collectionName, query, iter.Err())
+		return errors.Wrapf(ctx, iter.Err(), "iterate over collection '%v' with query '%v'", collectionName, query)
 	}
 	return nil
 }
@@ -302,7 +301,7 @@ func EnsureParanoidIndices(ctx context.Context, collectionNames ...string) {
 		defer c.Database.Session.Close()
 		err := c.EnsureIndexKey("deleted_at")
 		if err != nil {
-			log.WithError(err).Error("fail to setup the deleted_at index")
+			log.WithError(err).Error("Fail to setup the deleted_at index")
 			continue
 		}
 	}
