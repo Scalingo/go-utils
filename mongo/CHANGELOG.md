@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.5.3
+
 * build(deps): update `github.com/Scalingo/go-utils/errors` from v2 to v3
 * refactor: replace `github.com/pkg/errors` with `github.com/Scalingo/go-utils/errors/v3`
 
