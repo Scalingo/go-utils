@@ -53,8 +53,7 @@ func NewCopier(opts ...CopierOpt) Copier {
 // Copy is highly inspired from io.Copy, but calls to fadvise have been
 // added to prevent caching the whole content of the files during the process,
 // impacting the whole OS disk cache
-func (c Copier) Copy(dst io.Writer, src io.Reader) (int64, error) {
-	ctx := context.Background()
+func (c Copier) Copy(ctx context.Context, dst io.Writer, src io.Reader) (int64, error) {
 	var (
 		written int64
 		err     error

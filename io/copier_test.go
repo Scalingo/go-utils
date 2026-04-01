@@ -12,6 +12,7 @@ import (
 )
 
 func TestCopier_Copy(t *testing.T) {
+	ctx := t.Context()
 	wd, err := os.Getwd()
 	require.NoError(t, err)
 	wd = filepath.Join(wd, "tmp")
@@ -23,7 +24,7 @@ func TestCopier_Copy(t *testing.T) {
 		src := bytes.NewBuffer([]byte("hello"))
 		dst := &bytes.Buffer{}
 		copier := NewCopier()
-		n, err := copier.Copy(dst, src)
+		n, err := copier.Copy(ctx, dst, src)
 		require.NoError(t, err)
 		assert.Equal(t, int64(5), n)
 		assert.Equal(t, "hello", dst.String())
@@ -44,7 +45,7 @@ func TestCopier_Copy(t *testing.T) {
 		require.NoError(t, err)
 
 		copier := NewCopier()
-		n, err := copier.Copy(dst, src)
+		n, err := copier.Copy(ctx, dst, src)
 		require.NoError(t, err)
 		assert.Equal(t, int64(5), n)
 
@@ -79,7 +80,7 @@ func TestCopier_Copy(t *testing.T) {
 		require.NoError(t, err)
 
 		copier := NewCopier(WithNoDiskCache)
-		_, err = copier.Copy(dst, src)
+		_, err = copier.Copy(ctx, dst, src)
 		require.NoError(t, err)
 		require.NoError(t, dst.Close())
 		require.NoError(t, src.Close())

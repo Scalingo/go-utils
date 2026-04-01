@@ -2,7 +2,7 @@
 
 ## To be Released
 
-* refactor(io): replace `github.com/pkg/errors` with `github.com/Scalingo/go-utils/errors/v3`
+* refactor(io): replace `github.com/pkg/errors` with `github.com/Scalingo/go-utils/errors/v3` [BREAKING CHANGE]
 
 ## v1.2.1
 
