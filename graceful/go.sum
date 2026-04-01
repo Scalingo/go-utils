@@ -1,7 +1,7 @@
 github.com/Scalingo/go-utils/errors/v3 v3.2.0 h1:Ks+v2oRwv3VZfe+xVB+kpfmZouXHVCPHHtwL5W60prc=
 github.com/Scalingo/go-utils/errors/v3 v3.2.0/go.mod h1:jVVNoOdYFjuNkR/BeEZWNWJVvu4jmyLY4udlsQQyBss=
-github.com/Scalingo/go-utils/logger v1.12.0 h1:tK1LwRz7ijYLGe7/c4SzAtNEJCbSPQnOo859O1FsOLM=
-github.com/Scalingo/go-utils/logger v1.12.0/go.mod h1:PgZwmIEqJ/1hBeXKmwzFNjAfYHHglnalt49gnAzuW9M=
+github.com/Scalingo/go-utils/logger v1.12.1 h1:r+RqwOcnsTtKoQdvcNVZCtu0Xhq01tp/3gT6+4Q7AxI=
+github.com/Scalingo/go-utils/logger v1.12.1/go.mod h1:uH7LVG1pQR+5jpVgGDFyFfTMeHc3nUXC7GRUc2dPoZ4=
 github.com/cloudflare/tableflip v1.2.3 h1:8I+B99QnnEWPHOY3fWipwVKxS70LGgUsslG7CSfmHMw=
 github.com/cloudflare/tableflip v1.2.3/go.mod h1:P4gRehmV6Z2bY5ao5ml9Pd8u6kuEnlB37pUFMmv7j2E=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
@@ -24,8 +24,8 @@ github.com/sirupsen/logrus v1.9.4/go.mod h1:ftWc9WdOfJ0a92nsE2jF5u5ZwH8Bv2zdeOC4
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
 golang.org/x/sys v0.0.0-20210119212857-b64e53b001e4/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
-golang.org/x/sys v0.41.0 h1:Ivj+2Cp/ylzLiEU89QhWblYnOE9zerudt9Ftecq2C6k=
-golang.org/x/sys v0.41.0/go.mod h1:OgkHotnGiDImocRcuBABYBEXf8A9a87e/uXjp9XT3ks=
+golang.org/x/sys v0.42.0 h1:omrd2nAlyT5ESRdCLYdm3+fMfNFE/+Rf4bDIQImRJeo=
+golang.org/x/sys v0.42.0/go.mod h1:4GL1E5IUh+htKOUEOaiffhrAeqysfVGipDYzABqnCmw=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/errgo.v1 v1.0.1 h1:oQFRXzZ7CkBGdm1XZm/EbQYaYNNEElNBOd09M6cqNso=
