@@ -1,5 +1,7 @@
 github.com/Scalingo/go-utils/env v1.2.1 h1:myWfa0C8UtCi0pRPHFnIgZgeTt2dlJg8YfvCAE7HEtk=
 github.com/Scalingo/go-utils/env v1.2.1/go.mod h1:FjTfQmlmT0QPZ/KqxhpYLKsz10UPD6r5Iab9GigzHPk=
+github.com/Scalingo/go-utils/errors/v3 v3.2.0 h1:Ks+v2oRwv3VZfe+xVB+kpfmZouXHVCPHHtwL5W60prc=
+github.com/Scalingo/go-utils/errors/v3 v3.2.0/go.mod h1:jVVNoOdYFjuNkR/BeEZWNWJVvu4jmyLY4udlsQQyBss=
 github.com/Scalingo/go-utils/logger v1.12.1 h1:r+RqwOcnsTtKoQdvcNVZCtu0Xhq01tp/3gT6+4Q7AxI=
 github.com/Scalingo/go-utils/logger v1.12.1/go.mod h1:uH7LVG1pQR+5jpVgGDFyFfTMeHc3nUXC7GRUc2dPoZ4=
 github.com/Scalingo/go-utils/otel v0.8.1 h1:rqwRo0Q53QzPO/M1aQ5FQGsBMeKMkxMyzVNJwis2nYI=

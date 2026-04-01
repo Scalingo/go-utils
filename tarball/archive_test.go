@@ -8,17 +8,17 @@ import (
 	"os/exec"
 	"testing"
 
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/fs"
 )
 
 type failedWriter struct{}
 
 func (w failedWriter) Write([]byte) (int, error) {
-	return -1, errors.New("fail to write")
+	return -1, errors.New(context.Background(), "write")
 }
 
 func testFs(t *testing.T) fs.Fs {
@@ -59,7 +59,7 @@ func TestCreate(t *testing.T) {
 				writer := failedWriter{}
 				err := Create(ctx, "/tmp", writer, CreateOpts{})
 				require.Error(t, err)
-				assert.Contains(t, err.Error(), "fail to write")
+				assert.Contains(t, err.Error(), "create tar archive of /tmp")
 			},
 		},
 		"it should make a valid tar.gz archive": {

@@ -1,6 +1,7 @@
 package nsqlbproducer
 
 import (
+	"context"
 	"strings"
 
 	"github.com/sirupsen/logrus"
@@ -14,7 +15,7 @@ type FromEnvOpts struct {
 	SkipLogSet map[string]bool
 }
 
-func FromEnv(opts FromEnvOpts) (*NsqLBProducer, error) {
+func FromEnv(ctx context.Context, opts FromEnvOpts) (*NsqLBProducer, error) {
 	E := env.InitMapFromEnv(map[string]string{
 		"NSQD_TLS":              "false",
 		"NSQD_TLS_CACERT":       "",
@@ -40,7 +41,7 @@ func FromEnv(opts FromEnvOpts) (*NsqLBProducer, error) {
 		return nil, err
 	}
 
-	return New(LBProducerOpts{
+	return New(ctx, LBProducerOpts{
 		Hosts:      hosts,
 		NsqConfig:  nsqConfig,
 		Strategy:   StrategiesFromName[E["NSQ_PRODUCER_STRATEGY"]],

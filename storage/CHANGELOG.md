@@ -2,7 +2,7 @@
 
 ## To be Released
 
-* build(deps): update `github.com/Scalingo/go-utils/errors` from v2 to v3
+* refactor: only use `github.com/Scalingo/go-utils/errors/v3` for errors
 
 ## v1.7.2
 

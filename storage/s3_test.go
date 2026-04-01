@@ -2,7 +2,7 @@ package storage
 
 import (
 	"context"
-	"errors"
+	stderrors "errors"
 	"fmt"
 	"io"
 	"strings"
@@ -141,7 +141,7 @@ func TestS3_Info(t *testing.T) {
 			expectMock: func(t *testing.T, m *storagemock.MockS3Client, key string) {
 				m.EXPECT().HeadObject(gomock.Any(), &s3.HeadObjectInput{
 					Bucket: aws.String("bucket"), Key: aws.String(key),
-				}).Return(nil, errors.New("there is an issue"))
+				}).Return(nil, stderrors.New("there is an issue"))
 			},
 			err:          "there is an issue",
 			expectedInfo: storagetypes.Info{},
@@ -241,7 +241,7 @@ func TestS3_List(t *testing.T) {
 					Bucket:  aws.String(bucket),
 					Prefix:  aws.String(prefix),
 					MaxKeys: aws.Int32(S3ListMaxKeys),
-				}).Return(nil, errors.New("err list"))
+				}).Return(nil, stderrors.New("err list"))
 			},
 			expectedError: "err list",
 		},
@@ -290,7 +290,7 @@ func TestS3_Move(t *testing.T) {
 						assert.Equal(t, fullPath(dstPath), *input.Key)
 						assert.Equal(t, srcPathWithBucket, *input.CopySource)
 					}).
-					Return(nil, errors.New("err copy"))
+					Return(nil, stderrors.New("err copy"))
 			},
 			expectedError: "err copy",
 		},
@@ -311,7 +311,7 @@ func TestS3_Move(t *testing.T) {
 						assert.Equal(t, bucket, *input.Bucket)
 						assert.Equal(t, fullPath(srcPath), *input.Key)
 					}).
-					Return(nil, errors.New("err delete"))
+					Return(nil, stderrors.New("err delete"))
 			},
 			expectedError: "err delete",
 		},
@@ -444,7 +444,7 @@ func TestS3_GetWithRetries(t *testing.T) {
 
 				m.EXPECT().GetObject(gomock.Any(), &s3.GetObjectInput{
 					Bucket: aws.String(bucket), Key: aws.String(key), Range: aws.String("bytes=0-11"),
-				}).Return(nil, errors.New("connection closed")).Times(3)
+				}).Return(nil, stderrors.New("connection closed")).Times(3)
 			},
 			expectedError: "connection closed",
 		},

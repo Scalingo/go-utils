@@ -10,12 +10,13 @@ import (
 
 func Test_CreateKey(t *testing.T) {
 	t.Parallel()
+	ctx := t.Context()
 
-	key, err := CreateKey(32)
+	key, err := CreateKey(ctx, 32)
 	require.NoError(t, err)
 	assert.Len(t, key, 32)
 
-	key2, err := CreateKey(32)
+	key2, err := CreateKey(ctx, 32)
 	require.NoError(t, err)
 	assert.Len(t, key2, 32)
 

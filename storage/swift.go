@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/ncw/swift/v2"
-	"github.com/pkg/errors"
 
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/go-utils/storage/types"
 )
@@ -31,16 +31,16 @@ type Swift struct {
 // NewSwift instantiate a new connection to a Swift object storage. The
 // configuration is taken from the environment. Refer to the
 // github.com/ncw/swift documentation for more information.
-func NewSwift(cfg SwiftConfig) (*Swift, error) {
+func NewSwift(ctx context.Context, cfg SwiftConfig) (*Swift, error) {
 	conn := new(swift.Connection)
 	err := conn.ApplyEnvironment()
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to get Swift configuration from the environment")
+		return nil, errors.Wrap(ctx, err, "get Swift configuration from the environment")
 	}
 
-	err = conn.Authenticate(context.TODO())
+	err = conn.Authenticate(ctx)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to authentication to Swift")
+		return nil, errors.Wrap(ctx, err, "authenticate to Swift")
 	}
 
 	return &Swift{cfg: cfg, conn: conn}, nil
@@ -53,16 +53,16 @@ func (s *Swift) Get(ctx context.Context, path string) (io.ReadCloser, error) {
 
 	object, _, err := s.conn.ObjectOpen(ctx, s.cfg.Container, path, false, swift.Headers{})
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to get object %v", path)
+		return nil, errors.Wrapf(ctx, err, "get object %v", path)
 	}
 	return object, nil
 }
 
 func (s *Swift) Upload(ctx context.Context, reader io.Reader, path string) error {
 	path = s.fullPath(path)
-	segmentPath, err := s.segmentPath(path)
+	segmentPath, err := s.segmentPath(ctx, path)
 	if err != nil {
-		return errors.Wrapf(err, "fail to generate segment path")
+		return errors.Wrap(ctx, err, "generate segment path")
 	}
 	object, err := s.conn.DynamicLargeObjectCreateFile(ctx, &swift.LargeObjectOpts{
 		ObjectName:       path,
@@ -73,18 +73,18 @@ func (s *Swift) Upload(ctx context.Context, reader io.Reader, path string) error
 		ChunkSize:        s.cfg.ChunkSize,
 	})
 	if err != nil {
-		return errors.Wrapf(err, "fail to create a dynamic large object %v", path)
+		return errors.Wrapf(ctx, err, "create dynamic large object %v", path)
 	}
 	defer object.Close()
 
 	_, err = io.Copy(object, reader)
 	if err != nil {
-		return errors.Wrapf(err, "fail to upload content of object %v", path)
+		return errors.Wrapf(ctx, err, "upload content of object %v", path)
 	}
 
 	err = object.Flush(ctx)
 	if err != nil {
-		return errors.Wrapf(err, "fail to flush object %v", path)
+		return errors.Wrapf(ctx, err, "flush object %v", path)
 	}
 
 	return nil
@@ -97,7 +97,7 @@ func (s *Swift) Size(ctx context.Context, path string) (int64, error) {
 	path = s.fullPath(path)
 	info, _, err := s.conn.Object(ctx, s.cfg.Container, path)
 	if err != nil {
-		return -1, errors.Wrapf(err, "fail to get object info %v", path)
+		return -1, errors.Wrapf(ctx, err, "get object info %v", path)
 	}
 	return info.Bytes, nil
 }
@@ -109,7 +109,7 @@ func (s *Swift) Delete(ctx context.Context, path string) error {
 		if err.Error() == swift.ObjectNotFound.Error() {
 			return ObjectNotFound{Path: path}
 		}
-		return errors.Wrapf(err, "fail to delete object %v", path)
+		return errors.Wrapf(ctx, err, "delete object %v", path)
 	}
 	return nil
 }
@@ -121,7 +121,7 @@ func (s *Swift) Info(ctx context.Context, path string) (types.Info, error) {
 		if err.Error() == swift.ObjectNotFound.Error() {
 			return types.Info{}, ObjectNotFound{Path: path}
 		}
-		return types.Info{}, errors.Wrapf(err, "fail to get object info %v", path)
+		return types.Info{}, errors.Wrapf(ctx, err, "get object info %v", path)
 	}
 
 	return types.Info{
@@ -133,7 +133,7 @@ func (s *Swift) Info(ctx context.Context, path string) (types.Info, error) {
 func (s *Swift) Move(ctx context.Context, srcPath, dstPath string) error {
 	err := s.conn.ObjectMove(ctx, s.cfg.Container, srcPath, s.cfg.Container, dstPath)
 	if err != nil {
-		return errors.Wrapf(err, "fail to move the Swift object '%v' on Swift", srcPath)
+		return errors.Wrapf(ctx, err, "move Swift object %v", srcPath)
 	}
 
 	return nil
@@ -145,17 +145,17 @@ func (s *Swift) List(ctx context.Context, prefix string, opts types.ListOpts) ([
 		Limit:  int(opts.MaxKeys),
 	})
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to list objects in '%v'", prefix)
+		return nil, errors.Wrapf(ctx, err, "list objects in %v", prefix)
 	}
 
 	return objects, nil
 }
 
-func (s *Swift) segmentPath(path string) (string, error) {
+func (s *Swift) segmentPath(ctx context.Context, path string) (string, error) {
 	checksum := sha1.New()
 	random := make([]byte, 32)
 	if _, err := rand.Read(random); err != nil {
-		return "", err
+		return "", errors.Wrap(ctx, err, "read random bytes for Swift segment path")
 	}
 	path = hex.EncodeToString(checksum.Sum(append([]byte(path), random...)))
 	return strings.TrimLeft(strings.TrimRight(s.cfg.Prefix+"/segments/"+path[0:3]+"/"+path[3:], "/"), "/"), nil

@@ -9,8 +9,8 @@ import (
 	"github.com/gofrs/uuid/v5"
 	"github.com/nsqio/go-nsq"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/errgo.v1"
 
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/logger"
 )
 
@@ -102,21 +102,21 @@ func (p *NsqProducer) Publish(ctx context.Context, topic string, message NsqMess
 	var err error
 	message.RequestID, err = p.requestID(ctx)
 	if err != nil {
-		err = errgo.Notef(err, "fail to get requestID")
+		err = errors.Wrap(ctx, err, "get request ID")
 		telemetryErr = err
 		return err
 	}
 
 	body, err := json.Marshal(message)
 	if err != nil {
-		err = errgo.Mask(err, errgo.Any)
+		err = errors.Wrap(ctx, err, "marshal message")
 		telemetryErr = err
 		return err
 	}
 
 	err = p.producer.Publish(topic, body)
 	if err != nil {
-		err = errgo.Mask(err, errgo.Any)
+		err = errors.Wrap(ctx, err, "publish message")
 		telemetryErr = err
 		return err
 	}
@@ -143,21 +143,21 @@ func (p *NsqProducer) DeferredPublish(ctx context.Context, topic string, delay i
 	var err error
 	message.RequestID, err = p.requestID(ctx)
 	if err != nil {
-		err = errgo.Notef(err, "fail to get requestID")
+		err = errors.Wrap(ctx, err, "get request ID")
 		telemetryErr = err
 		return err
 	}
 
 	body, err := json.Marshal(message)
 	if err != nil {
-		err = errgo.Mask(err, errgo.Any)
+		err = errors.Wrap(ctx, err, "marshal message")
 		telemetryErr = err
 		return err
 	}
 
 	err = p.producer.DeferredPublish(topic, time.Duration(delay)*time.Second, body)
 	if err != nil {
-		err = errgo.Mask(err, errgo.Any)
+		err = errors.Wrap(ctx, err, "deferred publish message")
 		telemetryErr = err
 		return err
 	}
@@ -172,7 +172,7 @@ func (p *NsqProducer) requestID(ctx context.Context) (string, error) {
 	if !ok {
 		uuid, err := uuid.NewV4()
 		if err != nil {
-			return "", errgo.Notef(err, "fail to generate UUID v4")
+			return "", errors.Wrap(ctx, err, "generate UUID v4")
 		}
 		return uuid.String(), nil
 	}

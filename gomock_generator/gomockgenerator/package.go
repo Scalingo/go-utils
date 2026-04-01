@@ -1,6 +1,7 @@
 package gomockgenerator
 
 import (
+	"context"
 	"crypto/sha1"
 	"fmt"
 	"go/ast"
@@ -10,13 +11,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/pkg/errors"
+	"github.com/Scalingo/go-utils/errors/v3"
 )
 
-func interfaceHash(pkg, iName string) (string, error) {
-	sig, err := interfaceSignature(pkg, iName)
+func interfaceHash(ctx context.Context, pkg, iName string) (string, error) {
+	sig, err := interfaceSignature(ctx, pkg, iName)
 	if err != nil {
-		return "", errors.Wrapf(err, "fail to get interface signature for %s:%s", pkg, iName)
+		return "", errors.Wrapf(ctx, err, "get interface signature for %s:%s", pkg, iName)
 	}
 	if sig == "FORCE_REGENERATE" {
 		return sig, nil
@@ -25,10 +26,10 @@ func interfaceHash(pkg, iName string) (string, error) {
 	return fmt.Sprintf("% x", hash), nil
 }
 
-func interfaceSignature(pkg, iName string) (string, error) {
+func interfaceSignature(ctx context.Context, pkg, iName string) (string, error) {
 	cwd, err := os.Getwd()
 	if err != nil {
-		return "", errors.Wrap(err, "fail to get current working directory")
+		return "", errors.Wrap(ctx, err, "get current working directory")
 	}
 	fullPath := pkg
 	if !filepath.IsAbs(fullPath) {
@@ -49,18 +50,18 @@ func interfaceSignature(pkg, iName string) (string, error) {
 	}, 0)
 
 	if err != nil {
-		return "", errors.Wrap(err, "fail to parse package")
+		return "", errors.Wrap(ctx, err, "parse package")
 	}
 
 	if len(packages) == 0 {
-		return "", errors.Errorf("no package found in %v for interface %v", fullPath, iName)
+		return "", errors.Newf(ctx, "no package found in %v for interface %v", fullPath, iName)
 	}
 
 	if len(packages) != 1 {
 		for name := range packages {
 			fmt.Println(name)
 		}
-		return "", errors.New("too many packages")
+		return "", errors.New(ctx, "too many packages")
 	}
 
 	for _, pck := range packages {
@@ -112,7 +113,7 @@ func interfaceSignature(pkg, iName string) (string, error) {
 			}
 		}
 	}
-	return "", errors.New("not found")
+	return "", errors.Newf(ctx, "interface %s not found in %s", iName, fullPath)
 }
 
 func fieldToString(field ast.Expr) string {

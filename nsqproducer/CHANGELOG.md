@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* refactor: only use `github.com/Scalingo/go-utils/errors/v3` for errors [BREAKING CHANGE]
+
 ## v1.4.1
 
 * refactor: replace `github.com/golang/mock` with `go.uber.org/mock`

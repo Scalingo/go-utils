@@ -4,19 +4,19 @@ import (
 	"context"
 	"crypto/hmac"
 	"encoding/hex"
+	stderrors "errors"
 	"fmt"
 	"strconv"
 	"time"
 
-	"github.com/pkg/errors"
-
 	"github.com/Scalingo/go-utils/crypto"
+	"github.com/Scalingo/go-utils/errors/v3"
 )
 
 var (
-	ErrInvalidTimestamp = errors.New("timestamp wrongly formatted")
-	ErrFutureTimestamp  = errors.New("invalid timestamp in the future")
-	ErrTokenExpired     = errors.New("token expired")
+	ErrInvalidTimestamp = stderrors.New("timestamp wrongly formatted")
+	ErrFutureTimestamp  = stderrors.New("invalid timestamp in the future")
+	ErrTokenExpired     = stderrors.New("token expired")
 )
 
 // TokenGenerator lets you generate a Token.
@@ -95,7 +95,7 @@ func (g TokenManager) CheckToken(ctx context.Context, timestamp, payload, hashHe
 	// Try to decode the hash as an hex string
 	hash, err := hex.DecodeString(hashHex)
 	if err != nil {
-		return false, errors.Wrap(err, "fail to decode the hash as a valid hex representation")
+		return false, errors.Wrap(ctx, err, "fail to decode the hash as a valid hex representation")
 	}
 
 	// Generate a hash for the given metadata

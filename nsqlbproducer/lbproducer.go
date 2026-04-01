@@ -7,10 +7,9 @@ import (
 	"time"
 
 	nsq "github.com/nsqio/go-nsq"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	errgo "gopkg.in/errgo.v1"
 
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/nsqproducer"
 )
 
@@ -75,7 +74,7 @@ type LBProducerOpts struct {
 
 var _ nsqproducer.Producer = &NsqLBProducer{} // Ensure that NsqLBProducer implements the Producer interface
 
-func New(opts LBProducerOpts) (*NsqLBProducer, error) {
+func New(ctx context.Context, opts LBProducerOpts) (*NsqLBProducer, error) {
 	if len(opts.Hosts) == 0 {
 		return nil, fmt.Errorf("A producer must have at least one host")
 	}
@@ -93,7 +92,7 @@ func New(opts LBProducerOpts) (*NsqLBProducer, error) {
 		})
 
 		if err != nil {
-			return nil, errors.Wrapf(err, "fail to create producer for host: %s:%s", h.Host, h.Port)
+			return nil, errors.Wrapf(ctx, err, "creating producer for host %s:%s", h.Host, h.Port)
 		}
 
 		lbproducer.producers[i] = producer{
@@ -125,8 +124,8 @@ func alwaysZero() int {
 }
 
 // Ping return an error if all the nodes are unreachable
-func (p *NsqLBProducer) Ping() error {
-	err := errors.New("fail to ping NSQ LB producer")
+func (p *NsqLBProducer) Ping(ctx context.Context) error {
+	err := errors.New(ctx, "pinging NSQ LB producer")
 
 	hasError := true
 	for _, producer := range p.producers {
@@ -135,7 +134,7 @@ func (p *NsqLBProducer) Ping() error {
 			hasError = false
 			break
 		}
-		err = errors.Wrapf(err, "%s: %v", producer.host, pingErr)
+		err = errors.Wrapf(ctx, err, "%s: %v", producer.host, pingErr)
 	}
 	if hasError {
 		return err
@@ -163,7 +162,7 @@ func (p *NsqLBProducer) Publish(ctx context.Context, topic string, message nsqpr
 		}
 	}
 
-	return errgo.Notef(err, "fail to send message on %v hosts", len(p.producers))
+	return errors.Wrapf(ctx, err, "sending message on %v hosts", len(p.producers))
 }
 
 func (p *NsqLBProducer) DeferredPublish(ctx context.Context, topic string, delay int64, message nsqproducer.NsqMessageSerialize) error {
@@ -186,7 +185,7 @@ func (p *NsqLBProducer) DeferredPublish(ctx context.Context, topic string, delay
 		}
 	}
 
-	return errgo.Notef(err, "fail to send message on %v hosts", len(p.producers))
+	return errors.Wrapf(ctx, err, "sending message on %v hosts", len(p.producers))
 }
 
 func (p *NsqLBProducer) Stop() {

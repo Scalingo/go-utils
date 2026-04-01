@@ -2,7 +2,6 @@ package nsqproducer
 
 import (
 	"context"
-	"errors"
 	"testing"
 	"time"
 
@@ -11,6 +10,7 @@ import (
 	"go.opentelemetry.io/otel/metric"
 	"go.uber.org/mock/gomock"
 
+	"github.com/Scalingo/go-utils/errors/v3"
 	otelmock "github.com/Scalingo/go-utils/otel/otelmock"
 	oteltest "github.com/Scalingo/go-utils/otel/oteltest"
 )
@@ -35,6 +35,7 @@ func TestNewTelemetryCreatesInstruments(t *testing.T) {
 
 func TestTelemetryRecordRecordsMetrics(t *testing.T) {
 	t.Parallel()
+	ctx := t.Context()
 
 	tests := []struct {
 		name           string
@@ -55,7 +56,7 @@ func TestTelemetryRecordRecordsMetrics(t *testing.T) {
 			name:           "error deferred",
 			messageType:    "event",
 			publishType:    publishTypeDeferred,
-			err:            errors.New("boom"),
+			err:            errors.New(ctx, "boom"),
 			expectedType:   "event",
 			expectedStatus: "error",
 		},
@@ -90,7 +91,7 @@ func TestTelemetryRecordRecordsMetrics(t *testing.T) {
 					assertTelemetryAttributesForRecord(t, opts, topic, test.expectedType, test.publishType, test.expectedStatus)
 				})
 
-			telemetry.record(t.Context(), startedAt, topic, test.messageType, test.publishType, test.err)
+			telemetry.record(ctx, startedAt, topic, test.messageType, test.publishType, test.err)
 		})
 	}
 }

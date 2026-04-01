@@ -1,10 +1,12 @@
 package io
 
 import (
+	"context"
 	"io"
 
-	"github.com/pkg/errors"
 	"golang.org/x/sys/unix"
+
+	"github.com/Scalingo/go-utils/errors/v3"
 )
 
 type Copier struct {
@@ -51,7 +53,7 @@ func NewCopier(opts ...CopierOpt) Copier {
 // Copy is highly inspired from io.Copy, but calls to fadvise have been
 // added to prevent caching the whole content of the files during the process,
 // impacting the whole OS disk cache
-func (c Copier) Copy(dst io.Writer, src io.Reader) (int64, error) {
+func (c Copier) Copy(ctx context.Context, dst io.Writer, src io.Reader) (int64, error) {
 	var (
 		written int64
 		err     error
@@ -67,7 +69,7 @@ func (c Copier) Copy(dst io.Writer, src io.Reader) (int64, error) {
 				// http://man7.org/linux/man-pages/man2/posix_fadvise.2.html
 				errFadvise := unix.Fadvise(int(fdSrc.Fd()), written, written+int64(nr), unix.FADV_DONTNEED)
 				if errFadvise != nil {
-					err = errors.Wrap(errFadvise, "fadvise read source file")
+					err = errors.Wrap(ctx, errFadvise, "fadvise read source file")
 					break
 				}
 			}
@@ -77,7 +79,7 @@ func (c Copier) Copy(dst io.Writer, src io.Reader) (int64, error) {
 				if fdDst, ok := dst.(Fder); c.noDiskCacheWrite && ok {
 					errFadvise := unix.Fadvise(int(fdDst.Fd()), written, written+int64(nw), unix.FADV_DONTNEED)
 					if errFadvise != nil {
-						err = errors.Wrap(errFadvise, "fadvise write destination file")
+						err = errors.Wrap(ctx, errFadvise, "fadvise write destination file")
 						break
 					}
 				}

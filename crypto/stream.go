@@ -1,6 +1,7 @@
 package crypto
 
 import (
+	"context"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/hmac"
@@ -9,19 +10,19 @@ import (
 	"hash"
 	"io"
 
-	"github.com/pkg/errors"
+	"github.com/Scalingo/go-utils/errors/v3"
 )
 
 // NewStreamEncrypter creates a new stream encrypter
-func NewStreamEncrypter(encKey, macKey []byte, plainText io.Reader) (*StreamEncrypter, error) {
+func NewStreamEncrypter(ctx context.Context, encKey, macKey []byte, plainText io.Reader) (*StreamEncrypter, error) {
 	block, err := aes.NewCipher(encKey)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to create AES cipher")
+		return nil, errors.Wrap(ctx, err, "create AES cipher")
 	}
 	iv := make([]byte, block.BlockSize())
 	_, err = rand.Read(iv)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to generate random IV")
+		return nil, errors.Wrap(ctx, err, "generate random IV")
 	}
 	stream := cipher.NewCTR(block, iv)
 	mac := hmac.New(sha256.New, macKey)
@@ -35,10 +36,10 @@ func NewStreamEncrypter(encKey, macKey []byte, plainText io.Reader) (*StreamEncr
 }
 
 // NewStreamDecrypter creates a new stream decrypter
-func NewStreamDecrypter(encKey, macKey []byte, meta StreamMeta, cipherText io.Reader) (*StreamDecrypter, error) {
+func NewStreamDecrypter(ctx context.Context, encKey, macKey []byte, meta StreamMeta, cipherText io.Reader) (*StreamDecrypter, error) {
 	block, err := aes.NewCipher(encKey)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to create AES Cipher")
+		return nil, errors.Wrap(ctx, err, "create AES cipher")
 	}
 	stream := cipher.NewCTR(block, meta.IV)
 	mac := hmac.New(sha256.New, macKey)
@@ -71,12 +72,14 @@ type StreamDecrypter struct {
 
 // Read encrypts the bytes of the inner reader and places them into p
 func (s *StreamEncrypter) Read(p []byte) (int, error) {
+	ctx := context.Background()
+
 	n, readErr := s.Source.Read(p)
 	if n > 0 {
 		s.Stream.XORKeyStream(p[:n], p[:n])
-		err := writeHash(s.Mac, p[:n])
+		err := writeHash(ctx, s.Mac, p[:n])
 		if err != nil {
-			return n, errors.Wrapf(err, "fail to write hash")
+			return n, errors.Wrap(ctx, err, "write stream hash")
 		}
 		return n, readErr
 	}
@@ -90,11 +93,13 @@ func (s *StreamEncrypter) Meta() StreamMeta {
 
 // Read reads bytes from the underlying reader and then decrypts them
 func (s *StreamDecrypter) Read(p []byte) (int, error) {
+	ctx := context.Background()
+
 	n, readErr := s.Source.Read(p)
 	if n > 0 {
-		err := writeHash(s.Mac, p[:n])
+		err := writeHash(ctx, s.Mac, p[:n])
 		if err != nil {
-			return n, errors.Wrapf(err, "fail to write hash")
+			return n, errors.Wrap(ctx, err, "write stream hash")
 		}
 		s.Stream.XORKeyStream(p[:n], p[:n])
 		return n, readErr
@@ -103,20 +108,20 @@ func (s *StreamDecrypter) Read(p []byte) (int, error) {
 }
 
 // Authenticate verifys that the hash of the stream is correct. This should only be called after processing is finished
-func (s *StreamDecrypter) Authenticate() error {
+func (s *StreamDecrypter) Authenticate(ctx context.Context) error {
 	if !hmac.Equal(s.Meta.Hash, s.Mac.Sum(nil)) {
-		return errors.New("authentication failed")
+		return errors.New(ctx, "authenticate stream: hash mismatch")
 	}
 	return nil
 }
 
-func writeHash(mac hash.Hash, p []byte) error {
+func writeHash(ctx context.Context, mac hash.Hash, p []byte) error {
 	m, err := mac.Write(p)
 	if err != nil {
-		return errors.Wrapf(err, "fail to write MAC data")
+		return errors.Wrap(ctx, err, "write MAC data")
 	}
 	if m != len(p) {
-		return errors.New("could not write all bytes to hmac")
+		return errors.New(ctx, "write MAC data: short write")
 	}
 	return nil
 }

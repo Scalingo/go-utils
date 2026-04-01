@@ -1,26 +1,28 @@
 package influx
 
 import (
+	"context"
 	"net/url"
 
 	influx "github.com/influxdata/influxdb/client/v2"
-	"github.com/pkg/errors"
+
+	"github.com/Scalingo/go-utils/errors/v3"
 )
 
 // Do actually executes the query to the specified InfluxDB instance hosted at the url argument.
-func (q Query) Do(url string) (*influx.Response, error) {
+func (q Query) Do(ctx context.Context, url string) (*influx.Response, error) {
 	query := q.Build()
-	response, err := executeQuery(url, query)
+	response, err := executeQuery(ctx, url, query)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to execute query "+query)
+		return nil, errors.Wrap(ctx, err, "executing query "+query)
 	}
 	return response, nil
 }
 
-func executeQuery(url, queryString string) (*influx.Response, error) {
-	client, dbName, err := newClient(url)
+func executeQuery(ctx context.Context, url, queryString string) (*influx.Response, error) {
+	client, dbName, err := newClient(ctx, url)
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to create InfluxDB client")
+		return nil, errors.Wrap(ctx, err, "creating InfluxDB client")
 	}
 	defer client.Close()
 
@@ -29,10 +31,10 @@ func executeQuery(url, queryString string) (*influx.Response, error) {
 		Database: dbName,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to query InfluxDB")
+		return nil, errors.Wrap(ctx, err, "querying InfluxDB")
 	}
 	if response.Error() != nil {
-		return nil, errors.Wrap(response.Error(), "error while fetching data in InfluxDB")
+		return nil, errors.Wrap(ctx, response.Error(), "fetching data from InfluxDB")
 	}
 
 	return response, nil
@@ -46,10 +48,10 @@ type influxInfo struct {
 	connectionString string
 }
 
-func newClient(url string) (c influx.Client, dbName string, err error) {
-	infos, err := parseConnectionString(url)
+func newClient(ctx context.Context, url string) (influx.Client, string, error) {
+	infos, err := parseConnectionString(ctx, url)
 	if err != nil {
-		return nil, "", errors.Wrap(err, "invalid connection string")
+		return nil, "", errors.Wrap(ctx, err, "parsing connection string")
 	}
 	client, err := influx.NewHTTPClient(influx.HTTPConfig{
 		Addr:      infos.host,
@@ -59,16 +61,16 @@ func newClient(url string) (c influx.Client, dbName string, err error) {
 	})
 
 	if err != nil {
-		return nil, "", errors.Wrap(err, "fail to create InfluxDB client")
+		return nil, "", errors.Wrap(ctx, err, "creating HTTP InfluxDB client")
 	}
 
-	return client, infos.database, err
+	return client, infos.database, nil
 }
 
-func parseConnectionString(con string) (*influxInfo, error) {
+func parseConnectionString(ctx context.Context, con string) (*influxInfo, error) {
 	url, err := url.Parse(con)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to parse connection string")
+		return nil, errors.Wrap(ctx, err, "parsing connection string")
 	}
 
 	var user, password string

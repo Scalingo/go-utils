@@ -2,9 +2,10 @@ package tarball
 
 import (
 	"archive/tar"
-	"errors"
-	"fmt"
+	"context"
 	"os"
+
+	"github.com/Scalingo/go-utils/errors/v3"
 )
 
 const (
@@ -21,8 +22,6 @@ const (
 )
 
 const (
-	blockSize = 512
-
 	// Types
 	TypeReg           = '0'    // regular file
 	TypeRegA          = '\x00' // regular file
@@ -43,9 +42,9 @@ const (
 // sysStat, if non-nil, populates h from system-dependent fields of fi.
 var sysStat func(fi os.FileInfo, h *tar.Header) error
 
-func FileInfoHeader(fi os.FileInfo, link string, fullpath string) (*tar.Header, error) {
+func fileInfoHeader(ctx context.Context, fi os.FileInfo, link string, fullpath string) (*tar.Header, error) {
 	if fi == nil {
-		return nil, errors.New("tar: FileInfo is nil")
+		return nil, errors.New(ctx, "tar: FileInfo is nil")
 	}
 	fm := fi.Mode()
 	h := &tar.Header{
@@ -67,7 +66,7 @@ func FileInfoHeader(fi os.FileInfo, link string, fullpath string) (*tar.Header, 
 		h.Mode |= c_ISLNK
 		target, err := os.Readlink(fullpath)
 		if err != nil {
-			return nil, fmt.Errorf("archive/tar: fail to resolve symlink %v", fullpath)
+			return nil, errors.Wrapf(ctx, err, "archive/tar: resolve symlink %v", fullpath)
 		}
 		h.Linkname = target
 	case fm&os.ModeDevice != 0:
@@ -84,7 +83,7 @@ func FileInfoHeader(fi os.FileInfo, link string, fullpath string) (*tar.Header, 
 	case fm&os.ModeSocket != 0:
 		h.Mode |= c_ISSOCK
 	default:
-		return nil, fmt.Errorf("archive/tar: unknown file mode %v", fm)
+		return nil, errors.Errorf(ctx, "archive/tar: unknown file mode %v", fm)
 	}
 	if fm&os.ModeSetuid != 0 {
 		h.Mode |= c_ISUID

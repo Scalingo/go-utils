@@ -212,9 +212,9 @@ func generateMock(ctx context.Context, gcfg GenerationConfiguration, basePackage
 	}
 
 	hashKey := fmt.Sprintf("%s.%s", hashKeyPackage, mock.Interface)
-	hash, err := interfaceHash(hashSourcePath, mock.Interface)
+	hash, err := interfaceHash(ctx, hashSourcePath, mock.Interface)
 	if err != nil {
-		return "", "", errors.Wrapf(ctx, err, "fail to get interface hash of %v:%v", mock.SrcPackage, mock.Interface)
+		return "", "", errors.Wrapf(ctx, err, "get interface hash of %v:%v", mock.SrcPackage, mock.Interface)
 	}
 	if _, err := os.Stat(mockPath); os.IsNotExist(err) {
 		hash = "NOFILE"
