@@ -47,7 +47,7 @@ type Closer interface {
 
 type Validable interface {
 	// Validate checks whether the document can be persisted.
-	Validate(ctx context.Context) *errors.ValidationErrors
+	Validate(ctx context.Context) error
 }
 
 var _ Validable = &Base{}

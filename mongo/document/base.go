@@ -5,8 +5,6 @@ import (
 	"time"
 
 	"gopkg.in/mgo.v2/bson"
-
-	"github.com/Scalingo/go-utils/errors/v3"
 )
 
 type Base struct {
@@ -51,6 +49,6 @@ func (d *Base) destroy(ctx context.Context, collection string) error {
 	return ReallyDestroy(ctx, collection, d)
 }
 
-func (d *Base) Validate(_ context.Context) *errors.ValidationErrors {
+func (d *Base) Validate(_ context.Context) error {
 	return nil
 }

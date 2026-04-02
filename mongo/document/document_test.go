@@ -24,16 +24,12 @@ type validatedDocument struct {
 	Valid bool `bson:"valid" json:"valid"`
 }
 
-func (d *validatedDocument) Validate(_ context.Context) *errors.ValidationErrors {
+func (d *validatedDocument) Validate(_ context.Context) error {
 	verr := errors.NewValidationErrorsBuilder()
 	if !d.Valid {
 		verr.Set("valid", "must be true")
 	}
-	err, ok := verr.Build().(*errors.ValidationErrors)
-	if !ok && err != nil {
-		panic("it must be a ValidationErrors")
-	}
-	return err
+	return verr.Build()
 }
 
 func buildValidatedDocument(valid bool) *validatedDocument {
