@@ -54,7 +54,3 @@ func (d *Base) destroy(ctx context.Context, collection string) error {
 func (d *Base) Validate(_ context.Context) *errors.ValidationErrors {
 	return nil
 }
-
-func (d *Base) ValidateWithInternalError(_ context.Context) (*errors.ValidationErrors, error) {
-	return nil, ErrValidateNoInternalErrorFunc
-}
