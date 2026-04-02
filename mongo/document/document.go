@@ -108,7 +108,7 @@ func Update(ctx context.Context, collectionName string, update bson.M, doc docum
 
 func save(ctx context.Context, collectionName string, doc document, saveFunc func(context.Context, string, document) error) error {
 	validationErrors, err := doc.ValidateWithInternalError(ctx)
-	if err == ErrValidateNoInternalErrorFunc {
+	if errors.Is(err, ErrValidateNoInternalErrorFunc) {
 		validationErrors = doc.Validate(ctx)
 	} else if err != nil {
 		return errors.Wrap(ctx, err, "validate document")
