@@ -2,7 +2,10 @@
 
 ## To be Released
 
+## v1.2.2
+
 * refactor: only use `github.com/Scalingo/go-utils/errors/v3` for errors
+* chore(deps): bump several dependencies
 
 ## v1.2.1
 
