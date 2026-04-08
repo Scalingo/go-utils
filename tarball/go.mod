@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/Scalingo/go-utils/errors/v3 v3.2.0
-	github.com/Scalingo/go-utils/fs v1.1.1
+	github.com/Scalingo/go-utils/fs v1.1.2
 	github.com/Scalingo/go-utils/io v1.2.1
 	github.com/Scalingo/go-utils/logger v1.12.1
 	github.com/spf13/afero v1.15.0

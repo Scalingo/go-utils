@@ -1,7 +1,7 @@
 github.com/Scalingo/go-utils/errors/v3 v3.2.0 h1:Ks+v2oRwv3VZfe+xVB+kpfmZouXHVCPHHtwL5W60prc=
 github.com/Scalingo/go-utils/errors/v3 v3.2.0/go.mod h1:jVVNoOdYFjuNkR/BeEZWNWJVvu4jmyLY4udlsQQyBss=
-github.com/Scalingo/go-utils/fs v1.1.1 h1:wgeUw6rQw6QFGxKy/skZ14FGbS1j26lDUIWKckbcZ3Q=
-github.com/Scalingo/go-utils/fs v1.1.1/go.mod h1:FFWKvrBnjUH3GLQJmDj7uD1lasWJtvhBVLy7mzxxgpg=
+github.com/Scalingo/go-utils/fs v1.1.2 h1:dcWBKe3JdTs+rB66IPg1KdBdihqpNouiCrEFuupCadk=
+github.com/Scalingo/go-utils/fs v1.1.2/go.mod h1:JOjuOrdjngNMEhl8IRVJQb79cJxYMe2kU3C6htwsD0I=
 github.com/Scalingo/go-utils/io v1.2.1 h1:oBCCotLWhKmlrUSaRFqkmdi5dP8Flw64HVwsfq7IqAM=
 github.com/Scalingo/go-utils/io v1.2.1/go.mod h1:2Ob8fqtoT6KgxHeB/DIP/L6HOGFY//B91tRN6D0XZC4=
 github.com/Scalingo/go-utils/logger v1.12.1 h1:r+RqwOcnsTtKoQdvcNVZCtu0Xhq01tp/3gT6+4Q7AxI=
