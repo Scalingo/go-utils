@@ -34,17 +34,6 @@ updates:
           - "*"
 
   - package-ecosystem: "gomod"
-    directory: "/difflib"
-    allow:
-      - dependency-type: "all"
-    schedule:
-      interval: "monthly"
-    groups:
-      dependencies:
-        patterns:
-          - "*"
-
-  - package-ecosystem: "gomod"
     directory: "/env"
     allow:
       - dependency-type: "all"
@@ -222,17 +211,6 @@ updates:
 
   - package-ecosystem: "gomod"
     directory: "/postgresql"
-    allow:
-      - dependency-type: "all"
-    schedule:
-      interval: "monthly"
-    groups:
-      dependencies:
-        patterns:
-          - "*"
-
-  - package-ecosystem: "gomod"
-    directory: "/publicgen"
     allow:
       - dependency-type: "all"
     schedule:
