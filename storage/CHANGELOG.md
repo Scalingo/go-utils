@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.8.0
+
 * refactor: only use `github.com/Scalingo/go-utils/errors/v3` for errors
 
 ## v1.7.2
