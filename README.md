@@ -2,7 +2,7 @@
 
 ## Structure of This Repository
 
-This repository is hosting modules, each of these modules are independant, they should all have their own:
+This repository is hosting modules, each of these modules are independent, they should all have their own:
 
 * Dependencies (handled with go modules)
 * `README.md`
