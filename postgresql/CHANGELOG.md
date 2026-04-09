@@ -2,7 +2,10 @@
 
 ## To be Released
 
+# v1.1.2
+
 * build(deps): update `github.com/Scalingo/go-utils/errors` from v2 to v3
+* chore(deps): bump several dependencies
 
 ## v1.1.1
 
