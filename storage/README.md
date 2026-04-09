@@ -1,1 +1,1 @@
-# Package `storage` v1.7.2
+# Package `storage` v1.8.0
