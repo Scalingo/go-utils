@@ -2,7 +2,10 @@
 
 ## To be Released
 
+## v1.7.1
+
 * refactor: replace `github.com/golang/mock` with `go.uber.org/mock`
+* chore(deps): bump several dependencies
 
 ## v1.7.0
 
