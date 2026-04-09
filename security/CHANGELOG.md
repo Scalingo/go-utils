@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.2.0
+
 * refactor(security): replace `github.com/pkg/errors` with `github.com/Scalingo/go-utils/errors/v3`
 
 ## v1.1.2
