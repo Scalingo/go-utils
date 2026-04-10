@@ -2,11 +2,18 @@
 
 ## To be Released
 
+## v1.2.3
+
 * refactor: only use `github.com/Scalingo/go-utils/errors/v3` for errors [BREAKING CHANGE]
+* build(deps): bump `github.com/Scalingo/go-utils/nsqproducer` from 1.4.0 to 1.4.1
+* build(deps): bump `github.com/Scalingo/go-utils/logger` from 1.12.0 to 1.12.1
+* build(deps): bump `go.opentelemetry.io/otel`, `go.opentelemetry.io/otel/metric`, and `go.opentelemetry.io/otel/trace` from 1.40.0 to 1.43.0
+* build(deps): bump `golang.org/x/sys` from 0.41.0 to 0.42.0
 
 ## v1.2.2
 
 * refactor: replace `github.com/golang/mock` with `go.uber.org/mock`
+* chore(go): upgrade to Go 1.25
 
 ## v1.2.1
 
