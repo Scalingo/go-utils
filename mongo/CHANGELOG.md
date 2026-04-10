@@ -2,6 +2,9 @@
 
 ## To be Released
 
+* feat(document): `Validate` returns an `error` [BREAKING CHANGE]
+* feat(document): remove unused `ValidateWithInternalError` [BREAKING CHANGE]
+
 ## v1.5.3
 
 * build(deps): update `github.com/Scalingo/go-utils/errors` from v2 to v3

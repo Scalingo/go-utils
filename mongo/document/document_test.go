@@ -24,41 +24,17 @@ type validatedDocument struct {
 	Valid bool `bson:"valid" json:"valid"`
 }
 
-func (d *validatedDocument) Validate(_ context.Context) *errors.ValidationErrors {
+func (d *validatedDocument) Validate(_ context.Context) error {
 	verr := errors.NewValidationErrorsBuilder()
 	if !d.Valid {
 		verr.Set("valid", "must be true")
 	}
-	err, ok := verr.Build().(*errors.ValidationErrors)
-	if !ok && err != nil {
-		// If there is an error, it must have the type *errors.ValidationErrors
-		panic("invalid error type")
-	}
-	return err
+	return verr.Build()
 }
 
 func buildValidatedDocument(valid bool) *validatedDocument {
 	return &validatedDocument{
 		Valid: valid,
-	}
-}
-
-type validatedWithInternalErrorDocument struct {
-	validatedDocument `bson:",inline"`
-	InternalError     string `bson:"internal_error" json:"internal_error"`
-}
-
-func (d *validatedWithInternalErrorDocument) ValidateWithInternalError(ctx context.Context) (*errors.ValidationErrors, error) {
-	if d.InternalError != "" {
-		return nil, errors.New(ctx, d.InternalError)
-	}
-	return d.validatedDocument.Validate(ctx), nil
-}
-
-func buildValidatedWithInternalErrorDocument(valid bool, internalError string) *validatedWithInternalErrorDocument {
-	return &validatedWithInternalErrorDocument{
-		validatedDocument: *buildValidatedDocument(valid),
-		InternalError:     internalError,
 	}
 }
 
@@ -96,42 +72,6 @@ func TestDocument_Create(t *testing.T) {
 			err := Create(context.Background(), testDocuments, d)
 			require.Error(t, err)
 			require.IsType(t, &errors.ValidationErrors{}, err)
-			assert.Empty(t, d.ID)
-			assert.Empty(t, d.CreatedAt)
-		})
-	})
-
-	t.Run("with internal error validation", func(t *testing.T) {
-		t.Run("with a valid document, it should create it", func(t *testing.T) {
-			d := buildValidatedWithInternalErrorDocument(true, "")
-			err := Create(context.Background(), testDocuments, d)
-			require.NoError(t, err)
-			assert.NotEmpty(t, d.ID)
-			assert.NotEmpty(t, d.CreatedAt)
-		})
-		t.Run("with an invalid document, it should return a validation error", func(t *testing.T) {
-			d := buildValidatedWithInternalErrorDocument(false, "")
-			err := Create(context.Background(), testDocuments, d)
-			require.Error(t, err)
-			require.IsType(t, &errors.ValidationErrors{}, err)
-			assert.Empty(t, d.ID)
-			assert.Empty(t, d.CreatedAt)
-		})
-
-		t.Run("with a validation returning an internal error, it should forward internal error", func(t *testing.T) {
-			d := buildValidatedWithInternalErrorDocument(true, "internal error when validating")
-			err := Create(context.Background(), testDocuments, d)
-			require.Error(t, err)
-			assert.Contains(t, err.Error(), "internal error when validating")
-			assert.Empty(t, d.ID)
-			assert.Empty(t, d.CreatedAt)
-		})
-
-		t.Run("with a validation returning an internal error and a validation error, it should return the internal error", func(t *testing.T) {
-			d := buildValidatedWithInternalErrorDocument(false, "internal error when validating")
-			err := Create(context.Background(), testDocuments, d)
-			require.Error(t, err)
-			assert.Contains(t, err.Error(), "internal error when validating")
 			assert.Empty(t, d.ID)
 			assert.Empty(t, d.CreatedAt)
 		})

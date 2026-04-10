@@ -2,7 +2,6 @@ package document
 
 import (
 	"context"
-	stderrors "errors"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -46,18 +45,9 @@ type Closer interface {
 	Close()
 }
 
-var ErrValidateNoInternalErrorFunc = stderrors.New("no validation returning an internal error has been implemented")
-
 type Validable interface {
-	// Validate will be used if no ValidateWithInternalError is defined on a document
-	// It is not useful to have both defined on a document, only ValidationWithInternalError
-	// would be used in this case
-	Validate(ctx context.Context) *errors.ValidationErrors
-
-	// ValidateWithInternalError will be used in priority if defined on a document
-	// It will be called for all modifying operations (Create, Save, Update)
-	// If it returns an internal error, the validation error will be nil.
-	ValidateWithInternalError(ctx context.Context) (*errors.ValidationErrors, error)
+	// Validate checks whether the document can be persisted.
+	Validate(ctx context.Context) error
 }
 
 var _ Validable = &Base{}
@@ -107,12 +97,7 @@ func Update(ctx context.Context, collectionName string, update bson.M, doc docum
 }
 
 func save(ctx context.Context, collectionName string, doc document, saveFunc func(context.Context, string, document) error) error {
-	validationErrors, err := doc.ValidateWithInternalError(ctx)
-	if err == ErrValidateNoInternalErrorFunc {
-		validationErrors = doc.Validate(ctx)
-	} else if err != nil {
-		return errors.Wrap(ctx, err, "validate document")
-	}
+	validationErrors := doc.Validate(ctx)
 	if validationErrors != nil {
 		return validationErrors
 	}
