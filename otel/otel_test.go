@@ -1,6 +1,7 @@
 package otel
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -26,7 +27,6 @@ func TestInit(t *testing.T) {
 		// OTEL_EXPORTER_OTLP_METRICS_TIMEOUT is set to avoid to wait 10 seconds in the test
 		"OTEL_EXPORTER_OTLP_METRICS_TIMEOUT": "1", // 1 millisecond
 	}
-	defaultShutdownError := "failed to upload metrics: exporter export timeout"
 
 	tests := []struct {
 		name                string
@@ -61,13 +61,10 @@ func TestInit(t *testing.T) {
 		},
 		{
 			name: "minimal initialization",
-			// expected error in the case of the unit test, due to endpoint that doesn't respond
-			expectShutdownError: defaultShutdownError,
-			env:                 minimalValidEnv,
+			env:  minimalValidEnv,
 		}, {
-			name:                "with additional global attributes",
-			expectShutdownError: defaultShutdownError,
-			env:                 minimalValidEnv,
+			name: "with additional global attributes",
+			env:  minimalValidEnv,
 			opts: []InitOpt{
 				WithServiceVersionAttribute("v1.0.0"),
 				func(opts *initDefaultOptions) {
@@ -113,6 +110,26 @@ func TestInit(t *testing.T) {
 			})
 		})
 	}
+}
+
+func TestInit_ShutdownWithCanceledContext(t *testing.T) {
+	for k, v := range map[string]string{
+		"GO_ENV":                              "test",
+		"OTEL_SERVICE_NAME":                   "test",
+		"OTEL_EXPORTER_OTLP_ENDPOINT":         "http://localhost:4317",
+		"OTEL_EXPORTER_OTLP_METRICS_TIMEOUT":  "1",
+	} {
+		t.Setenv(k, v)
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	shutdown := Init(ctx)
+	require.NotNil(t, shutdown)
+
+	cancel()
+
+	err := shutdown()
+	require.NoError(t, err)
 }
 
 func TestSetTLSConfig(t *testing.T) {

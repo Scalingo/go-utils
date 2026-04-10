@@ -2,6 +2,8 @@
 
 ## To be released
 
+* feat: do not return error on shutdown if context has been canceled (graceceful shutdown)
+
 ## v0.8.1
 
 * refactor: replace `github.com/golang/mock` with `go.uber.org/mock`

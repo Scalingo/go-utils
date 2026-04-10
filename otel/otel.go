@@ -154,7 +154,11 @@ func Init(ctx context.Context, opts ...InitOpt) func() error {
 	return func() error {
 		if meterProvider != nil {
 			log.Info("OpenTelemetry SDK shutdown")
-			return meterProvider.Shutdown(ctx)
+			err := meterProvider.Shutdown(ctx)
+			if errors.Is(err, context.Canceled) {
+				return nil
+			}
+			return err
 		}
 		return nil
 	}
