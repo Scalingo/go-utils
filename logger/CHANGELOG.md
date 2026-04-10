@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.12.2
+
 * refactor: replace `github.com/pkg/errors` with `errors`
 
 ## v1.12.1
