@@ -2,7 +2,10 @@
 
 ## To be released
 
+## v1.3.3
+
 * fix(graceful): race condition
+* chore(deps): bump several dependencies
 
 ## v1.3.2
 
