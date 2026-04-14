@@ -158,7 +158,7 @@ func Init(ctx context.Context, opts ...InitOpt) func() error {
 			if errors.Is(err, context.Canceled) {
 				return nil
 			}
-			return err
+			return errors.Wrap(ctx, err, "shutdown OpenTelemetry SDK")
 		}
 		return nil
 	}

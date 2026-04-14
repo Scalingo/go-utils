@@ -114,15 +114,15 @@ func TestInit(t *testing.T) {
 
 func TestInit_ShutdownWithCanceledContext(t *testing.T) {
 	for k, v := range map[string]string{
-		"GO_ENV":                              "test",
-		"OTEL_SERVICE_NAME":                   "test",
-		"OTEL_EXPORTER_OTLP_ENDPOINT":         "http://localhost:4317",
-		"OTEL_EXPORTER_OTLP_METRICS_TIMEOUT":  "1",
+		"GO_ENV":                             "test",
+		"OTEL_SERVICE_NAME":                  "test",
+		"OTEL_EXPORTER_OTLP_ENDPOINT":        "http://localhost:4317",
+		"OTEL_EXPORTER_OTLP_METRICS_TIMEOUT": "1",
 	} {
 		t.Setenv(k, v)
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(t.Context())
 	shutdown := Init(ctx)
 	require.NotNil(t, shutdown)
 
