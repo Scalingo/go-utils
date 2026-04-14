@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"gopkg.in/mgo.v2/bson"
 
-	"github.com/Scalingo/go-utils/mongo/document"
+	"github.com/Scalingo/go-utils/mongo/v2/document"
 )
 
 const dummyCollection = "dummy_documents"
