@@ -2,6 +2,8 @@
 
 ## To be released
 
+## v0.9.0
+
 * feat: do not return error on shutdown if context has been canceled (graceceful shutdown)
 
 ## v0.8.1
