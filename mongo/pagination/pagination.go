@@ -9,7 +9,7 @@ import (
 
 	"github.com/Scalingo/go-handlers"
 	"github.com/Scalingo/go-utils/errors/v3"
-	"github.com/Scalingo/go-utils/mongo/document"
+	"github.com/Scalingo/go-utils/mongo/v2/document"
 )
 
 func NewPaginationService(opts ServiceOpts) Service {

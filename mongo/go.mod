@@ -1,4 +1,4 @@
-module github.com/Scalingo/go-utils/mongo
+module github.com/Scalingo/go-utils/mongo/v2
 
 go 1.25.0
 

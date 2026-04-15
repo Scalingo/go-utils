@@ -10,7 +10,7 @@ import (
 
 	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/logger"
-	"github.com/Scalingo/go-utils/mongo"
+	"github.com/Scalingo/go-utils/mongo/v2"
 )
 
 type unvalidatedDocument struct {
