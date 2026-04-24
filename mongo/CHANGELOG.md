@@ -1,6 +1,6 @@
 # Changelog
 
-## To be Released
+## v2.0.0
 
 * feat(document): `Validate` returns an `error` [BREAKING CHANGE]
 * feat(document): remove unused `ValidateWithInternalError` [BREAKING CHANGE]
