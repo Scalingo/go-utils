@@ -39,7 +39,7 @@ jobs:
       matrix:
         modules: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
     steps:
-      - uses: Scalingo/actions/go-linter@main
+      - uses: Scalingo/actions/go-linter@fix/go-lint-with-working-directory
         with:
           working-directory: ${{ matrix.modules }}
 
