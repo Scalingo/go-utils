@@ -3,8 +3,8 @@ module github.com/Scalingo/go-utils/influx
 go 1.24.0
 
 require (
-	github.com/Scalingo/go-utils/errors/v3 v3.2.0
-	github.com/influxdata/influxdb v1.12.3
+	github.com/Scalingo/go-utils/errors/v3 v3.2.1
+	github.com/influxdata/influxdb v1.12.4
 	github.com/stretchr/testify v1.11.1
 )
 
