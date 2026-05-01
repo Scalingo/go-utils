@@ -1,9 +1,9 @@
-github.com/Scalingo/go-utils/env v1.2.1 h1:myWfa0C8UtCi0pRPHFnIgZgeTt2dlJg8YfvCAE7HEtk=
-github.com/Scalingo/go-utils/env v1.2.1/go.mod h1:FjTfQmlmT0QPZ/KqxhpYLKsz10UPD6r5Iab9GigzHPk=
-github.com/Scalingo/go-utils/errors/v3 v3.2.0 h1:Ks+v2oRwv3VZfe+xVB+kpfmZouXHVCPHHtwL5W60prc=
-github.com/Scalingo/go-utils/errors/v3 v3.2.0/go.mod h1:jVVNoOdYFjuNkR/BeEZWNWJVvu4jmyLY4udlsQQyBss=
-github.com/Scalingo/go-utils/logger v1.12.1 h1:r+RqwOcnsTtKoQdvcNVZCtu0Xhq01tp/3gT6+4Q7AxI=
-github.com/Scalingo/go-utils/logger v1.12.1/go.mod h1:uH7LVG1pQR+5jpVgGDFyFfTMeHc3nUXC7GRUc2dPoZ4=
+github.com/Scalingo/go-utils/env v1.2.2 h1:H8pOvIxa2sNTPEJNPz9hJKqNZWnoV6u5Ar6Kwh6f5mU=
+github.com/Scalingo/go-utils/env v1.2.2/go.mod h1:DFH9eERM31g2M9NJ/MtTNJl1iUvq1mwtnWk9UB85Muc=
+github.com/Scalingo/go-utils/errors/v3 v3.2.1 h1:2w3qUz6MxJa3aqx/biz2G3JquSKsFnfz/E7wrNf/LPc=
+github.com/Scalingo/go-utils/errors/v3 v3.2.1/go.mod h1:jVVNoOdYFjuNkR/BeEZWNWJVvu4jmyLY4udlsQQyBss=
+github.com/Scalingo/go-utils/logger v1.12.2 h1:9vm83/gqjCIy5t+OuNYjkVOUrJtdMy78XNIv8E+OCCU=
+github.com/Scalingo/go-utils/logger v1.12.2/go.mod h1:vaeFcI5LMHiRRmMfJbbnblbj3RXRJIzxUcyEjZpMFpg=
 github.com/Scalingo/go-utils/nsqproducer v1.4.1 h1:vOITNRkOhTaAa9SOFKnaDy2VP+Wx1u+j60Dk7hPjgSg=
 github.com/Scalingo/go-utils/nsqproducer v1.4.1/go.mod h1:BEjWZEaHgaAhyvE07aruMjpcPxcz2DW3zSD80wbjP/I=
 github.com/Scalingo/go-utils/otel v0.8.1 h1:rqwRo0Q53QzPO/M1aQ5FQGsBMeKMkxMyzVNJwis2nYI=
@@ -56,8 +56,8 @@ go.opentelemetry.io/otel/trace v1.43.0 h1:BkNrHpup+4k4w+ZZ86CZoHHEkohws8AY+WTX09
 go.opentelemetry.io/otel/trace v1.43.0/go.mod h1:/QJhyVBUUswCphDVxq+8mld+AvhXZLhe+8WVFxiFff0=
 go.uber.org/mock v0.6.0 h1:hyF9dfmbgIX5EfOdasqLsWD6xqpNZlXblLB/Dbnwv3Y=
 go.uber.org/mock v0.6.0/go.mod h1:KiVJ4BqZJaMj4svdfmHM0AUx4NJYO8ZNpPnZn1Z+BBU=
-golang.org/x/sys v0.42.0 h1:omrd2nAlyT5ESRdCLYdm3+fMfNFE/+Rf4bDIQImRJeo=
-golang.org/x/sys v0.42.0/go.mod h1:4GL1E5IUh+htKOUEOaiffhrAeqysfVGipDYzABqnCmw=
+golang.org/x/sys v0.43.0 h1:Rlag2XtaFTxp19wS8MXlJwTvoh8ArU6ezoyFsMyCTNI=
+golang.org/x/sys v0.43.0/go.mod h1:4GL1E5IUh+htKOUEOaiffhrAeqysfVGipDYzABqnCmw=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c h1:Hei/4ADfdWqJk1ZMxUNpqntNwaWcugrBjAiHlqqRiVk=
 gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c/go.mod h1:JHkPIbrfpd72SG/EVd6muEfDQjcINNoR0C8j2r3qZ4Q=
