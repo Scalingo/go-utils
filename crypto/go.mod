@@ -3,7 +3,7 @@ module github.com/Scalingo/go-utils/crypto
 go 1.24
 
 require (
-	github.com/Scalingo/go-utils/errors/v3 v3.2.0
+	github.com/Scalingo/go-utils/errors/v3 v3.2.1
 	github.com/stretchr/testify v1.11.1
 )
 
