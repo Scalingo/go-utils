@@ -3,9 +3,9 @@ module github.com/Scalingo/go-utils/mongo/v2
 go 1.25.0
 
 require (
-	github.com/Scalingo/go-handlers v1.11.0
-	github.com/Scalingo/go-utils/errors/v3 v3.2.0
-	github.com/Scalingo/go-utils/logger v1.12.1
+	github.com/Scalingo/go-handlers v1.11.1
+	github.com/Scalingo/go-utils/errors/v3 v3.2.1
+	github.com/Scalingo/go-utils/logger v1.12.2
 	github.com/sirupsen/logrus v1.9.4
 	github.com/stretchr/testify v1.11.1
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
@@ -30,7 +30,7 @@ require (
 	go.opentelemetry.io/otel v1.43.0 // indirect
 	go.opentelemetry.io/otel/metric v1.43.0 // indirect
 	go.opentelemetry.io/otel/trace v1.43.0 // indirect
-	golang.org/x/sys v0.42.0 // indirect
+	golang.org/x/sys v0.43.0 // indirect
 	gopkg.in/errgo.v1 v1.0.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
