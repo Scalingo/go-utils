@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 
-	"github.com/Scalingo/go-utils/nsqlbproducer/nsqlbproducermock"
+	"github.com/Scalingo/go-utils/nsqlbproducer/v2/nsqlbproducermock"
 	"github.com/Scalingo/go-utils/nsqproducer"
 )
 

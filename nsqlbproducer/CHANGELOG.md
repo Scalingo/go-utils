@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* fix(nsqlbproducer): correctly declare the v2
+
 ## v2.0.0
 
 * refactor: only use `github.com/Scalingo/go-utils/errors/v3` for errors [BREAKING CHANGE]

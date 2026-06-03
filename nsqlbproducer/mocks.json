@@ -1,8 +1,9 @@
 {
-  "base_package": "github.com/Scalingo/go-utils/nsqlbproducer",
+  "base_package": "github.com/Scalingo/go-utils/nsqlbproducer/v2",
   "mocks": [
     {
       "src_package": ".",
+      "dst_package": "nsqlbproducermock",
       "interface": "PublishPinger"
     }
   ]
