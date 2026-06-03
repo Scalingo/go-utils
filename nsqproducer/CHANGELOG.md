@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v2.0.1
+
 * fix(nsqproducer): correctly declare the v2
 * fix(nsqproducer): missing error wrapping
 
