@@ -7,6 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/Scalingo/go-utils/env"
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/nsqproducer"
 )
 
@@ -38,14 +39,19 @@ func FromEnv(ctx context.Context, opts FromEnvOpts) (*NsqLBProducer, error) {
 
 	nsqConfig, err := nsqproducer.NsqConfigFromEnv(E)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(ctx, err, "get NSQ config from environment")
 	}
 
-	return New(ctx, LBProducerOpts{
+	nsqLBProducer, err := New(ctx, LBProducerOpts{
 		Hosts:      hosts,
 		NsqConfig:  nsqConfig,
 		Strategy:   StrategiesFromName[E["NSQ_PRODUCER_STRATEGY"]],
 		SkipLogSet: opts.SkipLogSet,
 		Logger:     opts.Logger,
 	})
+	if err != nil {
+		return nil, errors.Wrap(ctx, err, "instantiate new NSQ LB producer")
+	}
+
+	return nsqLBProducer, nil
 }
