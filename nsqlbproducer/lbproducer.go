@@ -10,7 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/Scalingo/go-utils/errors/v3"
-	"github.com/Scalingo/go-utils/nsqproducer"
+	"github.com/Scalingo/go-utils/nsqproducer/v3"
 )
 
 type LBStrategy int
@@ -84,7 +84,7 @@ func New(ctx context.Context, opts LBProducerOpts) (*NsqLBProducer, error) {
 	}
 
 	for i, h := range opts.Hosts {
-		p, err := nsqproducer.New(nsqproducer.ProducerOpts{
+		p, err := nsqproducer.New(ctx, nsqproducer.ProducerOpts{
 			Host:       h.Host,
 			Port:       h.Port,
 			NsqConfig:  opts.NsqConfig,
