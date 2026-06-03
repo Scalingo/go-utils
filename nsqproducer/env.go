@@ -27,15 +27,20 @@ func FromEnv(ctx context.Context) (*NsqProducer, error) {
 
 	nsqConfig, err := NsqConfigFromEnv(ctx, envMap)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(ctx, err, "get NSQ config from environment")
 	}
 
-	return New(ProducerOpts{
+	nsqProducer, err := New(ProducerOpts{
 		Host: envMap["NSQD_HOST"],
 		Port: envMap["NSQD_PORT"],
 
 		NsqConfig: nsqConfig,
 	})
+	if err != nil {
+		return nil, errors.Wrap(ctx, err, "instantiate new NSQ producer")
+	}
+
+	return nsqProducer, nil
 }
 
 func NsqConfigFromEnv(ctx context.Context, envMap map[string]string) (*nsq.Config, error) {

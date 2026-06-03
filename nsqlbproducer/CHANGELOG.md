@@ -3,6 +3,7 @@
 ## To be Released
 
 * fix(nsqlbproducer): correctly declare the v2
+* fix(nsqlbproducer): missing error wrapping
 
 ## v2.0.0
 

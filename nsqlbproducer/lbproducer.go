@@ -76,7 +76,7 @@ var _ nsqproducer.Producer = &NsqLBProducer{} // Ensure that NsqLBProducer imple
 
 func New(ctx context.Context, opts LBProducerOpts) (*NsqLBProducer, error) {
 	if len(opts.Hosts) == 0 {
-		return nil, fmt.Errorf("A producer must have at least one host")
+		return nil, errors.New(ctx, "a producer must have at least one host")
 	}
 	lbproducer := &NsqLBProducer{
 		producers: make([]producer, len(opts.Hosts)),
