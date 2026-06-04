@@ -1,5 +1,5 @@
 {
-  "base_package": "github.com/Scalingo/go-utils/nsqproducer/v2",
+  "base_package": "github.com/Scalingo/go-utils/nsqproducer/v3",
   "mocks": [
     {
       "src_package": ".",

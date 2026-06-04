@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v3.0.0
+
 * refactor(nsqproducer): replace use of `fmt.Errorf` with `errors.Newf` [BREAKING CHANGE]
 
 ## v2.0.1
