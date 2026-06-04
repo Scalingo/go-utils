@@ -3,7 +3,6 @@ package nsqproducer
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/gofrs/uuid/v5"
@@ -51,10 +50,10 @@ type NsqMessageSerialize struct {
 
 var _ Producer = &NsqProducer{} // Ensure that NsqProducer implements the Producer interface
 
-func New(opts ProducerOpts) (*NsqProducer, error) {
+func New(ctx context.Context, opts ProducerOpts) (*NsqProducer, error) {
 	client, err := nsq.NewProducer(opts.Host+":"+opts.Port, opts.NsqConfig)
 	if err != nil {
-		return nil, fmt.Errorf("init-nsq: cannot initialize nsq producer: %v:%v", opts.Host, opts.Port)
+		return nil, errors.Newf(ctx, "initialize NSQ producer: %v:%v", opts.Host, opts.Port)
 	}
 
 	if opts.SkipLogSet == nil {
@@ -65,7 +64,7 @@ func New(opts ProducerOpts) (*NsqProducer, error) {
 	if !opts.WithoutTelemetry {
 		telemetry, err = newTelemetry()
 		if err != nil {
-			return nil, fmt.Errorf("init-nsq: cannot initialize telemetry: %v", err)
+			return nil, errors.Newf(ctx, "initialize telemetry: %v", err)
 		}
 	}
 
