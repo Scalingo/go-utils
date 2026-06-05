@@ -101,14 +101,11 @@ func New(ctx context.Context, opts LBProducerOpts) (*NsqLBProducer, error) {
 		}
 	}
 
-	switch lbproducer.strategy {
-	case FallbackStrategy:
+	lbproducer.randInt = rand.New(rand.NewSource(time.Now().Unix())).Int
+	if lbproducer.strategy == FallbackStrategy {
 		lbproducer.randInt = alwaysZero
-	case RandomStrategy:
-		fallthrough
-	default:
-		lbproducer.randInt = rand.New(rand.NewSource(time.Now().Unix())).Int
 	}
+
 	lbproducer.logger = opts.Logger
 	if opts.PublishTimeout == 0 {
 		lbproducer.publishTimeout = defaultPublishTimeout
