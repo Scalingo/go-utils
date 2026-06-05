@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat(gomock_generator): add support for standard library
+
 ## v1.4.3
 
 * chore(deps): bump multiple dependencies
