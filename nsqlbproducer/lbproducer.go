@@ -43,8 +43,8 @@ type NsqLBProducer struct {
 }
 
 type PublishPinger interface {
-	Publish(context.Context, string, nsqproducer.NsqMessageSerialize) error
-	DeferredPublish(context.Context, string, int64, nsqproducer.NsqMessageSerialize) error
+	Publish(ctx context.Context, topic string, message nsqproducer.NsqMessageSerialize) error
+	DeferredPublish(ctx context.Context, topic string, delay int64, message nsqproducer.NsqMessageSerialize) error
 	Ping() error
 	Stop()
 }
