@@ -8,7 +8,7 @@ import (
 
 	"github.com/Scalingo/go-utils/env"
 	"github.com/Scalingo/go-utils/errors/v3"
-	"github.com/Scalingo/go-utils/nsqproducer"
+	"github.com/Scalingo/go-utils/nsqproducer/v3"
 )
 
 type FromEnvOpts struct {
@@ -37,7 +37,7 @@ func FromEnv(ctx context.Context, opts FromEnvOpts) (*NsqLBProducer, error) {
 		})
 	}
 
-	nsqConfig, err := nsqproducer.NsqConfigFromEnv(E)
+	nsqConfig, err := nsqproducer.NsqConfigFromEnv(ctx, E)
 	if err != nil {
 		return nil, errors.Wrap(ctx, err, "get NSQ config from environment")
 	}

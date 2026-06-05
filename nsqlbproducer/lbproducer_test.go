@@ -10,7 +10,7 @@ import (
 	"go.uber.org/mock/gomock"
 
 	"github.com/Scalingo/go-utils/nsqlbproducer/v2/nsqlbproducermock"
-	"github.com/Scalingo/go-utils/nsqproducer"
+	"github.com/Scalingo/go-utils/nsqproducer/v3"
 )
 
 type mockedRandSource struct {

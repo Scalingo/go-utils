@@ -8,7 +8,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	nsqproducer "github.com/Scalingo/go-utils/nsqproducer"
+	nsqproducer "github.com/Scalingo/go-utils/nsqproducer/v3"
 	gomock "go.uber.org/mock/gomock"
 )
 
