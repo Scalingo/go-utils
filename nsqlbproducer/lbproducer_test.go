@@ -138,7 +138,7 @@ func TestLBPublish(t *testing.T) {
 }
 
 func runPublishExample(t *testing.T, example example, deferred bool) {
-	ctx := context.Background()
+	ctx := t.Context()
 	message := nsqproducer.NsqMessageSerialize{}
 	topic := "topic"
 	delay := int64(0)
