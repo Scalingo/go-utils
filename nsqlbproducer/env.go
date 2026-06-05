@@ -29,7 +29,7 @@ func FromEnv(ctx context.Context, opts FromEnvOpts) (*NsqLBProducer, error) {
 	})
 
 	var hosts []Host
-	for _, host := range strings.Split(E["NSQD_HOSTS"], ",") {
+	for host := range strings.SplitSeq(E["NSQD_HOSTS"], ",") {
 		splittedHost := strings.Split(host, ":")
 		hosts = append(hosts, Host{
 			Host: splittedHost[0],
