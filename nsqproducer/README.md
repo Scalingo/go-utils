@@ -1,4 +1,4 @@
-# Package `nsqproducer` v2.0.1
+# Package `nsqproducer` v3.0.0
 
 `nsqproducer` is a private package used by `nsqlbproducer`. It should **NEVER** be directly used! Please use the `nsqlbproducer` package.
 

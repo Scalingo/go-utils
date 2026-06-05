@@ -1,4 +1,4 @@
-module github.com/Scalingo/go-utils/nsqproducer/v2
+module github.com/Scalingo/go-utils/nsqproducer/v3
 
 go 1.25.0
 
