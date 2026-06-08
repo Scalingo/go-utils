@@ -15,7 +15,7 @@ import (
 	"github.com/Scalingo/go-utils/logger"
 )
 
-var version = "1.4.3"
+var version = "1.5.0"
 
 func main() {
 	cli.RootCommandHelpTemplate = fmt.Sprintf(`%s

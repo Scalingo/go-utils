@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.5.0
+
 * feat(gomock_generator): add support for standard library
 
 ## v1.4.3
