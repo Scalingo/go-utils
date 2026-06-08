@@ -138,7 +138,7 @@ func TestLBPublish(t *testing.T) {
 }
 
 func runPublishExample(t *testing.T, example example, deferred bool) {
-	ctx := context.Background()
+	ctx := t.Context()
 	message := nsqproducer.NsqMessageSerialize{}
 	topic := "topic"
 	delay := int64(0)
@@ -151,11 +151,11 @@ func runPublishExample(t *testing.T, example example, deferred bool) {
 
 	if example.ExpectP1Call {
 		if deferred {
-			p1.EXPECT().DeferredPublish(gomock.Any(), topic, delay, message).DoAndReturn(func(ctx context.Context, _, _, _ interface{}) error {
+			p1.EXPECT().DeferredPublish(gomock.Any(), topic, delay, message).DoAndReturn(func(ctx context.Context, _, _, _ any) error {
 				return timeoutOrError(ctx, example.P1Delay, example.P1Error)
 			})
 		} else {
-			p1.EXPECT().Publish(gomock.Any(), topic, message).DoAndReturn(func(ctx context.Context, _, _ interface{}) error {
+			p1.EXPECT().Publish(gomock.Any(), topic, message).DoAndReturn(func(ctx context.Context, _, _ any) error {
 				return timeoutOrError(ctx, example.P1Delay, example.P1Error)
 			})
 		}
@@ -163,11 +163,11 @@ func runPublishExample(t *testing.T, example example, deferred bool) {
 
 	if example.ExpectP2Call {
 		if deferred {
-			p2.EXPECT().DeferredPublish(gomock.Any(), topic, delay, message).DoAndReturn(func(ctx context.Context, _, _, _ interface{}) error {
+			p2.EXPECT().DeferredPublish(gomock.Any(), topic, delay, message).DoAndReturn(func(ctx context.Context, _, _, _ any) error {
 				return timeoutOrError(ctx, example.P2Delay, example.P2Error)
 			})
 		} else {
-			p2.EXPECT().Publish(gomock.Any(), topic, message).DoAndReturn(func(ctx context.Context, _, _ interface{}) error {
+			p2.EXPECT().Publish(gomock.Any(), topic, message).DoAndReturn(func(ctx context.Context, _, _ any) error {
 				return timeoutOrError(ctx, example.P2Delay, example.P2Error)
 			})
 		}

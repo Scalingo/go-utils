@@ -5,6 +5,7 @@
 * fix(nsqlbproducer): correctly declare the v2
 * fix(nsqlbproducer): missing error wrapping
 * build(deps): update `github.com/Scalingo/go-utils/nsqproducer` to `v3`
+* refactor(nsqlbproducer): fix all linter offenses
 
 ## v2.0.0
 

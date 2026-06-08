@@ -43,8 +43,8 @@ type NsqLBProducer struct {
 }
 
 type PublishPinger interface {
-	Publish(context.Context, string, nsqproducer.NsqMessageSerialize) error
-	DeferredPublish(context.Context, string, int64, nsqproducer.NsqMessageSerialize) error
+	Publish(ctx context.Context, topic string, message nsqproducer.NsqMessageSerialize) error
+	DeferredPublish(ctx context.Context, topic string, delay int64, message nsqproducer.NsqMessageSerialize) error
 	Ping() error
 	Stop()
 }
@@ -101,14 +101,11 @@ func New(ctx context.Context, opts LBProducerOpts) (*NsqLBProducer, error) {
 		}
 	}
 
-	switch lbproducer.strategy {
-	case FallbackStrategy:
+	lbproducer.randInt = rand.New(rand.NewSource(time.Now().Unix())).Int
+	if lbproducer.strategy == FallbackStrategy {
 		lbproducer.randInt = alwaysZero
-	case RandomStrategy:
-		fallthrough
-	default:
-		lbproducer.randInt = rand.New(rand.NewSource(time.Now().Unix())).Int
 	}
+
 	lbproducer.logger = opts.Logger
 	if opts.PublishTimeout == 0 {
 		lbproducer.publishTimeout = defaultPublishTimeout
