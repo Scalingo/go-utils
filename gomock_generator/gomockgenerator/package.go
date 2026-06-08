@@ -8,6 +8,7 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -31,6 +32,11 @@ func interfaceSignature(ctx context.Context, pkg, iName string) (string, error) 
 	if err != nil {
 		return "", errors.Wrap(ctx, err, "get current working directory")
 	}
+
+	// Resolve packages in this order:
+	// 1. the project tree relative to the current working directory,
+	// 2. the local vendor directory,
+	// 3. the package location reported by `go list` for standard library and module packages.
 	fullPath := pkg
 	if !filepath.IsAbs(fullPath) {
 		localPkg := filepath.Join(cwd, fullPath)
@@ -41,9 +47,16 @@ func interfaceSignature(ctx context.Context, pkg, iName string) (string, error) 
 		case isDir(vendoredPkg):
 			fullPath = vendoredPkg
 		default:
-			fullPath = localPkg
+			resolvedPkg, err := resolvePackageDir(ctx, cwd, pkg)
+			if err != nil {
+				// Fall back to the local path when `go list` cannot resolve the package.
+				fullPath = localPkg
+			} else {
+				fullPath = resolvedPkg
+			}
 		}
 	}
+
 	fileSet := token.NewFileSet()
 	packages, err := parser.ParseDir(fileSet, fullPath, func(info os.FileInfo) bool {
 		return !strings.HasSuffix(info.Name(), "_test.go")
@@ -114,6 +127,26 @@ func interfaceSignature(ctx context.Context, pkg, iName string) (string, error) 
 		}
 	}
 	return "", errors.Newf(ctx, "interface %s not found in %s", iName, fullPath)
+}
+
+// resolvePackageDir asks `go list` where a package lives on disk so we can
+// parse standard library and module packages that are not present in the local tree.
+func resolvePackageDir(ctx context.Context, cwd, pkg string) (string, error) {
+	cmd := exec.Command("go", "list", "-f", "{{.Dir}}", pkg)
+	cmd.Dir = cwd
+	output, err := cmd.Output()
+	if err != nil {
+		return "", errors.Wrapf(ctx, err, "resolve package directory for %s", pkg)
+	}
+
+	dir := strings.TrimSpace(string(output))
+	if dir == "" {
+		return "", errors.Newf(ctx, "empty package directory for %s", pkg)
+	}
+	if !isDir(dir) {
+		return "", errors.Newf(ctx, "package directory does not exist: %s", dir)
+	}
+	return dir, nil
 }
 
 func fieldToString(field ast.Expr) string {
