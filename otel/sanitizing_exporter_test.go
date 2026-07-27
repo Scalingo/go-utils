@@ -8,13 +8,16 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/attribute"
-	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 	"go.opentelemetry.io/otel/sdk/resource"
+	"go.uber.org/mock/gomock"
+
+	"github.com/Scalingo/go-utils/otel/otelmock"
 )
 
 func TestSanitizingExporter_ExportRemovesEmptyAttributes(t *testing.T) {
-	baseExporter := &capturingExporter{}
+	ctrl := gomock.NewController(t)
+	baseExporter := otelmock.NewMockExporter(ctrl)
 	log := logrus.New()
 	log.SetOutput(io.Discard)
 
@@ -22,6 +25,25 @@ func TestSanitizingExporter_ExportRemovesEmptyAttributes(t *testing.T) {
 		exporter: baseExporter,
 		log:      log,
 	}
+	baseExporter.EXPECT().Export(gomock.Any(), gomock.Any()).DoAndReturn(
+		func(_ context.Context, exported *metricdata.ResourceMetrics) error {
+			require.NotNil(t, exported)
+			require.ElementsMatch(t, []attribute.KeyValue{
+				attribute.String("resource.valid", "yes"),
+				attribute.Int("resource.zero", 0),
+				attribute.Bool("resource.false", false),
+			}, exported.Resource.Attributes())
+
+			gauge, ok := exported.ScopeMetrics[0].Metrics[0].Data.(metricdata.Gauge[int64])
+			require.True(t, ok)
+			require.ElementsMatch(t, []attribute.KeyValue{
+				attribute.String("datapoint.valid", "yes"),
+				attribute.Int("datapoint.zero", 0),
+				attribute.Bool("datapoint.false", false),
+			}, gauge.DataPoints[0].Attributes.ToSlice())
+			return nil
+		},
+	)
 
 	metrics := &metricdata.ResourceMetrics{
 		Resource: resource.NewWithAttributes(
@@ -59,46 +81,6 @@ func TestSanitizingExporter_ExportRemovesEmptyAttributes(t *testing.T) {
 		},
 	}
 
-	err := exporter.Export(context.Background(), metrics)
+	err := exporter.Export(t.Context(), metrics)
 	require.NoError(t, err)
-
-	require.NotNil(t, baseExporter.exported)
-	require.ElementsMatch(t, []attribute.KeyValue{
-		attribute.String("resource.valid", "yes"),
-		attribute.Int("resource.zero", 0),
-		attribute.Bool("resource.false", false),
-	}, baseExporter.exported.Resource.Attributes())
-
-	gauge, ok := baseExporter.exported.ScopeMetrics[0].Metrics[0].Data.(metricdata.Gauge[int64])
-	require.True(t, ok)
-	require.ElementsMatch(t, []attribute.KeyValue{
-		attribute.String("datapoint.valid", "yes"),
-		attribute.Int("datapoint.zero", 0),
-		attribute.Bool("datapoint.false", false),
-	}, gauge.DataPoints[0].Attributes.ToSlice())
-}
-
-type capturingExporter struct {
-	exported *metricdata.ResourceMetrics
-}
-
-func (e *capturingExporter) Temporality(_ sdkmetric.InstrumentKind) metricdata.Temporality {
-	return metricdata.CumulativeTemporality
-}
-
-func (e *capturingExporter) Aggregation(kind sdkmetric.InstrumentKind) sdkmetric.Aggregation {
-	return sdkmetric.DefaultAggregationSelector(kind)
-}
-
-func (e *capturingExporter) Export(_ context.Context, metrics *metricdata.ResourceMetrics) error {
-	e.exported = metrics
-	return nil
-}
-
-func (e *capturingExporter) ForceFlush(context.Context) error {
-	return nil
-}
-
-func (e *capturingExporter) Shutdown(context.Context) error {
-	return nil
 }
