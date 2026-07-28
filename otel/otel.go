@@ -209,23 +209,39 @@ func newMetricsExporter(ctx context.Context, cfg *Config) (sdkmetric.Exporter, e
 	switch cfg.ExporterType {
 	case "http":
 		if enforceTLSByDefault {
-			return otlpmetrichttp.New(
+			exporter, err := otlpmetrichttp.New(
 				ctx, otlpmetrichttp.WithTLSClientConfig(tlsConfig),
 			)
+			if err != nil {
+				return nil, errors.Wrap(ctx, err, "create OTLP HTTPs exporter")
+			}
+			return newSanitizingExporter(ctx, exporter), nil
 		}
 
-		return otlpmetrichttp.New(ctx)
+		exporter, err := otlpmetrichttp.New(ctx)
+		if err != nil {
+			return nil, errors.Wrap(ctx, err, "create OTLP HTTP exporter")
+		}
+		return newSanitizingExporter(ctx, exporter), nil
 	case "grpc":
 		if enforceTLSByDefault {
 			creds := credentials.NewTLS(tlsConfig)
-			return otlpmetricgrpc.New(
+			exporter, err := otlpmetricgrpc.New(
 				ctx, otlpmetricgrpc.WithDialOption(
 					grpc.WithTransportCredentials(creds),
 				),
 			)
+			if err != nil {
+				return nil, errors.Wrap(ctx, err, "create OTLP gRPC (TLS) exporter")
+			}
+			return newSanitizingExporter(ctx, exporter), nil
 		}
 
-		return otlpmetricgrpc.New(ctx)
+		exporter, err := otlpmetricgrpc.New(ctx)
+		if err != nil {
+			return nil, errors.Wrap(ctx, err, "create OTLP gRPC exporter")
+		}
+		return newSanitizingExporter(ctx, exporter), nil
 	default:
 		return nil, errors.New(ctx, "invalid exporter type")
 	}

@@ -120,6 +120,12 @@
       "src_package": "go.opentelemetry.io/otel/metric",
       "interface": "Registration",
       "mock_file": "otelmock/registration.go"
+    },
+    {
+      "external": true,
+      "src_package": "go.opentelemetry.io/otel/sdk/metric",
+      "interface": "Exporter",
+      "mock_file": "otelmock/exporter.go"
     }
   ]
 }

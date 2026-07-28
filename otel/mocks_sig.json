@@ -18,5 +18,6 @@
   "go.opentelemetry.io/otel/metric.Meter": "FORCE_REGENERATE",
   "go.opentelemetry.io/otel/metric.MeterProvider": "FORCE_REGENERATE",
   "go.opentelemetry.io/otel/metric.Observer": "FORCE_REGENERATE",
-  "go.opentelemetry.io/otel/metric.Registration": "FORCE_REGENERATE"
+  "go.opentelemetry.io/otel/metric.Registration": "FORCE_REGENERATE",
+  "go.opentelemetry.io/otel/sdk/metric.Exporter": "74 0f d9 2c 48 d3 ac 1c c9 f9 1a 3c 77 19 8f 4f b7 ff 9a 0d"
 }
