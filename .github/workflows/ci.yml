@@ -16,7 +16,7 @@ jobs:
         with:
           # We need to define the fetch-depth to 0 so that we can get the commit ID of the master branch
           fetch-depth: 0
-      - uses: actions/setup-go@v7
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: stable
           check-latest: true
