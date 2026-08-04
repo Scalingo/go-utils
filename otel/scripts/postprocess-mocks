@@ -1,11 +1,8 @@
-#!/usr/bin/env bash
+#!/usr/bin/env ruby
 
-set -euo pipefail
-
-cd "$(dirname "${BASH_SOURCE[0]}")/.."
-
-ruby <<'RUBY'
 require "json"
+
+Dir.chdir(File.join(__dir__, ".."))
 
 changed = []
 config = JSON.parse(File.read("mocks.json"))
@@ -24,7 +21,7 @@ config.fetch("mocks").each do |mock|
   unless content.include?(metric_import)
     abort "#{file}: metric import already exists for a different package" if content.match?(/\n\tmetric \"/)
 
-    content.sub!(/\n\tgomock \"go\.uber\.org\/mock\/gomock\"\n/, "\n#{metric_import}\tgomock \"go.uber.org/mock/gomock\"\n") ||
+    content.sub!(/\n\tgomock "go\.uber\.org\/mock\/gomock"\n/, "\n#{metric_import}\tgomock \"go.uber.org/mock/gomock\"\n") ||
       content.sub!(/import \(\n/, "import (\n#{metric_import}") ||
       abort("#{file}: could not find import block")
   end
@@ -49,6 +46,5 @@ if changed.empty?
 else
   puts "Post-processed #{changed.length} mock file(s)."
 end
-RUBY
 
-gofmt -w otelmock/*.go
+system("gofmt", "-w", *Dir.glob("otelmock/*.go")) || abort("gofmt failed")
