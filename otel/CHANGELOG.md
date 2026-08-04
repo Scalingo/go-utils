@@ -2,6 +2,8 @@
 
 ## To be released
 
+* fix: Fix broken mocks after new generation
+
 ## v0.10.0
 
 * feat: Add a custom exporter that removes and logs metrics with empty key or values
