@@ -21,8 +21,10 @@ Run the following command to generate mocks for the `otel` package inside the `o
 gomock_generator
 ```
 
-> [!IMPORTANT]
-> And then, please make sure that on each mock file, that each struct embed the original interface.
+Then run the postprocessor so each generated mock struct embeds the original interface:
+```bash
+scripts/postprocess-mocks
+```
 
 For example, the `gomock` library underneath generates the following code for the `metric.Int64Gauge` interface:
 ```go

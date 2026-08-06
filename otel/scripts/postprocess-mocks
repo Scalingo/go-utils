@@ -1,0 +1,50 @@
+#!/usr/bin/env ruby
+
+require "json"
+
+Dir.chdir(File.join(__dir__, ".."))
+
+changed = []
+config = JSON.parse(File.read("mocks.json"))
+
+config.fetch("mocks").each do |mock|
+  file = mock.fetch("mock_file")
+  package = mock.fetch("src_package")
+  interface = mock.fetch("interface")
+  mock_name = "Mock#{interface}"
+
+  content = File.read(file)
+  original = content
+  metric_import = "\tmetric \"#{package}\"\n"
+  embedded_interface = "\tmetric.#{interface}\n"
+
+  unless content.include?(metric_import)
+    abort "#{file}: metric import already exists for a different package" if content.match?(/\n\tmetric \"/)
+
+    content.sub!(/\n\tgomock "go\.uber\.org\/mock\/gomock"\n/, "\n#{metric_import}\tgomock \"go.uber.org/mock/gomock\"\n") ||
+      content.sub!(/import \(\n/, "import (\n#{metric_import}") ||
+      abort("#{file}: could not find import block")
+  end
+
+  struct_regexp = /(type #{Regexp.escape(mock_name)} struct \{\n)(.*?)(\n\})/m
+  match = content.match(struct_regexp) || abort("#{file}: could not find #{mock_name} struct")
+
+  unless match[2].include?(embedded_interface)
+    content = content.sub(struct_regexp) do
+      "#{match[1]}#{embedded_interface}\n#{match[2]}#{match[3]}"
+    end
+  end
+
+  next if content == original
+
+  File.write(file, content)
+  changed << file
+end
+
+if changed.empty?
+  puts "No mock post-processing changes needed."
+else
+  puts "Post-processed #{changed.length} mock file(s)."
+end
+
+system("gofmt", "-w", *Dir.glob("otelmock/*.go")) || abort("gofmt failed")

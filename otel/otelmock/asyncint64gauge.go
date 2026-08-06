@@ -7,11 +7,14 @@ package otelmock
 import (
 	reflect "reflect"
 
+	metric "go.opentelemetry.io/otel/metric"
 	gomock "go.uber.org/mock/gomock"
 )
 
 // MockInt64ObservableGauge is a mock of Int64ObservableGauge interface.
 type MockInt64ObservableGauge struct {
+	metric.Int64ObservableGauge
+
 	ctrl     *gomock.Controller
 	recorder *MockInt64ObservableGaugeMockRecorder
 	isgomock struct{}

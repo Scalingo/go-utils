@@ -7,11 +7,14 @@ package otelmock
 import (
 	reflect "reflect"
 
+	metric "go.opentelemetry.io/otel/metric"
 	gomock "go.uber.org/mock/gomock"
 )
 
 // MockRegistration is a mock of Registration interface.
 type MockRegistration struct {
+	metric.Registration
+
 	ctrl     *gomock.Controller
 	recorder *MockRegistrationMockRecorder
 	isgomock struct{}
