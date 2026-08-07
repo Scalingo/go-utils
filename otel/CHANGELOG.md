@@ -2,6 +2,8 @@
 
 ## To be released
 
+## v0.10.1
+
 * fix: Fix broken mocks after new generation
 
 ## v0.10.0
