@@ -275,16 +275,7 @@ func (c *Cron) run(ctx context.Context) {
 
 		select {
 		case now = <-time.After(effective.Sub(now)):
-			// Run every entry whose next time was this effective time.
-			for _, e := range c.entries {
-				if e.Next != effective {
-					break
-				}
-				e.Prev = e.Next
-				e.Next = e.Schedule.Next(effective)
-
-				go c.runEntry(ctx, effective, e)
-			}
+			c.runEntries(ctx, effective, now)
 			continue
 
 		case newEntry := <-c.add:
@@ -300,6 +291,19 @@ func (c *Cron) run(ctx context.Context) {
 
 		// 'now' should be updated after newEntry and snapshot cases.
 		now = time.Now().Local()
+	}
+}
+
+func (c *Cron) runEntries(ctx context.Context, effective, now time.Time) {
+	// Run each due entry once and skip any occurrences missed while the scheduler was paused.
+	for _, e := range c.entries {
+		if e.Next != effective {
+			break
+		}
+		e.Prev = e.Next
+		e.Next = e.Schedule.Next(now)
+
+		go c.runEntry(ctx, effective, e)
 	}
 }
 

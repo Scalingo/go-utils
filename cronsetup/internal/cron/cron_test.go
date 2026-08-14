@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sync"
 	"testing"
+	"testing/synctest"
 	"time"
 )
 
@@ -345,6 +346,50 @@ func TestRunningMultipleSchedules(t *testing.T) {
 		t.FailNow()
 	case <-wait(wg):
 	}
+}
+
+func TestRunEntriesSkipsMissedOccurrences(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		cron, err := New()
+		if err != nil {
+			t.Fatal("unexpected error")
+		}
+
+		run := make(chan struct{}, 1)
+		effective := time.Date(2026, time.August, 14, 6, 0, 0, 0, time.UTC)
+		now := effective.Add(time.Hour)
+		cron.entries = []*Entry{
+			{
+				Schedule: Every(time.Minute),
+				Next:     effective,
+				Job: Job{
+					Name: "test-skip-missed-occurrences",
+					Func: func(context.Context) error {
+						run <- struct{}{}
+						return nil
+					},
+				},
+			},
+		}
+
+		cron.runEntries(t.Context(), effective, now)
+		synctest.Wait()
+
+		select {
+		case <-run:
+		default:
+			t.Fatal("expected the due job to run")
+		}
+
+		entry := cron.entries[0]
+		if entry.Prev != effective {
+			t.Errorf("previous run = %s, want %s", entry.Prev, effective)
+		}
+		wantNext := now.Add(time.Minute)
+		if entry.Next != wantNext {
+			t.Errorf("next run = %s, want %s", entry.Next, wantNext)
+		}
+	})
 }
 
 // Test that the cron is run in the local time zone (as opposed to UTC).
