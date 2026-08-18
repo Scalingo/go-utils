@@ -26,6 +26,8 @@ type Cron struct {
 	funcCtx           func(context.Context, Job) context.Context
 	running           bool
 	etcdMutexBuilder  EtcdMutexBuilder
+	timeNow           func() time.Time
+	timeAfter         func(time.Duration) <-chan time.Time
 }
 
 // Job contains 3 mandatory options to define a job
@@ -184,11 +186,13 @@ func WithFuncCtx(f func(context.Context, Job) context.Context) Opt {
 // New returns a new cron job runner.
 func New(opts ...Opt) (*Cron, error) {
 	cron := &Cron{
-		entries:  nil,
-		add:      make(chan *Entry),
-		stop:     make(chan struct{}),
-		snapshot: make(chan []*Entry),
-		running:  false,
+		entries:   nil,
+		add:       make(chan *Entry),
+		stop:      make(chan struct{}),
+		snapshot:  make(chan []*Entry),
+		running:   false,
+		timeNow:   func() time.Time { return time.Now().Local() },
+		timeAfter: time.After,
 	}
 	for _, opt := range opts {
 		opt(cron)
@@ -255,7 +259,7 @@ func (c *Cron) Start(ctx context.Context) {
 // access to the 'running' state variable.
 func (c *Cron) run(ctx context.Context) {
 	// Figure out the next activation times for each entry.
-	now := time.Now().Local()
+	now := c.timeNow()
 	for _, entry := range c.entries {
 		entry.Next = entry.Schedule.Next(now)
 	}
@@ -274,7 +278,9 @@ func (c *Cron) run(ctx context.Context) {
 		}
 
 		select {
-		case now = <-time.After(effective.Sub(now)):
+		case <-c.timeAfter(effective.Sub(now)):
+			// A timer reports its scheduled expiration time, which may be stale when delivery is delayed.
+			now = c.timeNow()
 			c.runEntries(ctx, effective, now)
 			continue
 
@@ -290,7 +296,7 @@ func (c *Cron) run(ctx context.Context) {
 		}
 
 		// 'now' should be updated after newEntry and snapshot cases.
-		now = time.Now().Local()
+		now = c.timeNow()
 	}
 }
 

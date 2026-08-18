@@ -355,9 +355,11 @@ func TestRunEntriesSkipsMissedOccurrences(t *testing.T) {
 			t.Fatal("unexpected error")
 		}
 
-		run := make(chan struct{}, 1)
+		dueRun := make(chan struct{}, 1)
+		futureRun := make(chan struct{}, 1)
 		effective := time.Date(2026, time.August, 14, 6, 0, 0, 0, time.UTC)
 		now := effective.Add(time.Hour)
+		future := effective.Add(2 * time.Hour)
 		cron.entries = []*Entry{
 			{
 				Schedule: Every(time.Minute),
@@ -365,7 +367,18 @@ func TestRunEntriesSkipsMissedOccurrences(t *testing.T) {
 				Job: Job{
 					Name: "test-skip-missed-occurrences",
 					Func: func(context.Context) error {
-						run <- struct{}{}
+						dueRun <- struct{}{}
+						return nil
+					},
+				},
+			},
+			{
+				Schedule: Every(time.Minute),
+				Next:     future,
+				Job: Job{
+					Name: "test-future-occurrence",
+					Func: func(context.Context) error {
+						futureRun <- struct{}{}
 						return nil
 					},
 				},
@@ -376,9 +389,14 @@ func TestRunEntriesSkipsMissedOccurrences(t *testing.T) {
 		synctest.Wait()
 
 		select {
-		case <-run:
+		case <-dueRun:
 		default:
 			t.Fatal("expected the due job to run")
+		}
+		select {
+		case <-futureRun:
+			t.Fatal("expected the future job not to run")
+		default:
 		}
 
 		entry := cron.entries[0]
@@ -388,6 +406,71 @@ func TestRunEntriesSkipsMissedOccurrences(t *testing.T) {
 		wantNext := now.Add(time.Minute)
 		if entry.Next != wantNext {
 			t.Errorf("next run = %s, want %s", entry.Next, wantNext)
+		}
+
+		futureEntry := cron.entries[1]
+		if !futureEntry.Prev.IsZero() {
+			t.Errorf("future job previous run = %s, want zero time", futureEntry.Prev)
+		}
+		if futureEntry.Next != future {
+			t.Errorf("future job next run = %s, want %s", futureEntry.Next, future)
+		}
+	})
+}
+
+func TestRunRefreshesCurrentTimeAfterDelayedTimer(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		cron, err := New()
+		if err != nil {
+			t.Fatal("unexpected error")
+		}
+
+		initial := time.Date(2026, time.August, 14, 6, 0, 0, 0, time.UTC)
+		effective := initial.Add(time.Minute)
+		current := initial
+		timer := make(chan time.Time)
+		waits := make(chan time.Duration, 2)
+		run := make(chan struct{}, 1)
+
+		cron.timeNow = func() time.Time {
+			return current
+		}
+		cron.timeAfter = func(delay time.Duration) <-chan time.Time {
+			waits <- delay
+			return timer
+		}
+		cron.Schedule(Every(time.Minute), Job{
+			Name: "test-refresh-current-time",
+			Func: func(context.Context) error {
+				run <- struct{}{}
+				return nil
+			},
+		})
+
+		cron.Start(t.Context())
+		defer cron.Stop()
+
+		if delay := <-waits; delay != time.Minute {
+			t.Fatalf("initial timer delay = %s, want %s", delay, time.Minute)
+		}
+
+		current = effective.Add(time.Hour)
+		timer <- effective
+		synctest.Wait()
+
+		select {
+		case <-run:
+		default:
+			t.Fatal("expected the due job to run")
+		}
+
+		entry := cron.entries[0]
+		wantNext := current.Add(time.Minute)
+		if entry.Next != wantNext {
+			t.Errorf("next run = %s, want %s", entry.Next, wantNext)
+		}
+		if delay := <-waits; delay != time.Minute {
+			t.Errorf("next timer delay = %s, want %s", delay, time.Minute)
 		}
 	})
 }
