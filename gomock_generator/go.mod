@@ -8,8 +8,8 @@ go 1.25.0
 require (
 	github.com/Scalingo/go-utils/errors/v3 v3.2.1
 	github.com/Scalingo/go-utils/logger v1.12.2
-	github.com/sirupsen/logrus v1.9.4
-	github.com/urfave/cli/v3 v3.10.1
+	github.com/sirupsen/logrus v1.10.2
+	github.com/urfave/cli/v3 v3.11.0
 )
 
 require (
