@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* fix(gomock_generator): produce stable signature for channel and function types
+
 ## v1.5.0
 
 * feat(gomock_generator): add support for standard library

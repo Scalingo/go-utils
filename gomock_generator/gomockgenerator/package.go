@@ -170,7 +170,50 @@ func fieldToString(field ast.Expr) string {
 		return "interface{}"
 	}
 
+	if chanExpr, ok := field.(*ast.ChanType); ok {
+		direction := "chan "
+		switch chanExpr.Dir {
+		case ast.SEND:
+			direction = "chan<- "
+		case ast.RECV:
+			direction = "<-chan "
+		}
+		return direction + fieldToString(chanExpr.Value)
+	}
+
+	if funcExpr, ok := field.(*ast.FuncType); ok {
+		params := fieldListToStrings(funcExpr.Params)
+		results := fieldListToStrings(funcExpr.Results)
+
+		resultSignature := ""
+		if len(results) == 1 {
+			resultSignature = " " + results[0]
+		} else if len(results) > 1 {
+			resultSignature = " (" + strings.Join(results, ",") + ")"
+		}
+
+		return "func(" + strings.Join(params, ",") + ")" + resultSignature
+	}
+
 	return fmt.Sprintf("%v", field)
+}
+
+func fieldListToStrings(fields *ast.FieldList) []string {
+	if fields == nil {
+		return nil
+	}
+
+	var types []string
+	for _, field := range fields.List {
+		count := len(field.Names)
+		if count == 0 {
+			count = 1
+		}
+		for range count {
+			types = append(types, fieldToString(field.Type))
+		}
+	}
+	return types
 }
 
 func isDir(path string) bool {
