@@ -144,6 +144,31 @@ func TestInterfaceSignature(t *testing.T) {
 	})
 }
 
+func TestInterfaceHash(t *testing.T) {
+	t.Run("hashes the interface signature", func(t *testing.T) {
+		hash, err := interfaceHash(t.Context(), fixturePackage("service"), "Service")
+		if err != nil {
+			t.Fatalf("interfaceHash returned error: %v", err)
+		}
+
+		const want = "fd 79 e0 1f 61 c6 be 27 5c 24 01 19 b5 4f 79 8d a1 ac ac 10"
+		if hash != want {
+			t.Errorf("interfaceHash() = %q, want %q", hash, want)
+		}
+	})
+
+	t.Run("preserves the force regeneration marker", func(t *testing.T) {
+		hash, err := interfaceHash(t.Context(), fixturePackage("qualified"), "Service")
+		if err != nil {
+			t.Fatalf("interfaceHash returned error: %v", err)
+		}
+
+		if hash != "FORCE_REGENERATE" {
+			t.Errorf("interfaceHash() = %q, want %q", hash, "FORCE_REGENERATE")
+		}
+	})
+}
+
 func fixturePackage(name string) string {
 	return filepath.Join("fixtures", name)
 }
