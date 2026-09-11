@@ -20,6 +20,19 @@ func TestFieldToString(t *testing.T) {
 		"slice":      {expression: "[]Event", want: "[]Event"},
 		"ellipsis":   {expression: "...Event", want: "...Event"},
 		"interface":  {expression: "interface{}", want: "interface{}"},
+		"channel":    {expression: "chan Event", want: "chan Event"},
+		"send channel": {
+			expression: "chan<- *Event",
+			want:       "chan<- *Event",
+		},
+		"receive channel": {
+			expression: "<-chan *Event",
+			want:       "<-chan *Event",
+		},
+		"function": {
+			expression: "func(value string, values ...Event) (int, error)",
+			want:       "func(string,...Event) (int,error)",
+		},
 	}
 
 	for name, tt := range tests {
@@ -142,6 +155,18 @@ func TestInterfaceSignature(t *testing.T) {
 			t.Fatalf("method type change produced the same signature %q", stringSignature)
 		}
 	})
+
+	t.Run("serializes channel and function types consistently", func(t *testing.T) {
+		signature, err := interfaceSignature(t.Context(), fixturePackage("channels_and_functions"), "Service")
+		if err != nil {
+			t.Fatalf("interfaceSignature returned error: %v", err)
+		}
+
+		want := "\nEvents()(,<-chan *Event)\n\nSubscribe(,func(&{context Context},*&{time Timer},string) error)(,chan<- Event,func() error)\n"
+		if signature != want {
+			t.Errorf("interfaceSignature() = %q, want %q", signature, want)
+		}
+	})
 }
 
 func TestInterfaceHash(t *testing.T) {
@@ -165,6 +190,18 @@ func TestInterfaceHash(t *testing.T) {
 
 		if hash != "FORCE_REGENERATE" {
 			t.Errorf("interfaceHash() = %q, want %q", hash, "FORCE_REGENERATE")
+		}
+	})
+
+	t.Run("hashes channel and function types consistently", func(t *testing.T) {
+		hash, err := interfaceHash(t.Context(), fixturePackage("channels_and_functions"), "Service")
+		if err != nil {
+			t.Fatalf("interfaceHash returned error: %v", err)
+		}
+
+		const want = "15 4e e3 29 40 28 ae 6e d5 54 da e7 5e 59 97 f7 7e 97 69 98"
+		if hash != want {
+			t.Errorf("interfaceHash() = %q, want %q", hash, want)
 		}
 	})
 }
