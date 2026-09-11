@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"runtime/debug"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v3"
@@ -14,8 +16,6 @@ import (
 	"github.com/Scalingo/go-utils/gomock_generator/gomockgenerator"
 	"github.com/Scalingo/go-utils/logger"
 )
-
-var version = "1.5.0"
 
 func main() {
 	cli.RootCommandHelpTemplate = fmt.Sprintf(`%s
@@ -33,7 +33,7 @@ func main() {
 		Name:      "GoMock generator",
 		UsageText: "gomock_generator",
 		Usage:     "Highly parallelized generator of gomock mocks",
-		Version:   version,
+		Version:   version(),
 		Flags: []cli.Flag{
 			&cli.StringFlag{Name: "mocks-filepath", Value: "./mocks.json", Usage: "Path to the JSON file containing the MockConfiguration. Its containing directory is the base package directory.", Sources: cli.EnvVars("MOCKS_FILEPATH")},
 			&cli.StringFlag{Name: "signatures-filename", Value: "mocks_sig.json", Usage: "Filename of the signatures cache, written in the base package directory.", Sources: cli.EnvVars("SIGNATURES_FILENAME")},
@@ -105,6 +105,15 @@ VERSION:
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+}
+
+func version() string {
+	buildInfo, ok := debug.ReadBuildInfo()
+	if !ok || buildInfo == nil || buildInfo.Main.Version == "" || buildInfo.Main.Version == "(devel)" {
+		return "devel"
+	}
+
+	return strings.TrimPrefix(buildInfo.Main.Version, "v")
 }
 
 func validateBinaryDeps(ctx context.Context) error {

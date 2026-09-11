@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat(gomock_generator): automatically get the binary version
+
 ## v1.5.1
 
 * fix(gomock_generator): produce stable signature for channel and function types
