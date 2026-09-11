@@ -69,7 +69,11 @@ func parseFieldExpression(t *testing.T, expression string) ast.Expr {
 			return nil
 		}
 
-		funcDecl := file.Decls[0].(*ast.FuncDecl)
+		funcDecl, ok := file.Decls[0].(*ast.FuncDecl)
+		if !ok {
+			t.Errorf("parsed declaration for %q has type %T, want *ast.FuncDecl", expression, file.Decls[0])
+			return nil
+		}
 		return funcDecl.Type.Params.List[0].Type
 	}
 

@@ -9,5 +9,5 @@ type Event struct{}
 
 type Service interface {
 	Events() <-chan *Event
-	Subscribe(func(context.Context, *time.Timer, string) error) (chan<- Event, func() error)
+	Subscribe(callback func(ctx context.Context, timer *time.Timer, id string) error) (chan<- Event, func() error)
 }

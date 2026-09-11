@@ -1,5 +1,5 @@
 package stringparameter
 
 type Service interface {
-	Handle(string) error
+	Handle(value string) error
 }
