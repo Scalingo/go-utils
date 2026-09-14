@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.5.2
+
 * feat(gomock_generator): automatically get the binary version
 
 ## v1.5.1
