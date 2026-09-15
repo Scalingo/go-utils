@@ -1,7 +1,8 @@
 dependencies = []
 description = "Set of common libraries used in diverses services of the infrastructures, mostly helpers"
 flags = ["lib"]
-languages = ["go"]
-owner = "etienne@scalingo.com"
+languages = ["go", "github-actions"]
+owner = "team-infrastructure-services@scalingo.com"
 team = "IST"
+tier = 1
 version = "1.1.0"
