@@ -102,6 +102,7 @@ func FieldsFor(prefix string, value interface{}) logrus.Fields {
 
 	valueStr, ok := value.(fmt.Stringer)
 	if !ok {
+		// accept both a structure and a pointer to the structure when calling `logger.WithStructToCtx`
 		valueStr, ok = pointerTo(value).(fmt.Stringer)
 	}
 	if ok {
