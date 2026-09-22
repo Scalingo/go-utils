@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat(logger): support pointer receiver methods in FieldsFor
+
 ## v1.12.2
 
 * refactor: replace `github.com/pkg/errors` with `errors`

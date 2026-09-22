@@ -32,6 +32,16 @@ type structWithTagsAndLoggable struct {
 	Field3 string
 }
 
+type structWithPointerLoggable struct {
+	Field string
+}
+
+func (s *structWithPointerLoggable) LogFields() logrus.Fields {
+	return logrus.Fields{
+		"field": s.Field,
+	}
+}
+
 func (s structWithTagsAndLoggable) LogFields() logrus.Fields {
 	return logrus.Fields{
 		"another": "test",
@@ -45,6 +55,14 @@ type structWithoutTagsButWithStringer struct {
 
 func (s structWithoutTagsButWithStringer) String() string {
 	return "My Stringer"
+}
+
+type structWithPointerStringer struct {
+	Field string
+}
+
+func (s *structWithPointerStringer) String() string {
+	return s.Field
 }
 
 type structWithoutTags struct {
@@ -203,6 +221,16 @@ func TestFieldsFor(t *testing.T) {
 		}, fields)
 	})
 
+	t.Run("when a pointer to the struct implements Loggable", func(t *testing.T) {
+		s := structWithPointerLoggable{Field: "value1"}
+
+		fields := FieldsFor("prefix", s)
+
+		assert.Equal(t, logrus.Fields{
+			"prefix_field": "value1",
+		}, fields)
+	})
+
 	t.Run("when the struct has no tags but has a stringer", func(t *testing.T) {
 		// Given a struct without tags but with a stringer
 		s := structWithoutTagsButWithStringer{
@@ -216,6 +244,16 @@ func TestFieldsFor(t *testing.T) {
 		// Then it should be added as a single field
 		assert.Equal(t, logrus.Fields{
 			"prefix": "My Stringer",
+		}, fields)
+	})
+
+	t.Run("when a pointer to the struct implements Stringer", func(t *testing.T) {
+		s := structWithPointerStringer{Field: "My Pointer Stringer"}
+
+		fields := FieldsFor("prefix", s)
+
+		assert.Equal(t, logrus.Fields{
+			"prefix": "My Pointer Stringer",
 		}, fields)
 	})
 
