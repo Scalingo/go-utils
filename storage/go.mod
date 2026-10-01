@@ -1,15 +1,15 @@
 module github.com/Scalingo/go-utils/storage
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/Scalingo/go-utils/errors/v3 v3.2.1
-	github.com/Scalingo/go-utils/logger v1.12.2
+	github.com/Scalingo/go-utils/logger v1.13.0
 	github.com/aws/aws-sdk-go-v2 v1.32.8
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.52
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.49
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.72.3
-	github.com/aws/smithy-go v1.28.1
+	github.com/aws/smithy-go v1.28.2
 	github.com/ncw/swift/v2 v2.0.5
 	github.com/stretchr/testify v1.12.1
 	go.uber.org/mock v0.6.0
@@ -27,7 +27,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sirupsen/logrus v1.10.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/sys v0.47.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
 	gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 // indirect
 	gopkg.in/errgo.v1 v1.0.1 // indirect
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22 // indirect
