@@ -1,11 +1,11 @@
 module github.com/Scalingo/go-utils/nsqproducer/v3
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/Scalingo/go-utils/env v1.2.2
 	github.com/Scalingo/go-utils/errors/v3 v3.2.1
-	github.com/Scalingo/go-utils/logger v1.12.2
+	github.com/Scalingo/go-utils/logger v1.13.0
 	github.com/Scalingo/go-utils/otel v0.10.1
 	github.com/gofrs/uuid/v5 v5.5.1
 	github.com/nsqio/go-nsq v1.1.0
@@ -28,7 +28,7 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.46.0 // indirect
 	go.opentelemetry.io/otel/trace v1.46.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/sys v0.47.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
 	gopkg.in/errgo.v1 v1.0.1 // indirect
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22 // indirect
 )
