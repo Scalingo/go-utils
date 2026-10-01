@@ -1,6 +1,6 @@
 module github.com/Scalingo/go-utils/nsqlbproducer/v2
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/Scalingo/go-utils/env v1.2.2
@@ -13,7 +13,7 @@ require (
 )
 
 require (
-	github.com/Scalingo/go-utils/logger v1.12.2 // indirect
+	github.com/Scalingo/go-utils/logger v1.13.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -25,7 +25,7 @@ require (
 	go.opentelemetry.io/otel/metric v1.46.0 // indirect
 	go.opentelemetry.io/otel/trace v1.46.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/sys v0.47.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
 	gopkg.in/errgo.v1 v1.0.1 // indirect
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22 // indirect
 )
