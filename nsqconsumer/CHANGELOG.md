@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* fix(nsqconsumer): add the message request ID to the handling context
+
 ## v1.7.1
 
 * refactor: replace `github.com/golang/mock` with `go.uber.org/mock`
