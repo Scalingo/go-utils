@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.7.2
+
 * fix(nsqconsumer): add the message request ID to the handling context
 
 ## v1.7.1
