@@ -24,6 +24,10 @@ const (
 	// defaultChannel is the name of the channel we're using when we want the
 	// message to be receive only by 1 consumer, but no matter which one
 	defaultChannel = "default"
+
+	// requestIDKey is the name of the key used in logger and context when
+	// present in message
+	requestIDKey = "request_id"
 )
 
 var (
@@ -320,10 +324,11 @@ func (c *nsqConsumer) nsqHandler(message *nsq.Message) (err error) {
 	// That way we distinguish between the logger during normal operation, and the error logger (named `errLogger`) found when unwrapping the error raised during message handling.
 	msgLogger := logger.Default()
 	ctx = logger.ToCtx(context.Background(), msgLogger)
+	ctx = context.WithValue(ctx, requestIDKey, msg.RequestID) //nolint:staticcheck
 	ctx, msgLogger = logger.WithFieldsToCtx(ctx, logrus.Fields{
 		"message_id":   fmt.Sprintf("%s", message.ID),
 		"message_type": msg.Type,
-		"request_id":   msg.RequestID,
+		requestIDKey:   msg.RequestID,
 	})
 
 	if msg.At != 0 {
