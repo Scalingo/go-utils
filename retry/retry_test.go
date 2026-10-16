@@ -130,6 +130,28 @@ func TestRetrier(t *testing.T) {
 		})
 	})
 
+	t.Run("When the context is already canceled, it should not call the method", func(t *testing.T) {
+		synctest.Test(t, func(t *testing.T) {
+			retrier := New(WithWaitDuration(1 * time.Millisecond))
+			tries := 0
+			ctx, cancel := context.WithCancel(t.Context())
+			cancel()
+
+			err := retrier.Do(ctx, func(ctx context.Context) error {
+				tries++
+				return nil
+			})
+			synctest.Wait()
+
+			var retryError RetryError
+			require.ErrorAs(t, err, &retryError)
+			assert.Equal(t, ContextScope, retryError.Scope)
+			require.ErrorIs(t, retryError.Err, context.Canceled)
+			require.NoError(t, retryError.LastErr)
+			assert.Equal(t, 0, tries)
+		})
+	})
+
 	t.Run("With timeout should ignore sleep", func(t *testing.T) {
 		synctest.Test(t, func(t *testing.T) {
 			retrier := New(WithWaitDuration(1 * time.Second))
