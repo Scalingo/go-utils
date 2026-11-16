@@ -23,7 +23,7 @@ jobs:
       - id: set-modules
         run: |
           echo -n "modules=" > $GITHUB_OUTPUT
-          for m in ./*/*go.mod; do
+          git ls-files '**/go.mod' ':!:**/vendor/**' | while IFS= read -r m; do
             pushd $(dirname "$m") > /dev/null
             module_path="$(go list -m -json | jq --slurp '.' | jq --compact-output --raw-output '.[].Dir')"
             echo $module_path
