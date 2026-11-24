@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* build(gomock_generator): update Go version to 1.27
+
 ## v1.5.2
 
 * feat(gomock_generator): automatically get the binary version
